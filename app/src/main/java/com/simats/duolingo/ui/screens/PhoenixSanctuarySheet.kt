@@ -42,6 +42,7 @@ fun PhoenixSanctuarySheet(
     var evolutionFromStage by remember { mutableStateOf<PhoenixStageData?>(null) }
     var evolutionToStage by remember { mutableStateOf<PhoenixStageData?>(null) }
     var showEvolutionCinematic by remember { mutableStateOf(false) }
+    var showInteractiveEvolution by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val filteredStages = remember(selectedAct) {
@@ -115,11 +116,62 @@ fun PhoenixSanctuarySheet(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Active: Stage ${currentActive.id} â€¢ ${currentActive.name}",
+                        text = "Active: Stage ${currentActive.id} • ${currentActive.name}",
                         color = Color(0xFFFF9600),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black
                     )
+                }
+            }
+
+            // Interactive Phoenix Evolution Lab Banner
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF8E0000), Color(0xFFFF6D00), Color(0xFFFFD54F))
+                        )
+                    )
+                    .clickable { showInteractiveEvolution = true }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("🔥", fontSize = 24.sp)
+                        Column {
+                            Text(
+                                "PHOENIX EVOLUTION LAB",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.5.sp
+                            )
+                            Text(
+                                "Live creature physics, win/loss cinematics & morphing",
+                                color = Color.White.copy(0.9f),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.Black.copy(0.35f))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text("PLAY ⚡", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                    }
                 }
             }
 
@@ -198,7 +250,7 @@ fun PhoenixSanctuarySheet(
                 onEquip = {
                     AppState.activePhoenixStage = stage.id
                     previewStage = null
-                    equippedToast = "ðŸ”¥ Equipped ${stage.name}!"
+                    equippedToast = "🔥 Equipped ${stage.name}!"
                     coroutineScope.launch {
                         delay(2200)
                         equippedToast = null
@@ -224,7 +276,7 @@ fun PhoenixSanctuarySheet(
                     onComplete = {
                         AppState.activePhoenixStage = toS.id
                         showEvolutionCinematic = false
-                        equippedToast = "âœ¨ Evolved to ${toS.name}!"
+                        equippedToast = "✨ Evolved to ${toS.name}!"
                         coroutineScope.launch {
                             delay(2500)
                             equippedToast = null
@@ -232,6 +284,13 @@ fun PhoenixSanctuarySheet(
                     }
                 )
             }
+        }
+
+        // Full-Screen Interactive Phoenix Evolution Laboratory
+        if (showInteractiveEvolution) {
+            PhoenixEvolutionScreen(
+                onDismiss = { showInteractiveEvolution = false }
+            )
         }
 
         // Toast notification
@@ -253,7 +312,7 @@ fun PhoenixSanctuarySheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("ðŸ”¥", fontSize = 16.sp)
+                    Text("🔥", fontSize = 16.sp)
                     Text(
                         text = toast,
                         color = Color.White,
@@ -370,7 +429,7 @@ private fun StageCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(if (isEquipped) "âœ“" else "ðŸ”¥", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(if (isEquipped) "✓" else "🔥", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Text(
                     text = if (isEquipped) "EQUIPPED" else "EQUIP",
                     color = Color.White,

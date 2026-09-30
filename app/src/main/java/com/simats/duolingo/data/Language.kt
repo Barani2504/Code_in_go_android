@@ -12,6 +12,7 @@ data class Language(
 )
 
 val defaultLanguages = listOf(
+    Language(name = "Data Structures & Algorithms", nativeName = "DSA Master Course", code = "dsa", flagEmoji = "🔥", learnersCount = "52.4M learners"),
     Language(name = "Python",     nativeName = "Python",     code = "python", flagEmoji = "🐍", learnersCount = "38.5M learners"),
     Language(name = "Java",       nativeName = "Java",       code = "java",   flagEmoji = "☕️", learnersCount = "35.2M learners"),
     Language(name = "C++",        nativeName = "C++",        code = "cpp",    flagEmoji = "⚙️", learnersCount = "25.4M learners"),

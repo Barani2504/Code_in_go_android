@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.simats.duolingo.data.PhoenixStageData
+import com.simats.duolingo.ui.components.PhoenixCreature
 import com.simats.duolingo.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -446,7 +447,7 @@ fun PhoenixEvolutionCinematic(
             }
         }
 
-        // New mascot (phases 3–4)
+        // New mascot (phases 3–4) with living procedural Phoenix Creature
         AnimatedVisibility(
             visible = phase >= 3,
             enter = fadeIn(tween(300)) + scaleIn(initialScale = 0.4f)
@@ -458,14 +459,13 @@ fun PhoenixEvolutionCinematic(
                         .blur(45.dp)
                         .background(toStage.auraColor.copy(0.55f * newGlow.value), CircleShape)
                 )
-                Image(
-                    painter = painterResource(toStage.drawableResId),
-                    contentDescription = toStage.name,
+                PhoenixCreature(
+                    stage = toStage.id.toFloat(),
+                    ascendant = toStage.id >= 18,
                     modifier = Modifier
-                        .size(210.dp)
+                        .size(240.dp)
                         .scale(newScale.value)
-                        .graphicsLayer { alpha = newAlpha.value },
-                    contentScale = ContentScale.Fit
+                        .graphicsLayer { alpha = newAlpha.value }
                 )
             }
         }
@@ -574,6 +574,7 @@ fun PhoenixStageDetailOverlay(
     val auraPulse  = remember { Animatable(0.85f) }
     val auraAlpha  = remember { Animatable(0.3f) }
 
+    var isLiveProcedural by remember { mutableStateOf(true) }
     var sparkIndex by remember { mutableIntStateOf(0) }
     val sparks = listOf("🔥", "✨", "🌟", "💫", "⚡️", "🌙", "💥")
 
@@ -735,19 +736,69 @@ fun PhoenixStageDetailOverlay(
                     )
                 )
 
-                // Mascot with 3D perspective
-                Image(
-                    painterResource(stage.drawableResId), stage.name,
+                // Mascot with 3D perspective: Live Procedural Canvas Creature or Artwork
+                if (isLiveProcedural) {
+                    PhoenixCreature(
+                        stage = stage.id.toFloat(),
+                        ascendant = stage.id >= 18,
+                        modifier = Modifier
+                            .size(190.dp)
+                            .scale(bounceScale.value)
+                            .graphicsLayer {
+                                rotationY = rotationAngle
+                                rotationX = -tiltAngle
+                                cameraDistance = 12f * density
+                            }
+                    )
+                } else {
+                    Image(
+                        painterResource(stage.drawableResId), stage.name,
+                        modifier = Modifier
+                            .size(180.dp)
+                            .scale(bounceScale.value)
+                            .graphicsLayer {
+                                rotationY = rotationAngle
+                                rotationX = -tiltAngle
+                                cameraDistance = 12f * density
+                            },
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+
+            // Mode Selector Pill
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
                     modifier = Modifier
-                        .size(180.dp)
-                        .scale(bounceScale.value)
-                        .graphicsLayer {
-                            rotationY = rotationAngle
-                            rotationX = -tiltAngle
-                            cameraDistance = 12f * density
-                        },
-                    contentScale = ContentScale.Fit
-                )
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(if (isLiveProcedural) stage.auraColor else Color.White.copy(0.12f))
+                        .clickable { isLiveProcedural = true }
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        "✨ LIVE ANIMATION",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(if (!isLiveProcedural) stage.auraColor else Color.White.copy(0.12f))
+                        .clickable { isLiveProcedural = false }
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        "🎨 ILLUSTRATION",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
             }
 
             Text(
