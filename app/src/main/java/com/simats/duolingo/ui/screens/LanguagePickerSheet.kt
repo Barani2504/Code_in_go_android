@@ -29,8 +29,13 @@ fun LanguagePickerSheet(
             .fillMaxHeight(0.92f)
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(DuolingoDarkBg)
+            .clickable(enabled = false) {}
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+        ) {
             // Drag handle
             Box(
                 modifier = Modifier
