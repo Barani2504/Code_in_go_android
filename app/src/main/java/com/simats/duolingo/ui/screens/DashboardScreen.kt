@@ -27,17 +27,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.duolingo.R
 import com.simats.duolingo.data.*
+import com.simats.duolingo.domain.model.BossBattle
+import com.simats.duolingo.domain.model.DsaLesson
+import com.simats.duolingo.feature.boss.DsaBossBattleScreen
+import com.simats.duolingo.feature.lesson.DsaLessonPlayerScreen
+import com.simats.duolingo.feature.path.DsaPathMapScreen
+import com.simats.duolingo.feature.practice.DsaPracticeHubScreen
+import com.simats.duolingo.feature.visualizer.DsaVisualizerScreen
 import com.simats.duolingo.ui.components.*
 import com.simats.duolingo.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// ─── Tab definitions ───────────────────────────────────────────────────────────
+// ─── Tab definitions (Mirrors iOS MainDashboardView.swift) ─────────────────────
 enum class DashboardTab(val emoji: String, val label: String) {
     LEARN("🏡", "LEARN"),
-    LETTERS("▶️", "VIDEOS"),
-    LEADERBOARDS("🛡️", "LEADERBOARDS"),
-    QUESTS("🎁", "QUESTS"),
+    VISUALIZER("🔬", "VISUALIZER"),
+    PRACTICE("🛠️", "PRACTICE HUB"),
+    LEADERBOARDS("🛡️", "LEADERBOARD"),
+    QUESTS("🎯", "DAILY QUEST"),
     SHOP("💎", "SHOP"),
     PROFILE("👤", "PROFILE"),
     MORE("💬", "MORE")
@@ -56,6 +64,8 @@ fun DashboardScreen() {
     var showMoreBottomDrawer by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
     var showPhoenixSanctuary by remember { mutableStateOf(false) }
+    var activeDsaLesson by remember { mutableStateOf<DsaLesson?>(null) }
+    var activeBossBattle by remember { mutableStateOf<BossBattle?>(null) }
 
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -75,87 +85,106 @@ fun DashboardScreen() {
         }?.id ?: 1
     }
 
+    val isDsaCourse = AppState.selectedLanguage?.code == "dsa"
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(DuolingoDarkBg)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // ── 1. Top Stats Header ───────────────────────────────────────────
-            DashboardTopBar(
-                onMenuClick = { showSideMenu = true },
-                onOpenSanctuary = { showPhoenixSanctuary = true },
-                onLanguageClick = { showLangSheet = true }
-            )
+            // ── 1. Top Stats Header (Only when not in DSA Learn mode, as DsaPathMapScreen has its own rich header) ──
+            if (!isDsaCourse || selectedTab != DashboardTab.LEARN) {
+                DashboardTopBar(
+                    onMenuClick = { showSideMenu = true },
+                    onOpenSanctuary = { showPhoenixSanctuary = true },
+                    onLanguageClick = { showLangSheet = true }
+                )
+            }
 
             // ── Tab Content ───────────────────────────────────────────────────
             Box(modifier = Modifier.weight(1f)) {
                 when (selectedTab) {
                     DashboardTab.LEARN -> {
-                        LazyColumn(
-                            state = listState,
-                            contentPadding = PaddingValues(vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(28.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(allUnits.size) { i ->
-                                val unit = allUnits[i]
-                                UnitSectionView(
-                                    unit = unit,
-                                    activeLevelIdx = AppState.activeLevelIndex,
-                                    unlockedLevels = AppState.unlockedLevelIndices,
-                                    selectedLockedNodeId = selectedLockedNodeId,
-                                    onNodeClick = { node, isUnlocked ->
-                                        if (isUnlocked) {
-                                            AppState.activeLevelIndex = node.levelNumber
-                                            selectedLockedNodeId = null
-                                        } else {
-                                            selectedLockedNodeId = if (selectedLockedNodeId == node.id) null else node.id
-                                        }
-                                    },
-                                    onStartActiveLesson = {
-                                        showLoadingScreen = true
-                                    },
-                                    onJumpHere = {
-                                        unit.nodes.firstOrNull()?.let { firstNode ->
-                                            AppState.activeLevelIndex = firstNode.levelNumber
-                                            selectedLockedNodeId = null
-                                            coroutineScope.launch {
-                                                listState.animateScrollToItem(i)
+                        if (isDsaCourse) {
+                            DsaPathMapScreen(
+                                onStartLesson = { lesson ->
+                                    activeDsaLesson = lesson
+                                },
+                                onStartBoss = { boss ->
+                                    activeBossBattle = boss
+                                },
+                                onOpenSanctuary = { showPhoenixSanctuary = true },
+                                onOpenLanguagePicker = { showLangSheet = true },
+                                onMenuClick = { showSideMenu = true }
+                            )
+                        } else {
+                            LazyColumn(
+                                state = listState,
+                                contentPadding = PaddingValues(vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(28.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(allUnits.size) { i ->
+                                    val unit = allUnits[i]
+                                    UnitSectionView(
+                                        unit = unit,
+                                        activeLevelIdx = AppState.activeLevelIndex,
+                                        unlockedLevels = AppState.unlockedLevelIndices,
+                                        selectedLockedNodeId = selectedLockedNodeId,
+                                        onNodeClick = { node, isUnlocked ->
+                                            if (isUnlocked) {
+                                                AppState.activeLevelIndex = node.levelNumber
+                                                selectedLockedNodeId = null
+                                            } else {
+                                                selectedLockedNodeId = if (selectedLockedNodeId == node.id) null else node.id
                                             }
-                                        }
-                                    },
-                                    onOpenSanctuary = { showPhoenixSanctuary = true }
-                                )
-                            }
+                                        },
+                                        onStartActiveLesson = {
+                                            showLoadingScreen = true
+                                        },
+                                        onJumpHere = {
+                                            unit.nodes.firstOrNull()?.let { firstNode ->
+                                                AppState.activeLevelIndex = firstNode.levelNumber
+                                                selectedLockedNodeId = null
+                                                coroutineScope.launch {
+                                                    listState.animateScrollToItem(i)
+                                                }
+                                            }
+                                        },
+                                        onOpenSanctuary = { showPhoenixSanctuary = true }
+                                    )
+                                }
 
-                            // Footer Links
-                            item {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 20.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                // Footer Links
+                                item {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 20.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        listOf("ABOUT", "•", "BLOG", "•", "STORE", "•", "TERMS", "•", "PRIVACY").forEach { link ->
-                                            Text(
-                                                text = link,
-                                                color = DuolingoSubtext.copy(alpha = 0.7f),
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            listOf("ABOUT", "•", "BLOG", "•", "STORE", "•", "TERMS", "•", "PRIVACY").forEach { link ->
+                                                Text(
+                                                    text = link,
+                                                    color = DuolingoSubtext.copy(alpha = 0.7f),
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    DashboardTab.LETTERS -> LettersScreen()
+                    DashboardTab.VISUALIZER -> DsaVisualizerScreen(onOpenLanguagePicker = { showLangSheet = true })
+                    DashboardTab.PRACTICE -> DsaPracticeHubScreen()
                     DashboardTab.LEADERBOARDS -> LeaderboardsScreen(onStartLesson = { showLoadingScreen = true })
                     DashboardTab.QUESTS -> QuestsScreen(onStartLesson = { showLoadingScreen = true })
                     DashboardTab.SHOP -> ShopScreen(onOpenCreateProfile = { showSignupSheet = true })
@@ -283,6 +312,39 @@ fun DashboardScreen() {
                     AppState.unlockNextLevel()
                 },
                 onDismiss = { showAssessment = false }
+            )
+        }
+
+        // ── DSA Interactive Lesson Player Modal ───────────────────────────────
+        activeDsaLesson?.let { lesson ->
+            DsaLessonPlayerScreen(
+                lesson = lesson,
+                onFinishLesson = { activeDsaLesson = null }
+            )
+        }
+
+        // ── DSA Boss Battle Screen Overlay ────────────────────────────────────
+        activeBossBattle?.let { boss ->
+            DsaBossBattleScreen(
+                boss = boss,
+                onDismiss = { activeBossBattle = null },
+                onVictory = { activeBossBattle = null }
+            )
+        }
+
+        // ── Phoenix Evolution Cinematic Celebration Overlay ───────────────────
+        com.simats.duolingo.data.repository.GameStateRepository.pendingEvolutionStage?.let { targetStage ->
+            val fromStageData = allPhoenixStages.firstOrNull { it.id == (targetStage - 1).coerceAtLeast(1) }
+                ?: allPhoenixStages.first()
+            val toStageData = allPhoenixStages.firstOrNull { it.id == targetStage }
+                ?: allPhoenixStages.last()
+
+            PhoenixEvolutionCinematic(
+                fromStage = fromStageData,
+                toStage = toStageData,
+                onComplete = {
+                    com.simats.duolingo.data.repository.GameStateRepository.clearPendingEvolution()
+                }
             )
         }
 

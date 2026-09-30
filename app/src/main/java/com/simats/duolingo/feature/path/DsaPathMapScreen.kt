@@ -41,8 +41,10 @@ import kotlin.math.sin
 @Composable
 fun DsaPathMapScreen(
     onStartLesson: (DsaLesson) -> Unit,
+    onStartBoss: (BossBattle) -> Unit = {},
     onOpenSanctuary: () -> Unit,
     onOpenLanguagePicker: () -> Unit,
+    onMenuClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val course = CourseRepository.dsaCourse
@@ -67,7 +69,8 @@ fun DsaPathMapScreen(
                 hearts = AppState.heartsCount,
                 activeStageId = AppState.activePhoenixStage,
                 onOpenSanctuary = onOpenSanctuary,
-                onOpenCoursePicker = onOpenLanguagePicker
+                onOpenCoursePicker = onOpenLanguagePicker,
+                onMenuClick = onMenuClick
             )
 
             // ── Scrollable Zig-Zag Units Path ──────────────────────────────
@@ -124,8 +127,13 @@ fun DsaPathMapScreen(
                 onDismiss = { selectedLessonForSheet = null },
                 onStart = {
                     val l = lesson
+                    val u = unit
                     selectedLessonForSheet = null
-                    onStartLesson(l)
+                    if (l.type == LessonType.BOSS) {
+                        onStartBoss(u.boss)
+                    } else {
+                        onStartLesson(l)
+                    }
                 }
             )
         }
@@ -145,6 +153,7 @@ private fun DsaTopBar(
     activeStageId: Int,
     onOpenSanctuary: () -> Unit,
     onOpenCoursePicker: () -> Unit,
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -160,6 +169,18 @@ private fun DsaTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Hamburger Menu Button
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2A2050))
+                    .clickable(onClick = onMenuClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("☰", color = Color.White, fontSize = 16.sp)
+            }
+
             // Course Switcher Pill
             Row(
                 modifier = Modifier

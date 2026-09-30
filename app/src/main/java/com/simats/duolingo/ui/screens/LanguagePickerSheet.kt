@@ -79,15 +79,28 @@ fun LanguagePickerSheet(
             ) {
                 items(defaultLanguages, key = { it.code }) { lang ->
                     val isSelected = selected?.code == lang.code
+                    val isDsa = lang.code == "dsa"
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) DuolingoCardBg else DuolingoInputBg)
+                            .background(
+                                when {
+                                    isSelected && isDsa -> Color(0xFF2A1F45)
+                                    isSelected -> DuolingoCardBg
+                                    isDsa -> Color(0xFF1E1938)
+                                    else -> DuolingoInputBg
+                                }
+                            )
                             .border(
-                                width = if (isSelected) 2.dp else 1.dp,
-                                color = if (isSelected) DuolingoGreen else DuolingoInputBorder,
+                                width = if (isSelected) 2.dp else if (isDsa) 1.5.dp else 1.dp,
+                                color = when {
+                                    isSelected && isDsa -> Color(0xFFFF9600)
+                                    isSelected -> DuolingoGreen
+                                    isDsa -> Color(0xFFFF9600).copy(alpha = 0.5f)
+                                    else -> DuolingoInputBorder
+                                },
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .clickable {
@@ -112,7 +125,22 @@ fun LanguagePickerSheet(
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold
                                 )
-                                if (lang.name != lang.nativeName) {
+                                if (isDsa) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color(0xFFFF9600).copy(alpha = 0.2f))
+                                            .border(1.dp, Color(0xFFFF9600), RoundedCornerShape(6.dp))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            "11 WORLDS",
+                                            color = Color(0xFFFF9600),
+                                            fontSize = 9.5.sp,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                } else if (lang.name != lang.nativeName) {
                                     Text(
                                         "(${lang.name})",
                                         color = DuolingoSubtext,
@@ -120,7 +148,12 @@ fun LanguagePickerSheet(
                                     )
                                 }
                             }
-                            Text(lang.learnersCount, color = DuolingoSubtext.copy(alpha = 0.8f), fontSize = 12.sp)
+                            Text(
+                                text = if (isDsa) "Algorithms & Visual Structures • ${lang.learnersCount}" else lang.learnersCount,
+                                color = if (isDsa) Color(0xFFFFC800) else DuolingoSubtext.copy(alpha = 0.8f),
+                                fontSize = 12.sp,
+                                fontWeight = if (isDsa) FontWeight.SemiBold else FontWeight.Normal
+                            )
                         }
 
                         if (isSelected) {
