@@ -6,7 +6,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,16 +19,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -36,41 +50,61 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.data.model.DSA5ChapterCourse
 import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.data.model.LessonNodeItem
 import com.simats.codeingo.data.model.UnitCharacterType
 import com.simats.codeingo.data.model.UnitModel
-import com.simats.codeingo.data.repository.CourseRepository
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.domain.LocalizationManager
+import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.navigation.BottomNavBar
-import com.simats.codeingo.ui.theme.DarkBackground
-import com.simats.codeingo.ui.theme.DsaBlue
-import com.simats.codeingo.ui.theme.DsaBlueDark
-import com.simats.codeingo.ui.theme.DsaGreen
-import com.simats.codeingo.ui.theme.DsaGreenDark
-import com.simats.codeingo.ui.theme.DsaOrange
-import com.simats.codeingo.ui.theme.DsaOrangeDark
-import com.simats.codeingo.ui.theme.DsaPurple
-import com.simats.codeingo.ui.theme.DsaPurpleDark
-import com.simats.codeingo.ui.theme.DsaRed
-import com.simats.codeingo.ui.theme.DsaRedDark
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.leaderboards.LeaderboardsScreen
-import com.simats.codeingo.ui.practice.PracticeHubScreen
+import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
+import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
+import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
+import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.profile.ProfileScreen
+import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.quests.QuestsScreen
 import com.simats.codeingo.ui.shop.ShopScreen
+import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.visualizer.VisualizerScreen
+import com.simats.codeingo.ui.worlds.array.ArrayKingdomArenaScreen
+import com.simats.codeingo.ui.worlds.linkedlist.LinkedListRoadArenaScreen
+import com.simats.codeingo.ui.worlds.queue.QueueStationArenaScreen
+import com.simats.codeingo.ui.worlds.stack.StackTowerArenaScreen
+import com.simats.codeingo.ui.worlds.tree.BinaryTreeForestArenaScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
+/**
+ * MainDashboardScreen faithfully synchronized with iOS MainDashboardView.swift (commit 2b2c2ab).
+ * Features:
+ * - Master 5-Chapter DSA Course (Array, Linked List, Stack, Queue, Tree) with 25 levels & 5 Boss Stages
+ * - 3D Interactive Worlds Section (Array Kingdom, Stack Tower, Queue Station, LinkedList Road, Binary Tree Forest)
+ * - Floating Liquid Glass Top Stats Header (Menu, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
+ * - 3D Level Nodes with animated active target aura, START tooltip, and locked level popover
+ * - Dynamic Companion Mascot floating next to the active node
+ * - Slide-out Side Drawer Menu
+ * - FullScreen & Bottom Sheets for Emotion Picker, Streak, and Chapter Guidebook
+ * - Docked 4-Tab Liquid Glass Bottom Navigation Bar
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainDashboardScreen(
-    onStartLesson: (lessonId: String) -> Unit,
+    onStartLesson: (unitId: Int, levelNumber: Int, totalLevelsInUnit: Int, isBoss: Boolean) -> Unit,
     onStartBoss: (bossId: String) -> Unit,
     onOpenPhoenixSanctuary: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -78,365 +112,309 @@ fun MainDashboardScreen(
     modifier: Modifier = Modifier
 ) {
     val gameManager = GameManager.instance
+    val localizationManager = LocalizationManager.instance
+    val emotionManager = PhoenixEmotionManager.instance
+
     val totalXP by gameManager.totalXP.collectAsState()
+    val totalStars by gameManager.totalStars.collectAsState()
     val streakDays by gameManager.streakDays.collectAsState()
+    val isStreakLostPendingRestore by gameManager.isStreakLostPendingRestore.collectAsState()
+    val savedStreakDays by gameManager.savedStreakDays.collectAsState()
     val heartsCount by gameManager.heartsCount.collectAsState()
-    val activePhoenixStage by gameManager.activePhoenixStage.collectAsState()
     val unlockedLevels by gameManager.unlockedLevelIndices.collectAsState()
+    val showEvolutionModal by gameManager.showEvolutionModal.collectAsState()
+    val evolutionFromStage by gameManager.evolutionFromStage.collectAsState()
+    val evolutionToStage by gameManager.evolutionToStage.collectAsState()
 
     var selectedTab by remember { mutableStateOf(DashboardTab.LEARN) }
     var showSideMenu by remember { mutableStateOf(false) }
-    var showMoreDrawer by remember { mutableStateOf(false) }
+    var showEmotionPickerSheet by remember { mutableStateOf(false) }
+    var showStreakSheet by remember { mutableStateOf(false) }
+    var showHeartsSheet by remember { mutableStateOf(false) }
+    var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
+    var activeWorldArena by remember { mutableStateOf<String?>(null) }
+
+    // Active Node & Locked Selection State
     var activeLevelIndex by remember { mutableIntStateOf(1) }
+    var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
 
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 5-Minute Heart Regeneration Timer
+    var heartTimerRemainingSeconds by remember { mutableIntStateOf(300) }
+    LaunchedEffect(heartsCount) {
+        if (heartsCount < 10) {
+            while (isActive && heartsCount < 10) {
+                delay(1000)
+                if (heartTimerRemainingSeconds > 0) {
+                    heartTimerRemainingSeconds--
+                } else {
+                    gameManager.regenerateHeart()
+                    heartTimerRemainingSeconds = 300
+                }
+            }
+        }
+    }
 
-    // Curriculum units for the learning path
-    val dashboardUnits = remember {
+    val heartTimerStr = if (heartsCount < 10) {
+        val mins = heartTimerRemainingSeconds / 60
+        val secs = heartTimerRemainingSeconds % 60
+        String.format("%02d:%02d", mins, secs)
+    } else null
+
+    // 5 Master Chapters
+    val masterUnits = remember {
         listOf(
             UnitModel(
                 id = 1, sectionNumber = 1, unitNumber = 1,
-                titleKey = "unit_1_title", titleDefault = "🟢 Unit 1: Foundations",
-                themeColor = DsaGreen, themeDarkColor = DsaGreenDark,
+                titleKey = "unit_1_title", titleDefault = "🔥 Chapter 1: Array — The Primordial Ember Highway",
+                themeColor = Color(0xFFFF6E0F),
+                themeDarkColor = Color(0xFFC84105),
                 nodes = listOf(
-                    LessonNodeItem(1, 1, "x.squareroot", (-10).dp, "What is a DSA?"),
-                    LessonNodeItem(2, 2, "grid", (-45).dp, "Types of Data Structures"),
-                    LessonNodeItem(3, 3, "arrow.left.arrow.right", (-65).dp, "Linear vs Non-Linear"),
-                    LessonNodeItem(4, 4, "bus", 0.dp, "Static vs Dynamic"),
-                    LessonNodeItem(5, 5, "gauge", 50.dp, "Time & Space Complexity"),
-                    LessonNodeItem(6, 6, "flame", 0.dp, "Boss: The Great Jumble", isBoss = true)
+                    LessonNodeItem(1, 1, "square.grid", 0.dp, "Stage 1: Meet the Array"),
+                    LessonNodeItem(2, 2, "magnifyingglass", (-45).dp, "Stage 2: Find the Element"),
+                    LessonNodeItem(3, 3, "arrow.right", 45.dp, "Stage 3: Build the Array"),
+                    LessonNodeItem(4, 4, "gauge", (-20).dp, "Stage 4: Array Challenge"),
+                    LessonNodeItem(5, 5, "flame", 0.dp, "Stage 5: Boss: The Highway Race", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Hatchery Warehouse"
+                worldTheme = "The Primordial Ember Highway"
             ),
             UnitModel(
-                id = 2, sectionNumber = 1, unitNumber = 2,
-                titleKey = "unit_2_title", titleDefault = "🟢 Unit 2: Arrays",
-                themeColor = DsaGreen, themeDarkColor = DsaGreenDark,
+                id = 2, sectionNumber = 2, unitNumber = 2,
+                titleKey = "unit_2_title", titleDefault = "🔗 Chapter 2: Linked List — The Hatchling's Quest",
+                themeColor = Color(0xFFF02D4B),
+                themeDarkColor = Color(0xFFB41432),
                 nodes = listOf(
-                    LessonNodeItem(7, 7, "grid", 0.dp, "Array Basics & Address Math"),
-                    LessonNodeItem(8, 8, "arrow.right", 45.dp, "Conveyor Sweep"),
-                    LessonNodeItem(9, 9, "arrow.forward", 65.dp, "Shift Party (Insertion)"),
-                    LessonNodeItem(10, 10, "arrow.back", 10.dp, "Close the Gap (Deletion)"),
-                    LessonNodeItem(11, 11, "search", (-50).dp, "Hi-Lo Master (Binary Search)"),
-                    LessonNodeItem(12, 12, "grid", (-20).dp, "2D Arrays & Battleship"),
-                    LessonNodeItem(13, 13, "flame", 0.dp, "Boss: The Locker Thief", isBoss = true)
+                    LessonNodeItem(6, 6, "link", 0.dp, "Stage 1: Meet the Nodes"),
+                    LessonNodeItem(7, 7, "arrow.right", 45.dp, "Stage 2: Follow the Chain"),
+                    LessonNodeItem(8, 8, "puzzlepiece", (-45).dp, "Stage 3: Build the Chain"),
+                    LessonNodeItem(9, 9, "plus", 20.dp, "Stage 4: Insert a Node"),
+                    LessonNodeItem(10, 10, "flame", 0.dp, "Stage 5: Boss: The Broken Chain", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Locker Row Avenue"
+                worldTheme = "The Hatchling's Quest"
             ),
             UnitModel(
-                id = 3, sectionNumber = 1, unitNumber = 3,
-                titleKey = "unit_3_title", titleDefault = "🟢 Unit 3: Strings",
-                themeColor = DsaGreen, themeDarkColor = DsaGreenDark,
+                id = 3, sectionNumber = 3, unitNumber = 3,
+                titleKey = "unit_3_title", titleDefault = "🥞 Chapter 3: Stack — The Solar Ascent Tower",
+                themeColor = Color(0xFFFFA500),
+                themeDarkColor = Color(0xFFD26E00),
                 nodes = listOf(
-                    LessonNodeItem(14, 14, "textformat", 0.dp, "String Basics & Immutability"),
-                    LessonNodeItem(15, 15, "edit", (-40).dp, "Highlighter Sweep"),
-                    LessonNodeItem(16, 16, "build", (-60).dp, "Word Forge"),
-                    LessonNodeItem(17, 17, "sync", 0.dp, "Mirror Chamber (Palindrome)"),
-                    LessonNodeItem(18, 18, "sort", 45.dp, "Letter Sieve (Anagrams)"),
-                    LessonNodeItem(19, 19, "flame", 0.dp, "Boss: The Scrambled Scroll", isBoss = true)
+                    LessonNodeItem(11, 11, "stack", 0.dp, "Stage 1: Stack Basics (LIFO)"),
+                    LessonNodeItem(12, 12, "arrow.down", (-45).dp, "Stage 2: Push to Top"),
+                    LessonNodeItem(13, 13, "arrow.up", 45.dp, "Stage 3: Pop from Top"),
+                    LessonNodeItem(14, 14, "parentheses", (-20).dp, "Stage 4: Stack Sequences"),
+                    LessonNodeItem(15, 15, "flame", 0.dp, "Stage 5: Boss: Escape the Tower", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Scroll Scriptorium"
+                worldTheme = "The Solar Ascent Tower"
             ),
             UnitModel(
-                id = 4, sectionNumber = 2, unitNumber = 4,
-                titleKey = "unit_4_title", titleDefault = "🟡 Unit 4: Linked Lists",
-                themeColor = DsaOrange, themeDarkColor = DsaOrangeDark,
+                id = 4, sectionNumber = 4, unitNumber = 4,
+                titleKey = "unit_4_title", titleDefault = "🎫 Chapter 4: Queue — The Astral Rebirth Line",
+                themeColor = Color(0xFFB946FA),
+                themeDarkColor = Color(0xFF8228BE),
                 nodes = listOf(
-                    LessonNodeItem(20, 20, "link", 10.dp, "Train Builder (Singly Linked)"),
-                    LessonNodeItem(21, 21, "cut", 50.dp, "Pointer Surgery"),
-                    LessonNodeItem(22, 22, "swap", 60.dp, "Three-Pointer Dance (Reversal)"),
-                    LessonNodeItem(23, 23, "sync", (-10).dp, "Doubly Linked List"),
-                    LessonNodeItem(24, 24, "loop", (-45).dp, "Circular & Tortoise-Hare"),
-                    LessonNodeItem(25, 25, "flame", 0.dp, "Boss: The Runaway Train", isBoss = true)
+                    LessonNodeItem(16, 16, "person.3", 0.dp, "Stage 1: Understand FIFO"),
+                    LessonNodeItem(17, 17, "arrow.left", 45.dp, "Stage 2: Enqueue to Rear"),
+                    LessonNodeItem(18, 18, "arrow.right", (-45).dp, "Stage 3: Dequeue from Front"),
+                    LessonNodeItem(19, 19, "clock", 20.dp, "Stage 4: Queue Interleaving"),
+                    LessonNodeItem(20, 20, "flame", 0.dp, "Stage 5: Boss: Ticket Rush", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Chain Canyon"
+                worldTheme = "The Astral Rebirth Line"
             ),
             UnitModel(
-                id = 5, sectionNumber = 2, unitNumber = 5,
-                titleKey = "unit_5_title", titleDefault = "🟡 Unit 5: Stack",
-                themeColor = DsaOrange, themeDarkColor = DsaOrangeDark,
+                id = 5, sectionNumber = 5, unitNumber = 5,
+                titleKey = "unit_5_title", titleDefault = "👑 Chapter 5: Tree — The Immortal Phoenix Kingdom",
+                themeColor = Color(0xFFFF4623),
+                themeDarkColor = Color(0xFFC31E0A),
                 nodes = listOf(
-                    LessonNodeItem(26, 26, "layers", (-10).dp, "Stack Basics & LIFO"),
-                    LessonNodeItem(27, 27, "swap_vert", (-45).dp, "Push & Pop Visualizer"),
-                    LessonNodeItem(28, 28, "data_object", 10.dp, "Bracket Bouncer"),
-                    LessonNodeItem(29, 29, "calculate", 50.dp, "Railway Yard & Postfix"),
-                    LessonNodeItem(30, 30, "flame", 0.dp, "Boss: Diner Rush", isBoss = true)
+                    LessonNodeItem(21, 21, "crown", 0.dp, "Stage 1: Find the Root"),
+                    LessonNodeItem(22, 22, "leaf", (-45).dp, "Stage 2: Parent and Child"),
+                    LessonNodeItem(23, 23, "wind", 45.dp, "Stage 3: Find the Leaves"),
+                    LessonNodeItem(24, 24, "branch", (-20).dp, "Stage 4: Tree Traversals"),
+                    LessonNodeItem(25, 25, "flame", 0.dp, "Stage 5: Boss: Save the Kingdom", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Pancake Tower Diner"
-            ),
-            UnitModel(
-                id = 6, sectionNumber = 2, unitNumber = 6,
-                titleKey = "unit_6_title", titleDefault = "🟡 Unit 6: Queue",
-                themeColor = DsaOrange, themeDarkColor = DsaOrangeDark,
-                nodes = listOf(
-                    LessonNodeItem(31, 31, "queue", 0.dp, "Queue Basics & FIFO"),
-                    LessonNodeItem(32, 32, "sync", 45.dp, "Circular Queue Ring"),
-                    LessonNodeItem(33, 33, "swap_horiz", (-30).dp, "Deque (Double-Ended)"),
-                    LessonNodeItem(34, 34, "priority_high", (-60).dp, "Priority Queue (ER Triage)"),
-                    LessonNodeItem(35, 35, "flame", 0.dp, "Boss: The Café Stampede", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Ember Café Rush"
-            ),
-            UnitModel(
-                id = 7, sectionNumber = 2, unitNumber = 7,
-                titleKey = "unit_7_title", titleDefault = "🟡 Unit 7: Hashing",
-                themeColor = DsaOrange, themeDarkColor = DsaOrangeDark,
-                nodes = listOf(
-                    LessonNodeItem(36, 36, "lock", 10.dp, "Magic Locker Assigner"),
-                    LessonNodeItem(37, 37, "function", 50.dp, "Craft Your Hash Function"),
-                    LessonNodeItem(38, 38, "check", 0.dp, "HashMap & HashSet"),
-                    LessonNodeItem(39, 39, "warning", (-45).dp, "Collision: Chaining vs Probing"),
-                    LessonNodeItem(40, 40, "flame", 0.dp, "Boss: The Locker Storm", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Hash Harbor"
-            ),
-            UnitModel(
-                id = 8, sectionNumber = 3, unitNumber = 8,
-                titleKey = "unit_8_title", titleDefault = "🔵 Unit 8: Trees",
-                themeColor = DsaBlue, themeDarkColor = DsaBlueDark,
-                nodes = listOf(
-                    LessonNodeItem(41, 41, "park", 0.dp, "Tree Anatomy & Terminology"),
-                    LessonNodeItem(42, 42, "fork_right", (-40).dp, "Forest Tour (Pre/In/Post DFS)"),
-                    LessonNodeItem(43, 43, "waves", (-60).dp, "Level-Order (BFS Wave)"),
-                    LessonNodeItem(44, 44, "alt_route", 0.dp, "BST Plinko Insert"),
-                    LessonNodeItem(45, 45, "sync", 45.dp, "Balance Doctor (AVL Rotations)"),
-                    LessonNodeItem(46, 46, "filter_hdr", 65.dp, "Binary Heap (Bubble-up)"),
-                    LessonNodeItem(47, 47, "flame", 0.dp, "Boss: The Twisted Oak", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Ember Forest"
-            ),
-            UnitModel(
-                id = 9, sectionNumber = 3, unitNumber = 9,
-                titleKey = "unit_9_title", titleDefault = "🔵 Unit 9: Trie",
-                themeColor = DsaBlue, themeDarkColor = DsaBlueDark,
-                nodes = listOf(
-                    LessonNodeItem(48, 48, "text_fields", (-10).dp, "Trie & Shared Prefixes"),
-                    LessonNodeItem(49, 49, "search", (-45).dp, "Insert & Search Crystals"),
-                    LessonNodeItem(50, 50, "keyboard", 10.dp, "Live Autocomplete"),
-                    LessonNodeItem(51, 51, "content_cut", 50.dp, "Safe Node Pruning"),
-                    LessonNodeItem(52, 52, "flame", 0.dp, "Boss: The Whispering Wall", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Crystal Cave of Words"
-            ),
-            UnitModel(
-                id = 10, sectionNumber = 3, unitNumber = 10,
-                titleKey = "unit_10_title", titleDefault = "🟣 Unit 10: Graphs",
-                themeColor = DsaPurple, themeDarkColor = DsaPurpleDark,
-                nodes = listOf(
-                    LessonNodeItem(53, 53, "hub", 0.dp, "Vertices & Bridges"),
-                    LessonNodeItem(54, 54, "north_east", 45.dp, "Directed & Weighted Bridges"),
-                    LessonNodeItem(55, 55, "table_chart", (-30).dp, "Adjacency Matrix vs List"),
-                    LessonNodeItem(56, 56, "water", (-60).dp, "BFS: Ripple Flood"),
-                    LessonNodeItem(57, 57, "south", 0.dp, "DFS: Deep Diver"),
-                    LessonNodeItem(58, 58, "flame", 0.dp, "Boss: The Storm Archipelago", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "Sky Islands"
-            ),
-            UnitModel(
-                id = 11, sectionNumber = 4, unitNumber = 11,
-                titleKey = "unit_11_title", titleDefault = "🔴 Unit 11: Advanced Structures",
-                themeColor = DsaRed, themeDarkColor = DsaRedDark,
-                nodes = listOf(
-                    LessonNodeItem(59, 59, "groups", (-10).dp, "Union-Find (Kingdom Merge)"),
-                    LessonNodeItem(60, 60, "bar_chart", (-45).dp, "Segment Tree: Range Query"),
-                    LessonNodeItem(61, 61, "stairs", 0.dp, "Fenwick Tree (Lowbit Ladder)"),
-                    LessonNodeItem(62, 62, "palette", 50.dp, "Red-Black Tree: Color Court"),
-                    LessonNodeItem(63, 63, "menu_book", 20.dp, "B-Tree: Library Shelving"),
-                    LessonNodeItem(64, 64, "crown", 0.dp, "Final Boss: Eternal Flame Guardian", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Sun Citadel"
+                worldTheme = "The Immortal Phoenix Kingdom"
             )
         )
     }
 
-    Box(modifier = modifier.fillMaxSize().background(DarkBackground)) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFF070B12))
+    ) {
+        PhoenixAtmosphericBackgroundView()
+
         Scaffold(
-            topBar = {
-                TopStatsHeader(
-                    phoenixStage = activePhoenixStage,
-                    streakDays = streakDays,
-                    totalXP = totalXP,
-                    heartsCount = heartsCount,
-                    onMenuClick = { showSideMenu = true },
-                    onPhoenixClick = onOpenPhoenixSanctuary,
-                    onHeartsClick = { selectedTab = DashboardTab.SHOP }
+            containerColor = Color.Transparent,
+            bottomBar = {
+                BottomNavBar(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                    }
                 )
-            },
-            containerColor = DarkBackground
+            }
         ) { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(bottom = paddingValues.calculateBottomPadding())
             ) {
                 when (selectedTab) {
                     DashboardTab.LEARN -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(28.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 20.dp)
-                        ) {
-                            dashboardUnits.forEach { unit ->
-                                item {
-                                    val isUnitUnlocked = unit.id == 1 || unlockedLevels.contains(unit.nodes.first().levelNumber)
-                                    UnitSectionBanner(
-                                        unit = unit,
-                                        isUnlocked = isUnitUnlocked,
-                                        onGuidebookClick = { /* Show guidebook info */ }
-                                    )
-                                }
+                        // Learn Tab: Curriculum Path with Floating Header
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                // Spacing for floating top stats header
+                                Spacer(modifier = Modifier.height(72.dp))
 
-                                items(unit.nodes) { node ->
-                                    val isUnlocked = unlockedLevels.contains(node.levelNumber)
-                                    val isActive = node.levelNumber == activeLevelIndex
+                                // 1. 3D INTERACTIVE WORLDS CAROUSEL
+                                InteractiveGamesSection(
+                                    onOpenWorld = { worldKey ->
+                                        activeWorldArena = worldKey
+                                    }
+                                )
 
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
+                                Spacer(modifier = Modifier.height(18.dp))
+
+                                // 2. 5 CHAPTER UNITS PATH
+                                masterUnits.forEach { unit ->
+                                    val isUnitOpen = unit.id == 1 || (unit.nodes.firstOrNull()?.let { unlockedLevels.contains(it.levelNumber) } ?: false)
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        Row(
-                                            modifier = Modifier.offset(x = node.xOffset),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                        // Unit Section Banner
+                                        UnitSectionBanner(
+                                            unit = unit,
+                                            isUnlocked = isUnitOpen,
+                                            onGuidebookClick = { guideSelectedUnit = unit }
+                                        )
+
+                                        // Winding 3D Level Nodes
+                                        unit.nodes.forEach { node ->
+                                            val isNodeUnlocked = isUnitOpen && unlockedLevels.contains(node.levelNumber)
+                                            val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
+                                            val isLockedSelected = selectedLockedNodeId == node.id
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Center,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                // Active Target Start Tooltip (matches iOS)
-                                                if (isActive) {
-                                                    Column(
-                                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                                        modifier = Modifier.padding(bottom = 6.dp)
-                                                    ) {
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .clip(RoundedCornerShape(12.dp))
-                                                                .background(unit.themeColor)
-                                                                .clickable {
-                                                                    if (node.isBoss) {
-                                                                        val bossId = if (unit.id < 10) "boss_unit_0${unit.id}" else "boss_unit_${unit.id}"
-                                                                        onStartBoss(bossId)
-                                                                    } else {
-                                                                        val unitData = CourseRepository.allUnits.getOrNull(unit.id - 1)
-                                                                        val nodeIndex = unit.nodes.indexOf(node)
-                                                                        val lesson = unitData?.lessons?.getOrNull(nodeIndex) ?: unitData?.lessons?.firstOrNull()
-                                                                        onStartLesson(lesson?.id ?: "u1_l1_what_is_ds")
-                                                                    }
-                                                                }
-                                                                .padding(horizontal = 14.dp, vertical = 6.dp)
-                                                        ) {
-                                                            Text(
-                                                                text = if (node.isBoss) "⚔️ BOSS BATTLE" else "START +10 XP ▶",
-                                                                fontSize = 11.sp,
-                                                                fontWeight = FontWeight.Black,
-                                                                color = Color.White
-                                                            )
-                                                        }
-                                                    }
-                                                }
-
                                                 LessonNodeButton(
-                                                    levelNumber = node.levelNumber,
-                                                    icon = node.icon,
-                                                    title = node.title,
-                                                    xOffset = 0.dp,
-                                                    themeColor = unit.themeColor,
-                                                    themeDarkColor = unit.themeDarkColor,
-                                                    isUnlocked = isUnlocked,
-                                                    isActive = isActive,
-                                                    isBoss = node.isBoss,
-                                                    onClick = {
-                                                        if (isUnlocked) {
+                                                    node = node,
+                                                    unit = unit,
+                                                    isUnlocked = isNodeUnlocked,
+                                                    isActiveTarget = isActiveTarget,
+                                                    isLockedSelected = isLockedSelected,
+                                                    xOffset = if (isActiveTarget) 0.dp else node.xOffset * 0.45f,
+                                                    onNodeClick = {
+                                                        if (isNodeUnlocked) {
                                                             activeLevelIndex = node.levelNumber
-                                                            if (node.isBoss) {
-                                                                val bossId = if (unit.id < 10) "boss_unit_0${unit.id}" else "boss_unit_${unit.id}"
-                                                                onStartBoss(bossId)
-                                                            } else {
-                                                                val unitData = CourseRepository.allUnits.getOrNull(unit.id - 1)
-                                                                val nodeIndex = unit.nodes.indexOf(node)
-                                                                val lesson = unitData?.lessons?.getOrNull(nodeIndex) ?: unitData?.lessons?.firstOrNull()
-                                                                onStartLesson(lesson?.id ?: "u1_l1_what_is_ds")
-                                                            }
+                                                            selectedLockedNodeId = null
+                                                        } else {
+                                                            selectedLockedNodeId = node.id
+                                                        }
+                                                    },
+                                                    onStartClick = {
+                                                        if (node.isBoss) {
+                                                            onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
+                                                        } else {
+                                                            onStartLesson(unit.id, node.levelNumber, 5, false)
                                                         }
                                                     }
                                                 )
 
-                                                Spacer(modifier = Modifier.height(6.dp))
-
-                                                Text(
-                                                    text = node.title,
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = if (isUnlocked) Color.White else SubtextGray
-                                                )
-                                            }
-
-                                            // Mascot placed beside the active node
-                                            if (isActive) {
-                                                Spacer(modifier = Modifier.width(14.dp))
-                                                PhoenixEggCompanionMascotView(
-                                                    levelNumber = node.levelNumber,
-                                                    isBoss = node.isBoss
-                                                )
+                                                // Companion Mascot Animation next to Active Target Node
+                                                if (isActiveTarget) {
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    PhoenixAnimatedMascotView(
+                                                        pose = PhoenixMascotPose.Walking,
+                                                        modifier = Modifier.size(72.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                // Grand Master Journey Milestone Card
+                                GrandMasterJourneyCard(
+                                    completedCount = unlockedLevels.size,
+                                    totalCount = 25,
+                                    onOpenSanctuary = onOpenPhoenixSanctuary
+                                )
+
+                                Spacer(modifier = Modifier.height(40.dp))
                             }
 
-                            item {
-                                // End of path celebration card
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 24.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(Color(0xFFFFC800).copy(alpha = 0.12f))
-                                        .padding(16.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = "🏆", fontSize = 28.sp)
-                                        Spacer(modifier = Modifier.padding(8.dp))
-                                        Column {
-                                            Text(
-                                                text = "You're progressing through the path!",
-                                                fontSize = 14.sp,
-                                                fontWeight = FontWeight.Black,
-                                                color = Color.White
-                                            )
-                                            Text(
-                                                text = "Complete boss challenges to evolve your Phoenix!",
-                                                fontSize = 12.sp,
-                                                color = SubtextGray
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                            // Floating Liquid Glass Top Stats Header (Docked to Top)
+                            TopStatsHeader(
+                                streakDays = streakDays,
+                                isStreakPendingRestore = isStreakLostPendingRestore,
+                                savedStreakDays = savedStreakDays,
+                                totalStars = totalStars,
+                                totalXP = totalXP,
+                                heartsCount = heartsCount,
+                                heartTimerString = heartTimerStr,
+                                onMenuClick = { showSideMenu = true },
+                                onPhoenixClick = { showEmotionPickerSheet = true },
+                                onStreakClick = { showStreakSheet = true },
+                                onHeartsClick = { showHeartsSheet = true }
+                            )
                         }
                     }
 
                     DashboardTab.VISUALIZER -> {
-                        VisualizerScreen(modifier = Modifier.fillMaxSize())
+                        VisualizerScreen(
+                            onOpenArrayKingdom = { activeWorldArena = "array" },
+                            onOpenStackTower = { activeWorldArena = "stack" },
+                            onOpenQueueStation = { activeWorldArena = "queue" },
+                            onOpenLinkedListRoad = { activeWorldArena = "linkedlist" },
+                            onOpenBinaryTreeForest = { activeWorldArena = "tree" },
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
 
                     DashboardTab.PRACTICE -> {
-                        PracticeHubScreen(modifier = Modifier.fillMaxSize())
+                        PracticeHubScreen(
+                            onOpenArrayKingdom = { activeWorldArena = "array" },
+                            onOpenStackTower = { activeWorldArena = "stack" },
+                            onOpenQueueStation = { activeWorldArena = "queue" },
+                            onOpenLinkedListRoad = { activeWorldArena = "linkedlist" },
+                            onOpenBinaryTreeForest = { activeWorldArena = "tree" },
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
 
                     DashboardTab.LEADERBOARDS -> {
-                        LeaderboardsScreen(modifier = Modifier.fillMaxSize())
+                        LeaderboardsScreen(
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    DashboardTab.PROFILE -> {
+                        ProfileScreen(
+                            onOpenSettings = onOpenSettings,
+                            onLogout = onLogout,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
 
                     DashboardTab.QUESTS -> {
@@ -447,63 +425,474 @@ fun MainDashboardScreen(
                         ShopScreen(modifier = Modifier.fillMaxSize())
                     }
 
-                    DashboardTab.PROFILE -> {
-                        ProfileScreen(modifier = Modifier.fillMaxSize())
+                    else -> {
+                        VisualizerScreen(
+                            onOpenArrayKingdom = { onStartLesson(1, 1, 5, false) },
+                            onOpenStackTower = { onStartLesson(3, 11, 5, false) },
+                            onOpenQueueStation = { onStartLesson(4, 16, 5, false) },
+                            onOpenLinkedListRoad = { onStartLesson(2, 6, 5, false) },
+                            onOpenBinaryTreeForest = { onStartLesson(5, 21, 5, false) },
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
-
-                    DashboardTab.MORE -> {}
                 }
             }
         }
 
-        // Slide-Out Side Menu Drawer Overlay
+        // Side Drawer Menu
         AnimatedVisibility(
             visible = showSideMenu,
-            enter = fadeIn(),
-            exit = fadeOut()
+            enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
+            exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.6f))
+                    .background(Color.Black.copy(alpha = 0.5f))
                     .clickable { showSideMenu = false }
-            )
-        }
-
-        AnimatedVisibility(
-            visible = showSideMenu,
-            enter = slideInHorizontally { -it },
-            exit = slideOutHorizontally { -it }
-        ) {
-            SideMenuDrawer(
-                selectedTab = selectedTab,
-                onTabSelected = { tab ->
-                    selectedTab = tab
-                    showSideMenu = false
-                },
-                onMoreClick = {
-                    showSideMenu = false
-                    showMoreDrawer = true
-                }
-            )
-        }
-
-        // More Bottom Drawer
-        if (showMoreDrawer) {
-            ModalBottomSheet(
-                onDismissRequest = { showMoreDrawer = false },
-                sheetState = bottomSheetState,
-                containerColor = DarkBackground
             ) {
-                MoreBottomDrawer(
-                    onOpenSettings = {
-                        showMoreDrawer = false
-                        onOpenSettings()
+                SideMenuDrawer(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                        showSideMenu = false
                     },
-                    onLogout = {
-                        showMoreDrawer = false
-                        onLogout()
+                    onMoreClick = {
+                        showSideMenu = false
+                        onOpenSettings()
                     }
+                )
+            }
+        }
+
+        // Phoenix Emotion Picker Bottom Sheet
+        if (showEmotionPickerSheet) {
+            PhoenixEmotionPickerSheet(
+                onDismiss = { showEmotionPickerSheet = false }
+            )
+        }
+
+        // Chapter Guidebook Modal Sheet
+        guideSelectedUnit?.let { unit ->
+            ModalBottomSheet(
+                onDismissRequest = { guideSelectedUnit = null },
+                containerColor = Color(0xFF0F1420)
+            ) {
+                ChapterGuidebookSheet(
+                    unit = unit,
+                    onDismiss = { guideSelectedUnit = null }
+                )
+            }
+        }
+
+        // Streak Modal Sheet
+        if (showStreakSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showStreakSheet = false },
+                containerColor = Color(0xFF0F1420)
+            ) {
+                StreakInfoSheet(
+                    streakDays = streakDays,
+                    isStreakPendingRestore = isStreakLostPendingRestore,
+                    savedStreakDays = savedStreakDays,
+                    onRestoreStreak = {
+                        gameManager.restoreStreak()
+                        showStreakSheet = false
+                    },
+                    onDismiss = { showStreakSheet = false }
+                )
+            }
+        }
+
+        // Hearts Modal Sheet
+        if (showHeartsSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showHeartsSheet = false },
+                containerColor = Color(0xFF0F1420)
+            ) {
+                HeartsInfoSheet(
+                    heartsCount = heartsCount,
+                    timerString = heartTimerStr,
+                    onRefillHearts = {
+                        gameManager.refillHearts()
+                        showHeartsSheet = false
+                    },
+                    onDismiss = { showHeartsSheet = false }
+                )
+            }
+        }
+
+        // Phoenix Evolution Fullscreen Celebration Modal
+        if (showEvolutionModal) {
+            Dialog(
+                onDismissRequest = { gameManager.dismissEvolutionModal() },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                PhoenixEvolutionCelebrationScreen(
+                    fromStageId = evolutionFromStage,
+                    toStageId = evolutionToStage,
+                    onDismiss = { gameManager.dismissEvolutionModal() }
+                )
+            }
+        }
+
+        // 3D Interactive World Full-Screen Arena
+        activeWorldArena?.let { arenaKey ->
+            Dialog(
+                onDismissRequest = { activeWorldArena = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                when (arenaKey) {
+                    "array" -> ArrayKingdomArenaScreen(onDismiss = { activeWorldArena = null })
+                    "stack" -> StackTowerArenaScreen(onDismiss = { activeWorldArena = null })
+                    "queue" -> QueueStationArenaScreen(onDismiss = { activeWorldArena = null })
+                    "linkedlist" -> LinkedListRoadArenaScreen(onDismiss = { activeWorldArena = null })
+                    "tree" -> BinaryTreeForestArenaScreen(onDismiss = { activeWorldArena = null })
+                    else -> ArrayKingdomArenaScreen(onDismiss = { activeWorldArena = null })
+                }
+            }
+        }
+    }
+}
+
+// MARK: - 3D Interactive Worlds Section
+@Composable
+private fun InteractiveGamesSection(
+    onOpenWorld: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "🎮 3D INTERACTIVE WORLDS",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Monospace,
+                color = AmberGold
+            )
+            Text(
+                text = "5 ARENAS UNLOCKED",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White.copy(alpha = 0.6f)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            WorldPortalCard("tree", "🌲 BINARY TREE FOREST", "Explore BST Canopies & Lost Forest", Color(0xFF10B981), onOpenWorld)
+            WorldPortalCard("array", "🏰 ARRAY KINGDOM", "Traverse Contiguous Memory Mazes", AmberGold, onOpenWorld)
+            WorldPortalCard("stack", "🥞 SOLAR STACK TOWER", "Ascend Solar Plates & Escape the Spire", Color(0xFFF59E0B), onOpenWorld)
+            WorldPortalCard("queue", "🎫 ASTRAL QUEUE STATION", "Manage FIFO Rail Networks & Dispatch", Color(0xFFA855F7), onOpenWorld)
+            WorldPortalCard("linkedlist", "🔗 LINKED LIST ROAD", "Follow Pointers Across Pointer Bridges", Color(0xFFEF4444), onOpenWorld)
+        }
+    }
+}
+
+@Composable
+private fun WorldPortalCard(
+    worldKey: String,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    onOpenWorld: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .width(300.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xFF0F1523).copy(alpha = 0.85f))
+            .border(
+                1.2.dp,
+                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), accentColor.copy(alpha = 0.45f))),
+                RoundedCornerShape(18.dp)
+            )
+            .clickable { onOpenWorld(worldKey) }
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(46.dp)
+                .clip(CircleShape)
+                .background(accentColor.copy(alpha = 0.20f))
+                .border(1.5.dp, accentColor, CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.SportsEsports,
+                contentDescription = title,
+                tint = accentColor,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.70f),
+                lineHeight = 15.sp
+            )
+        }
+    }
+}
+
+// MARK: - Grand Master Journey Card
+@Composable
+private fun GrandMasterJourneyCard(
+    completedCount: Int,
+    totalCount: Int,
+    onOpenSanctuary: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(Color(0xFF1E1428), Color(0xFF0F0B18))
+                )
+            )
+            .border(1.5.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(22.dp))
+            .clickable { onOpenSanctuary() }
+            .padding(20.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Default.EmojiEvents,
+                contentDescription = null,
+                tint = AmberGold,
+                modifier = Modifier.size(36.dp)
+            )
+            Text(
+                text = "GRAND MASTER PHOENIX JOURNEY",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                color = AmberGold
+            )
+            Text(
+                text = "$completedCount / $totalCount Stages Conquered",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Text(
+                text = "Tap to enter the Phoenix Sanctuary and view all 18 evolution forms.",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.70f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+// MARK: - Chapter Guidebook Sheet
+@Composable
+private fun ChapterGuidebookSheet(
+    unit: UnitModel,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "📖 Chapter ${unit.unitNumber} Field Guide",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close",
+                tint = Color.White.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onDismiss() }
+            )
+        }
+
+        Text(
+            text = unit.titleDefault,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = unit.themeColor
+        )
+
+        Text(
+            text = "Master the architectural foundations of this data structure through 5 structured interactive stages. Complete each stage in sequence to challenge the Chapter Boss and unlock the next world.",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.White.copy(alpha = 0.8f),
+            lineHeight = 18.sp
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "CURRICULUM STAGES",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = AmberGold
+            )
+            unit.nodes.forEach { node ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = if (node.isBoss) "⚔️" else "🔹", fontSize = 12.sp)
+                    Text(
+                        text = node.title,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Streak Info Sheet
+@Composable
+private fun StreakInfoSheet(
+    streakDays: Int,
+    isStreakPendingRestore: Boolean,
+    savedStreakDays: Int,
+    onRestoreStreak: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(text = if (isStreakPendingRestore) "🧊" else "🔥", fontSize = 48.sp)
+        Text(
+            text = if (isStreakPendingRestore) "Streak Frozen!" else "$streakDays Day Streak!",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            color = Color.White
+        )
+        Text(
+            text = if (isStreakPendingRestore) {
+                "Your $savedStreakDays-day streak is frozen. Ignite it now to restore your flame!"
+            } else {
+                "Complete a lesson every single day to fuel your Phoenix and multiply your XP."
+            },
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.White.copy(alpha = 0.75f),
+            textAlign = TextAlign.Center
+        )
+
+        if (isStreakPendingRestore) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF22D3EE))
+                    .clickable { onRestoreStreak() }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "RESTORE MY STREAK 🔥",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Hearts Info Sheet
+@Composable
+private fun HeartsInfoSheet(
+    heartsCount: Int,
+    timerString: String?,
+    onRefillHearts: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(text = "❤️", fontSize = 48.sp)
+        Text(
+            text = "$heartsCount / 10 Hearts",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            color = Color.White
+        )
+        Text(
+            text = if (heartsCount < 10) {
+                "Next heart regenerates in $timerString. Keep practicing or refill instantly!"
+            } else {
+                "You have full hearts! Incorrect answers during lessons will consume 1 heart."
+            },
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.White.copy(alpha = 0.75f),
+            textAlign = TextAlign.Center
+        )
+
+        if (heartsCount < 10) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFFF4D4D))
+                    .clickable { onRefillHearts() }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "REFILL HEARTS (10 ❤️)",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
                 )
             }
         }

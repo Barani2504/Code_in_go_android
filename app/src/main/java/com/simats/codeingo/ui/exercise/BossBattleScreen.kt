@@ -142,13 +142,44 @@ fun BossBattleScreen(
             )
     ) {
         if (isVictory) {
+            val unitId = remember(bossId) {
+                bossId.removePrefix("boss_unit_").toIntOrNull() ?: 1
+            }
+            val starsEarned = remember(learnerHearts) {
+                when (maxOf(0, 3 - learnerHearts)) {
+                    0 -> 5
+                    1 -> 3
+                    2 -> 1
+                    else -> 0
+                }
+            }
+            val bossXP = unitId * 50
+
             // Full 3D Interactive Egg Cracking & Phoenix Ascension Celebration
             com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView(
+                unitId = unitId,
                 levelNumber = boss.targetPhoenixStageAwarded,
-                xpEarned = 150,
+                totalLevelsInUnit = 6,
+                isBoss = true,
+                xpEarned = bossXP,
+                starsEarned = starsEarned,
                 accuracyPercentage = 100,
+                onContinue = {
+                    GameManager.instance.addStars(starsEarned)
+                    GameManager.instance.awardBossVictory(boss, unitId)
+                    GameManager.instance.completeLessonAndExtendStreak()
+                    onVictory()
+                },
                 onFinish = {
-                    GameManager.instance.awardBossVictory(boss)
+                    GameManager.instance.addStars(starsEarned)
+                    GameManager.instance.awardBossVictory(boss, unitId)
+                    GameManager.instance.completeLessonAndExtendStreak()
+                    onVictory()
+                },
+                onUpgradePhoenixNextUnit = {
+                    GameManager.instance.addStars(starsEarned)
+                    GameManager.instance.awardBossVictory(boss, unitId)
+                    GameManager.instance.completeLessonAndExtendStreak()
                     onVictory()
                 }
             )

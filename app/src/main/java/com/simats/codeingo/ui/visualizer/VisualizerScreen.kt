@@ -4,8 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.ui.draw.scale
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +13,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -30,14 +32,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -48,16 +55,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.R
 import com.simats.codeingo.data.model.DSAVisualizerType
+import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.components.DuolingoButton
+import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import com.simats.codeingo.ui.onboarding.LanguagePickerSheet
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -74,59 +87,317 @@ import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+enum class VisualizerDisplayMode {
+    LIST,
+    VISUALIZER
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualizerScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenArrayKingdom: (() -> Unit)? = null,
+    onOpenStackTower: (() -> Unit)? = null,
+    onOpenQueueStation: (() -> Unit)? = null,
+    onOpenLinkedListRoad: (() -> Unit)? = null,
+    onOpenBinaryTreeForest: (() -> Unit)? = null
 ) {
-    var selectedType by remember { mutableStateOf(DSAVisualizerType.STACK) }
+    val localizationManager = LocalizationManager.instance
+    val selectedLanguageCode by localizationManager.selectedLanguageCode.collectAsState()
+    val selectedLangObj by localizationManager.selectedLanguage.collectAsState()
 
-    Column(
+    var displayMode by remember { mutableStateOf(VisualizerDisplayMode.LIST) }
+    var selectedType by remember { mutableStateOf(DSAVisualizerType.STACK) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All") }
+    var showLanguagePicker by remember { mutableStateOf(false) }
+
+    val currentLanguageName = selectedLangObj?.name ?: when (selectedLanguageCode) {
+        "es" -> "Spanish"
+        "fr" -> "French"
+        "de" -> "German"
+        "ja" -> "Japanese"
+        else -> "Python"
+    }
+
+    val currentLanguageFlag = when (currentLanguageName.lowercase()) {
+        "python" -> "🐍"
+        "java" -> "☕"
+        "c++", "cpp" -> "⚙️"
+        "swift" -> "🦅"
+        "go" -> "🐹"
+        "javascript", "js" -> "📜"
+        "kotlin" -> "📱"
+        else -> "🐍"
+    }
+
+    val categories = listOf("All", "Linear", "Trees & Graphs", "Algorithms")
+
+    val filteredStructures = remember(searchQuery, selectedCategory) {
+        DSAVisualizerType.entries.filter { type ->
+            val matchesCategory = selectedCategory == "All" || type.filterCategory == selectedCategory
+            val query = searchQuery.trim().lowercase()
+            val matchesSearch = query.isEmpty() ||
+                type.title.lowercase().contains(query) ||
+                type.tagline.lowercase().contains(query) ||
+                type.category.lowercase().contains(query) ||
+                type.shortDescription.lowercase().contains(query)
+            matchesCategory && matchesSearch
+        }
+    }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        // Header
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
-        ) {
-            Text(
-                text = "DSA Visualizer",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White
+        PhoenixAtmosphericBackgroundView()
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Header Bar
+            VisualizerHeaderBar(
+                displayMode = displayMode,
+                currentLanguageFlag = currentLanguageFlag,
+                currentLanguageName = currentLanguageName,
+                onBackToList = { displayMode = VisualizerDisplayMode.LIST },
+                onOpenLanguagePicker = { showLanguagePicker = true }
             )
-            Text(
-                text = "Watch data structures & code come alive in real-time",
-                fontSize = 13.sp,
-                color = SubtextGray
-            )
+
+            if (displayMode == VisualizerDisplayMode.LIST) {
+                // Topic List View
+                TopicListView(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    categories = categories,
+                    selectedCategory = selectedCategory,
+                    onCategorySelect = { selectedCategory = it },
+                    filteredStructures = filteredStructures,
+                    onSelectTopic = { type ->
+                        selectedType = type
+                        displayMode = VisualizerDisplayMode.VISUALIZER
+                    },
+                    onOpenArrayKingdom = onOpenArrayKingdom,
+                    onOpenStackTower = onOpenStackTower,
+                    onOpenQueueStation = onOpenQueueStation,
+                    onOpenLinkedListRoad = onOpenLinkedListRoad,
+                    onOpenBinaryTreeForest = onOpenBinaryTreeForest
+                )
+            } else {
+                // Topic Detail View
+                TopicDetailView(
+                    selectedType = selectedType,
+                    onSelectType = { selectedType = it },
+                    onBackToList = { displayMode = VisualizerDisplayMode.LIST },
+                    currentLanguageName = currentLanguageName
+                )
+            }
         }
 
-        // Horizontal Category Tabs
-        val types = DSAVisualizerType.values()
-        LazyRow(
+        if (showLanguagePicker) {
+            ModalBottomSheet(
+                onDismissRequest = { showLanguagePicker = false },
+                containerColor = DarkBackground
+            ) {
+                LanguagePickerSheet(
+                    selectedLanguageCode = selectedLanguageCode,
+                    onLanguageSelected = { lang ->
+                        localizationManager.setSelectedLanguage(lang)
+                        showLanguagePicker = false
+                    },
+                    onDismiss = { showLanguagePicker = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VisualizerHeaderBar(
+    displayMode: VisualizerDisplayMode,
+    currentLanguageFlag: String,
+    currentLanguageName: String,
+    onBackToList: () -> Unit,
+    onOpenLanguagePicker: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (displayMode == VisualizerDisplayMode.VISUALIZER) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(DsaBlue.copy(alpha = 0.20f))
+                    .border(1.5.dp, DsaBlue.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                    .clickable { onBackToList() }
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "All Topics",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                }
+            }
+        } else {
+            Column {
+                Text(
+                    text = "DSA Visualizer",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Text(
+                    text = "Watch structures & code come alive",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = SubtextGray
+                )
+            }
+        }
+
+        // Language Switcher Pill
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(CardBackground.copy(alpha = 0.85f))
+                .border(1.5.dp, DsaBlue.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                .clickable { onOpenLanguagePicker() }
+                .padding(horizontal = 12.dp, vertical = 7.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(text = currentLanguageFlag, fontSize = 15.sp)
+                Text(
+                    text = currentLanguageName,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = SubtextGray,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopicListView(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    categories: List<String>,
+    selectedCategory: String,
+    onCategorySelect: (String) -> Unit,
+    filteredStructures: List<DSAVisualizerType>,
+    onSelectTopic: (DSAVisualizerType) -> Unit,
+    onOpenArrayKingdom: (() -> Unit)?,
+    onOpenStackTower: (() -> Unit)?,
+    onOpenQueueStation: (() -> Unit)?,
+    onOpenLinkedListRoad: (() -> Unit)?,
+    onOpenBinaryTreeForest: (() -> Unit)?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Search Bar
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(CardBackground.copy(alpha = 0.75f))
+                .border(1.2.dp, InputBorder, RoundedCornerShape(16.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp)
+                )
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier.weight(1f),
+                    textStyle = TextStyle(
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    singleLine = true,
+                    cursorBrush = SolidColor(AmberGold),
+                    decorationBox = { innerTextField ->
+                        if (searchQuery.isEmpty()) {
+                            Text(
+                                text = "Search topics, operations, complexity...",
+                                color = SubtextGray,
+                                fontSize = 13.sp
+                            )
+                        }
+                        innerTextField()
+                    }
+                )
+                if (searchQuery.isNotEmpty()) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear",
+                        tint = SubtextGray,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable { onSearchQueryChange("") }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Category Filter Pills
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(types) { type ->
-                val isSelected = selectedType == type
+            items(categories) { cat ->
+                val isSelected = selectedCategory == cat
                 val shape = RoundedCornerShape(20.dp)
                 Box(
                     modifier = Modifier
                         .clip(shape)
-                        .background(if (isSelected) type.color else CardBackground)
-                        .border(1.5.dp, if (isSelected) type.color else InputBorder, shape)
-                        .clickable { selectedType = type }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                        .background(if (isSelected) DsaBlue else CardBackground.copy(alpha = 0.7f))
+                        .border(1.2.dp, if (isSelected) DsaBlue else InputBorder, shape)
+                        .clickable { onCategorySelect(cat) }
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
                 ) {
                     Text(
-                        text = type.title,
-                        fontSize = 13.sp,
+                        text = cat,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
                         color = if (isSelected) Color.White else SubtextGray
                     )
@@ -134,17 +405,428 @@ fun VisualizerScreen(
             }
         }
 
-        // Visualizer Content
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // 3D Game Arenas Quick Access Carousel
+        VisualizerGameArenasRow(
+            onOpenArrayKingdom = onOpenArrayKingdom,
+            onOpenStackTower = onOpenStackTower,
+            onOpenQueueStation = onOpenQueueStation,
+            onOpenLinkedListRoad = onOpenLinkedListRoad,
+            onOpenBinaryTreeForest = onOpenBinaryTreeForest
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Directory Info Banner
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(CardBackground.copy(alpha = 0.65f))
+                .border(1.2.dp, DsaBlue.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(DsaBlue.copy(alpha = 0.22f))
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "✨", fontSize = 18.sp)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Interactive DSA Directory",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Tap any structure below to open its visualizer & live code",
+                        fontSize = 12.sp,
+                        color = SubtextGray
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Cards list
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            filteredStructures.forEach { type ->
+                DSATopicListCard(
+                    type = type,
+                    onSelect = { onSelectTopic(type) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(50.dp))
+    }
+}
+
+@Composable
+private fun VisualizerGameArenasRow(
+    onOpenArrayKingdom: (() -> Unit)?,
+    onOpenStackTower: (() -> Unit)?,
+    onOpenQueueStation: (() -> Unit)?,
+    onOpenLinkedListRoad: (() -> Unit)?,
+    onOpenBinaryTreeForest: (() -> Unit)?
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Array Kingdom
+        item {
+            ArenaCard(
+                title = "👑 ARRAY KINGDOM",
+                subtitle = "3D Sorting Arena",
+                accentColor = AmberGold,
+                emotionRes = R.drawable.phoenix_emotion_4,
+                onClick = { onOpenArrayKingdom?.invoke() }
+            )
+        }
+        // Stack Tower
+        item {
+            ArenaCard(
+                title = "🗼 STACK TOWER",
+                subtitle = "3D LIFO Tower & Boss",
+                accentColor = Color(0xFF00E5FF),
+                emotionRes = R.drawable.phoenix_emotion_28,
+                onClick = { onOpenStackTower?.invoke() }
+            )
+        }
+        // Queue Station
+        item {
+            ArenaCard(
+                title = "🚋 QUEUE STATION",
+                subtitle = "3D FIFO Station & Boss",
+                accentColor = DuolingoGreen,
+                emotionRes = R.drawable.phoenix_emotion_25,
+                onClick = { onOpenQueueStation?.invoke() }
+            )
+        }
+        // Linked List Road
+        item {
+            ArenaCard(
+                title = "🛣️ LINKED LIST ROAD",
+                subtitle = "3D Pointer Highway & Boss",
+                accentColor = Color(0xFF00E5FF),
+                emotionRes = R.drawable.phoenix_emotion_4,
+                onClick = { onOpenLinkedListRoad?.invoke() }
+            )
+        }
+        // Binary Tree Forest
+        item {
+            ArenaCard(
+                title = "🌲 BINARY TREE FOREST",
+                subtitle = "3D Tree Canopies & Boss",
+                accentColor = Color(0xFF00CD9C),
+                emotionRes = R.drawable.phoenix_emotion_13,
+                onClick = { onOpenBinaryTreeForest?.invoke() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ArenaCard(
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    emotionRes: Int,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier
+            .clip(shape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.5.dp, accentColor.copy(alpha = 0.45f), shape)
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Image(
+            painter = painterResource(id = emotionRes),
+            contentDescription = null,
+            modifier = Modifier.size(38.dp)
+        )
+        Column {
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Text(
+                text = subtitle,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = accentColor
+            )
+        }
+        Icon(
+            imageVector = Icons.Default.ArrowForward,
+            contentDescription = null,
+            tint = accentColor,
+            modifier = Modifier.size(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun DSATopicListCard(
+    type: DSAVisualizerType,
+    onSelect: () -> Unit
+) {
+    val cardShape = RoundedCornerShape(22.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.5.dp, type.color.copy(alpha = 0.45f), cardShape)
+            .clickable { onSelect() }
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // Top Row: Icon, Category & Difficulty Badge, Title
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(type.color.copy(alpha = 0.20f))
+                    .border(1.2.dp, type.color.copy(alpha = 0.6f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = getDsaTypeIcon(type), fontSize = 22.sp)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(type.color.copy(alpha = 0.15f))
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = type.category.uppercase(),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = type.color
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(type.difficultyColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = type.difficulty,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = type.difficultyColor
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = type.title,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+            }
+        }
+
+        Text(
+            text = type.tagline,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = type.color
+        )
+
+        Text(
+            text = type.shortDescription,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = SubtextGray,
+            maxLines = 2,
+            lineHeight = 16.sp
+        )
+
+        // Operations & Time Complexity
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                type.keyOperations.take(3).forEach { op ->
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = op,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(type.color.copy(alpha = 0.18f))
+                    .border(1.dp, type.color.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = type.timeComplexity,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.White
+                )
+            }
+        }
+
+        // Action Bar: "Open Interactive Lab →"
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Interactive Visualizer & Code",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = type.color
+            )
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(type.color)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Open",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopicDetailView(
+    selectedType: DSAVisualizerType,
+    onSelectType: (DSAVisualizerType) -> Unit,
+    onBackToList: () -> Unit,
+    currentLanguageName: String
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Horizontal Quick Switcher Carousel
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(DSAVisualizerType.entries) { type ->
+                val isSelected = selectedType == type
+                val shape = RoundedCornerShape(20.dp)
+                Box(
+                    modifier = Modifier
+                        .clip(shape)
+                        .background(if (isSelected) type.color else CardBackground.copy(alpha = 0.7f))
+                        .border(1.5.dp, if (isSelected) type.color else InputBorder, shape)
+                        .clickable { onSelectType(type) }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(text = getDsaTypeIcon(type), fontSize = 12.sp)
+                        Text(
+                            text = type.title,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (isSelected) Color.White else SubtextGray
+                        )
+                    }
+                }
+            }
+        }
+
+        // Scrollable Detail Content
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
+            // 1. Structure Deep Dive Header Card
+            DSATopicDeepDiveHeaderCard(type = selectedType)
+
+            // 2. Interactive Visualizer Engine
             when (selectedType) {
                 DSAVisualizerType.STACK -> StackVisualizer()
                 DSAVisualizerType.QUEUE -> QueueVisualizer()
@@ -158,13 +840,275 @@ fun VisualizerScreen(
                 DSAVisualizerType.STEP_RECORDER -> StepRecorderVisualizer()
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // 3. Real World Applications Card
+            DSARealWorldApplicationsCard(type = selectedType)
 
-            DSALanguageImplementationCardView(structureName = selectedType.title)
+            // 4. Idiomatic Code Implementation Card in Chosen Language
+            if (selectedType != DSAVisualizerType.STEP_RECORDER) {
+                DSALanguageImplementationCardView(
+                    structureName = selectedType.title,
+                    initialLanguage = currentLanguageName
+                )
+            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            // 5. Navigation Buttons: Up Next & Back to Topics
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val next = selectedType.nextType
+                val nextShape = RoundedCornerShape(18.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(nextShape)
+                        .background(CardBackground)
+                        .border(1.5.dp, next.color.copy(alpha = 0.45f), nextShape)
+                        .clickable { onSelectType(next) }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = "UP NEXT",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = next.color
+                        )
+                        Text(
+                            text = "Explore ${next.title}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = null,
+                        tint = next.color,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(CardBackground.copy(alpha = 0.5f))
+                        .border(1.dp, InputBorder, RoundedCornerShape(14.dp))
+                        .clickable { onBackToList() }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null,
+                            tint = SubtextGray,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Back to All Topics",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = SubtextGray
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
+}
+
+@Composable
+private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
+    val shape = RoundedCornerShape(22.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.5.dp, type.color.copy(alpha = 0.45f), shape)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(type.color.copy(alpha = 0.18f))
+                    .border(1.5.dp, type.color, RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = getDsaTypeIcon(type), fontSize = 24.sp)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(type.color.copy(alpha = 0.15f))
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = type.category.uppercase(),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = type.color
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(type.difficultyColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = type.difficulty,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = type.difficultyColor
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Text(
+                    text = type.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+            }
+        }
+
+        Text(
+            text = type.tagline,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            color = type.color
+        )
+
+        Text(
+            text = type.shortDescription,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = SubtextGray,
+            lineHeight = 18.sp
+        )
+
+        // Complexity Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(DarkBackground.copy(alpha = 0.6f))
+                    .border(1.dp, InputBorder, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = "⏱️ Time:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                    Text(text = type.timeComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.White)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(DarkBackground.copy(alpha = 0.6f))
+                    .border(1.dp, InputBorder, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = "💾 Space:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                    Text(text = type.spaceComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DSARealWorldApplicationsCard(type: DSAVisualizerType) {
+    val shape = RoundedCornerShape(20.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.2.dp, InputBorder, shape)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = "🌐", fontSize = 18.sp)
+            Text(
+                text = "Real-World Systems & Applications",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            type.realWorldApplications.forEach { app ->
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "✓", fontSize = 13.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
+                    Text(
+                        text = app,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White.copy(alpha = 0.85f),
+                        lineHeight = 17.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun getDsaTypeIcon(type: DSAVisualizerType): String = when (type) {
+    DSAVisualizerType.STACK -> "📚"
+    DSAVisualizerType.ARRAY -> "📊"
+    DSAVisualizerType.QUEUE -> "🎫"
+    DSAVisualizerType.LINKED_LIST -> "🔗"
+    DSAVisualizerType.BINARY_TREE -> "🌲"
+    DSAVisualizerType.AVL_TREE -> "⚖️"
+    DSAVisualizerType.TRIE -> "🔤"
+    DSAVisualizerType.GRAPH -> "🕸️"
+    DSAVisualizerType.SORTING -> "🔄"
+    DSAVisualizerType.STEP_RECORDER -> "🎬"
 }
 
 // ──────────────────────────────────────────────

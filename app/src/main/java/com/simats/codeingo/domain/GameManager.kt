@@ -13,6 +13,7 @@ class GameManager private constructor() {
 
     companion object {
         val instance: GameManager by lazy { GameManager() }
+        val shared: GameManager get() = instance
     }
 
     private val _totalXP = MutableStateFlow(120)
@@ -26,6 +27,37 @@ class GameManager private constructor() {
 
     private val _streakDays = MutableStateFlow(3)
     val streakDays: StateFlow<Int> = _streakDays.asStateFlow()
+
+    private val _lastPlayedDateUnix = MutableStateFlow(0.0)
+    val lastPlayedDateUnix: StateFlow<Double> = _lastPlayedDateUnix.asStateFlow()
+
+    private val _isStreakLostPendingRestore = MutableStateFlow(false)
+    val isStreakLostPendingRestore: StateFlow<Boolean> = _isStreakLostPendingRestore.asStateFlow()
+
+    private val _savedStreakDays = MutableStateFlow(0)
+    val savedStreakDays: StateFlow<Int> = _savedStreakDays.asStateFlow()
+
+    private val _lastPracticedTimestamp = MutableStateFlow(System.currentTimeMillis() / 1000.0)
+    val lastPracticedTimestamp: StateFlow<Double> = _lastPracticedTimestamp.asStateFlow()
+
+    private val _streakLostTimestamp = MutableStateFlow(0.0)
+    val streakLostTimestamp: StateFlow<Double> = _streakLostTimestamp.asStateFlow()
+
+    val hasPracticedToday: Boolean
+        get() {
+            if (_lastPracticedTimestamp.value <= 0) return false
+            val cal = java.util.Calendar.getInstance()
+            val nowYear = cal.get(java.util.Calendar.YEAR)
+            val nowDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
+            cal.timeInMillis = (_lastPracticedTimestamp.value * 1000).toLong()
+            return cal.get(java.util.Calendar.YEAR) == nowYear && cal.get(java.util.Calendar.DAY_OF_YEAR) == nowDay
+        }
+
+    val isStreakAtRisk: Boolean
+        get() {
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            return !hasPracticedToday && hour >= 20
+        }
 
     private val _activePhoenixStage = MutableStateFlow(1)
     val activePhoenixStage: StateFlow<Int> = _activePhoenixStage.asStateFlow()
@@ -66,27 +98,137 @@ class GameManager private constructor() {
     init {
         initializeDailyQuests()
         loadDefaultMistakes()
+        evaluateStreakOnLaunch()
     }
 
-    fun awardLessonXP(baseXP: Int, accuracyPercentage: Double, speedSeconds: Int): Int {
-        val earned = XPCalculator.calculateLessonXP(
-            baseXP = baseXP,
-            accuracyPercentage = accuracyPercentage,
-            speedSeconds = speedSeconds,
-            currentCombo = _currentCombo.value
-        )
-        _totalXP.value += earned
-        _gemsCount.value += (earned / 5)
+    private val _totalStars = MutableStateFlow(15)
+    val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
+
+    fun addStars(count: Int) {
+        _totalStars.value += count
+    }
+
+    fun addXP(amount: Int) {
+        _totalXP.value += amount
+    }
+
+    fun addGems(count: Int) {
+        _gemsCount.value += count
+    }
+
+    fun evaluateStreakOnLaunch() {
+        val now = System.currentTimeMillis() / 1000.0
+        if (_lastPlayedDateUnix.value <= 0) {
+            _lastPlayedDateUnix.value = now
+            return
+        }
+        val cal = java.util.Calendar.getInstance()
+        val nowDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
+        val nowYear = cal.get(java.util.Calendar.YEAR)
+        cal.timeInMillis = (_lastPlayedDateUnix.value * 1000).toLong()
+        val lastDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
+        val lastYear = cal.get(java.util.Calendar.YEAR)
+
+        val isSameDay = nowYear == lastYear && nowDay == lastDay
+        val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) || (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
+
+        if (!isSameDay && !isYesterday && _streakDays.value > 0) {
+            _isStreakLostPendingRestore.value = true
+            _savedStreakDays.value = _streakDays.value
+            _streakDays.value = 0
+            _streakLostTimestamp.value = now
+        }
+    }
+
+    fun restoreStreak() {
+        _isStreakLostPendingRestore.value = false
+        _streakDays.value = _savedStreakDays.value
+        val yesterday = (System.currentTimeMillis() - 86400000L) / 1000.0
+        _lastPlayedDateUnix.value = yesterday
+    }
+
+    fun completeLessonAndExtendStreak() {
+        val now = System.currentTimeMillis() / 1000.0
+        val cal = java.util.Calendar.getInstance()
+        val nowDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
+        val nowYear = cal.get(java.util.Calendar.YEAR)
+
+        if (_lastPlayedDateUnix.value == 0.0) {
+            _streakDays.value = 1
+        } else {
+            cal.timeInMillis = (_lastPlayedDateUnix.value * 1000).toLong()
+            val lastDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
+            val lastYear = cal.get(java.util.Calendar.YEAR)
+
+            val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) || (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
+            val isToday = nowYear == lastYear && nowDay == lastDay
+
+            if (isYesterday) {
+                _streakDays.value += 1
+            } else if (!isToday) {
+                if (_isStreakLostPendingRestore.value) {
+                    _isStreakLostPendingRestore.value = false
+                }
+                _streakDays.value = 1
+            }
+        }
+        _lastPlayedDateUnix.value = now
+        _lastPracticedTimestamp.value = now
         incrementDailyQuest("lessons")
+    }
+
+    fun awardLessonXP(
+        unitId: Int = 1,
+        accuracyPercentage: Double = 1.0,
+        speedSeconds: Int = 30,
+        baseXP: Int? = null
+    ): Int {
+        var earned = baseXP ?: (unitId * 10)
+        if (accuracyPercentage >= 1.0) {
+            earned += 10
+        } else if (accuracyPercentage >= 0.8) {
+            earned += 5
+        }
+        if (speedSeconds < 45) {
+            earned += 5
+        } else if (speedSeconds < 90) {
+            earned += 2
+        }
+        if (_currentCombo.value >= 5) {
+            earned += 5
+        }
+        _totalXP.value += earned
+        _gemsCount.value += maxOf(earned / 5, 2)
+        _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
+        incrementDailyQuest("lessons")
+
+        // Duolingo-style automatic emotion evaluation
+        PhoenixEmotionManager.instance.handleQuizCompleted(
+            accuracy = accuracyPercentage,
+            heartsRemaining = _heartsCount.value
+        )
         return earned
     }
 
-    fun awardBossVictory(boss: DSABossSpec) {
-        val bossXP = 60
+    fun loseHeart() {
+        _currentCombo.value = 0
+        if (_heartsCount.value > 0) {
+            _heartsCount.value -= 1
+        }
+    }
+
+    fun refillHearts() {
+        _heartsCount.value = 10
+        PhoenixEmotionManager.instance.handleHeartsRefilled()
+    }
+
+    fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {
+        val bossXP = unitId * 50
         _totalXP.value += bossXP
         _gemsCount.value += 50
         _completedBossIds.value = _completedBossIds.value + boss.id
         triggerEvolution(boss.targetPhoenixStageAwarded)
+        PhoenixEmotionManager.instance.handleBossBattle("victory")
     }
 
     fun recordCorrectAnswer() {
@@ -131,14 +273,23 @@ class GameManager private constructor() {
         _showEvolutionModal.value = false
     }
 
-    fun refillHearts() {
-        _heartsCount.value = 10
+    fun setActivePhoenixStage(stageId: Int) {
+        _activePhoenixStage.value = stageId.coerceIn(1, 18)
     }
 
     fun completeLesson(lessonId: String, nextLevelIndex: Int? = null) {
         _completedLessonIds.value = _completedLessonIds.value + lessonId
         if (nextLevelIndex != null) {
             _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevelIndex
+        }
+    }
+
+    fun regenerateHeart() {
+        if (_heartsCount.value < 10) {
+            _heartsCount.value++
+            if (_heartsCount.value == 10) {
+                PhoenixEmotionManager.instance.handleHeartsRefilled()
+            }
         }
     }
 
@@ -235,3 +386,5 @@ class GameManager private constructor() {
         )
     }
 }
+
+typealias DSAGameManager = GameManager

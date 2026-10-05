@@ -6,8 +6,10 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object ProfileCreation : Screen("profile_creation")
     object Dashboard : Screen("dashboard")
-    object Assessment : Screen("assessment/{lessonId}") {
-        fun createRoute(lessonId: String) = "assessment/$lessonId"
+    object Assessment : Screen("assessment/{unitId}/{levelNumber}/{totalLevelsInUnit}/{isBoss}") {
+        fun createRoute(unitId: Int, levelNumber: Int, totalLevelsInUnit: Int = 6, isBoss: Boolean = false) =
+            "assessment/$unitId/$levelNumber/$totalLevelsInUnit/$isBoss"
+        fun createRoute(lessonId: String) = "assessment/1/1/6/false"
     }
     object BossBattle : Screen("boss_battle/{bossId}") {
         fun createRoute(bossId: String) = "boss_battle/$bossId"

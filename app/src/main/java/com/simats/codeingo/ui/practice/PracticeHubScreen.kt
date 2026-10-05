@@ -50,9 +50,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
+import com.simats.codeingo.R
 import com.simats.codeingo.data.model.MistakeVaultItem
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.ui.components.Duolingo3DButton
+import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
 import com.simats.codeingo.ui.components.DuolingoButton
+import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -79,7 +88,12 @@ data class InterviewProblem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeHubScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenArrayKingdom: (() -> Unit)? = null,
+    onOpenStackTower: (() -> Unit)? = null,
+    onOpenQueueStation: (() -> Unit)? = null,
+    onOpenLinkedListRoad: (() -> Unit)? = null,
+    onOpenBinaryTreeForest: (() -> Unit)? = null
 ) {
     val gameManager = GameManager.instance
     val mistakes by gameManager.mistakeVault.collectAsState()
@@ -88,95 +102,111 @@ fun PracticeHubScreen(
     var repairingMistake by remember { mutableStateOf<MistakeVaultItem?>(null) }
     var selectedProblem by remember { mutableStateOf<InterviewProblem?>(null) }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+        PhoenixAtmosphericBackgroundView()
+
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Box(
+            // Header
+            Row(
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFFA8000).copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "🛠️", fontSize = 22.sp)
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column {
-                Text(
-                    text = "Spaced Repetition & Repair",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White
-                )
-                val unrepairedCount = mistakes.count { !it.isRepaired }
-                Text(
-                    text = "$unrepairedCount mistakes waiting in vault",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DsaOrange
-                )
-            }
-        }
-
-        // Segment Tabs (matching iOS)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val tabs = listOf(
-                Pair("Mistake Vault", "📦"),
-                Pair("Daily Review", "⚡"),
-                Pair("Interview Mode", "💼")
-            )
-            tabs.forEachIndexed { index, (title, icon) ->
-                val isSelected = selectedTab == index
-                val shape = RoundedCornerShape(16.dp)
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(shape)
-                        .background(if (isSelected) DuolingoGreen else CardBackground)
-                        .border(1.5.dp, if (isSelected) DuolingoGreen else InputBorder, shape)
-                        .clickable { selectedTab = index }
-                        .padding(vertical = 10.dp),
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFA8000).copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = icon, fontSize = 13.sp)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = title,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = if (isSelected) Color.White else SubtextGray
-                        )
+                    Text(text = "🛠️", fontSize = 22.sp)
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column {
+                    Text(
+                        text = "Spaced Repetition & Repair",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                    val unrepairedCount = mistakes.count { !it.isRepaired }
+                    Text(
+                        text = "$unrepairedCount mistakes waiting in vault",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DsaOrange
+                    )
+                }
+            }
+
+            // Segment Tabs (matching iOS)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val tabs = listOf(
+                    Pair("Mistake Vault", "📦"),
+                    Pair("Daily Review", "⚡"),
+                    Pair("Interview Mode", "💼")
+                )
+                tabs.forEachIndexed { index, (title, icon) ->
+                    val isSelected = selectedTab == index
+                    val shape = RoundedCornerShape(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(shape)
+                            .background(if (isSelected) DuolingoGreen else CardBackground.copy(alpha = 0.75f))
+                            .border(1.5.dp, if (isSelected) DuolingoGreen else InputBorder, shape)
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = icon, fontSize = 13.sp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = title,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = if (isSelected) Color.White else SubtextGray
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Tab Content
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            when (selectedTab) {
+            // 3D Worlds Practice Banners (matching iOS)
+            WorldPracticeBanners(
+                onOpenArrayKingdom = onOpenArrayKingdom,
+                onOpenStackTower = onOpenStackTower,
+                onOpenQueueStation = onOpenQueueStation,
+                onOpenLinkedListRoad = onOpenLinkedListRoad,
+                onOpenBinaryTreeForest = onOpenBinaryTreeForest
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Tab Content
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                when (selectedTab) {
                 0 -> MistakeVaultTab(
                     mistakes = mistakes,
                     onStartRepair = { mistake -> repairingMistake = mistake }
@@ -376,6 +406,7 @@ fun PracticeHubScreen(
             }
         }
     }
+}
 }
 
 // ──────────────────────────────────────────────
@@ -840,3 +871,165 @@ private fun InterviewPrepTab(
         }
     }
 }
+
+// ──────────────────────────────────────────────
+// 4. World Practice Banners (matching iOS)
+// ──────────────────────────────────────────────
+@Composable
+private fun WorldPracticeBanners(
+    onOpenArrayKingdom: (() -> Unit)?,
+    onOpenStackTower: (() -> Unit)?,
+    onOpenQueueStation: (() -> Unit)?,
+    onOpenLinkedListRoad: (() -> Unit)?,
+    onOpenBinaryTreeForest: (() -> Unit)?
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        item {
+            PracticeBannerCard(
+                tag = "3D SORTING ARENA",
+                tagColor = AmberGold,
+                title = "👑 Array Kingdom",
+                subtitle = "Bubble Sort Challenge",
+                emotionRes = R.drawable.phoenix_emotion_4,
+                gradientColors = listOf(AmberGold, Color(0xFFFA8000)),
+                onClick = { onOpenArrayKingdom?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D LIFO TOWER",
+                tagColor = DsaBlue,
+                title = "🗼 Stack Tower",
+                subtitle = "Tower Collapse",
+                emotionRes = R.drawable.phoenix_emotion_28,
+                gradientColors = listOf(Color(0xFF00E5FF), DsaBlue),
+                onClick = { onOpenStackTower?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D FIFO STATION",
+                tagColor = DuolingoGreen,
+                title = "🚋 Queue Station",
+                subtitle = "Station Chaos",
+                emotionRes = R.drawable.phoenix_emotion_25,
+                gradientColors = listOf(DuolingoGreen, Color(0xFF00897B)),
+                onClick = { onOpenQueueStation?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D POINTER ROAD",
+                tagColor = DsaPurple,
+                title = "🛣️ Linked List Road",
+                subtitle = "Broken Road",
+                emotionRes = R.drawable.phoenix_emotion_4,
+                gradientColors = listOf(DsaPurple, Color(0xFF6200EA)),
+                onClick = { onOpenLinkedListRoad?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D TREE FOREST",
+                tagColor = Color(0xFF00CD9C),
+                title = "🌲 Binary Tree Forest",
+                subtitle = "Lost Forest",
+                emotionRes = R.drawable.phoenix_emotion_13,
+                gradientColors = listOf(Color(0xFF00CD9C), Color(0xFF7B1FA2)),
+                onClick = { onOpenBinaryTreeForest?.invoke() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PracticeBannerCard(
+    tag: String,
+    tagColor: Color,
+    title: String,
+    subtitle: String,
+    emotionRes: Int,
+    gradientColors: List<Color>,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier
+            .width(260.dp)
+            .clip(shape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.5.dp, tagColor.copy(alpha = 0.45f), shape)
+            .clickable { onClick() }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(46.dp)
+                .clip(CircleShape)
+                .background(Brush.radialGradient(gradientColors)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = emotionRes),
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = tag,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = tagColor
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(DuolingoRed)
+                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                ) {
+                    Text(
+                        text = "BOSS",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                maxLines = 1
+            )
+            Text(
+                text = subtitle,
+                fontSize = 11.sp,
+                color = SubtextGray,
+                maxLines = 1
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.ArrowForward,
+            contentDescription = null,
+            tint = tagColor,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+

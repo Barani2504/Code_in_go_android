@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,16 +29,23 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.R
 import com.simats.codeingo.ui.components.ProgressBarAnimated
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoGreenDark
+import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
+
+// ══════════════════════════════════════════════════════════════════
+// 🌌 SplashScreen — Phoenix Bird Life Theme (Volcanic Obsidian & Amber Gold)
+// Exact Parity with iOS SplashScreenView.swift
+// ══════════════════════════════════════════════════════════════════
 
 @Composable
 fun SplashScreen(
@@ -60,7 +68,7 @@ fun SplashScreen(
             mascotScale.animateTo(1.15f, tween(500, easing = FastOutSlowInEasing))
             mascotScale.animateTo(1.0f, tween(300, easing = FastOutSlowInEasing))
         }
-        // Bubble blast
+        // Fiery ember blast
         launch {
             delay(400)
             bubbleExplosion.animateTo(1f, tween(1200, easing = FastOutSlowInEasing))
@@ -88,38 +96,38 @@ fun SplashScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF58CC02),
-                        Color(0xFF46A302),
-                        Color(0xFF2E7200)
+                        Color(0xFF080E1A),
+                        Color(0xFF0B111F),
+                        Color(0xFF111222)
                     )
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Animated background particles / bubbles
+        // Animated fiery solar embers
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f - 40.dp.toPx())
             val explosion = bubbleExplosion.value
-            val bubbleColors = listOf(
-                Color(0xFF58CC02),
-                Color(0xFF88E714),
-                Color(0xFFFFC800),
-                Color(0xFF2EE07A),
+            val emberColors = listOf(
+                AmberGold,
+                Color(0xFFFF7A1A),
+                Color(0xFFFFC733),
+                Color(0xFFFF401F),
+                Color(0xFFFF9E0D),
                 Color.White,
-                Color(0xFF38C2F5),
-                Color(0xFFFA8000)
+                Color(0xFFFF590D)
             )
 
-            for (i in 0 until 24) {
-                val angle = (i.toFloat() / 24f) * 2f * Math.PI.toFloat()
-                val radius = (80.dp.toPx() + (i % 5) * 20.dp.toPx()) * explosion
+            for (i in 0 until 32) {
+                val angle = (i.toFloat() / 32f) * 2f * Math.PI.toFloat()
+                val radius = (90.dp.toPx() + (i % 6) * 22.dp.toPx()) * explosion
                 val x = center.x + cos(angle.toDouble()).toFloat() * radius
                 val y = center.y + sin(angle.toDouble()).toFloat() * radius
-                val bubbleSize = (8.dp.toPx() + (i % 4) * 4.dp.toPx()) * (1f - explosion * 0.3f)
-                val alpha = (1f - explosion * 0.7f).coerceIn(0f, 1f)
+                val bubbleSize = (8.dp.toPx() + (i % 4) * 4.dp.toPx()) * (1f - explosion * 0.25f)
+                val alpha = (1f - explosion * 0.65f).coerceIn(0f, 1f)
 
                 drawCircle(
-                    color = bubbleColors[i % bubbleColors.size].copy(alpha = alpha * 0.8f),
+                    color = emberColors[i % emberColors.size].copy(alpha = alpha * 0.85f),
                     radius = bubbleSize,
                     center = Offset(x, y)
                 )
@@ -138,22 +146,26 @@ fun SplashScreen(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(180.dp)
+                    .size(190.dp)
                     .scale(mascotScale.value)
                     .alpha(mascotAlpha.value)
             ) {
-                // Soft glow behind mascot
+                // Radiant solar aura behind mascot
                 Box(
                     modifier = Modifier
-                        .size(160.dp)
+                        .size(170.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(AmberGold.copy(alpha = 0.35f), Color.Transparent)
+                            )
+                        )
                 )
-                // Mascot representation
-                androidx.compose.foundation.Image(
-                    painter = androidx.compose.ui.res.painterResource(id = com.simats.codeingo.R.drawable.phoenix),
-                    contentDescription = "Codeingo Phoenix Mascot",
-                    modifier = Modifier.size(140.dp)
+                // Mascot
+                Image(
+                    painter = painterResource(id = R.drawable.phoenix),
+                    contentDescription = "Code in Go Phoenix Mascot",
+                    modifier = Modifier.size(150.dp)
                 )
             }
 
@@ -167,9 +179,10 @@ fun SplashScreen(
                     .offset(y = titleOffsetY.value.dp)
             ) {
                 Text(
-                    text = "DSA Learn",
+                    text = "Code in Go",
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.SansSerif,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -177,7 +190,8 @@ fun SplashScreen(
                     text = "Master Data Structures & Algorithms",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.9f)
+                    fontFamily = FontFamily.SansSerif,
+                    color = AmberGold
                 )
             }
 
@@ -192,8 +206,8 @@ fun SplashScreen(
                 ProgressBarAnimated(
                     progress = progress.value,
                     height = 12.dp,
-                    barColor = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.25f)
+                    barColor = AmberGold,
+                    trackColor = Color.White.copy(alpha = 0.15f)
                 )
             }
         }

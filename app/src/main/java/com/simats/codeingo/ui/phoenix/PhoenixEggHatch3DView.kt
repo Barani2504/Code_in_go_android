@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.CandyCrushStarsView
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
@@ -78,10 +79,14 @@ data class EggParticle(
 fun PhoenixEggHatch3DView(
     unitId: Int = 1,
     levelNumber: Int = 5,
+    totalLevelsInUnit: Int = 6,
+    isBoss: Boolean = false,
     xpEarned: Int = 100,
+    starsEarned: Int = 5,
     accuracyPercentage: Int = 100,
     onContinue: (() -> Unit)? = null,
-    onFinish: () -> Unit,
+    onFinish: () -> Unit = {},
+    onUpgradePhoenixNextUnit: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var crackStep by remember { mutableIntStateOf(0) }
@@ -346,6 +351,13 @@ fun PhoenixEggHatch3DView(
                 }
             }
 
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Animated Candy Crush Stars
+            CandyCrushStarsView(earnedStars = starsEarned)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             // Stats Badges
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -356,14 +368,20 @@ fun PhoenixEggHatch3DView(
                 StatPill("STAGE", "Lv. $levelNumber 🦅", DuolingoOrange, Modifier.weight(1f))
             }
 
-            // Bottom Continue Button
+            Spacer(modifier = Modifier.height(14.dp))
+
+            val isLastLevel = isBoss || levelNumber >= totalLevelsInUnit
+            // Bottom Action Button
             DuolingoButton(
-                text = if (isShattered) "CLAIM REWARDS & CONTINUE" else "HATCHING...",
-                faceColor = if (isShattered) DuolingoGreen else CardBackground,
-                shadowColor = if (isShattered) DuolingoGreenDark else Color(0xFF142028),
-                textColor = if (isShattered) Color.White else SubtextGray,
+                text = if (isLastLevel) "UPGRADE PHOENIX & NEXT UNIT ➔" else (if (onContinue != null || isShattered) "CONTINUE" else "CLAIM REWARDS"),
+                faceColor = if (isLastLevel) DuolingoOrange else DuolingoGreen,
+                shadowColor = if (isLastLevel) DuolingoOrangeDark else DuolingoGreenDark,
                 onClick = {
-                    if (isShattered) {
+                    if (isLastLevel && onUpgradePhoenixNextUnit != null) {
+                        onUpgradePhoenixNextUnit()
+                    } else if (onContinue != null) {
+                        onContinue()
+                    } else {
                         onFinish()
                     }
                 },

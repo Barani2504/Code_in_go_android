@@ -9,8 +9,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +17,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -30,10 +30,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -44,95 +47,137 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.data.model.DSAExerciseItem
 import com.simats.codeingo.data.model.DSAExerciseType
-import com.simats.codeingo.data.repository.CourseRepository
+import com.simats.codeingo.data.repository.QuizQuestion
+import com.simats.codeingo.data.repository.QuizQuestionsData
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.components.ProgressBarAnimated
+import com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView
+import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoBlueDark
+import com.simats.codeingo.ui.theme.DuolingoCardBg
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoGreenDark
+import com.simats.codeingo.ui.theme.DuolingoInputBg
+import com.simats.codeingo.ui.theme.DuolingoInputBorder
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoRedDark
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import kotlinx.coroutines.delay
 
 @Composable
 fun AssessmentScreen(
-    lessonId: String,
-    onComplete: (xpEarned: Int) -> Unit,
+    unitId: Int = 1,
+    levelNumber: Int = 1,
+    totalLevelsInUnit: Int = 6,
+    isBoss: Boolean = false,
+    lessonId: String = "",
+    onComplete: (xpEarned: Int) -> Unit = {},
     onDismiss: () -> Unit,
+    onUpgradePhoenixNextUnit: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val gameManager = GameManager.instance
     val heartsCount by gameManager.heartsCount.collectAsState()
 
-    // Retrieve exercise items for this lesson
-    val lesson = CourseRepository.getLessonById(lessonId)
-    val exercises = remember(lesson) {
-        if (!lesson?.exercises.isNullOrEmpty()) {
-            lesson!!.exercises
-        } else {
-            // Default interactive questions if not in repository
-            listOf(
-                DSAExerciseItem(
-                    id = "q1",
-                    type = DSAExerciseType.MULTIPLE_CHOICE,
-                    prompt = "What is the worst-case time complexity of searching in an unsorted array of size n?",
-                    explanation = "In an unsorted array, we must potentially inspect every element sequentially: O(n).",
-                    conceptId = "array_search",
-                    options = listOf("O(1)", "O(log n)", "O(n)", "O(n²)"),
-                    correctIndex = 2
-                ),
-                DSAExerciseItem(
-                    id = "q2",
-                    type = DSAExerciseType.TRUE_FALSE_SWIPE,
-                    prompt = "True or False: In a Singly Linked List, accessing an element by index takes O(1) time.",
-                    explanation = "False! Linked lists do not support random access; traversing to index k takes O(k) time.",
-                    conceptId = "linked_list_traversal",
-                    options = listOf("True", "False"),
-                    correctAnswers = listOf("False")
-                ),
-                DSAExerciseItem(
-                    id = "q3",
-                    type = DSAExerciseType.MULTIPLE_CHOICE,
-                    prompt = "Which data structure follows the Last In, First Out (LIFO) principle?",
-                    explanation = "A Stack follows LIFO: elements pushed last are popped first.",
-                    conceptId = "stack_lifo",
-                    options = listOf("Queue", "Stack", "Binary Tree", "Hash Table"),
-                    correctIndex = 1
-                )
-            )
-        }
+    // Retrieve curated 10 questions for this unit and level
+    val questions = remember(unitId, levelNumber) {
+        QuizQuestionsData.getQuestionsForUnit(unitId, levelNumber)
     }
 
     var currentIndex by remember { mutableIntStateOf(0) }
     var selectedOptionIndex by remember { mutableStateOf<Int?>(null) }
-    var selectedToken by remember { mutableStateOf<String?>(null) }
+    var matchedPairs by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var orderedSteps by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedFillToken by remember { mutableStateOf<String?>(null) }
     var selectedComplexity by remember { mutableStateOf<String?>(null) }
-    var matchPairsResult by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var parsonsOrder by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedTrueFalse by remember { mutableStateOf<Boolean?>(null) }
+
     var isChecked by remember { mutableStateOf(false) }
     var isAnswerCorrect by remember { mutableStateOf(false) }
     var isFinished by remember { mutableStateOf(false) }
     var correctCount by remember { mutableIntStateOf(0) }
+    var showHintDialog by remember { mutableStateOf(false) }
 
-    val currentExercise = exercises.getOrNull(currentIndex) ?: exercises.first()
-    val progress = (currentIndex.toFloat() + if (isChecked) 0.5f else 0f) / exercises.size.toFloat()
+    // Generous 45s countdown indicator per question
+    var timeRemaining by remember { mutableIntStateOf(45) }
 
-    val hasSelection = selectedOptionIndex != null ||
-        selectedToken != null ||
-        selectedComplexity != null ||
-        matchPairsResult.isNotEmpty() ||
-        parsonsOrder.isNotEmpty()
+    val currentQuestion: QuizQuestion = questions.getOrElse(currentIndex) {
+        QuizQuestion(
+            typeTitle = "DSA Challenge",
+            speakerName = "Duo",
+            speakerImage = "DuoPencil",
+            promptSentence = "Analyze the algorithmic logic:",
+            targetPrompt = "Select the correct option"
+        )
+    }
+
+    // Reset exercise state when question index changes
+    LaunchedEffect(currentIndex) {
+        timeRemaining = 45
+        selectedOptionIndex = null
+        matchedPairs = emptyMap()
+        orderedSteps = currentQuestion.orderStepsInitial
+        selectedFillToken = null
+        selectedComplexity = null
+        selectedTrueFalse = null
+        isChecked = false
+        isAnswerCorrect = false
+    }
+
+    // 1-second countdown timer
+    LaunchedEffect(currentIndex, isChecked, isFinished) {
+        while (!isChecked && !isFinished && timeRemaining > 0) {
+            delay(1000)
+            timeRemaining -= 1
+        }
+    }
+
+    val hasSelection = when (currentQuestion.gameType) {
+        DSAExerciseType.MULTIPLE_CHOICE -> selectedOptionIndex != null
+        DSAExerciseType.MATCH_PAIRS -> matchedPairs.size >= currentQuestion.matchSolution.size && currentQuestion.matchSolution.isNotEmpty()
+        DSAExerciseType.ORDER_STEPS -> orderedSteps.isNotEmpty()
+        DSAExerciseType.FILL_CODE -> selectedFillToken != null
+        DSAExerciseType.COMPLEXITY_DIAL -> selectedComplexity != null
+        DSAExerciseType.TRUE_FALSE_SWIPE -> selectedTrueFalse != null
+        else -> selectedOptionIndex != null
+    }
+
+    val correctAnswerSummary: String = when (currentQuestion.gameType) {
+        DSAExerciseType.MULTIPLE_CHOICE -> {
+            currentQuestion.options.getOrElse(currentQuestion.correctOptionIndex) { "" }
+        }
+        DSAExerciseType.MATCH_PAIRS -> "All pairs connected!"
+        DSAExerciseType.ORDER_STEPS -> currentQuestion.orderStepsSolution.joinToString(" → ")
+        DSAExerciseType.FILL_CODE -> currentQuestion.fillCodeCorrectToken
+        DSAExerciseType.COMPLEXITY_DIAL -> currentQuestion.complexityDialCorrect
+        DSAExerciseType.TRUE_FALSE_SWIPE -> if (currentQuestion.trueFalseIsCorrectTrue) "True ✅" else "False ❌"
+        else -> currentQuestion.options.getOrElse(currentQuestion.correctOptionIndex) { "" }
+    }
+
+    // Calculate stars and XP
+    val starsEarned = when (correctCount) {
+        10 -> 5
+        in 8..9 -> 4
+        in 6..7 -> 3
+        in 4..5 -> 2
+        in 1..3 -> 1
+        else -> 0
+    }
+    val accuracyPercentage = if (questions.isNotEmpty()) {
+        ((correctCount.toFloat() / questions.size.toFloat()) * 100).toInt()
+    } else 100
+    val totalXPEarned = (unitId * 10) + (starsEarned * 5)
 
     Box(
         modifier = modifier
@@ -140,29 +185,78 @@ fun AssessmentScreen(
             .background(DarkBackground)
     ) {
         if (isFinished) {
-            // Lesson Complete Celebration Screen
-            LessonCompleteScreen(
-                totalQuestions = exercises.size,
-                correctCount = correctCount,
-                xpEarned = correctCount * 10 + 5,
+            // Phoenix Egg Hatch 3D Cutscene with CandyCrushStarsView
+            PhoenixEggHatch3DView(
+                unitId = unitId,
+                levelNumber = levelNumber,
+                totalLevelsInUnit = totalLevelsInUnit,
+                isBoss = isBoss,
+                xpEarned = totalXPEarned,
+                starsEarned = starsEarned,
+                accuracyPercentage = accuracyPercentage,
                 onContinue = {
-                    val earnedXP = gameManager.awardLessonXP(
-                        baseXP = 15,
-                        accuracyPercentage = correctCount.toDouble() / exercises.size.toDouble(),
-                        speedSeconds = 40
-                    )
-                    gameManager.completeLesson(lessonId, nextLevelIndex = 2)
-                    onComplete(earnedXP)
+                    gameManager.addStars(starsEarned)
+                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                    gameManager.completeLessonAndExtendStreak()
+                    onComplete(totalXPEarned)
+                },
+                onFinish = {
+                    gameManager.addStars(starsEarned)
+                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                    gameManager.completeLessonAndExtendStreak()
+                    onComplete(totalXPEarned)
+                },
+                onUpgradePhoenixNextUnit = {
+                    gameManager.addStars(starsEarned)
+                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                    gameManager.completeLessonAndExtendStreak()
+                    onUpgradePhoenixNextUnit?.invoke() ?: onComplete(totalXPEarned)
                 }
             )
+        } else if (heartsCount <= 0) {
+            // Out of Hearts Dialog / Screen
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "💔", fontSize = 64.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Out of Hearts!",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Take a break, practice past lessons, or visit the Phoenix Sanctuary to restore hearts.",
+                    fontSize = 14.sp,
+                    color = SubtextGray,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                DuolingoButton(
+                    text = "RETURN TO DASHBOARD",
+                    faceColor = DuolingoBlue,
+                    shadowColor = DuolingoBlueDark,
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         } else {
+            // Main Quiz View
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
             ) {
-                // Top Header (Close button + Progress bar + Hearts)
+                // 1. Top Header Bar: Close (✕), Progress Bar, Hearts Count
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -173,28 +267,35 @@ fun AssessmentScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = SubtextGray
+                            tint = SubtextGray,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
+                    val progress = if (questions.isNotEmpty()) {
+                        (currentIndex.toFloat() / questions.size.toFloat())
+                    } else 0f
                     ProgressBarAnimated(
                         progress = progress,
-                        height = 14.dp,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(14.dp)
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Hearts",
                             tint = DuolingoRed,
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "$heartsCount",
                             fontSize = 15.sp,
@@ -204,429 +305,420 @@ fun AssessmentScreen(
                     }
                 }
 
-                // Question Area
+                // Scrollable Question Content
+                val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 24.dp)
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = 20.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Character Avatar / Prompt Header
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Question Count Badge + Exercise Title + Cheat Code Hint Button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(CardBackground)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "Q${currentIndex + 1}/${questions.size}",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Black,
+                                color = SubtextGray
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = currentQuestion.typeTitle,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        if (currentQuestion.hint != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(DuolingoBlue)
+                                    .clickable { showHintDialog = true }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = "🎮", fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Cheat Code",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Speed timer challenge indicator
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Text(
+                            text = "⏳ ${timeRemaining}s",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (timeRemaining <= 5) DuolingoRed else SubtextGray
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Speaker Chat Bubble Card
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        // Speaker Avatar
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(CircleShape)
-                                .background(DuolingoGreen.copy(alpha = 0.2f)),
+                                .background(DuolingoGreen.copy(alpha = 0.2f))
+                                .border(1.5.dp, DuolingoGreen, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "🦅", fontSize = 28.sp)
+                            Text(text = "🦉", fontSize = 26.sp)
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
+                        // Speech Bubble
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(CardBackground)
-                                .border(1.dp, InputBorder, RoundedCornerShape(16.dp))
-                                .padding(horizontal = 14.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = "Select the correct answer",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SubtextGray
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Question Prompt
-                    Text(
-                        text = currentExercise.prompt,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        lineHeight = 28.sp
-                    )
-
-                    if (!currentExercise.codeSnippet.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(14.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF0F1720))
-                                .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
+                                .weight(1f)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(DuolingoInputBg)
+                                .border(1.5.dp, DuolingoInputBorder, RoundedCornerShape(18.dp))
                                 .padding(14.dp)
                         ) {
-                            Text(
-                                text = currentExercise.codeSnippet!!,
-                                fontSize = 13.sp,
-                                color = Color(0xFF68D391),
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = currentQuestion.promptSentence,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = currentQuestion.targetPrompt,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = AmberGold
+                                )
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    // Dynamic Exercise Types
-                    when (currentExercise.type) {
-                        DSAExerciseType.MATCH_PAIRS -> {
-                            val leftList = remember(currentExercise.id) { currentExercise.pairs.keys.shuffled() }
-                            val rightList = remember(currentExercise.id) { currentExercise.pairs.values.shuffled() }
-                            MatchPairsExerciseView(
-                                leftItems = leftList,
-                                rightItems = rightList,
-                                solution = currentExercise.pairs,
-                                isChecked = isChecked,
-                                onMatchedChanged = { matches ->
-                                    matchPairsResult = matches
-                                }
-                            )
-                        }
-
-                        DSAExerciseType.ORDER_STEPS -> {
-                            val shuffledSteps = remember(currentExercise.id) {
-                                if (currentExercise.parsonsLines.isNotEmpty()) {
-                                    currentExercise.parsonsLines.shuffled()
-                                } else {
-                                    currentExercise.options.shuffled()
-                                }
-                            }
-                            OrderStepsExerciseView(
-                                steps = shuffledSteps,
-                                solution = if (currentExercise.parsonsLines.isNotEmpty()) currentExercise.parsonsLines else currentExercise.options,
-                                isChecked = isChecked,
-                                onStepsChanged = { order ->
-                                    parsonsOrder = order
-                                }
-                            )
-                        }
-
-                        DSAExerciseType.FILL_CODE -> {
-                            val correctToken = currentExercise.correctAnswers.firstOrNull() ?: ""
-                            FillCodeExerciseView(
-                                codeTemplate = currentExercise.codeSnippet ?: currentExercise.prompt,
-                                wordBank = currentExercise.options.ifEmpty { listOf(correctToken, "pop()", "push()", "len()") },
-                                correctToken = correctToken,
-                                selectedToken = selectedToken,
-                                isChecked = isChecked,
-                                onTokenSelected = { token ->
-                                    selectedToken = token
-                                }
-                            )
-                        }
-
-                        DSAExerciseType.COMPLEXITY_DIAL -> {
-                            val correctComplexity = currentExercise.correctAnswers.firstOrNull() ?: "O(n)"
-                            ComplexityDialExerciseView(
-                                promptCode = currentExercise.codeSnippet ?: currentExercise.prompt,
-                                correctComplexity = correctComplexity,
-                                selectedComplexity = selectedComplexity,
-                                isChecked = isChecked,
-                                onComplexitySelected = { complexity ->
-                                    selectedComplexity = complexity
-                                }
-                            )
-                        }
-
-                        else -> {
-                            // Multiple Choice / True False Swipe / Standard
-                            val options = if (currentExercise.type == DSAExerciseType.TRUE_FALSE_SWIPE) {
-                                listOf("True", "False")
-                            } else {
-                                currentExercise.options
-                            }
-
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                options.forEachIndexed { index, optionText ->
+                    // Dynamic Gamified Exercise Renderer
+                    when (currentQuestion.gameType) {
+                        DSAExerciseType.MULTIPLE_CHOICE -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                currentQuestion.options.forEachIndexed { index, optionText ->
                                     val isSelected = selectedOptionIndex == index
-                                    val shape = RoundedCornerShape(16.dp)
+                                    val isCorrectOpt = index == currentQuestion.correctOptionIndex
+                                    val shape = RoundedCornerShape(14.dp)
+
+                                    val bgColor by animateColorAsState(
+                                        targetValue = when {
+                                            isChecked && isSelected && isCorrectOpt -> DuolingoGreen.copy(alpha = 0.22f)
+                                            isChecked && isSelected && !isCorrectOpt -> DuolingoRed.copy(alpha = 0.22f)
+                                            isChecked && isCorrectOpt -> DuolingoGreen.copy(alpha = 0.18f)
+                                            isSelected -> DuolingoBlue.copy(alpha = 0.22f)
+                                            else -> DuolingoCardBg
+                                        },
+                                        label = "optBg"
+                                    )
 
                                     val borderColor by animateColorAsState(
                                         targetValue = when {
-                                            isChecked && isSelected && isAnswerCorrect -> DuolingoGreen
-                                            isChecked && isSelected && !isAnswerCorrect -> DuolingoRed
+                                            isChecked && isSelected && isCorrectOpt -> DuolingoGreen
+                                            isChecked && isSelected && !isCorrectOpt -> DuolingoRed
+                                            isChecked && isCorrectOpt -> DuolingoGreen
                                             isSelected -> DuolingoBlue
-                                            else -> InputBorder
+                                            else -> DuolingoInputBorder
                                         },
-                                        label = "BorderColor"
+                                        label = "optBorder"
                                     )
-
-                                    val bgColor = when {
-                                        isChecked && isSelected && isAnswerCorrect -> DuolingoGreen.copy(alpha = 0.15f)
-                                        isChecked && isSelected && !isAnswerCorrect -> DuolingoRed.copy(alpha = 0.15f)
-                                        isSelected -> DuolingoBlue.copy(alpha = 0.15f)
-                                        else -> CardBackground
-                                    }
 
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(shape)
                                             .background(bgColor)
-                                            .border(2.dp, borderColor, shape)
+                                            .border(if (isSelected) 2.dp else 1.dp, borderColor, shape)
                                             .clickable(enabled = !isChecked) {
                                                 selectedOptionIndex = index
                                             }
-                                            .padding(horizontal = 18.dp, vertical = 16.dp),
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(28.dp)
-                                                .clip(CircleShape)
-                                                .border(2.dp, borderColor, CircleShape),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = "${index + 1}",
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isSelected) Color.White else SubtextGray
-                                            )
-                                        }
-
-                                        Spacer(modifier = Modifier.width(16.dp))
-
                                         Text(
                                             text = optionText,
-                                            fontSize = 16.sp,
+                                            fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
                                             modifier = Modifier.weight(1f)
                                         )
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = "Selected",
+                                                tint = if (isChecked) {
+                                                    if (isCorrectOpt) DuolingoGreen else DuolingoRed
+                                                } else DuolingoBlue,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        DSAExerciseType.MATCH_PAIRS -> {
+                            MatchPairsExerciseView(
+                                leftItems = currentQuestion.matchLeft,
+                                rightItems = currentQuestion.matchRight,
+                                solution = currentQuestion.matchSolution,
+                                isChecked = isChecked,
+                                onMatchedChanged = { pairs ->
+                                    matchedPairs = pairs
+                                }
+                            )
+                        }
+
+                        DSAExerciseType.ORDER_STEPS -> {
+                            OrderStepsExerciseView(
+                                initialSteps = currentQuestion.orderStepsInitial,
+                                solution = currentQuestion.orderStepsSolution,
+                                isChecked = isChecked,
+                                onStepsChanged = { steps ->
+                                    orderedSteps = steps
+                                }
+                            )
+                        }
+
+                        DSAExerciseType.FILL_CODE -> {
+                            FillCodeExerciseView(
+                                codeTemplate = currentQuestion.fillCodeTemplate,
+                                wordBank = currentQuestion.fillCodeWordBank,
+                                correctToken = currentQuestion.fillCodeCorrectToken,
+                                isChecked = isChecked,
+                                externalSelectedToken = selectedFillToken,
+                                onTokenSelected = { token ->
+                                    selectedFillToken = token
+                                }
+                            )
+                        }
+
+                        DSAExerciseType.COMPLEXITY_DIAL -> {
+                            ComplexityDialExerciseView(
+                                promptCode = currentQuestion.complexityCodeSnippet,
+                                correctComplexity = currentQuestion.complexityDialCorrect,
+                                isChecked = isChecked,
+                                externalSelectedComplexity = selectedComplexity,
+                                onComplexitySelected = { comp ->
+                                    selectedComplexity = comp
+                                }
+                            )
+                        }
+
+                        DSAExerciseType.TRUE_FALSE_SWIPE -> {
+                            TrueFalseSwipeExerciseView(
+                                statement = currentQuestion.trueFalseStatement,
+                                isCorrectTrue = currentQuestion.trueFalseIsCorrectTrue,
+                                explanation = currentQuestion.hint,
+                                isChecked = isChecked,
+                                externalDecision = selectedTrueFalse,
+                                onDecisionMade = { decision ->
+                                    selectedTrueFalse = decision
+                                }
+                            )
+                        }
+
+                        else -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                currentQuestion.options.forEachIndexed { index, optionText ->
+                                    val isSelected = selectedOptionIndex == index
+                                    val shape = RoundedCornerShape(14.dp)
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(shape)
+                                            .background(if (isSelected) DuolingoBlue.copy(alpha = 0.22f) else DuolingoCardBg)
+                                            .border(if (isSelected) 2.dp else 1.dp, if (isSelected) DuolingoBlue else DuolingoInputBorder, shape)
+                                            .clickable(enabled = !isChecked) { selectedOptionIndex = index }
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = optionText, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                     }
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // Bottom Action Bar (CHECK button or feedback drawer)
-                Box(
+                // Bottom Feedback & Action Bar
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(if (isChecked) (if (isAnswerCorrect) Color(0xFF0F3014) else Color(0xFF381414)) else DarkBackground)
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .background(
+                            when {
+                                isChecked && isAnswerCorrect -> DuolingoGreen.copy(alpha = 0.15f)
+                                isChecked && !isAnswerCorrect -> DuolingoRed.copy(alpha = 0.15f)
+                                else -> CardBackground
+                            }
+                        )
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
-                    Column {
-                        if (isChecked) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (isAnswerCorrect) Icons.Default.Check else Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = if (isAnswerCorrect) DuolingoGreen else DuolingoRed,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                    if (isChecked) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isAnswerCorrect) "🎯" else "💔",
+                                fontSize = 28.sp
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (isAnswerCorrect) "Nicely done!" else "Correct solution:",
-                                    fontSize = 18.sp,
+                                    text = if (isAnswerCorrect) "AMAZING! CORRECT! ✨" else "NOT QUITE! 🐣",
+                                    fontSize = 17.sp,
                                     fontWeight = FontWeight.Black,
                                     color = if (isAnswerCorrect) DuolingoGreen else DuolingoRed
                                 )
+                                if (!isAnswerCorrect && correctAnswerSummary.isNotEmpty()) {
+                                    Text(
+                                        text = "Correct answer: $correctAnswerSummary",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
                             }
-                            if (!isAnswerCorrect) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = currentExercise.explanation,
-                                    fontSize = 13.sp,
-                                    color = Color.White.copy(alpha = 0.9f),
-                                    lineHeight = 18.sp
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
 
-                        val canCheck = hasSelection || isChecked
-                        DuolingoButton(
-                            text = if (!isChecked) "CHECK" else "CONTINUE",
-                            faceColor = when {
-                                !canCheck -> CardBackground
-                                isChecked && !isAnswerCorrect -> DuolingoRed
-                                else -> DuolingoGreen
-                            },
-                            shadowColor = when {
-                                !canCheck -> Color(0xFF142028)
-                                isChecked && !isAnswerCorrect -> DuolingoRedDark
-                                else -> DuolingoGreenDark
-                            },
-                            textColor = if (!canCheck) SubtextGray else Color.White,
-                            onClick = {
-                                if (!isChecked) {
-                                    if (hasSelection) {
-                                        val correct = when (currentExercise.type) {
-                                            DSAExerciseType.MATCH_PAIRS -> {
-                                                matchPairsResult.size == currentExercise.pairs.size &&
-                                                    currentExercise.pairs.all { matchPairsResult[it.key] == it.value }
-                                            }
-                                            DSAExerciseType.ORDER_STEPS -> {
-                                                val expected = if (currentExercise.parsonsLines.isNotEmpty()) {
-                                                    currentExercise.parsonsLines
-                                                } else {
-                                                    currentExercise.options
-                                                }
-                                                parsonsOrder == expected
-                                            }
-                                            DSAExerciseType.FILL_CODE -> {
-                                                selectedToken == (currentExercise.correctAnswers.firstOrNull() ?: "")
-                                            }
-                                            DSAExerciseType.COMPLEXITY_DIAL -> {
-                                                selectedComplexity == (currentExercise.correctAnswers.firstOrNull() ?: "O(n)")
-                                            }
-                                            DSAExerciseType.TRUE_FALSE_SWIPE -> {
-                                                val ans = if (selectedOptionIndex == 0) "True" else "False"
-                                                currentExercise.correctAnswers.contains(ans)
-                                            }
-                                            else -> {
-                                                selectedOptionIndex == currentExercise.correctIndex
-                                            }
+                    val canCheck = hasSelection || isChecked
+                    DuolingoButton(
+                        text = if (!isChecked) "CHECK" else "CONTINUE",
+                        faceColor = when {
+                            !canCheck -> CardBackground
+                            isChecked && !isAnswerCorrect -> DuolingoRed
+                            else -> DuolingoGreen
+                        },
+                        shadowColor = when {
+                            !canCheck -> Color(0xFF142028)
+                            isChecked && !isAnswerCorrect -> DuolingoRedDark
+                            else -> DuolingoGreenDark
+                        },
+                        textColor = if (!canCheck) SubtextGray else Color.White,
+                        onClick = {
+                            if (!isChecked) {
+                                if (hasSelection) {
+                                    val correct = when (currentQuestion.gameType) {
+                                        DSAExerciseType.MULTIPLE_CHOICE -> {
+                                            selectedOptionIndex == currentQuestion.correctOptionIndex
                                         }
-
-                                        isAnswerCorrect = correct
-                                        isChecked = true
-
-                                        if (correct) {
-                                            correctCount += 1
-                                            gameManager.recordCorrectAnswer()
-                                        } else {
-                                            val wrongAnswer = when (currentExercise.type) {
-                                                DSAExerciseType.FILL_CODE -> selectedToken ?: ""
-                                                DSAExerciseType.COMPLEXITY_DIAL -> selectedComplexity ?: ""
-                                                else -> currentExercise.options.getOrNull(selectedOptionIndex ?: -1) ?: ""
-                                            }
-                                            gameManager.recordWrongAnswer(currentExercise, wrongAnswer)
+                                        DSAExerciseType.MATCH_PAIRS -> {
+                                            matchedPairs.size == currentQuestion.matchSolution.size &&
+                                                currentQuestion.matchSolution.all { matchedPairs[it.key] == it.value }
+                                        }
+                                        DSAExerciseType.ORDER_STEPS -> {
+                                            orderedSteps == currentQuestion.orderStepsSolution
+                                        }
+                                        DSAExerciseType.FILL_CODE -> {
+                                            selectedFillToken == currentQuestion.fillCodeCorrectToken
+                                        }
+                                        DSAExerciseType.COMPLEXITY_DIAL -> {
+                                            selectedComplexity == currentQuestion.complexityDialCorrect
+                                        }
+                                        DSAExerciseType.TRUE_FALSE_SWIPE -> {
+                                            selectedTrueFalse == currentQuestion.trueFalseIsCorrectTrue
+                                        }
+                                        else -> {
+                                            selectedOptionIndex == currentQuestion.correctOptionIndex
                                         }
                                     }
-                                } else {
-                                    // Move to next question or complete
-                                    if (currentIndex + 1 < exercises.size) {
-                                        currentIndex += 1
-                                        selectedOptionIndex = null
-                                        selectedToken = null
-                                        selectedComplexity = null
-                                        matchPairsResult = emptyMap()
-                                        parsonsOrder = emptyList()
-                                        isChecked = false
-                                        isAnswerCorrect = false
+
+                                    isAnswerCorrect = correct
+                                    isChecked = true
+
+                                    if (correct) {
+                                        correctCount += 1
                                     } else {
-                                        isFinished = true
+                                        gameManager.loseHeart()
                                     }
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                            } else {
+                                if (currentIndex + 1 < questions.size) {
+                                    currentIndex += 1
+                                } else {
+                                    isFinished = true
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        // Cheat Code Hint Dialog
+        if (showHintDialog) {
+            AlertDialog(
+                onDismissRequest = { showHintDialog = false },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🎮", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Phoenix Cheat Code",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
                         )
                     }
-                }
-            }
+                },
+                text = {
+                    Text(
+                        text = currentQuestion.hint ?: "Master the data structure patterns to unlock the Phoenix Bird!",
+                        fontSize = 14.sp,
+                        color = SubtextGray
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showHintDialog = false }) {
+                        Text(text = "GOT IT! ⚡️", fontWeight = FontWeight.Black, color = DuolingoBlue)
+                    }
+                },
+                containerColor = DuolingoCardBg,
+                shape = RoundedCornerShape(18.dp)
+            )
         }
-    }
-}
-
-@Composable
-private fun LessonCompleteScreen(
-    totalQuestions: Int,
-    correctCount: Int,
-    xpEarned: Int,
-    onContinue: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        Text(text = "🎉", fontSize = 72.sp)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Lesson Complete!",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Black,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "You're building your algorithmic instincts step by step.",
-            fontSize = 14.sp,
-            color = SubtextGray,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(36.dp))
-
-        // Stats Row (XP + Accuracy)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            val statShape = RoundedCornerShape(16.dp)
-
-            // Total XP Card
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(statShape)
-                    .background(Color(0xFFFFC800).copy(alpha = 0.15f))
-                    .border(1.5.dp, Color(0xFFFFC800), statShape)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "TOTAL XP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFFFFC800))
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "⭐", fontSize = 18.sp)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "+$xpEarned", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
-                }
-            }
-
-            // Accuracy Card
-            val accuracy = if (totalQuestions > 0) ((correctCount.toFloat() / totalQuestions.toFloat()) * 100).toInt() else 100
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(statShape)
-                    .background(DuolingoGreen.copy(alpha = 0.15f))
-                    .border(1.5.dp, DuolingoGreen, statShape)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "ACCURACY", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🎯", fontSize = 18.sp)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "$accuracy%", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DuolingoButton(
-            text = "CONTINUE",
-            faceColor = DuolingoGreen,
-            shadowColor = DuolingoGreenDark,
-            onClick = onContinue,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
     }
 }

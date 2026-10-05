@@ -57,10 +57,11 @@ import com.simats.codeingo.ui.theme.SubtextGray
 @Composable
 fun DSALanguageImplementationCardView(
     structureName: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialLanguage: String = "Python"
 ) {
     val context = LocalContext.current
-    var activeLanguage by remember { mutableStateOf("Python") }
+    var activeLanguage by remember(initialLanguage) { mutableStateOf(initialLanguage) }
     var isExpanded by remember { mutableStateOf(true) }
     var copied by remember { mutableStateOf(false) }
 

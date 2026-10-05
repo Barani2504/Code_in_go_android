@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.Codeingo" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+        Phoenix Bird Life — Force edge-to-edge dark mode.
+        Compose SideEffect in CodeingoTheme handles actual
+        status/nav bar colors at runtime.
+    -->
+    <style name="Theme.Codeingo" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FF070D17</item>
+        <item name="android:statusBarColor">#FF070D17</item>
+        <item name="android:navigationBarColor">#FF070D17</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 </resources>

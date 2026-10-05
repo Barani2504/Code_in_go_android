@@ -74,6 +74,9 @@ fun AppNavHost(
                     },
                     onDismiss = {
                         navController.popBackStack()
+                    },
+                    onCreateAccountClick = {
+                        navController.navigate(Screen.ProfileCreation.route)
                     }
                 )
             }
@@ -96,8 +99,8 @@ fun AppNavHost(
 
             composable(Screen.Dashboard.route) {
                 MainDashboardScreen(
-                    onStartLesson = { lessonId ->
-                        navController.navigate(Screen.Assessment.createRoute(lessonId))
+                    onStartLesson = { unitId, levelNumber, totalLevelsInUnit, isBoss ->
+                        navController.navigate(Screen.Assessment.createRoute(unitId, levelNumber, totalLevelsInUnit, isBoss))
                     },
                     onStartBoss = { bossId ->
                         navController.navigate(Screen.BossBattle.createRoute(bossId))
@@ -118,11 +121,22 @@ fun AppNavHost(
 
             composable(
                 route = Screen.Assessment.route,
-                arguments = listOf(navArgument("lessonId") { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument("unitId") { type = NavType.IntType; defaultValue = 1 },
+                    navArgument("levelNumber") { type = NavType.IntType; defaultValue = 1 },
+                    navArgument("totalLevelsInUnit") { type = NavType.IntType; defaultValue = 6 },
+                    navArgument("isBoss") { type = NavType.BoolType; defaultValue = false }
+                )
             ) { backStackEntry ->
-                val lessonId = backStackEntry.arguments?.getString("lessonId") ?: "u1_l1_what_is_ds"
+                val unitId = backStackEntry.arguments?.getInt("unitId") ?: 1
+                val levelNumber = backStackEntry.arguments?.getInt("levelNumber") ?: 1
+                val totalLevelsInUnit = backStackEntry.arguments?.getInt("totalLevelsInUnit") ?: 6
+                val isBoss = backStackEntry.arguments?.getBoolean("isBoss") ?: false
                 AssessmentScreen(
-                    lessonId = lessonId,
+                    unitId = unitId,
+                    levelNumber = levelNumber,
+                    totalLevelsInUnit = totalLevelsInUnit,
+                    isBoss = isBoss,
                     onComplete = { _ ->
                         navController.popBackStack()
                     },

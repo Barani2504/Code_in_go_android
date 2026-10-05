@@ -1,43 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App identity -->
     <string name="app_name">Code in Go</string>
+    <string name="duolingo_on_the_go">Code in Go</string>
+    <string name="hero_subtitle">The free, fun, and effective way to master Data Structures!</string>
+    <string name="master_dsa_subtitle">Master Data Structures &amp; Algorithms</string>
+
+    <!-- Language Picker -->
     <string name="site_language">SITE LANGUAGE:</string>
     <string name="choose_language">CHOOSE LANGUAGE</string>
     <string name="what_language_do_you_speak">What language do you speak?</string>
     <string name="choose_interface_lang">Choose your site and interface language</string>
+    <string name="site_language_modal">Site Language</string>
+
+    <!-- Auth / Login -->
     <string name="login_caps">LOGIN</string>
     <string name="signup_caps">SIGN UP</string>
     <string name="get_started_caps">GET STARTED</string>
     <string name="already_have_account_caps">I ALREADY HAVE AN ACCOUNT</string>
-    <string name="duolingo_on_the_go">Code in Go</string>
-    <string name="hero_subtitle">The free, fun, and effective way to learn data structures!</string>
     <string name="login_title">Log in</string>
-    <string name="create_profile">Create profile</string>
     <string name="email_or_username">Email or username</string>
     <string name="password">Password</string>
-    <string name="forgot">FORGOT PASSWORD?</string>
+    <string name="forgot">FORGOT?</string>
     <string name="name_optional">Name (optional)</string>
     <string name="age">Age</string>
     <string name="create_account">CREATE ACCOUNT</string>
-    <string name="terms_privacy">By signing in, you agree to our Terms and Privacy Policy.</string>
-    <string name="site_language_modal">Site Language</string>
-    <string name="done">Done</string>
+    <string name="create_profile">Create profile</string>
+    <string name="terms_privacy">By signing in to Codeingo, you agree to our Terms and Privacy Policy.</string>
+    <string name="recaptcha">This site is protected by reCAPTCHA Enterprise and the Google Privacy Policy and Terms of Service apply.</string>
     <string name="google_auth">GOOGLE</string>
     <string name="facebook_auth">FACEBOOK</string>
     <string name="use_another_account">USE ANOTHER ACCOUNT</string>
-    <string name="loading">LOADING...</string>
-    <string name="continue_caps">CONTINUE</string>
-    <string name="guidebook">GUIDEBOOK</string>
-    <string name="start">START</string>
-    <string name="learn">LEARN</string>
-    <string name="visualizer">VISUALIZER</string>
+    <string name="signed_in_google">Signed in with Google as %1$s</string>
+    <string name="welcome_back">Welcome back! Logging in…</string>
+    <string name="account_created">Account created successfully!</string>
+    <string name="enter_email">Please enter your email or username</string>
+    <string name="password_short">Password must be at least 4 characters</string>
+    <string name="sign_in">SIGN IN</string>
+
+    <!-- Forgot Password multi-step -->
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_enter_email">Enter your email address and we\'ll send a reset code</string>
+    <string name="forgot_password_send_code">SEND RESET CODE</string>
+    <string name="forgot_password_verify_otp">Verify Code</string>
+    <string name="forgot_password_otp_hint">Enter the 6-digit code sent to your email</string>
+    <string name="forgot_password_verify">VERIFY CODE</string>
+    <string name="forgot_password_new_password">Create New Password</string>
+    <string name="forgot_password_save">SAVE NEW PASSWORD</string>
+    <string name="forgot_password_success">Password Reset Complete! 🔥</string>
+    <string name="forgot_password_success_sub">Your password has been successfully updated. You can now sign in with your new password.</string>
+    <string name="sign_in_now">SIGN IN NOW</string>
+
+    <!-- Navigation / Tabs (new iOS tab labels) -->
+    <string name="learn">CODE</string>
+    <string name="visualizer">DSA LAB</string>
     <string name="practice">PRACTICE</string>
-    <string name="leaderboards">LEADERBOARDS</string>
-    <string name="quests">QUESTS</string>
-    <string name="shop">SHOP</string>
-    <string name="profile">PROFILE</string>
-    <string name="more">MORE</string>
+    <string name="leaderboards">RANKINGS</string>
+    <string name="profile">DEVELOPER</string>
+    <string name="more">CONSOLE</string>
     <string name="settings_caps">SETTINGS</string>
+
+    <!-- Removed tab labels (kept as references) -->
+    <string name="quests">ISSUES</string>
+    <string name="shop">MARKETPLACE</string>
+    <string name="letters">VIDEOS</string>
+
+    <!-- Common UI -->
+    <string name="loading">LOADING…</string>
+    <string name="continue_caps">CONTINUE</string>
+    <string name="done">Done</string>
+    <string name="start">RUN</string>
+    <string name="guidebook">DOCS</string>
+    <string name="jump_here">JUMP HERE?</string>
+    <string name="start_plus_10_xp">RUN +10 XP</string>
+    <string name="loading_next_lesson">Loading next module…</string>
+    <string name="getting_things_ready">Compiling your environment…</string>
+    <string name="form_basic_sentences">Write basic syntax</string>
+    <string name="view_all">VIEW ALL</string>
     <string name="logout_caps">LOG OUT</string>
     <string name="logged_out_success">You have been logged out</string>
-    <string name="daily_quests">Daily Quests</string>
+
+    <!-- Dashboard Units -->
+    <string name="section_1_unit_1">SECTION 1, UNIT 1</string>
+    <string name="section_1_unit_2">SECTION 1, UNIT 2</string>
+    <string name="section_1_unit_3">SECTION 1, UNIT 3</string>
+    <string name="section_1_unit_4">SECTION 1, UNIT 4</string>
+    <string name="section_1_unit_5">SECTION 1, UNIT 5</string>
+    <string name="solo_trip_title">Solo trip: Compare travel experiences</string>
+    <string name="ask_about_transportation">Solo trip: Debug runtime errors</string>
+    <string name="reserve_hotel_room">Solo trip: Setup environment</string>
+    <string name="order_food_drinks">Compile code</string>
+    <string name="discuss_travel_plans">Deploy application</string>
+
+    <!-- 5 DSA Chapter Worlds -->
+    <string name="world_array_kingdom">Array Kingdom</string>
+    <string name="world_array_kingdom_sub">3D Sorting Arena — Bubble Sort Battle</string>
+    <string name="world_stack_tower">Stack Tower</string>
+    <string name="world_stack_tower_sub">Restaurant Tower — LIFO Plate Stacking</string>
+    <string name="world_queue_station">Queue Station</string>
+    <string name="world_queue_station_sub">Futuristic Ticket Station — FIFO Chaos</string>
+    <string name="world_linked_list_road">Linked List Road</string>
+    <string name="world_linked_list_road_sub">Magical Chain World — Pointer Adventure</string>
+    <string name="world_binary_tree_forest">Binary Tree Forest</string>
+    <string name="world_binary_tree_forest_sub">Magical Data Kingdom — BST Labyrinth</string>
+    <string name="world_final_master_journey">Final Master Journey</string>
+    <string name="world_final_master_journey_sub">Complete all 5 chapters to unlock</string>
+
+    <!-- DSA Chapter Course Names (5 chapters) -->
+    <string name="chapter_1_name">Chapter 1: Array — The Data Highway</string>
+    <string name="chapter_2_name">Chapter 2: Linked List — The Chain Quest</string>
+    <string name="chapter_3_name">Chapter 3: Stack — The Tower of Plates</string>
+    <string name="chapter_4_name">Chapter 4: Queue — The Waiting Line</string>
+    <string name="chapter_5_name">Chapter 5: Tree — The Data Kingdom</string>
+
+    <!-- Practice Hub -->
+    <string name="practice_hub_title">⚔️ DSA Practice Arena</string>
+    <string name="practice_world_challenges">World Challenges</string>
+    <string name="practice_mistake_review">Mistake Review</string>
+    <string name="practice_speed_challenge">Speed Challenge</string>
+    <string name="boss_battle_tag">BOSS BATTLE</string>
+
+    <!-- Gamification -->
+    <string name="hearts">Hearts</string>
+    <string name="refill_hearts">Refill Hearts</string>
+    <string name="refill_hearts_sub">Get full hearts so you can worry less about making mistakes in a lesson</string>
+    <string name="full_caps">FULL</string>
+    <string name="unlimited_hearts">Unlimited Hearts</string>
+    <string name="unlimited_hearts_sub">Never run out of hearts with Super!</string>
+    <string name="free_trial_caps">FREE TRIAL</string>
+    <string name="power_ups">Power-Ups</string>
+    <string name="streak_freeze">Streak Freeze</string>
+    <string name="streak_freeze_sub">Streak Freeze allows your streak to remain in place for one full day of inactivity.</string>
+    <string name="equipped_status">%1$d / 2 EQUIPPED</string>
+    <string name="earn_10_xp">Earn 10 XP</string>
+    <string name="earn_100_xp">Earn 100 XP</string>
+    <string name="super_trial_banner_title">Start a 1 week free trial to enjoy exclusive Super benefits</string>
+    <string name="start_my_free_7_days">START MY FREE 7 DAYS</string>
+
+    <!-- Leaderboards -->
+    <string name="unlock_leaderboards">Unlock Rankings!</string>
+    <string name="unlock_leaderboards_sub">Complete 3 more modules to start competing</string>
+    <string name="what_are_leaderboards">WHAT ARE RANKINGS?</string>
+    <string name="do_lessons_earn_xp">Write code. Earn XP. Compete.</string>
+    <string name="earn_xp_compete_sub">Earn XP through coding, then compete with developers in a weekly ranking</string>
+    <string name="complete_lessons_to_start">Complete %1$d more modules to start competing</string>
+    <string name="start_a_lesson">START CODING</string>
+    <string name="bronze_league">Junior League</string>
+    <string name="obsidian_league">Obsidian League</string>
+    <string name="top_20_advance">Top 20 advance to the next tier!</string>
+    <string name="you_are_promoted">🔥 You\'re promoted to the next league!</string>
+    <string name="you_are_demoted">🌊 Stay active to avoid demotion.</string>
+    <string name="none_league">None</string>
+
+    <!-- Daily Quests (kept as localization refs) -->
+    <string name="daily_quests">Daily Issues</string>
+    <string name="welcome_title">Welcome Developer!</string>
+    <string name="complete_quests_body">Resolve issues to earn rewards! Issues refresh every day.</string>
+    <string name="spend_15_mins">Spend 15 minutes coding</string>
+    <string name="complete_2_perfect">Write 2 perfect scripts</string>
+    <string name="more_quests_unlock_soon">More issues unlock soon</string>
+    <string name="monthly_challenges_title">Monthly sprints unlock soon!</string>
+    <string name="monthly_challenges_sub">Complete each month\'s sprint to earn exclusive badges</string>
+    <string name="hours_left_tag">%1$d HOURS</string>
+
+    <!-- Statistics / Profile -->
+    <string name="statistics">Statistics</string>
+    <string name="day_streak">Day streak</string>
+    <string name="total_xp">Total XP</string>
+    <string name="current_league">Current league</string>
+    <string name="top_3_finishes">Top 3 finishes</string>
+    <string name="achievements">Achievements</string>
+    <string name="wildfire">Wildfire</string>
+    <string name="reach_3_day_streak">Reach a 3 day streak</string>
+    <string name="sage">Sage</string>
+    <string name="champion">Champion</string>
+    <string name="unlock_leaderboards_10">Unlock Leaderboards by completing 10 lessons</string>
+    <string name="add_friends">Add friends</string>
+    <string name="find_friends">Find friends</string>
+    <string name="invite_friends">Invite friends</string>
+    <string name="joined_september">Joined September 2026</string>
+    <string name="you_earned_500_gems">You earned 500 gems! Create a profile to spend them in the store!</string>
+
+    <!-- Phoenix Emotion System -->
+    <string name="phoenix_emotion_title">Choose Phoenix Emotion</string>
+    <string name="phoenix_emotion_subtitle">Select an emotion that matches your feeling right now. Phoenix will change its expression accordingly.</string>
+    <string name="phoenix_live_emotion_icon">Live Emotion Icon</string>
+    <string name="phoenix_auto_emotion_on">Auto-changing based on your activity</string>
+    <string name="phoenix_auto_emotion_off">Static icon — tap to re-enable</string>
+    <string name="phoenix_browse_emotions">Browse &amp; Customize All Emotions</string>
+    <string name="phoenix_emotion_activated">%1$s activated!</string>
+
+    <!-- Phoenix Emotion Categories -->
+    <string name="emotion_cat_all">All</string>
+    <string name="emotion_cat_happy">Happy &amp; Proud</string>
+    <string name="emotion_cat_learning">Learning &amp; Focus</string>
+    <string name="emotion_cat_drama">Drama &amp; Tears</string>
+    <string name="emotion_cat_fierce">Fierce &amp; Battle</string>
+    <string name="emotion_cat_love">Love &amp; Charm</string>
+
+    <!-- Onboarding flow steps -->
+    <string name="onboarding_welcome">Welcome to Code in Go! 🔥</string>
+    <string name="onboarding_welcome_sub">The fun, effective way to master Data Structures.</string>
+    <string name="onboarding_10_questions">Answer 10 quick questions to set up your path</string>
+    <string name="onboarding_choose_language">What programming language do you want to learn?</string>
+    <string name="onboarding_referral">How did you hear about us?</string>
+    <string name="onboarding_temp_challenge">Solve a quick challenge to calibrate your level!</string>
+    <string name="onboarding_first_lesson">Great! Let\'s start your first lesson.</string>
+    <string name="onboarding_sentence">Complete the sentence:</string>
+    <string name="onboarding_proud">You\'re making great progress! 🎉</string>
+    <string name="onboarding_streak_earned">You earned a 1-Day Streak! 🔥</string>
+    <string name="onboarding_streak_goal">Set your daily coding goal</string>
+    <string name="onboarding_widget_cheer">Add a widget to stay on track!</string>
+    <string name="onboarding_loading_cefr">Analyzing your level…</string>
+    <string name="get_started">GET STARTED</string>
+
+    <!-- Assessment -->
+    <string name="assessment_title">Quick Assessment</string>
+    <string name="assessment_subtitle">Let\'s see what you know</string>
+    <string name="correct_answer">Correct! 🎉</string>
+    <string name="wrong_answer">Not quite. Try again!</string>
+    <string name="lesson_complete">Lesson Complete! 🔥</string>
+    <string name="perfect_lesson">Perfect Score! 🏆</string>
+
+    <!-- Settings -->
+    <string name="settings_preferences">Preferences</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_app_icon">App Icon &amp; Mascot Emotion</string>
+    <string name="settings_sound_effects">Sound effects</string>
+    <string name="settings_listening_exercises">Listening exercises</string>
+    <string name="settings_speaking_exercises">Speaking exercises</string>
+    <string name="settings_vibrate_on_tap">Vibrate on tap</string>
+    <string name="settings_smart_practice">Smart practice</string>
+    <string name="settings_learning_reminders">Learning reminders</string>
+    <string name="settings_sign_out">Sign Out</string>
+    <string name="settings_sign_out_confirm">Are you sure you want to sign out of your Phoenix profile?</string>
 </resources>
