@@ -1,12 +1,19 @@
 package com.simats.codeingo.domain
 
+import android.content.Context
+import com.simats.codeingo.data.local.UserPreferences
 import com.simats.codeingo.data.model.DSABossSpec
 import com.simats.codeingo.data.model.DSAExerciseItem
 import com.simats.codeingo.data.model.DailyQuestItem
 import com.simats.codeingo.data.model.MistakeVaultItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 class GameManager private constructor() {
@@ -15,6 +22,11 @@ class GameManager private constructor() {
         val instance: GameManager by lazy { GameManager() }
         val shared: GameManager get() = instance
     }
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var prefs: UserPreferences? = null
+
+    // ── Core stats ────────────────────────────────────────────────────────────
 
     private val _totalXP = MutableStateFlow(120)
     val totalXP: StateFlow<Int> = _totalXP.asStateFlow()
@@ -50,7 +62,8 @@ class GameManager private constructor() {
             val nowYear = cal.get(java.util.Calendar.YEAR)
             val nowDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
             cal.timeInMillis = (_lastPracticedTimestamp.value * 1000).toLong()
-            return cal.get(java.util.Calendar.YEAR) == nowYear && cal.get(java.util.Calendar.DAY_OF_YEAR) == nowDay
+            return cal.get(java.util.Calendar.YEAR) == nowYear &&
+                    cal.get(java.util.Calendar.DAY_OF_YEAR) == nowDay
         }
 
     val isStreakAtRisk: Boolean
@@ -58,6 +71,8 @@ class GameManager private constructor() {
             val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
             return !hasPracticedToday && hour >= 20
         }
+
+    // ── Phoenix / progression ─────────────────────────────────────────────────
 
     private val _activePhoenixStage = MutableStateFlow(1)
     val activePhoenixStage: StateFlow<Int> = _activePhoenixStage.asStateFlow()
@@ -80,6 +95,8 @@ class GameManager private constructor() {
     private val _evolutionToStage = MutableStateFlow(2)
     val evolutionToStage: StateFlow<Int> = _evolutionToStage.asStateFlow()
 
+    // ── Vault / quests ────────────────────────────────────────────────────────
+
     private val _mistakeVault = MutableStateFlow<List<MistakeVaultItem>>(emptyList())
     val mistakeVault: StateFlow<List<MistakeVaultItem>> = _mistakeVault.asStateFlow()
 
@@ -95,14 +112,57 @@ class GameManager private constructor() {
     private val _unlockedLevelIndices = MutableStateFlow<Set<Int>>(setOf(1))
     val unlockedLevelIndices: StateFlow<Set<Int>> = _unlockedLevelIndices.asStateFlow()
 
+    private val _totalStars = MutableStateFlow(15)
+    val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
+
     init {
         initializeDailyQuests()
         loadDefaultMistakes()
         evaluateStreakOnLaunch()
     }
 
-    private val _totalStars = MutableStateFlow(15)
-    val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
+    // ── Initialization (called once from CodeingoApp) ─────────────────────────
+
+    fun initialize(context: Context) {
+        val p = UserPreferences(context)
+        prefs = p
+        scope.launch {
+            // Seed StateFlows from persisted DataStore values (one-shot first())
+            _totalXP.value = p.totalXP.first()
+            _gemsCount.value = p.gemsCount.first()
+            _heartsCount.value = p.heartsCount.first()
+            _streakDays.value = p.streakDays.first()
+            _activePhoenixStage.value = p.activePhoenixStage.first()
+            _highestCombo.value = p.highestCombo.first()
+            _eggCrackLevel.value = p.eggCrackLevel.first()
+            _completedLessonIds.value = p.completedLessons.first()
+            _completedBossIds.value = p.completedBosses.first()
+            _unlockedLevelIndices.value = p.unlockedLevels.first().mapNotNull { it.toIntOrNull() }.toSet()
+                .ifEmpty { setOf(1) }
+
+            // Re-evaluate streak with restored persisted timestamp
+            evaluateStreakOnLaunch()
+        }
+    }
+
+    // ── Persistence helpers ───────────────────────────────────────────────────
+
+    private fun persistStats() {
+        val p = prefs ?: return
+        scope.launch {
+            p.updateGameState(
+                xp = _totalXP.value,
+                gems = _gemsCount.value,
+                hearts = _heartsCount.value,
+                streak = _streakDays.value,
+                phoenixStage = _activePhoenixStage.value,
+                highestCombo = _highestCombo.value,
+                eggCrack = _eggCrackLevel.value
+            )
+        }
+    }
+
+    // ── Public API ────────────────────────────────────────────────────────────
 
     fun addStars(count: Int) {
         _totalStars.value += count
@@ -110,10 +170,12 @@ class GameManager private constructor() {
 
     fun addXP(amount: Int) {
         _totalXP.value += amount
+        persistStats()
     }
 
     fun addGems(count: Int) {
         _gemsCount.value += count
+        persistStats()
     }
 
     fun evaluateStreakOnLaunch() {
@@ -130,13 +192,15 @@ class GameManager private constructor() {
         val lastYear = cal.get(java.util.Calendar.YEAR)
 
         val isSameDay = nowYear == lastYear && nowDay == lastDay
-        val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) || (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
+        val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) ||
+                (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
 
         if (!isSameDay && !isYesterday && _streakDays.value > 0) {
             _isStreakLostPendingRestore.value = true
             _savedStreakDays.value = _streakDays.value
             _streakDays.value = 0
             _streakLostTimestamp.value = now
+            persistStats()
         }
     }
 
@@ -145,6 +209,7 @@ class GameManager private constructor() {
         _streakDays.value = _savedStreakDays.value
         val yesterday = (System.currentTimeMillis() - 86400000L) / 1000.0
         _lastPlayedDateUnix.value = yesterday
+        persistStats()
     }
 
     fun completeLessonAndExtendStreak() {
@@ -160,7 +225,8 @@ class GameManager private constructor() {
             val lastDay = cal.get(java.util.Calendar.DAY_OF_YEAR)
             val lastYear = cal.get(java.util.Calendar.YEAR)
 
-            val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) || (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
+            val isYesterday = (nowYear == lastYear && nowDay == lastDay + 1) ||
+                    (nowYear == lastYear + 1 && lastDay >= 365 && nowDay == 1)
             val isToday = nowYear == lastYear && nowDay == lastDay
 
             if (isYesterday) {
@@ -175,6 +241,7 @@ class GameManager private constructor() {
         _lastPlayedDateUnix.value = now
         _lastPracticedTimestamp.value = now
         incrementDailyQuest("lessons")
+        persistStats()
     }
 
     fun awardLessonXP(
@@ -201,6 +268,7 @@ class GameManager private constructor() {
         _gemsCount.value += maxOf(earned / 5, 2)
         _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
         incrementDailyQuest("lessons")
+        persistStats()
 
         // Duolingo-style automatic emotion evaluation
         PhoenixEmotionManager.instance.handleQuizCompleted(
@@ -215,10 +283,12 @@ class GameManager private constructor() {
         if (_heartsCount.value > 0) {
             _heartsCount.value -= 1
         }
+        persistStats()
     }
 
     fun refillHearts() {
         _heartsCount.value = 10
+        persistStats()
         PhoenixEmotionManager.instance.handleHeartsRefilled()
     }
 
@@ -228,6 +298,9 @@ class GameManager private constructor() {
         _gemsCount.value += 50
         _completedBossIds.value = _completedBossIds.value + boss.id
         triggerEvolution(boss.targetPhoenixStageAwarded)
+        persistStats()
+        val p = prefs ?: return
+        scope.launch { p.completeBoss(boss.id) }
         PhoenixEmotionManager.instance.handleBossBattle("victory")
     }
 
@@ -235,6 +308,7 @@ class GameManager private constructor() {
         _currentCombo.value += 1
         if (_currentCombo.value > _highestCombo.value) {
             _highestCombo.value = _currentCombo.value
+            persistStats()
         }
         incrementDailyQuest("combo")
     }
@@ -258,6 +332,7 @@ class GameManager private constructor() {
             explanation = exercise.explanation
         )
         _mistakeVault.value = _mistakeVault.value + mistake
+        persistStats()
     }
 
     fun triggerEvolution(toStage: Int) {
@@ -266,6 +341,7 @@ class GameManager private constructor() {
             _evolutionToStage.value = toStage
             _activePhoenixStage.value = toStage
             _showEvolutionModal.value = true
+            persistStats()
         }
     }
 
@@ -275,6 +351,7 @@ class GameManager private constructor() {
 
     fun setActivePhoenixStage(stageId: Int) {
         _activePhoenixStage.value = stageId.coerceIn(1, 18)
+        persistStats()
     }
 
     fun completeLesson(lessonId: String, nextLevelIndex: Int? = null) {
@@ -282,6 +359,8 @@ class GameManager private constructor() {
         if (nextLevelIndex != null) {
             _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevelIndex
         }
+        val p = prefs ?: return
+        scope.launch { p.completeLesson(lessonId, nextLevelIndex) }
     }
 
     /**
@@ -309,6 +388,11 @@ class GameManager private constructor() {
         } else {
             _eggCrackLevel.value = (_unlockedLevelIndices.value.size).coerceAtMost(5)
         }
+        persistStats()
+        val p = prefs ?: return
+        scope.launch {
+            p.completeLesson("level_$currentLevelIndex", nextLevel)
+        }
     }
 
     fun regenerateHeart() {
@@ -317,6 +401,7 @@ class GameManager private constructor() {
             if (_heartsCount.value == 10) {
                 PhoenixEmotionManager.instance.handleHeartsRefilled()
             }
+            persistStats()
         }
     }
 
@@ -328,6 +413,7 @@ class GameManager private constructor() {
                 it.copy(isRepaired = true)
             } else it
         }
+        persistStats()
     }
 
     fun claimQuest(questId: String) {
@@ -338,6 +424,7 @@ class GameManager private constructor() {
                 quest.copy(isClaimed = true)
             } else quest
         }
+        persistStats()
     }
 
     fun incrementDailyQuest(type: String) {

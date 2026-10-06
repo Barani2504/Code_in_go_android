@@ -20,11 +20,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import com.simats.codeingo.domain.AppTheme
+import com.simats.codeingo.domain.ThemeManager
+
 // ─────────────────────────────────────────────────────────────────
-// Phoenix Bird Life Material Color Scheme
-// Mirrors iOS Core/Theme.swift — .preferredColorScheme(.dark) only
+// Phoenix Bird Life Material Color Schemes
+// Mirrors iOS Core/Theme.swift — ThemeManager adaptive switching
 // ─────────────────────────────────────────────────────────────────
-private val PhoenixColorScheme = darkColorScheme(
+private val PhoenixDarkColorScheme = darkColorScheme(
     primary          = AmberGold,
     onPrimary        = Color(0xFF1A_0F_00),
     primaryContainer = AmberGoldDark,
@@ -47,29 +56,120 @@ private val PhoenixColorScheme = darkColorScheme(
     onError          = Color.White,
 )
 
+private val PhoenixLightColorScheme = lightColorScheme(
+    primary          = AmberGold,
+    onPrimary        = Color(0xFF1A_0F_00),
+    primaryContainer = AmberGoldDark,
+    onPrimaryContainer = Color.White,
+    secondary        = PhoenixEmber,
+    onSecondary      = Color.White,
+    secondaryContainer = Color(0xFFFF_E0_D0),
+    onSecondaryContainer = Color(0xFF4A_20_00),
+    tertiary         = DsaPurple,
+    onTertiary       = Color.White,
+    background       = PhoenixLightBg,
+    onBackground     = PhoenixLightText,
+    surface          = PhoenixLightCard,
+    onSurface        = PhoenixLightText,
+    surfaceVariant   = PhoenixLightInput,
+    onSurfaceVariant = PhoenixLightSubtext,
+    outline          = PhoenixLightBorder,
+    outlineVariant   = PhoenixLightBorder.copy(alpha = 0.7f),
+    error            = PhoenixCrimson,
+    onError          = Color.White,
+)
+
+data class DynamicThemeColors(
+    val isDark: Boolean,
+    val background: Color,
+    val headerBackground: Color,
+    val cardBackground: Color,
+    val inputBackground: Color,
+    val inputBorder: Color,
+    val inputText: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
+    val placeholder: Color
+)
+
+val LocalDynamicThemeColors = staticCompositionLocalOf {
+    DynamicThemeColors(
+        isDark = true,
+        background = PhoenixObsidian,
+        headerBackground = PhoenixDeepNavy,
+        cardBackground = PhoenixCard,
+        inputBackground = PhoenixInput,
+        inputBorder = PhoenixBorder,
+        inputText = Color.White,
+        textPrimary = Color.White,
+        textSecondary = PhoenixSubtext,
+        placeholder = PhoenixPlaceholder
+    )
+}
+
 @Composable
 fun CodeingoTheme(
     content: @Composable () -> Unit
 ) {
+    val themeManager = ThemeManager.instance
+    val currentTheme by themeManager.currentTheme.collectAsState()
+    val systemDark = isSystemInDarkTheme()
+
+    val isDark = when (currentTheme) {
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+        AppTheme.SYSTEM -> systemDark
+    }
+
+    val dynamicColors = if (isDark) {
+        DynamicThemeColors(
+            isDark = true,
+            background = PhoenixObsidian,
+            headerBackground = PhoenixDeepNavy,
+            cardBackground = PhoenixCard,
+            inputBackground = PhoenixInput,
+            inputBorder = PhoenixBorder,
+            inputText = Color.White,
+            textPrimary = Color.White,
+            textSecondary = PhoenixSubtext,
+            placeholder = PhoenixPlaceholder
+        )
+    } else {
+        DynamicThemeColors(
+            isDark = false,
+            background = PhoenixLightBg,
+            headerBackground = PhoenixLightHeaderBg,
+            cardBackground = PhoenixLightCard,
+            inputBackground = PhoenixLightInput,
+            inputBorder = PhoenixLightBorder,
+            inputText = PhoenixLightText,
+            textPrimary = PhoenixLightText,
+            textSecondary = PhoenixLightSubtext,
+            placeholder = PhoenixLightPlaceholder
+        )
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = PhoenixObsidian.toArgb()
-            window.navigationBarColor = PhoenixObsidian.toArgb()
+            window.statusBarColor = Color.Transparent.toArgb()
+            window.navigationBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+                isAppearanceLightStatusBars = !isDark
+                isAppearanceLightNavigationBars = !isDark
             }
         }
     }
 
-    MaterialTheme(
-        colorScheme = PhoenixColorScheme,
-        typography  = AppTypography,
-        shapes      = AppShapes,
-        content     = content
-    )
+    CompositionLocalProvider(LocalDynamicThemeColors provides dynamicColors) {
+        MaterialTheme(
+            colorScheme = if (isDark) PhoenixDarkColorScheme else PhoenixLightColorScheme,
+            typography  = AppTypography,
+            shapes      = AppShapes,
+            content     = content
+        )
+    }
 }
 
 // ═════════════════════════════════════════════════════════════════

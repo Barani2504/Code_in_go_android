@@ -28,6 +28,16 @@ val PhoenixSubtext       = Color(0xFFB4_A5_8C)
 /** Placeholder text in fields.  iOS: 140,125,105 */
 val PhoenixPlaceholder   = Color(0xFF8C_7D_69)
 
+// Light Mode Tokens (iOS Core/Theme.swift)
+val PhoenixLightBg         = Color(0xFFF5_F7_FC)
+val PhoenixLightHeaderBg   = Color(0xFFFF_FF_FF)
+val PhoenixLightCard       = Color(0xFFFF_FF_FF)
+val PhoenixLightInput      = Color(0xFFF1_F4_FA)
+val PhoenixLightBorder     = Color(0xFFD7_DE_EB)
+val PhoenixLightText       = Color(0xFF12_18_26)
+val PhoenixLightSubtext    = Color(0xFF64_70_80)
+val PhoenixLightPlaceholder= Color(0xFF9B_A2_AF)
+
 // ── ACCENT PALETTE ────────────────────────────────────
 
 /** Primary amber gold — headings, icons, CTA.  iOS: FFC800 */

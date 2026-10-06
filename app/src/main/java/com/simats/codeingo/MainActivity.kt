@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.simats.codeingo.navigation.AppNavHost
 import com.simats.codeingo.ui.theme.CodeingoTheme
 import com.simats.codeingo.ui.theme.DarkBackground
+import com.simats.codeingo.ui.theme.ProvideScreenMetrics
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,11 +18,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CodeingoTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = DarkBackground
-                ) {
-                    AppNavHost()
+                ProvideScreenMetrics {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = DarkBackground
+                    ) {
+                        AppNavHost()
+                    }
                 }
             }
         }
