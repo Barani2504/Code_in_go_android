@@ -284,6 +284,33 @@ class GameManager private constructor() {
         }
     }
 
+    /**
+     * Called when a lesson/stage is completed. Mirrors iOS onComplete / onUpgradePhoenixNextUnit:
+     *  - Inserts [levelNumber + 1] into unlockedLevelIndices  (or nextUnitFirstLevel for boss)
+     *  - Updates eggCrackLevel so PhoenixEggHatch3DView reflects the new crack stage
+     *  - For boss completion, triggers Phoenix Evolution
+     */
+    fun unlockNextLevel(
+        currentLevelIndex: Int,
+        isBoss: Boolean = false,
+        nextUnitFirstLevelIndex: Int? = null
+    ) {
+        val nextLevel = if (isBoss) {
+            nextUnitFirstLevelIndex ?: (currentLevelIndex + 1)
+        } else {
+            currentLevelIndex + 1
+        }
+        _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevel
+
+        if (isBoss) {
+            _eggCrackLevel.value = 0
+            val targetStage = (_activePhoenixStage.value + 1).coerceAtMost(18)
+            triggerEvolution(targetStage)
+        } else {
+            _eggCrackLevel.value = (_unlockedLevelIndices.value.size).coerceAtMost(5)
+        }
+    }
+
     fun regenerateHeart() {
         if (_heartsCount.value < 10) {
             _heartsCount.value++

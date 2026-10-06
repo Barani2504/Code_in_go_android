@@ -138,6 +138,15 @@ fun MainDashboardScreen(
     var activeLevelIndex by remember { mutableIntStateOf(1) }
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
 
+    // Keep activeLevelIndex in sync whenever a stage is unlocked (mirrors iOS onComplete)
+    LaunchedEffect(unlockedLevels) {
+        val maxUnlocked = unlockedLevels.maxOrNull() ?: 1
+        if (maxUnlocked > activeLevelIndex) {
+            activeLevelIndex = maxUnlocked
+            selectedLockedNodeId = null
+        }
+    }
+
     // 5-Minute Heart Regeneration Timer
     var heartTimerRemainingSeconds by remember { mutableIntStateOf(300) }
     LaunchedEffect(heartsCount) {
@@ -540,7 +549,10 @@ fun MainDashboardScreen(
         activeWorldArena?.let { arenaKey ->
             Dialog(
                 onDismissRequest = { activeWorldArena = null },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false
+                )
             ) {
                 when (arenaKey) {
                     "array" -> ArrayKingdomArenaScreen(onDismiss = { activeWorldArena = null })

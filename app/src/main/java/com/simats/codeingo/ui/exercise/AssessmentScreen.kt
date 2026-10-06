@@ -198,18 +198,25 @@ fun AssessmentScreen(
                     gameManager.addStars(starsEarned)
                     gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                     gameManager.completeLessonAndExtendStreak()
+                    gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false)
                     onComplete(totalXPEarned)
                 },
                 onFinish = {
                     gameManager.addStars(starsEarned)
                     gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                     gameManager.completeLessonAndExtendStreak()
+                    gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false)
                     onComplete(totalXPEarned)
                 },
                 onUpgradePhoenixNextUnit = {
                     gameManager.addStars(starsEarned)
                     gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                     gameManager.completeLessonAndExtendStreak()
+                    gameManager.unlockNextLevel(
+                        currentLevelIndex = levelNumber,
+                        isBoss = true,
+                        nextUnitFirstLevelIndex = levelNumber + 1
+                    )
                     onUpgradePhoenixNextUnit?.invoke() ?: onComplete(totalXPEarned)
                 }
             )

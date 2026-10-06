@@ -61,7 +61,7 @@ fun TopStatsHeader(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         // Floating Island Container
         Row(
@@ -76,14 +76,14 @@ fun TopStatsHeader(
                     ),
                     RoundedCornerShape(24.dp)
                 )
-                .padding(horizontal = 10.dp, vertical = 7.dp),
+                .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // 1. Side Menu Hamburger Button
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.08f))
                     .border(
@@ -100,105 +100,119 @@ fun TopStatsHeader(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Side Menu",
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(15.dp)
                 )
             }
 
-            // 2. Phoenix Dynamic Emotion Logo (28dp, opens emotion sheet on tap)
+            // 2. Phoenix Dynamic Emotion Logo (26dp, opens emotion sheet on tap)
             PhoenixDynamicLogoView(
                 showTitle = false,
                 showSubtitleBadge = false,
-                size = 28.dp,
+                size = 26.dp,
                 enableTapSheet = true,
                 onTap = onPhoenixClick
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // 3. Streak Pill
-            val streakEmoji = if (isStreakPendingRestore) "🧊" else "🔥"
-            val streakVal = if (isStreakPendingRestore) savedStreakDays else streakDays
-            val streakColor = if (isStreakPendingRestore) Color(0xFF22D3EE) else Color(0xFFFF9500)
-
+            // Stats Pill Row (Compact & Horizontally Scrollable on ultra-narrow displays)
             Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(0.9.dp, streakColor.copy(alpha = 0.35f), CircleShape)
-                    .clickable { onStreakClick() }
-                    .padding(horizontal = 8.dp, vertical = 4.5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = streakEmoji, fontSize = 13.sp)
-                Text(
-                    text = "$streakVal",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    color = streakColor
-                )
-            }
+                // 3. Streak Pill
+                val streakEmoji = if (isStreakPendingRestore) "🧊" else "🔥"
+                val streakVal = if (isStreakPendingRestore) savedStreakDays else streakDays
+                val streakColor = if (isStreakPendingRestore) Color(0xFF22D3EE) else Color(0xFFFF9500)
 
-            // 4. Stars Pill
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(
-                        0.9.dp,
-                        if (isBossActive) Color.Red.copy(alpha = 0.6f) else Color(0xFFFFD700).copy(alpha = 0.35f),
-                        CircleShape
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(0.9.dp, streakColor.copy(alpha = 0.35f), CircleShape)
+                        .clickable { onStreakClick() }
+                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                ) {
+                    Text(text = streakEmoji, fontSize = 11.5.sp)
+                    Text(
+                        text = "$streakVal",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = streakColor
                     )
-                    .padding(horizontal = 8.dp, vertical = 4.5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(text = "🌟", fontSize = 12.sp)
-                Text(
-                    text = "$totalStars",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFFFFD700)
-                )
-            }
+                }
 
-            // 5. XP Pill
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(0.9.dp, AmberGold.copy(alpha = 0.35f), CircleShape)
-                    .padding(horizontal = 8.dp, vertical = 4.5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(text = "⚡", fontSize = 12.sp)
-                Text(
-                    text = "$totalXP",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    color = AmberGold
-                )
-            }
+                // 4. Stars Pill
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(
+                            0.9.dp,
+                            if (isBossActive) Color.Red.copy(alpha = 0.6f) else Color(0xFFFFD700).copy(alpha = 0.35f),
+                            CircleShape
+                        )
+                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                ) {
+                    Text(text = "🌟", fontSize = 11.sp)
+                    Text(
+                        text = "$totalStars",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD700)
+                    )
+                }
 
-            // 6. Hearts Pill (with countdown if regenerating)
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(0.9.dp, Color(0xFFFF4D4D).copy(alpha = 0.35f), CircleShape)
-                    .clickable { onHeartsClick() }
-                    .padding(horizontal = 8.dp, vertical = 4.5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(text = "❤️", fontSize = 12.sp)
-                Text(
-                    text = if (heartTimerString != null) "$heartsCount ($heartTimerString)" else "$heartsCount",
-                    fontSize = if (heartTimerString != null) 10.sp else 12.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFFFF4D4D)
-                )
+                // 5. XP Pill
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(0.9.dp, AmberGold.copy(alpha = 0.35f), CircleShape)
+                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                ) {
+                    Text(text = "⚡", fontSize = 11.sp)
+                    Text(
+                        text = "$totalXP",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmberGold
+                    )
+                }
+
+                // 6. Hearts Pill (with countdown if regenerating)
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(0.9.dp, Color(0xFFFF4D4D).copy(alpha = 0.35f), CircleShape)
+                        .clickable { onHeartsClick() }
+                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                ) {
+                    Text(text = "❤️", fontSize = 11.sp)
+                    Text(
+                        text = "$heartsCount",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFF4D4D)
+                    )
+                    if (heartTimerString != null) {
+                        Text(
+                            text = heartTimerString,
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF8888)
+                        )
+                    }
+                }
             }
         }
     }

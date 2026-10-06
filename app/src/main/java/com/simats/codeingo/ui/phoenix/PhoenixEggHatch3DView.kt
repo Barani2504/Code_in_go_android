@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -111,19 +113,24 @@ fun PhoenixEggHatch3DView(
     }
 
     // Cracking Sequence
+    // For regular levels: show progressive cracks but do NOT shatter the egg (matches iOS).
+    // Only Boss / final levels shatter the egg and reveal the Phoenix.
+    val isHatchingFinalLevel = isBoss || levelNumber >= totalLevelsInUnit
     LaunchedEffect(Unit) {
-        delay(600)
+        delay(300)
         crackStep = 1
-        delay(600)
+        delay(500)
         crackStep = 2
-        delay(600)
+        delay(500)
         crackStep = 3
-        delay(600)
+        delay(500)
         crackStep = 4
-        delay(700)
-        isShattered = true
-        shockwaveScale = 2.5f
-        shockwaveOpacity = 0.9f
+        if (isHatchingFinalLevel) {
+            delay(600)
+            isShattered = true
+            shockwaveScale = 2.5f
+            shockwaveOpacity = 0.9f
+        }
     }
 
     val animatedShockwaveScale by animateFloatAsState(
@@ -179,6 +186,8 @@ fun PhoenixEggHatch3DView(
                     radius = 900f
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(24.dp)
     ) {
         // Shockwave Ring
@@ -224,14 +233,21 @@ fun PhoenixEggHatch3DView(
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 Text(
-                    text = if (isShattered) "🌟 PHOENIX EVOLVED! 🌟" else "🔥 EGG CRACKING! 🔥",
+                    text = if (isShattered) "🔥 PHOENIX ASCENDS! 🔥"
+                           else if (levelNumber == 1) "🎉 LEVEL 1 COMPLETE! 🎉"
+                           else "🎉 LEVEL $levelNumber COMPLETE! 🎉",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = AmberGold
+                    color = if (isShattered) AmberGold else DuolingoGreen
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = if (isShattered) "Your guardian has unlocked new power!" else "The heat within begins to fissure the shell...",
+                    text = if (isShattered)
+                        "The sacred egg has shattered and set the Phoenix free!"
+                    else if (levelNumber == 1)
+                        "Level 1 Complete! The Phoenix Egg has started cracking!"
+                    else
+                        "Level $levelNumber Complete! The Phoenix Egg crack is deepening!",
                     fontSize = 13.sp,
                     color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center
@@ -333,19 +349,34 @@ fun PhoenixEggHatch3DView(
                         }
                     }
                 } else {
-                    // Ascending Majestic Phoenix
-                    Column(
+                    // Ascending Majestic Phoenix (Boss level only)
+                    Box(
                         modifier = Modifier
+                            .size(140.dp)
                             .offset(y = animatedPhoenixAscend.dp)
                             .scale(animatedPhoenixScale),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "🦅", fontSize = 84.sp)
-                        Text(
-                            text = "SOLAR PHOENIX",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            color = AmberGold
+                        // Phoenix aura glow
+                        Box(
+                            modifier = Modifier
+                                .size(180.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            AmberGold.copy(alpha = 0.75f),
+                                            DuolingoOrange.copy(alpha = 0.35f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                        // Actual Phoenix image — matches iOS RealisticPhoenixBirdFaceView
+                        androidx.compose.foundation.Image(
+                            painter = androidx.compose.ui.res.painterResource(id = com.simats.codeingo.R.drawable.phoenix_stage_2),
+                            contentDescription = "Phoenix Ascended",
+                            modifier = Modifier.size(110.dp)
                         )
                     }
                 }
@@ -365,7 +396,7 @@ fun PhoenixEggHatch3DView(
             ) {
                 StatPill("XP EARNED", "+$xpEarned ⭐", AmberGold, Modifier.weight(1f))
                 StatPill("ACCURACY", "$accuracyPercentage%", DuolingoGreen, Modifier.weight(1f))
-                StatPill("STAGE", "Lv. $levelNumber 🦅", DuolingoOrange, Modifier.weight(1f))
+                StatPill("STAGE", "Lv. $levelNumber 🔥", DuolingoOrange, Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -387,7 +418,7 @@ fun PhoenixEggHatch3DView(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 32.dp)
             )
         }
     }

@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import android.widget.Toast
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 
@@ -110,6 +112,17 @@ class PhoenixEmotionManager private constructor() {
 
     fun initialize(context: Context) {
         this.appContext = context.applicationContext
+        try {
+            val prefs = this.appContext?.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
+            val savedEmotionId = prefs?.getInt("active_emotion_id", -1) ?: -1
+            if (savedEmotionId != -1) {
+                val savedEmotion = phoenixEmotion(savedEmotionId)
+                _currentEmotion.value = savedEmotion
+                _lastAppliedIconName.value = "MainActivityAlias_$savedEmotionId"
+            }
+        } catch (e: Exception) {
+            Log.w("PhoenixEmotion", "Error restoring saved icon state: ${e.message}")
+        }
     }
 
     // Reactive State
@@ -398,18 +411,76 @@ class PhoenixEmotionManager private constructor() {
 
     // MARK: - 📲 System Alternate App Icon Updater
     fun applySystemAppIcon(named: String?) {
-        val iconName = named ?: "AppIcon_0"
+        val iconName = named ?: "phoenix_emotion_0"
         _lastAppliedIconName.value = iconName
         Log.d("PhoenixEmotion", "Requested launcher app icon sync: $iconName")
-        // Android dynamically changes icons via PackageManager activity-alias toggle
-        appContext?.let { ctx ->
-            try {
-                val pm = ctx.packageManager
-                val pkgName = ctx.packageName
-                // Log icon switch target
-                Log.d("PhoenixEmotion", "Updating activity-alias for package: $pkgName target=$iconName")
-            } catch (e: Exception) {
-                Log.w("PhoenixEmotion", "App icon toggle skipped: ${e.message}")
+
+        val id = when {
+            iconName.startsWith("phoenix_emotion_") -> iconName.removePrefix("phoenix_emotion_").toIntOrNull() ?: 0
+            iconName.startsWith("AppIcon_") -> iconName.removePrefix("AppIcon_").toIntOrNull() ?: 0
+            iconName.toIntOrNull() != null -> iconName.toInt()
+            else -> 0
+        }
+
+        val targetAlias = "MainActivityAlias_$id"
+        val allEmotionIds = listOf(0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28)
+        val allAliases = listOf("MainActivityAliasDefault") + allEmotionIds.map { "MainActivityAlias_$it" }
+
+        scope.launch(Dispatchers.IO) {
+            appContext?.let { ctx ->
+                try {
+                    val pm = ctx.packageManager
+                    val pkgName = ctx.packageName
+                    val targetComponent = ComponentName(pkgName, "$pkgName.$targetAlias")
+                    val currentSetting = pm.getComponentEnabledSetting(targetComponent)
+
+                    Log.d("PhoenixEmotion", "Switching launcher alias to $targetAlias (current: $currentSetting)")
+
+                    // 1. Enable target component FIRST
+                    pm.setComponentEnabledSetting(
+                        targetComponent,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP
+                    )
+
+                    // 2. Disable all other aliases
+                    for (alias in allAliases) {
+                        if (alias != targetAlias) {
+                            val comp = ComponentName(pkgName, "$pkgName.$alias")
+                            try {
+                                val state = pm.getComponentEnabledSetting(comp)
+                                if (state != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                                    pm.setComponentEnabledSetting(
+                                        comp,
+                                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                                        PackageManager.DONT_KILL_APP
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                Log.w("PhoenixEmotion", "Failed to disable alias $alias: ${e.message}")
+                            }
+                        }
+                    }
+
+                    // 3. Persist selection in SharedPreferences
+                    ctx.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
+                        .edit()
+                        .putInt("active_emotion_id", id)
+                        .putString("active_icon_name", targetAlias)
+                        .apply()
+
+                    Log.d("PhoenixEmotion", "Successfully switched and persisted launcher app icon: $targetAlias")
+
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            ctx,
+                            "App icon updated to ${phoenixEmotion(id).title}! 🔥",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    Log.e("PhoenixEmotion", "Failed to update launcher app icon: ${e.message}", e)
+                }
             }
         }
     }

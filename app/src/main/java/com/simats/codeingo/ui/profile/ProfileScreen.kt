@@ -219,7 +219,6 @@ private fun AuthenticatedProfileBody(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .statusBarsPadding()
-            .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -880,6 +879,8 @@ private fun AddFriendsSection() {
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(56.dp))
     }
 }
 
@@ -899,7 +900,6 @@ private fun UnauthenticatedProfileBody(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .statusBarsPadding()
-            .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -1130,7 +1130,7 @@ private fun UnauthenticatedProfileBody(
             }
         }
 
-        Spacer(modifier = Modifier.height(72.dp))
+        Spacer(modifier = Modifier.height(56.dp))
     }
 }
 

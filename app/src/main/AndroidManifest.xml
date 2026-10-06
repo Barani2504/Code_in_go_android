@@ -17,13 +17,442 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Codeingo"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Default Launcher Alias -->
+        <activity-alias
+            android:name=".MainActivityAliasDefault"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_0"
+            android:roundIcon="@mipmap/ic_launcher_emotion_0"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- Emotion 0 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_0"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_0"
+            android:roundIcon="@mipmap/ic_launcher_emotion_0"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 2 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_2"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_2"
+            android:roundIcon="@mipmap/ic_launcher_emotion_2"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 3 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_3"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_3"
+            android:roundIcon="@mipmap/ic_launcher_emotion_3"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 4 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_4"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_4"
+            android:roundIcon="@mipmap/ic_launcher_emotion_4"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 5 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_5"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_5"
+            android:roundIcon="@mipmap/ic_launcher_emotion_5"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 6 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_6"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_6"
+            android:roundIcon="@mipmap/ic_launcher_emotion_6"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 7 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_7"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_7"
+            android:roundIcon="@mipmap/ic_launcher_emotion_7"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 8 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_8"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_8"
+            android:roundIcon="@mipmap/ic_launcher_emotion_8"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 9 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_9"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_9"
+            android:roundIcon="@mipmap/ic_launcher_emotion_9"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 10 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_10"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_10"
+            android:roundIcon="@mipmap/ic_launcher_emotion_10"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 11 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_11"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_11"
+            android:roundIcon="@mipmap/ic_launcher_emotion_11"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 12 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_12"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_12"
+            android:roundIcon="@mipmap/ic_launcher_emotion_12"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 13 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_13"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_13"
+            android:roundIcon="@mipmap/ic_launcher_emotion_13"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 14 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_14"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_14"
+            android:roundIcon="@mipmap/ic_launcher_emotion_14"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 15 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_15"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_15"
+            android:roundIcon="@mipmap/ic_launcher_emotion_15"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 16 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_16"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_16"
+            android:roundIcon="@mipmap/ic_launcher_emotion_16"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 17 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_17"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_17"
+            android:roundIcon="@mipmap/ic_launcher_emotion_17"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 18 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_18"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_18"
+            android:roundIcon="@mipmap/ic_launcher_emotion_18"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 19 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_19"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_19"
+            android:roundIcon="@mipmap/ic_launcher_emotion_19"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 20 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_20"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_20"
+            android:roundIcon="@mipmap/ic_launcher_emotion_20"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 21 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_21"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_21"
+            android:roundIcon="@mipmap/ic_launcher_emotion_21"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 22 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_22"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_22"
+            android:roundIcon="@mipmap/ic_launcher_emotion_22"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 23 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_23"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_23"
+            android:roundIcon="@mipmap/ic_launcher_emotion_23"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 24 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_24"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_24"
+            android:roundIcon="@mipmap/ic_launcher_emotion_24"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 25 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_25"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_25"
+            android:roundIcon="@mipmap/ic_launcher_emotion_25"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 26 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_26"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_26"
+            android:roundIcon="@mipmap/ic_launcher_emotion_26"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 27 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_27"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_27"
+            android:roundIcon="@mipmap/ic_launcher_emotion_27"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Emotion 28 Dynamic Launcher Icon -->
+        <activity-alias
+            android:name=".MainActivityAlias_28"
+            android:targetActivity=".MainActivity"
+            android:icon="@mipmap/ic_launcher_emotion_28"
+            android:roundIcon="@mipmap/ic_launcher_emotion_28"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
     </application>
 
 </manifest>
