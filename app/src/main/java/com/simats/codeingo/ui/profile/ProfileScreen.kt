@@ -82,7 +82,6 @@ fun ProfileScreen(
     var showCreateAccountSheet by remember { mutableStateOf(false) }
     var showSignInSheet by remember { mutableStateOf(false) }
     var showSignOutAlert by remember { mutableStateOf(false) }
-    var showAllAchievements by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -99,8 +98,6 @@ fun ProfileScreen(
                 streakDays = streakDays,
                 totalXP = totalXP,
                 currentEmotion = currentEmotion,
-                showAllAchievements = showAllAchievements,
-                onToggleAllAchievements = { showAllAchievements = !showAllAchievements },
                 onOpenEmotionSheet = { showEmotionSheet = true },
                 onOpenEditProfile = { showCreateAccountSheet = true },
                 onSignOutClick = { showSignOutAlert = true }
@@ -208,8 +205,6 @@ private fun AuthenticatedProfileBody(
     streakDays: Int,
     totalXP: Int,
     currentEmotion: com.simats.codeingo.data.model.PhoenixEmotion,
-    showAllAchievements: Boolean,
-    onToggleAllAchievements: () -> Unit,
     onOpenEmotionSheet: () -> Unit,
     onOpenEditProfile: () -> Unit,
     onSignOutClick: () -> Unit
@@ -281,15 +276,11 @@ private fun AuthenticatedProfileBody(
         )
 
         // 3. Achievements Section
-        if (showAllAchievements) {
-            DSAAchievementsView()
-        } else {
-            AchievementsSection(
-                streakDays = streakDays,
-                totalXP = totalXP,
-                onViewAllClick = onToggleAllAchievements
-            )
-        }
+        AchievementsSection(
+            streakDays = streakDays,
+            totalXP = totalXP,
+            onViewAllClick = {}
+        )
 
         // 4. Add Friends Section
         AddFriendsSection()

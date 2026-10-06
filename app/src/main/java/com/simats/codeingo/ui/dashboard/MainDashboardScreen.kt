@@ -76,8 +76,6 @@ import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.profile.ProfileScreen
 import com.simats.codeingo.ui.practice.PracticeHubScreen
-import com.simats.codeingo.ui.quests.QuestsScreen
-import com.simats.codeingo.ui.shop.ShopScreen
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.visualizer.VisualizerScreen
@@ -424,14 +422,6 @@ fun MainDashboardScreen(
                             onLogout = onLogout,
                             modifier = Modifier.fillMaxSize()
                         )
-                    }
-
-                    DashboardTab.QUESTS -> {
-                        QuestsScreen(modifier = Modifier.fillMaxSize())
-                    }
-
-                    DashboardTab.SHOP -> {
-                        ShopScreen(modifier = Modifier.fillMaxSize())
                     }
 
                     else -> {
