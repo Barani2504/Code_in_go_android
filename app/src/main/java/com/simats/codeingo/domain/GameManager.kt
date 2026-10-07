@@ -212,6 +212,26 @@ class GameManager private constructor() {
         persistStats()
     }
 
+    /** Debug helper — resets streak to 0, used by Settings streak controls. */
+    fun debugResetStreak() {
+        _streakDays.value = 0
+        _savedStreakDays.value = 0
+        _isStreakLostPendingRestore.value = false
+        _lastPlayedDateUnix.value = 0.0
+        persistStats()
+    }
+
+    /** Resets all unlocked levels and XP — used by Settings → Courses → RESET. */
+    fun resetAllProgress() {
+        _totalXP.value = 0
+        _unlockedLevelIndices.value = setOf(1)
+        _streakDays.value = 0
+        _savedStreakDays.value = 0
+        _isStreakLostPendingRestore.value = false
+        _lastPlayedDateUnix.value = 0.0
+        persistStats()
+    }
+
     fun completeLessonAndExtendStreak() {
         val now = System.currentTimeMillis() / 1000.0
         val cal = java.util.Calendar.getInstance()

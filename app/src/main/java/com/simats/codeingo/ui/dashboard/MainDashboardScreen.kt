@@ -428,7 +428,10 @@ fun MainDashboardScreen(
                     }
 
                     DashboardTab.LEADERBOARDS -> {
+                        val completedLessonCount by GameManager.instance.completedLessonIds.collectAsState()
                         LeaderboardsScreen(
+                            completedLessons = completedLessonCount.size,
+                            onStartLesson = { selectedTab = DashboardTab.LEARN },
                             modifier = Modifier.fillMaxSize()
                         )
                     }

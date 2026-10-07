@@ -19,9 +19,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             CodeingoTheme {
                 ProvideScreenMetrics {
+                    val colors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = DarkBackground
+                        color = colors.background
                     ) {
                         AppNavHost()
                     }

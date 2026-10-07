@@ -37,6 +37,9 @@ class ThemeManager private constructor() {
     private val _currentTheme = MutableStateFlow(AppTheme.DARK)
     val currentTheme: StateFlow<AppTheme> = _currentTheme.asStateFlow()
 
+    val isDark: Boolean
+        get() = _currentTheme.value == AppTheme.DARK
+
     fun initialize(context: Context) {
         val appContext = context.applicationContext
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

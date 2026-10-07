@@ -103,6 +103,11 @@ class PhoenixEmotionManager private constructor() {
         val instance: PhoenixEmotionManager by lazy { PhoenixEmotionManager() }
         val shared: PhoenixEmotionManager get() = instance
         var isSuppressingIconAlert: Boolean = false
+
+        val ALL_EMOTION_IDS = listOf(
+            0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28
+        )
+        val ALL_ALIASES = listOf("MainActivityAliasDefault") + ALL_EMOTION_IDS.map { "MainActivityAlias_$it" }
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -120,8 +125,34 @@ class PhoenixEmotionManager private constructor() {
                 _currentEmotion.value = savedEmotion
                 _lastAppliedIconName.value = "MainActivityAlias_$savedEmotionId"
             }
+            ensureLauncherAliasIntegrity()
         } catch (e: Exception) {
             Log.w("PhoenixEmotion", "Error restoring saved icon state: ${e.message}")
+        }
+    }
+
+    private fun ensureLauncherAliasIntegrity() {
+        val ctx = appContext ?: return
+        try {
+            val pm = ctx.packageManager
+            val pkgName = ctx.packageName
+            val anyEnabled = ALL_ALIASES.any { alias ->
+                val comp = ComponentName(pkgName, "$pkgName.$alias")
+                val state = pm.getComponentEnabledSetting(comp)
+                state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                        (alias == "MainActivityAliasDefault" && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            }
+            if (!anyEnabled) {
+                Log.w("PhoenixEmotion", "No launcher alias active on launch! Recovering MainActivityAliasDefault.")
+                val defaultComp = ComponentName(pkgName, "$pkgName.MainActivityAliasDefault")
+                pm.setComponentEnabledSetting(
+                    defaultComp,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+            }
+        } catch (e: Exception) {
+            Log.w("PhoenixEmotion", "Failed to verify launcher alias integrity on launch: ${e.message}")
         }
     }
 
@@ -134,6 +165,11 @@ class PhoenixEmotionManager private constructor() {
 
     private val _isAutoEmotionEnabled = MutableStateFlow(true)
     val isAutoEmotionEnabled: StateFlow<Boolean> = _isAutoEmotionEnabled.asStateFlow()
+
+    fun setAutoEmotionEnabled(enabled: Boolean) {
+        _isAutoEmotionEnabled.value = enabled
+        if (enabled) evaluateEmotionRules(forceIconUpdate = true)
+    }
 
     private val _lastTriggerReason = MutableStateFlow("App Launch")
     val lastTriggerReason: StateFlow<String> = _lastTriggerReason.asStateFlow()
@@ -415,41 +451,49 @@ class PhoenixEmotionManager private constructor() {
         _lastAppliedIconName.value = iconName
         Log.d("PhoenixEmotion", "Requested launcher app icon sync: $iconName")
 
-        val id = when {
+        val rawId = when {
             iconName.startsWith("phoenix_emotion_") -> iconName.removePrefix("phoenix_emotion_").toIntOrNull() ?: 0
             iconName.startsWith("AppIcon_") -> iconName.removePrefix("AppIcon_").toIntOrNull() ?: 0
             iconName.toIntOrNull() != null -> iconName.toInt()
             else -> 0
         }
 
+        val id = if (ALL_EMOTION_IDS.contains(rawId)) rawId else 0
         val targetAlias = "MainActivityAlias_$id"
-        val allEmotionIds = listOf(0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28)
-        val allAliases = listOf("MainActivityAliasDefault") + allEmotionIds.map { "MainActivityAlias_$it" }
 
         scope.launch(Dispatchers.IO) {
             appContext?.let { ctx ->
-                try {
-                    val pm = ctx.packageManager
-                    val pkgName = ctx.packageName
-                    val targetComponent = ComponentName(pkgName, "$pkgName.$targetAlias")
-                    val currentSetting = pm.getComponentEnabledSetting(targetComponent)
+                val pm = ctx.packageManager
+                val pkgName = ctx.packageName
+                val targetComponent = ComponentName(pkgName, "$pkgName.$targetAlias")
 
+                try {
+                    val currentSetting = pm.getComponentEnabledSetting(targetComponent)
                     Log.d("PhoenixEmotion", "Switching launcher alias to $targetAlias (current: $currentSetting)")
 
-                    // 1. Enable target component FIRST
+                    // 1. Enable target component FIRST using DONT_KILL_APP
                     pm.setComponentEnabledSetting(
                         targetComponent,
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         PackageManager.DONT_KILL_APP
                     )
 
-                    // 2. Disable all other aliases
-                    for (alias in allAliases) {
+                    // Verify target component is enabled before disabling old aliases
+                    val verifiedState = pm.getComponentEnabledSetting(targetComponent)
+                    if (verifiedState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                        Log.e("PhoenixEmotion", "Failed to verify enabled state for target alias: $targetAlias")
+                        return@launch
+                    }
+
+                    // 2. Disable old / other aliases AFTER target is confirmed enabled
+                    for (alias in ALL_ALIASES) {
                         if (alias != targetAlias) {
                             val comp = ComponentName(pkgName, "$pkgName.$alias")
                             try {
                                 val state = pm.getComponentEnabledSetting(comp)
-                                if (state != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                                val isCurrentlyEnabled = state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                                        (alias == "MainActivityAliasDefault" && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+                                if (isCurrentlyEnabled) {
                                     pm.setComponentEnabledSetting(
                                         comp,
                                         PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
@@ -462,7 +506,24 @@ class PhoenixEmotionManager private constructor() {
                         }
                     }
 
-                    // 3. Persist selection in SharedPreferences
+                    // 3. Safety Guard: Guarantee at least one launcher alias remains enabled
+                    val anyEnabled = ALL_ALIASES.any { alias ->
+                        val comp = ComponentName(pkgName, "$pkgName.$alias")
+                        val state = pm.getComponentEnabledSetting(comp)
+                        state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                                (alias == "MainActivityAliasDefault" && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+                    }
+
+                    if (!anyEnabled) {
+                        Log.e("PhoenixEmotion", "CRITICAL: All aliases were disabled! Recovering target alias: $targetAlias")
+                        pm.setComponentEnabledSetting(
+                            targetComponent,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                            PackageManager.DONT_KILL_APP
+                        )
+                    }
+
+                    // 4. Persist selection in SharedPreferences
                     ctx.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
                         .edit()
                         .putInt("active_emotion_id", id)
@@ -480,6 +541,17 @@ class PhoenixEmotionManager private constructor() {
                     }
                 } catch (e: Exception) {
                     Log.e("PhoenixEmotion", "Failed to update launcher app icon: ${e.message}", e)
+                    // Emergency fallback: ensure launcher alias is never completely disabled
+                    try {
+                        val defaultComp = ComponentName(pkgName, "$pkgName.MainActivityAliasDefault")
+                        pm.setComponentEnabledSetting(
+                            defaultComp,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                            PackageManager.DONT_KILL_APP
+                        )
+                    } catch (fallbackEx: Exception) {
+                        Log.e("PhoenixEmotion", "Emergency fallback failed: ${fallbackEx.message}", fallbackEx)
+                    }
                 }
             }
         }
