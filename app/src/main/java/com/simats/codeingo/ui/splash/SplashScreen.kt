@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.splash
+package com.simats.codeingo.ui.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -390,7 +390,7 @@ fun SplashScreen(
                     progress = progress.value,
                     height = 12.dp,
                     barColor = AmberGold,
-                    trackcolor = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.15f)
+                    trackColor = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.15f)
                 )
             }
         }

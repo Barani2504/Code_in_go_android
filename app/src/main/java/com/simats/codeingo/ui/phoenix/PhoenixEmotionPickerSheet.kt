@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -230,7 +230,7 @@ fun PhoenixEmotionPickerSheet(
                         checked = isAutoEnabled,
                         onCheckedChange = { emotionManager.syncAutoEmotion() },
                         colors = SwitchDefaults.colors(
-                            checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
+                            checkedThumbColor = LocalDynamicThemeColors.current.textPrimary,
                             checkedTrackColor = AmberGold
                         )
                     )

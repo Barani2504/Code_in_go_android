@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.settings
+package com.simats.codeingo.ui.settings
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -532,9 +532,9 @@ private fun AppearanceSection(
                     ThemeManager.instance.toggleDarkMode(toDark)
                 },
                 colors = SwitchDefaults.colors(
-                    checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
+                    checkedThumbColor = LocalDynamicThemeColors.current.textPrimary,
                     checkedTrackColor = AmberGold,
-                    uncheckedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
+                    uncheckedThumbColor = LocalDynamicThemeColors.current.textPrimary,
                     uncheckedTrackColor = cardBorder
                 )
             )
@@ -938,9 +938,9 @@ private fun ToggleRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
+                checkedThumbColor = LocalDynamicThemeColors.current.textPrimary,
                 checkedTrackColor = DuolingoBlue,
-                uncheckedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
+                uncheckedThumbColor = LocalDynamicThemeColors.current.textPrimary,
                 uncheckedTrackColor = textSecondary.copy(alpha = 0.35f)
             )
         )

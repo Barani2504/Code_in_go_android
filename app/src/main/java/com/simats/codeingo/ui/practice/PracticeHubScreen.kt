@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.practice
+package com.simats.codeingo.ui.practice
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -803,7 +803,6 @@ private fun InterviewPrepTab(
                 diffColor = AmberGold,
                 approach = "Perform BFS using a queue. Pop nodes level by level and append children for next level.",
                 sampleCode = "from collections import deque\ndef levelOrder(root):\n    if not root: return []\n    res, q = [], deque([root])\n    while q:\n        level = []\n        for _ in range(len(q)):\n            node = q.popleft()\n            level.append(node.val)\n            if node.left: q.append(node.left)\n            if node.right: q.append(node.right)\n        res.append(level)\n    return res"
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
             ),
             InterviewProblem(
                 title = "Course Schedule (Topological Graph)",
@@ -812,7 +811,6 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
                 diffColor = AmberGold,
                 approach = "Build adjacency graph and in-degree array. Push 0 in-degree nodes to queue (Kahn's Algorithm).",
                 sampleCode = "from collections import deque\ndef canFinish(numCourses, prerequisites):\n    adj = [[] for _ in range(numCourses)]\n    indegree = [0] * numCourses\n    for dest, src in prerequisites:\n        adj[src].append(dest)\n        indegree[dest] += 1\n    q = deque([i for i in range(numCourses) if indegree[i] == 0])\n    visited = 0\n    while q:\n        node = q.popleft()\n        visited += 1\n        for neighbor in adj[node]:\n            indegree[neighbor] -= 1\n            if indegree[neighbor] == 0: q.append(neighbor)\n    return visited == numCourses"
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
             ),
             InterviewProblem(
                 title = "LRU Cache (Doubly Linked + Map)",

@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -304,7 +304,7 @@ fun PhoenixEggHatch3DView(
                         drawPath(
                             path = eggPath,
                             brush = Brush.linearGradient(
-                                colors = listOf(LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f), Color.Transparent)
+                                colors = listOf(Color.White.copy(alpha = 0.6f), Color.Transparent)
                             ),
                             style = Stroke(width = 3.dp.toPx())
                         )
