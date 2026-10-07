@@ -26,6 +26,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.LocalContentColor
 import com.simats.codeingo.domain.AppTheme
 import com.simats.codeingo.domain.ThemeManager
 
@@ -167,8 +168,11 @@ fun CodeingoTheme(
             colorScheme = if (isDark) PhoenixDarkColorScheme else PhoenixLightColorScheme,
             typography  = AppTypography,
             shapes      = AppShapes,
-            content     = content
-        )
+        ) {
+            CompositionLocalProvider(LocalContentColor provides dynamicColors.textPrimary) {
+                content()
+            }
+        }
     }
 }
 

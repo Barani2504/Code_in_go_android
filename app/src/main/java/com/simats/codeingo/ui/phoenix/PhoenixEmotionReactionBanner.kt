@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import kotlin.math.roundToInt
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // ⚡ PhoenixEmotionReactionBanner — Floating Reactive HUD Banner
@@ -142,7 +143,7 @@ fun PhoenixEmotionReactionBanner(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = emotion.title,
-                            color = Color.White,
+                            color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.SansSerif
@@ -196,7 +197,7 @@ fun PhoenixEmotionReactionBanner(
 
                     Text(
                         text = "\"${emotion.quote}\"",
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         fontStyle = FontStyle.Italic,

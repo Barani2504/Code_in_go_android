@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * Vector representation of the Facebook 'f' logo matching iOS FacebookLogoView.
@@ -34,7 +35,7 @@ fun FacebookLogoView(
     ) {
         Text(
             text = "f",
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = (size.value * 0.75f).sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Serif,

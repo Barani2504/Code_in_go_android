@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.splash
+﻿package com.simats.codeingo.ui.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🌌 SplashScreen — Phoenix Bird Flight Theme with Soaring Dynamics
@@ -365,7 +366,7 @@ fun SplashScreen(
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.SansSerif,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -389,7 +390,7 @@ fun SplashScreen(
                     progress = progress.value,
                     height = 12.dp,
                     barColor = AmberGold,
-                    trackColor = Color.White.copy(alpha = 0.15f)
+                    trackcolor = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.15f)
                 )
             }
         }

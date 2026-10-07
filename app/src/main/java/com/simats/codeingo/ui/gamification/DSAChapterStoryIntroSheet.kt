@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.gamification
+﻿package com.simats.codeingo.ui.gamification
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSAChapterModel
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * DSAChapterStoryIntroSheet
@@ -103,14 +104,14 @@ fun DSAChapterStoryIntroSheet(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.12f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.8f),
+                        tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -181,7 +182,7 @@ fun DSAChapterStoryIntroSheet(
                             text = chapter.title,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Text(
                             text = "“${chapter.subtitle}”",
@@ -220,7 +221,7 @@ fun DSAChapterStoryIntroSheet(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f)
                         )
                     }
 
@@ -228,7 +229,7 @@ fun DSAChapterStoryIntroSheet(
                         text = chapter.story,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.95f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.95f),
                         lineHeight = 22.sp
                     )
                 }
@@ -245,7 +246,7 @@ fun DSAChapterStoryIntroSheet(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f)
                     )
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -265,7 +266,7 @@ fun DSAChapterStoryIntroSheet(
                                         .clip(CircleShape)
                                         .background(
                                             if (lvl.isBoss) Color.Yellow.copy(alpha = 0.2f)
-                                            else Color.White.copy(alpha = 0.1f)
+                                            else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f)
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -282,13 +283,13 @@ fun DSAChapterStoryIntroSheet(
                                         text = lvl.title,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                     Text(
                                         text = lvl.subtitle,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = Color.White.copy(alpha = 0.6f)
+                                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
                                     )
                                 }
 

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.animateDpAsState
@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🔘 Duolingo 3D Tactile Push Button (Exact Parity with iOS)
@@ -83,7 +84,7 @@ enum class Duolingo3DButtonColor {
             GREEN, BLUE -> Color.White
             AMBER -> Color(0xFF1A1205)
             WHITE -> Color(0xFF1CB0F6)
-            DISABLED -> Color.White.copy(alpha = 0.4f)
+            DISABLED -> LocalDynamicThemeColors.current.placeholder
         }
 }
 

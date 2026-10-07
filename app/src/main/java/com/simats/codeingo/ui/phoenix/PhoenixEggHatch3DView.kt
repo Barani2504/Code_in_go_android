@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -68,6 +68,7 @@ import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 data class EggParticle(
     val id: Int,
@@ -249,7 +250,7 @@ fun PhoenixEggHatch3DView(
                     else
                         "Level $levelNumber Complete! The Phoenix Egg crack is deepening!",
                     fontSize = 13.sp,
-                    color = Color.White.copy(alpha = 0.85f),
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center
                 )
             }
@@ -303,7 +304,7 @@ fun PhoenixEggHatch3DView(
                         drawPath(
                             path = eggPath,
                             brush = Brush.linearGradient(
-                                colors = listOf(Color.White.copy(alpha = 0.6f), Color.Transparent)
+                                colors = listOf(LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f), Color.Transparent)
                             ),
                             style = Stroke(width = 3.dp.toPx())
                         )

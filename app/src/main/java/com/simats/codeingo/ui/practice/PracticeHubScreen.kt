@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.practice
+﻿package com.simats.codeingo.ui.practice
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -76,6 +76,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreenDark
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 data class InterviewProblem(
     val title: String,
@@ -139,7 +140,7 @@ fun PracticeHubScreen(
                         text = "Spaced Repetition & Repair",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     val unrepairedCount = mistakes.count { !it.isRepaired }
                     Text(
@@ -241,7 +242,7 @@ fun PracticeHubScreen(
                         text = "🛠️ Mistake Repair",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -250,7 +251,7 @@ fun PracticeHubScreen(
                         text = item.prompt,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -273,7 +274,7 @@ fun PracticeHubScreen(
                             Text(
                                 text = item.explanation,
                                 fontSize = 13.sp,
-                                color = Color.White.copy(alpha = 0.9f),
+                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
                                 lineHeight = 18.sp
                             )
                             Divider(color = InputBorder)
@@ -326,7 +327,7 @@ fun PracticeHubScreen(
                             text = prob.title,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Box(
                             modifier = Modifier
@@ -364,7 +365,7 @@ fun PracticeHubScreen(
                     Text(
                         text = prob.approach,
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
                         lineHeight = 18.sp
                     )
 
@@ -445,7 +446,7 @@ private fun MistakeVaultTab(
                     text = "No Mistakes Recorded!",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -517,7 +518,7 @@ private fun MistakeVaultTab(
                                     text = "REPAIR (+10 XP)",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                             }
                         }
@@ -529,7 +530,7 @@ private fun MistakeVaultTab(
                         text = item.prompt,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -642,7 +643,7 @@ private fun DailyReviewTab(
                     text = q.first,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     lineHeight = 24.sp
                 )
 
@@ -682,7 +683,7 @@ private fun DailyReviewTab(
                             text = opt,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                 }
@@ -737,7 +738,7 @@ private fun DailyReviewTab(
                                 text = "5 Quick Reviews",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.White
+                                color = LocalDynamicThemeColors.current.textPrimary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
@@ -802,6 +803,7 @@ private fun InterviewPrepTab(
                 diffColor = AmberGold,
                 approach = "Perform BFS using a queue. Pop nodes level by level and append children for next level.",
                 sampleCode = "from collections import deque\ndef levelOrder(root):\n    if not root: return []\n    res, q = [], deque([root])\n    while q:\n        level = []\n        for _ in range(len(q)):\n            node = q.popleft()\n            level.append(node.val)\n            if node.left: q.append(node.left)\n            if node.right: q.append(node.right)\n        res.append(level)\n    return res"
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
             ),
             InterviewProblem(
                 title = "Course Schedule (Topological Graph)",
@@ -810,6 +812,7 @@ private fun InterviewPrepTab(
                 diffColor = AmberGold,
                 approach = "Build adjacency graph and in-degree array. Push 0 in-degree nodes to queue (Kahn's Algorithm).",
                 sampleCode = "from collections import deque\ndef canFinish(numCourses, prerequisites):\n    adj = [[] for _ in range(numCourses)]\n    indegree = [0] * numCourses\n    for dest, src in prerequisites:\n        adj[src].append(dest)\n        indegree[dest] += 1\n    q = deque([i for i in range(numCourses) if indegree[i] == 0])\n    visited = 0\n    while q:\n        node = q.popleft()\n        visited += 1\n        for neighbor in adj[node]:\n            indegree[neighbor] -= 1\n            if indegree[neighbor] == 0: q.append(neighbor)\n    return visited == numCourses"
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
             ),
             InterviewProblem(
                 title = "LRU Cache (Doubly Linked + Map)",
@@ -846,7 +849,7 @@ private fun InterviewPrepTab(
                         text = prob.title,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -1007,7 +1010,7 @@ private fun PracticeBannerCard(
                         text = "BOSS",
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }
@@ -1016,7 +1019,7 @@ private fun PracticeBannerCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 maxLines = 1
             )
             Text(

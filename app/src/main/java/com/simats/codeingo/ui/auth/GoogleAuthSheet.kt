@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.auth
+﻿package com.simats.codeingo.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +44,7 @@ import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 data class GoogleAccountItem(
     val name: String,
@@ -120,7 +121,7 @@ fun GoogleAuthSheet(
                 text = "Sign in with Google",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -141,7 +142,7 @@ fun GoogleAuthSheet(
                 Text(
                     text = "Signing in as $selectedName...",
                     fontSize = 15.sp,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             } else {
                 // List of Google Accounts
@@ -176,7 +177,7 @@ fun GoogleAuthSheet(
                                     text = account.avatarInitial,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                             }
 
@@ -187,7 +188,7 @@ fun GoogleAuthSheet(
                                     text = account.name,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                                 Text(
                                     text = account.email,

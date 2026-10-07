@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.exercise
+﻿package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -66,6 +66,7 @@ import com.simats.codeingo.ui.theme.DuolingoRedDark
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun BossBattleScreen(
@@ -293,7 +294,7 @@ fun BossBattleScreen(
                         text = boss.name,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
 
                     Text(
@@ -312,7 +313,7 @@ fun BossBattleScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(text = "BOSS HP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DuolingoRed)
-                            Text(text = "$bossHp / ${boss.bossHp}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = "$bossHp / ${boss.bossHp}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         ProgressBarAnimated(
@@ -331,7 +332,7 @@ fun BossBattleScreen(
                         text = curQ.first,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         textAlign = TextAlign.Center
                     )
 
@@ -356,7 +357,7 @@ fun BossBattleScreen(
                                     text = opt,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                             }
                         }

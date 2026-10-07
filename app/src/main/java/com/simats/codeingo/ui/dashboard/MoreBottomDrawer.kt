@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +36,7 @@ import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun MoreBottomDrawer(
@@ -57,7 +58,7 @@ fun MoreBottomDrawer(
                 .align(Alignment.CenterHorizontally)
                 .size(width = 40.dp, height = 4.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(Color.White.copy(alpha = 0.3f))
+                .background(LocalDynamicThemeColors.current.placeholder)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -99,7 +100,7 @@ fun MoreBottomDrawer(
                     text = "SETTINGS",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
 

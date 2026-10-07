@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
@@ -34,6 +34,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 enum class SpeechBubblePointerDirection {
     BOTTOM,
@@ -97,7 +98,7 @@ fun DuolingoSpeechBubbleView(
 
             Text(
                 text = annotatedText,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.SansSerif,

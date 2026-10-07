@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.exercise
+﻿package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -74,6 +74,7 @@ import com.simats.codeingo.ui.theme.DuolingoRedDark
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun AssessmentScreen(
@@ -237,7 +238,7 @@ fun AssessmentScreen(
                     text = "Out of Hearts!",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -348,7 +349,7 @@ fun AssessmentScreen(
                             text = currentQuestion.typeTitle,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -368,7 +369,7 @@ fun AssessmentScreen(
                                         text = "Cheat Code",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Black,
-                                        color = Color.White
+                                        color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                 }
                             }
@@ -422,7 +423,7 @@ fun AssessmentScreen(
                                     text = currentQuestion.promptSentence,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                                 Text(
                                     text = currentQuestion.targetPrompt,
@@ -483,7 +484,7 @@ fun AssessmentScreen(
                                             text = optionText,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color.White,
+                                            color = LocalDynamicThemeColors.current.textPrimary,
                                             modifier = Modifier.weight(1f)
                                         )
                                         if (isSelected) {
@@ -577,7 +578,7 @@ fun AssessmentScreen(
                                             .padding(horizontal = 16.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(text = optionText, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text(text = optionText, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                                     }
                                 }
                             }
@@ -622,7 +623,7 @@ fun AssessmentScreen(
                                         text = "Correct answer: $correctAnswerSummary",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                 }
                             }
@@ -707,7 +708,7 @@ fun AssessmentScreen(
                             text = "Phoenix Cheat Code",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                 },

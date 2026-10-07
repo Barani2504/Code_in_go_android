@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.onboarding
+﻿package com.simats.codeingo.ui.onboarding
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -84,6 +84,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * OnboardingScreen faithfully synchronized with iOS ContentView.swift (commit 2b2c2ab).
@@ -265,7 +266,7 @@ private fun HeroPageSlide() {
             text = "Rise with Code in Go",
             fontSize = 28.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             textAlign = TextAlign.Center
         )
 
@@ -275,7 +276,7 @@ private fun HeroPageSlide() {
             text = "The fiery, fun, and gamified way to master Data Structures & Algorithms!",
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.70f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
             textAlign = TextAlign.Center,
             lineHeight = 20.sp,
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -323,7 +324,7 @@ private fun FeatureSlide(
                     .border(
                         2.dp,
                         Brush.linearGradient(
-                            listOf(Color.White.copy(alpha = 0.5f), badgeColor.copy(alpha = 0.5f))
+                            listOf(LocalDynamicThemeColors.current.textSecondary, badgeColor.copy(alpha = 0.5f))
                         ),
                         CircleShape
                     )
@@ -361,7 +362,7 @@ private fun FeatureSlide(
             text = title,
             fontSize = 26.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             textAlign = TextAlign.Center
         )
 
@@ -371,7 +372,7 @@ private fun FeatureSlide(
             text = subtitle,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.72f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.72f),
             textAlign = TextAlign.Center,
             lineHeight = 20.sp,
             modifier = Modifier.padding(horizontal = 20.dp)
@@ -394,7 +395,7 @@ private fun CarouselPageIndicator(
         for (i in 0 until pageCount) {
             val isSelected = i == currentPage
             val width = if (isSelected) 22.dp else 7.dp
-            val color = if (isSelected) AmberGold else Color.White.copy(alpha = 0.25f)
+            val color = if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f)
 
             Box(
                 modifier = Modifier

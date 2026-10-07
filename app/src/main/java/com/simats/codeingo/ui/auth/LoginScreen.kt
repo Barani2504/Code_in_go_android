@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.auth
+﻿package com.simats.codeingo.ui.auth
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -84,6 +84,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * LoginScreen faithfully synchronized with iOS LoginView.swift.
@@ -153,14 +154,14 @@ fun LoginScreen(
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), CircleShape)
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.85f),
+                        tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -171,7 +172,7 @@ fun LoginScreen(
                     text = "SIGN IN",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     letterSpacing = 1.sp
                 )
 
@@ -260,7 +261,7 @@ fun LoginScreen(
                             text = "Welcome back! Enter your details to ignite your daily streak.",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                 }
@@ -272,7 +273,7 @@ fun LoginScreen(
                     text = localizationManager.string("login_title"),
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     textAlign = TextAlign.Center
                 )
 
@@ -285,7 +286,7 @@ fun LoginScreen(
                         .height(50.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.2.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
+                        .border(1.2.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
                         .clickable { showGoogleAuthSheet = true },
                     contentAlignment = Alignment.Center
                 ) {
@@ -298,7 +299,7 @@ fun LoginScreen(
                             text = localizationManager.string("google_auth"),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                 }
@@ -315,19 +316,19 @@ fun LoginScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(1.dp)
-                            .background(Color.White.copy(alpha = 0.12f))
+                            .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                     )
                     Text(
                         text = "OR",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White.copy(alpha = 0.40f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.40f)
                     )
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(1.dp)
-                            .background(Color.White.copy(alpha = 0.12f))
+                            .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                     )
                 }
 
@@ -349,7 +350,7 @@ fun LoginScreen(
                     val emailBorderColor = when {
                         isEmailFocused -> AmberGold
                         emailOrUsername.isNotEmpty() -> AmberGold.copy(alpha = 0.60f)
-                        else -> Color.White.copy(alpha = 0.18f)
+                        else -> LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.18f)
                     }
 
                     Row(
@@ -376,7 +377,7 @@ fun LoginScreen(
                                 .weight(1f)
                                 .onFocusChanged { isEmailFocused = it.isFocused },
                             textStyle = TextStyle(
-                                color = Color.White,
+                                color = LocalDynamicThemeColors.current.textPrimary,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium
                             ),
@@ -389,7 +390,7 @@ fun LoginScreen(
                                 if (emailOrUsername.isEmpty()) {
                                     Text(
                                         text = localizationManager.string("email_or_username"),
-                                        color = Color.White.copy(alpha = 0.35f),
+                                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -402,7 +403,7 @@ fun LoginScreen(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear",
-                                tint = Color.White.copy(alpha = 0.40f),
+                                tint = LocalDynamicThemeColors.current.placeholder,
                                 modifier = Modifier
                                     .size(16.dp)
                                     .clickable { emailOrUsername = "" }
@@ -429,7 +430,7 @@ fun LoginScreen(
                     val passwordBorderColor = when {
                         isPasswordFocused -> AmberGold
                         password.isNotEmpty() -> AmberGold.copy(alpha = 0.60f)
-                        else -> Color.White.copy(alpha = 0.18f)
+                        else -> LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.18f)
                     }
 
                     Row(
@@ -457,7 +458,7 @@ fun LoginScreen(
                                 .onFocusChanged { isPasswordFocused = it.isFocused },
                             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             textStyle = TextStyle(
-                                color = Color.White,
+                                color = LocalDynamicThemeColors.current.textPrimary,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium
                             ),
@@ -471,7 +472,7 @@ fun LoginScreen(
                                 if (password.isEmpty()) {
                                     Text(
                                         text = localizationManager.string("password"),
-                                        color = Color.White.copy(alpha = 0.35f),
+                                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -542,7 +543,7 @@ fun LoginScreen(
                                 text = msg,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = LocalDynamicThemeColors.current.textPrimary
                             )
                         }
                     }
@@ -591,7 +592,7 @@ fun LoginScreen(
                     text = localizationManager.string("terms_privacy"),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.40f),
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.40f),
                     textAlign = TextAlign.Center
                 )
 
@@ -599,7 +600,7 @@ fun LoginScreen(
                     text = localizationManager.string("recaptcha"),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.30f),
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.30f),
                     textAlign = TextAlign.Center
                 )
             }

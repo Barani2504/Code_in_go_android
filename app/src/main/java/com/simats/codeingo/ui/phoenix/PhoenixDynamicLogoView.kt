@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.RepeatMode
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.PhoenixEmotion
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🦅 PhoenixDynamicLogoView — Dynamic Reactive Mascot Brand Header
@@ -122,7 +123,7 @@ fun PhoenixDynamicLogoView(
                 if (showTitle) {
                     Text(
                         text = "Code in Go",
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = if (size > 30.dp) 18.sp else 14.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.SansSerif,
@@ -163,7 +164,7 @@ fun PhoenixDynamicLogoView(
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = currentEmotion.feeling,
-                            color = Color.White.copy(alpha = 0.92f),
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.92f),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.SansSerif,

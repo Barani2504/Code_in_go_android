@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -60,6 +60,7 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 data class EvolutionParticle(
     val id: Int,
@@ -265,7 +266,7 @@ fun PhoenixEvolutionCelebrationScreen(
                     .scale(if (animPhase >= 2) 1.0f else 0.8f)
                     .clip(RoundedCornerShape(22.dp))
                     .background(Color.White.copy(alpha = 0.05f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(22.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(22.dp))
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -290,7 +291,7 @@ fun PhoenixEvolutionCelebrationScreen(
                     text = toStage.name,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     textAlign = TextAlign.Center
                 )
 

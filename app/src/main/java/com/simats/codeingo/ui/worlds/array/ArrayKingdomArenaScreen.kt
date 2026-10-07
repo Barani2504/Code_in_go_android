@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.worlds.array
+﻿package com.simats.codeingo.ui.worlds.array
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -81,6 +81,7 @@ import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -297,7 +298,7 @@ private fun ArenaTopHUD(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Default.Close, contentDescription = "Exit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Close, contentDescription = "Exit", tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -306,10 +307,10 @@ private fun ArenaTopHUD(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.Black.copy(alpha = 0.45f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 6.dp, vertical = 3.dp)
             ) {
-                Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
 
             // Session XP
@@ -317,10 +318,10 @@ private fun ArenaTopHUD(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.Black.copy(alpha = 0.45f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 6.dp, vertical = 3.dp)
             ) {
-                Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
 
             // Gems
@@ -328,10 +329,10 @@ private fun ArenaTopHUD(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.Black.copy(alpha = 0.45f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 6.dp, vertical = 3.dp)
             ) {
-                Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
         }
 
@@ -400,7 +401,7 @@ private fun ArenaLevelTrack(
                     )
                     .border(
                         1.dp,
-                        if (isSelected) Color.White else Color.White.copy(alpha = 0.15f),
+                        if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f),
                         RoundedCornerShape(14.dp)
                     )
                     .clickable(enabled = isUnlocked) { onSelectLevel(lvl) }
@@ -444,7 +445,7 @@ private fun ArenaBottomBar(
             modifier = Modifier
                 .clip(RoundedCornerShape(14.dp))
                 .background(Color(0xFF141E30))
-                .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                 .clickable { onOpenCodex() }
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
@@ -457,7 +458,7 @@ private fun ArenaBottomBar(
                     text = "Kingdom Lore & Big-O",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -482,7 +483,7 @@ private fun ArenaBottomBar(
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
             }
         }
     }
@@ -528,7 +529,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                 },
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center,
                 lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
@@ -547,7 +548,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                         .size(160.dp, 60.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "Empty Array []", color = SubtextGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -564,11 +565,11 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                                         listOf(AmberGold, Color(0xFFD46800))
                                     )
                                 )
-                                .border(1.5.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                                .border(1.5.dp, LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
                                 .shadow(8.dp, spotColor = AmberGold),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "$value", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White)
+                            Text(text = "$value", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                         }
 
                         Text(
@@ -606,7 +607,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                                     Color(0xFF141E30)
                                 }
                             )
-                            .border(1.5.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                            .border(1.5.dp, if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                             .clickable {
                                 selectedQuizOption = opt
                                 if (isCorrect) {
@@ -615,7 +616,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }
@@ -684,7 +685,7 @@ private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$valNum", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "$valNum", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
 
                     Text(text = "[$idx]", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
@@ -748,7 +749,7 @@ private fun ArrayLevel3Content(onComplete: () -> Unit) {
                                     else -> Color(0xFF101724)
                                 }
                             )
-                            .border(1.5.dp, if (isScanning) Color.White else Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                            .border(1.5.dp, if (isScanning) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Black, color = if (isScanning && !isMatch) Color.Black else Color.White)
@@ -807,7 +808,7 @@ private fun ArrayLevel4Content(onComplete: () -> Unit) {
                 text = if (!isSorted) "🔄 Bubble Sort: Compare adjacent pairs. If left > right, swap them!" else "✨ Pass completed! The largest value bubbled to the end!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -986,7 +987,7 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         .size(60.dp, 64.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isSuccess) DuolingoGreen else Color(0xFF14243C))
-                        .border(1.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .border(1.5.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                         .clickable(enabled = !isSuccess) {
                             if (idx < items.size - 1 && items[idx] > items[idx + 1]) {
                                 val t = items[idx]
@@ -1000,7 +1001,7 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$v", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "$v", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -1047,7 +1048,7 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                     .fillMaxWidth(0.8f)
                     .height(14.dp)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))
             ) {
                 Box(
                     modifier = Modifier
@@ -1129,7 +1130,7 @@ private fun ArenaVictoryOverlay(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "🎉 LEVEL COMPLETE!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = AmberGold)
-            Text(text = level.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(text = level.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(text = "⭐ +${level.xpReward} XP", fontSize = 14.sp, fontWeight = FontWeight.Black, color = AmberGold)
@@ -1190,7 +1191,7 @@ private fun ArrayKingdomCodexSheet(onClose: () -> Unit) {
         Text(
             text = "An Array stores elements in contiguous memory slots. Accessing an element by index takes O(1) time because the memory address is calculated as: Base_Address + (Index * Element_Size).\n\nSearching takes O(n) because each box must be inspected linearly. Sorting with Bubble Sort repeatedly swaps adjacent inverted pairs until the array is fully sorted, which takes O(n²) comparisons in the worst case.",
             fontSize = 13.sp,
-            color = Color.White.copy(alpha = 0.8f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
             lineHeight = 18.sp
         )
     }
@@ -1216,7 +1217,7 @@ private fun ArrayKingdomHintSheet(currentLevel: ArrayKingdomLevel, onClose: () -
                 ArrayKingdomLevel.BOSS_BATTLE -> "Restore order to deal damage to the Chaos Boss!"
             },
             fontSize = 13.sp,
-            color = Color.White.copy(alpha = 0.85f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
             lineHeight = 18.sp
         )
     }

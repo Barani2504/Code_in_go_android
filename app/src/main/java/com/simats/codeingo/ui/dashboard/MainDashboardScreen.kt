@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -88,6 +88,7 @@ import com.simats.codeingo.ui.worlds.stack.StackTowerArenaScreen
 import com.simats.codeingo.ui.worlds.tree.BinaryTreeForestArenaScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * MainDashboardScreen faithfully synchronized with iOS MainDashboardView.swift (commit 2b2c2ab).
@@ -638,7 +639,7 @@ private fun InteractiveGamesSection(
                 text = "5 ARENAS UNLOCKED",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.6f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
             )
         }
 
@@ -673,7 +674,7 @@ private fun WorldPortalCard(
             .background(Color(0xFF0F1523).copy(alpha = 0.85f))
             .border(
                 1.2.dp,
-                Brush.linearGradient(listOf(Color.White.copy(alpha = 0.25f), accentColor.copy(alpha = 0.45f))),
+                Brush.linearGradient(listOf(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), accentColor.copy(alpha = 0.45f))),
                 RoundedCornerShape(18.dp)
             )
             .clickable { onOpenWorld(worldKey) }
@@ -702,14 +703,14 @@ private fun WorldPortalCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.70f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
                 lineHeight = 15.sp
             )
         }
@@ -758,13 +759,13 @@ private fun GrandMasterJourneyCard(
                 text = "$completedCount / $totalCount Stages Conquered",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = "Tap to enter the Phoenix Sanctuary and view all 18 evolution forms.",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.70f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
                 textAlign = TextAlign.Center
             )
         }
@@ -792,12 +793,12 @@ private fun ChapterGuidebookSheet(
                 text = "📖 Chapter ${unit.unitNumber} Field Guide",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
-                tint = Color.White.copy(alpha = 0.6f),
+                tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                 modifier = Modifier
                     .size(24.dp)
                     .clickable { onDismiss() }
@@ -815,7 +816,7 @@ private fun ChapterGuidebookSheet(
             text = "Master the architectural foundations of this data structure through 5 structured interactive stages. Complete each stage in sequence to challenge the Chapter Boss and unlock the next world.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.8f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
             lineHeight = 18.sp
         )
 
@@ -836,7 +837,7 @@ private fun ChapterGuidebookSheet(
                         text = node.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }
@@ -865,7 +866,7 @@ private fun StreakInfoSheet(
             text = if (isStreakPendingRestore) "Streak Frozen!" else "$streakDays Day Streak!",
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White
+            color = LocalDynamicThemeColors.current.textPrimary
         )
         Text(
             text = if (isStreakPendingRestore) {
@@ -875,7 +876,7 @@ private fun StreakInfoSheet(
             },
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.75f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.75f),
             textAlign = TextAlign.Center
         )
 
@@ -920,7 +921,7 @@ private fun HeartsInfoSheet(
             text = "$heartsCount / 10 Hearts",
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White
+            color = LocalDynamicThemeColors.current.textPrimary
         )
         Text(
             text = if (heartsCount < 10) {
@@ -930,7 +931,7 @@ private fun HeartsInfoSheet(
             },
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.75f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.75f),
             textAlign = TextAlign.Center
         )
 
@@ -948,7 +949,7 @@ private fun HeartsInfoSheet(
                     text = "REFILL HEARTS (10 ❤️)",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }

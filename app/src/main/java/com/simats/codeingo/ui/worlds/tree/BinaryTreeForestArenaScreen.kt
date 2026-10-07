@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.worlds.tree
+﻿package com.simats.codeingo.ui.worlds.tree
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +56,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.worlds.array.KingdomGameSpeed
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,18 +127,18 @@ fun BinaryTreeForestArenaScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
 
@@ -189,7 +190,7 @@ fun BinaryTreeForestArenaScreen(
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
-                            .border(1.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                            .border(1.dp, if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                             .clickable(enabled = isUnlocked) { currentLevel = lvl }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -235,11 +236,11 @@ fun BinaryTreeForestArenaScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF0C2B1D))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🌲 Binary Tree Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "🌲 Binary Tree Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -269,7 +270,7 @@ fun BinaryTreeForestArenaScreen(
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -284,7 +285,7 @@ fun BinaryTreeForestArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "🌲 CANOPY ASCENDED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
-                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
                         title = "EXPLORE NEXT CANOPY ➔",
                         style = Duolingo3DButtonStyle.GREEN,
@@ -328,7 +329,7 @@ fun BinaryTreeForestArenaScreen(
                     Text(
                         text = "A Binary Tree is a hierarchical structure where each node has at most two children (left & right).\n\nBinary Search Tree (BST) Invariant:\n- Left subtree values < Root value\n- Right subtree values > Root value\n\nSearch / Insert in a balanced BST takes O(log n) time. In-order traversal (Left ➔ Root ➔ Right) yields elements in strictly sorted order!",
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
                     )
                 }
@@ -350,7 +351,7 @@ fun BinaryTreeForestArenaScreen(
                             BinaryTreeForestLevel.BOSS_BATTLE -> "Restore tree balance to defeat the Overgrown Ent!"
                         },
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -373,7 +374,7 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
                 text = "👑 Tap the ROOT node at the top of the canopy!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -393,7 +394,7 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "50", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "50", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
 
             // Branches
@@ -405,10 +406,10 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
             // Children
             Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
                 Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
-                    Text(text = "30", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = "30", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                 }
                 Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
-                    Text(text = "70", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = "70", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -418,7 +419,7 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel2Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Parent & Child: Node 50 is parent to Left (30) & Right (70).", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "Parent & Child: Node 50 is parent to Left (30) & Right (70).", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Duolingo3DButton(
             title = "UNDERSTOOD ➔",
@@ -434,7 +435,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
     var leavesTapped by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "🍃 Tap both LEAVES (nodes with zero children) ($leavesTapped/2):", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "🍃 Tap both LEAVES (nodes with zero children) ($leavesTapped/2):", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(30.dp)) {
             Box(
@@ -448,7 +449,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "10 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "10 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
 
             Box(
@@ -462,7 +463,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "90 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "90 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
         }
     }
@@ -471,7 +472,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel4Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚖️ BST Rule: Left < Root < Right.\nFor root 50, which value belongs in the left subtree?", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "⚖️ BST Rule: Left < Root < Right.\nFor root 50, which value belongs in the left subtree?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             listOf(25, 75).forEach { opt ->
@@ -486,7 +487,7 @@ private fun TreeLevel4Content(onComplete: () -> Unit) {
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -496,7 +497,7 @@ private fun TreeLevel4Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel5Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "🌱 Insert 40 into the BST:", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "🌱 Insert 40 into the BST:", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
         Text(text = "Root is 50. Since 40 < 50, go left to node 30. Since 40 > 30, place at right of 30.", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
 
         Duolingo3DButton(
@@ -511,7 +512,7 @@ private fun TreeLevel5Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel6Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "📜 In-Order Traversal:\nVisiting [Left ➔ Root ➔ Right] produces: 10, 20, 30, 40, 50!", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "📜 In-Order Traversal:\nVisiting [Left ➔ Root ➔ Right] produces: 10, 20, 30, 40, 50!", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Duolingo3DButton(
             title = "EXECUTE IN-ORDER TRAVERSAL",

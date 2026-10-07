@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +45,7 @@ import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoSubtext
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +86,7 @@ fun UnitGuideSheetView(
                         text = unit.titleDefault,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
                 IconButton(onClick = onDismiss) {
@@ -116,7 +117,7 @@ fun UnitGuideSheetView(
                 Text(
                     text = "In this unit, you will practice data structure challenges. Prepare to master:",
                     fontSize = 13.sp,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                 )
                 Box(
                     modifier = Modifier
@@ -212,7 +213,7 @@ private fun GuideInfoRow(
                 text = title,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = description,

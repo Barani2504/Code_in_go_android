@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.onboarding
+﻿package com.simats.codeingo.ui.onboarding
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
@@ -62,6 +62,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🌡️ CreativeTemperatureGaugeView — Interactive Memory Pointer Game
@@ -166,7 +167,7 @@ fun CreativeTemperatureGaugeView(
 
             Text(
                 text = "nums = [14, 32, 58, 77, 91]",
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.Monospace
@@ -177,7 +178,7 @@ fun CreativeTemperatureGaugeView(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Align Memory Pointer to: ",
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -226,7 +227,7 @@ fun CreativeTemperatureGaugeView(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF0B1224).copy(alpha = 0.85f))
-                        .border(1.2.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                        .border(1.2.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                         .padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -240,7 +241,7 @@ fun CreativeTemperatureGaugeView(
                                 .background(if (isSlotSelected) activeColor.copy(alpha = 0.25f) else Color(0xFF141F38).copy(alpha = 0.75f))
                                 .border(
                                     width = if (isSlotSelected) 1.5.dp else 1.dp,
-                                    color = if (isSlotSelected) activeColor else Color.White.copy(alpha = 0.12f),
+                                    color = if (isSlotSelected) activeColor else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
                                     shape = RoundedCornerShape(10.dp)
                                 )
                                 .clickable(enabled = !isChecked) {
@@ -251,7 +252,7 @@ fun CreativeTemperatureGaugeView(
                         ) {
                             Text(
                                 text = "[$idx]",
-                                color = if (isSlotSelected) Color.White else Color.White.copy(alpha = 0.5f),
+                                color = if (isSlotSelected) Color.White else LocalDynamicThemeColors.current.textSecondary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = FontFamily.Monospace,
@@ -267,7 +268,7 @@ fun CreativeTemperatureGaugeView(
                             ) {
                                 Text(
                                     text = "${arrayElements[idx]}",
-                                    color = if (isSlotSelected) Color(0xFF1A1205) else Color.White.copy(alpha = 0.85f),
+                                    color = if (isSlotSelected) Color(0xFF1A1205) else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Black,
                                     fontFamily = FontFamily.Monospace
@@ -324,12 +325,12 @@ fun CreativeTemperatureGaugeView(
                         .fillMaxWidth(0.9f)
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF202C38))
-                        .border(1.2.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                        .border(1.2.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = speechText,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center,
@@ -364,7 +365,7 @@ fun CreativeTemperatureGaugeView(
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Previous",
-                        tint = if (selectedIndex > 0 && !isChecked) Color.White else Color.White.copy(alpha = 0.3f),
+                        tint = if (selectedIndex > 0 && !isChecked) Color.White else LocalDynamicThemeColors.current.placeholder,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -372,7 +373,7 @@ fun CreativeTemperatureGaugeView(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "INDEX",
-                        color = Color.White.copy(alpha = 0.6f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace
@@ -401,7 +402,7 @@ fun CreativeTemperatureGaugeView(
                     Icon(
                         imageVector = Icons.Default.ArrowForwardIos,
                         contentDescription = "Next",
-                        tint = if (selectedIndex < arrayElements.size - 1 && !isChecked) Color.White else Color.White.copy(alpha = 0.3f),
+                        tint = if (selectedIndex < arrayElements.size - 1 && !isChecked) Color.White else LocalDynamicThemeColors.current.placeholder,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -418,7 +419,7 @@ fun CreativeTemperatureGaugeView(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(if (isSelected) AmberGold else Color(0xFF141F38))
-                            .border(1.2.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                            .border(1.2.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
                             .clickable(enabled = !isChecked) {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 selectedIndex = idx
@@ -427,14 +428,14 @@ fun CreativeTemperatureGaugeView(
                     ) {
                         Text(
                             text = "[$idx]",
-                            color = if (isSelected) Color(0xFF1A1205) else Color.White.copy(alpha = 0.85f),
+                            color = if (isSelected) Color(0xFF1A1205) else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
                             text = "${arrayElements[idx]}",
-                            color = if (isSelected) Color(0xFF1A1205) else Color.White.copy(alpha = 0.65f),
+                            color = if (isSelected) Color(0xFF1A1205) else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -472,7 +473,7 @@ fun CreativeTemperatureGaugeView(
                     )
                     Text(
                         text = if (isCorrect) "nums[3] = 77! Array access by index is instant O(1) time." else "nums[$selectedIndex] = ${arrayElements[selectedIndex]}. We need 77 at index 3!",
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )

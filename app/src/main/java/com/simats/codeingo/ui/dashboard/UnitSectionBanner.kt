@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.UnitModel
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * UnitSectionBanner — DSA Chapter Header Banner Card with Lore Era Tag & Guidebook Button.
@@ -83,7 +84,7 @@ fun UnitSectionBanner(
                         1.5.dp,
                         Brush.linearGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.48f),
+                                LocalDynamicThemeColors.current.placeholder,
                                 unit.themeColor.copy(alpha = 0.65f),
                                 Color.White.copy(alpha = 0.08f)
                             )
@@ -102,8 +103,8 @@ fun UnitSectionBanner(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.10f))
-                            .border(0.9.dp, Color.White.copy(alpha = 0.30f), CircleShape)
+                            .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
+                            .border(0.9.dp, LocalDynamicThemeColors.current.placeholder, CircleShape)
                             .padding(horizontal = 9.dp, vertical = 4.dp)
                     ) {
                         Text(
@@ -111,7 +112,7 @@ fun UnitSectionBanner(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
 
@@ -119,14 +120,14 @@ fun UnitSectionBanner(
                         text = unit.titleDefault,
                         fontSize = 19.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
 
                     Text(
                         text = topicsPreview,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.88f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.88f),
                         lineHeight = 16.sp
                     )
                 }
@@ -135,11 +136,11 @@ fun UnitSectionBanner(
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
                         .border(
                             1.1.dp,
                             Brush.linearGradient(
-                                listOf(Color.White.copy(alpha = 0.55f), Color.White.copy(alpha = 0.15f))
+                                listOf(LocalDynamicThemeColors.current.textSecondary, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
                             ),
                             CircleShape
                         )
@@ -158,7 +159,7 @@ fun UnitSectionBanner(
                         text = "Guide",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }
@@ -169,7 +170,7 @@ fun UnitSectionBanner(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
                     .background(Color(0xFF0F1420).copy(alpha = 0.75f))
-                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(22.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(22.dp))
                     .padding(16.dp),
                 verticalAlignment = Alignment.Top
             ) {
@@ -179,21 +180,21 @@ fun UnitSectionBanner(
                         fontSize = 9.5.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = Color.White.copy(alpha = 0.55f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f)
                     )
 
                     Text(
                         text = unit.titleDefault,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White.copy(alpha = 0.65f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f)
                     )
 
                     Text(
                         text = "🔒 Complete Unit ${unit.unitNumber - 1} to unlock this world!",
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.50f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.50f)
                     )
                 }
             }

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.leaderboards
+﻿package com.simats.codeingo.ui.leaderboards
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -62,6 +62,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🏆  LeaderboardsScreen — Full iOS LeaderboardsView.swift parity
@@ -178,7 +179,7 @@ private fun LockedHeaderGraphic() {
             ) {
                 Icon(
                     Icons.Default.Shield, null,
-                    tint = Color.White.copy(alpha = 0.8f),
+                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                     modifier = Modifier.size(30.dp)
                 )
             }
@@ -191,7 +192,7 @@ private fun LockedHeaderGraphic() {
                     .background(
                         Brush.linearGradient(listOf(AmberGold, Color(0xFFF2A000)))
                     )
-                    .border(2.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+                    .border(2.dp, LocalDynamicThemeColors.current.textSecondary, RoundedCornerShape(22.dp))
                     .shadow(12.dp, RoundedCornerShape(22.dp)),
                 contentAlignment = Alignment.Center
             ) {
@@ -219,7 +220,7 @@ private fun LockedHeaderGraphic() {
             ) {
                 Icon(
                     Icons.Default.Shield, null,
-                    tint = Color.White.copy(alpha = 0.8f),
+                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                     modifier = Modifier.size(30.dp)
                 )
             }
@@ -245,14 +246,14 @@ private fun LockedHeadlineAndButton(
             text = "Unlock Leaderboards",
             fontSize = 24.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             textAlign = TextAlign.Center
         )
         Text(
             text = "Complete $lessonsNeeded more lesson${if (lessonsNeeded > 1) "s" else ""} to start competing!",
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White.copy(alpha = 0.55f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f),
             textAlign = TextAlign.Center
         )
         Button(
@@ -282,7 +283,7 @@ private fun LockedHeadlineAndButton(
                     "START A LESSON",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -335,12 +336,12 @@ private fun WhatAreLeaderboardsCard() {
                 "Do lessons, earn XP",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 "Earn XP by completing lessons and compete with learners around the world each week.",
                 fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.65f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
                 lineHeight = 17.sp
             )
         }
@@ -393,14 +394,14 @@ private fun LockedSkeletonPreviewList() {
                     modifier = Modifier
                         .size(14.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
                 )
                 // Avatar circle
                 Box(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.10f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
                 )
                 // Name pill
                 Box(
@@ -408,7 +409,7 @@ private fun LockedSkeletonPreviewList() {
                         .height(14.dp)
                         .width(namePillWidths[idx % 6])
                         .clip(RoundedCornerShape(7.dp))
-                        .background(Color.White.copy(alpha = 0.12f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 // XP pill
@@ -417,7 +418,7 @@ private fun LockedSkeletonPreviewList() {
                         .height(14.dp)
                         .width(45.dp)
                         .clip(RoundedCornerShape(7.dp))
-                        .background(Color.White.copy(alpha = 0.10f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
                 )
             }
         }
@@ -478,7 +479,7 @@ private fun UnlockedLeagueHeader() {
             "Bronze League",
             fontSize = 24.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White
+            color = LocalDynamicThemeColors.current.textPrimary
         )
 
         // Top 20% advance pill
@@ -529,9 +530,9 @@ private fun RankRowView(entry: RankEntry) {
     val nameColor = if (entry.isUser) AmberGold else Color.White
     val xpColor = if (isTop3) AmberGold else SubtextGray
     val xpBg = if (isTop3) AmberGold.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.07f)
-    val xpBorder = if (isTop3) AmberGold.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.10f)
+    val xpBorder = if (isTop3) AmberGold.copy(alpha = 0.4f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f)
     val avatarBg = if (entry.isUser) AmberGold.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f)
-    val avatarBorder = if (entry.isUser) AmberGold.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.12f)
+    val avatarBorder = if (entry.isUser) AmberGold.copy(alpha = 0.7f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f)
     val shape = RoundedCornerShape(16.dp)
 
     Row(
@@ -554,7 +555,7 @@ private fun RankRowView(entry: RankEntry) {
                     "${entry.rank}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White.copy(alpha = 0.45f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
                 )
             }
         }

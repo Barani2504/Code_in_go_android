@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -58,6 +58,7 @@ import com.simats.codeingo.data.model.LessonNodeItem
 import com.simats.codeingo.data.model.UnitModel
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * LessonNodeButton — 3D Bevel Pushable Node Button Component.
@@ -127,7 +128,7 @@ fun LessonNodeButton(
                                 listOf(unit.themeColor, unit.themeDarkColor)
                             )
                         )
-                        .border(1.2.dp, Color.White.copy(alpha = 0.40f), RoundedCornerShape(16.dp))
+                        .border(1.2.dp, LocalDynamicThemeColors.current.placeholder, RoundedCornerShape(16.dp))
                         .padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -136,7 +137,7 @@ fun LessonNodeButton(
                         text = node.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         textAlign = TextAlign.Center,
                         maxLines = 2
                     )
@@ -150,7 +151,7 @@ fun LessonNodeButton(
                             text = "5 Questions • +${unit.unitNumber * 5 + 5} XP • +1 Ember",
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White.copy(alpha = 0.95f)
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.95f)
                         )
                     }
 
@@ -220,7 +221,7 @@ fun LessonNodeButton(
                         text = node.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         maxLines = 2
                     )
 
@@ -228,7 +229,7 @@ fun LessonNodeButton(
                         text = "Complete previous levels to unlock!",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.6f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
                     )
 
                     // 3D Pushable Dark Gray Disabled LOCKED Button
@@ -259,7 +260,7 @@ fun LessonNodeButton(
                                 text = "LOCKED",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.White.copy(alpha = 0.5f)
+                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.5f)
                             )
                         }
                     }
@@ -328,7 +329,7 @@ fun LessonNodeButton(
                         .border(
                             if (isBoss) 2.5.dp else 2.dp,
                             if (isUnlocked) {
-                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.28f)
+                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.28f)
                             } else {
                                 Color(0xFF2E3E4E)
                             },
@@ -341,7 +342,7 @@ fun LessonNodeButton(
                         imageVector = iconVector,
                         contentDescription = node.title,
                         tint = when {
-                            !isUnlocked -> Color.White.copy(alpha = 0.35f)
+                            !isUnlocked -> LocalDynamicThemeColors.current.placeholder
                             isBoss -> Color(0xFFFFD700)
                             else -> Color.White
                         },

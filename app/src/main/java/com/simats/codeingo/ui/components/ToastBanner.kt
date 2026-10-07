@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * Animated toast banner matching iOS toast overlays.
@@ -56,7 +57,7 @@ fun ToastBanner(
         ) {
             Text(
                 text = message ?: "",
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier

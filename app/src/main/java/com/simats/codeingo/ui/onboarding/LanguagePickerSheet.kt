@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.onboarding
+﻿package com.simats.codeingo.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +37,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBackground
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun LanguagePickerSheet(
@@ -60,7 +61,7 @@ fun LanguagePickerSheet(
                 .align(Alignment.CenterHorizontally)
                 .size(width = 40.dp, height = 4.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(Color.White.copy(alpha = 0.3f))
+                .background(LocalDynamicThemeColors.current.placeholder)
         )
 
         Row(
@@ -73,7 +74,7 @@ fun LanguagePickerSheet(
                 text = "What language do you code in?",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = onDismiss) {
@@ -127,7 +128,7 @@ fun LanguagePickerSheet(
                             text = language.nativeName,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Text(
                             text = language.learnersCount,

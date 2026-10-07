@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.worlds.queue
+﻿package com.simats.codeingo.ui.worlds.queue
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +58,7 @@ import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.worlds.array.KingdomGameSpeed
 import kotlinx.coroutines.delay
 import kotlin.random.Random
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,18 +128,18 @@ fun QueueStationArenaScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
 
@@ -190,7 +191,7 @@ fun QueueStationArenaScreen(
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
-                            .border(1.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                            .border(1.dp, if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                             .clickable(enabled = isUnlocked) { currentLevel = lvl }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -236,11 +237,11 @@ fun QueueStationArenaScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF221133))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🎫 FIFO Station Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "🎫 FIFO Station Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -270,7 +271,7 @@ fun QueueStationArenaScreen(
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -285,7 +286,7 @@ fun QueueStationArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "🎫 PASSENGERS DISPATCHED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
-                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
                         title = "NEXT TRAIN ➔",
                         style = Duolingo3DButtonStyle.GREEN,
@@ -329,7 +330,7 @@ fun QueueStationArenaScreen(
                     Text(
                         text = "A Queue is a First-In, First-Out (FIFO) data structure. Like boarding a train, the first person to arrive at the FRONT is the first to leave, and new arrivals join at the REAR.\n\nKey Operations:\n- ENQUEUE(item): Adds to REAR in O(1)\n- DEQUEUE(): Removes from FRONT in O(1)\n- PEEK(): Inspects FRONT in O(1)\n\nQueues are essential for Breadth-First Search (BFS), asynchronous job processing, and printer spools.",
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
                     )
                 }
@@ -351,7 +352,7 @@ fun QueueStationArenaScreen(
                             QueueStationLevel.BOSS_BATTLE -> "Spam DEQUEUE to release passengers before the platform overfills!"
                         },
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -374,7 +375,7 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
                 text = "🎫 Station Queue: Passengers wait in line. FRONT leaves first, new arrivals join REAR!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -388,10 +389,10 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
                             .size(76.dp, 56.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (idx == 0) Color(0xFFB946FA) else Color(0xFF4A1A6D))
-                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                     Text(
                         text = if (idx == 0) "FRONT 🚪" else if (idx == line.size - 1) "REAR ➡️" else "[$idx]",
@@ -422,7 +423,7 @@ private fun QueueLevel2Content(onComplete: () -> Unit) {
     val line = remember { mutableStateListOf("🧑 Alice") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "ENQUEUE adds new arrivals exclusively to the REAR.", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "ENQUEUE adds new arrivals exclusively to the REAR.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -436,7 +437,7 @@ private fun QueueLevel2Content(onComplete: () -> Unit) {
                         .background(Color(0xFFB946FA)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -458,7 +459,7 @@ private fun QueueLevel3Content(onComplete: () -> Unit) {
     val line = remember { mutableStateListOf("🧑 1st", "👱 2nd", "🧔 3rd") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "DEQUEUE dispatches the FRONT passenger.", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "DEQUEUE dispatches the FRONT passenger.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -472,7 +473,7 @@ private fun QueueLevel3Content(onComplete: () -> Unit) {
                         .background(if (idx == 0) DuolingoRed else Color(0xFF4A1A6D)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -496,7 +497,7 @@ private fun QueueLevel4Content(onComplete: () -> Unit) {
     var isPeeked by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PEEK checks the FRONT passenger without dispatching them.", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "PEEK checks the FRONT passenger without dispatching them.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Box(
             modifier = Modifier
@@ -528,7 +529,7 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
         Text(
             text = "🔮 Arrival order: [A, B, C].\nWho will DEQUEUE first?",
             fontSize = 15.sp,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
@@ -551,7 +552,7 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = opt, fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = opt, fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }

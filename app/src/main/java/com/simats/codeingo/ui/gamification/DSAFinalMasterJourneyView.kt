@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.gamification
+﻿package com.simats.codeingo.ui.gamification
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * DSAFinalMasterJourneyView
@@ -114,14 +115,14 @@ fun DSAFinalMasterJourneyView(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.12f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.8f),
+                        tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -196,13 +197,13 @@ fun DSAFinalMasterJourneyView(
                         text = "Congratulations!",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Text(
                         text = "You have completed your Data Structures journey.",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.8f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
@@ -297,13 +298,13 @@ private fun WaterfallItem(title: String, subtitle: String, emoji: String, color:
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = subtitle,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.6f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
             )
         }
 
@@ -374,7 +375,7 @@ private fun WaterfallMasterItem() {
                 text = "Mastery Certified",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.8f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f)
             )
         }
 
@@ -443,7 +444,7 @@ private fun StatTile(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.07f))
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -463,14 +464,14 @@ private fun StatTile(
                 text = value,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = label,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 fontFamily = FontFamily.Monospace,
-                color = Color.White.copy(alpha = 0.6f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
             )
         }
     }

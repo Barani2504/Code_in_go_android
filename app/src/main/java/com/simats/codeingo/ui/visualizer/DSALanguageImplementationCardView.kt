@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.visualizer
+﻿package com.simats.codeingo.ui.visualizer
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -53,6 +53,7 @@ import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun DSALanguageImplementationCardView(
@@ -125,7 +126,7 @@ fun DSALanguageImplementationCardView(
                     text = "$structureName Implementation",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "$activeLanguage Code & Complexity Analysis",

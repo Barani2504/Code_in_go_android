@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.exercise
+﻿package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -58,6 +58,7 @@ import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoSubtext
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // =========================================================================
 // 1. MATCH PAIRS EXERCISE VIEW
@@ -297,7 +298,7 @@ fun OrderStepsExerciseView(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -414,7 +415,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
 
                 // The Slot
@@ -460,7 +461,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             } else {
                 Text(
@@ -468,7 +469,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -587,7 +588,7 @@ fun ComplexityDialExerciseView(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -653,7 +654,7 @@ fun ComplexityDialExerciseView(
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Black,
                                         fontFamily = FontFamily.Monospace,
-                                        color = Color.White
+                                        color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                     Text(
                                         text = item.name,
@@ -736,7 +737,7 @@ fun TrueFalseSwipeExerciseView(
                 text = statement,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -784,7 +785,7 @@ fun TrueFalseSwipeExerciseView(
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "TRUE", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "TRUE", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(text = "✅", fontSize = 16.sp)
                 }
@@ -811,7 +812,7 @@ fun TrueFalseSwipeExerciseView(
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "FALSE", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "FALSE", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(text = "❌", fontSize = 16.sp)
                 }

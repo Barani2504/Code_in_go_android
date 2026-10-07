@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
@@ -72,7 +73,7 @@ fun TopStatsHeader(
                 .border(
                     1.dp,
                     Brush.linearGradient(
-                        listOf(Color.White.copy(alpha = 0.40f), AmberGold.copy(alpha = 0.25f), Color.White.copy(alpha = 0.08f))
+                        listOf(LocalDynamicThemeColors.current.placeholder, AmberGold.copy(alpha = 0.25f), Color.White.copy(alpha = 0.08f))
                     ),
                     RoundedCornerShape(24.dp)
                 )
@@ -89,7 +90,7 @@ fun TopStatsHeader(
                     .border(
                         1.dp,
                         Brush.linearGradient(
-                            listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.10f))
+                            listOf(LocalDynamicThemeColors.current.placeholder, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
                         ),
                         CircleShape
                     )

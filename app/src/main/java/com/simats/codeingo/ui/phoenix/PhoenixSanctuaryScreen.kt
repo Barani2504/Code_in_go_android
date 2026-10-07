@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -81,6 +81,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 fun getPhoenixDrawableId(stageId: Int): Int {
     return when (stageId) {
@@ -190,7 +191,7 @@ fun PhoenixSanctuaryScreen(
                     text = "PHOENIX SANCTUARY",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.size(48.dp))
@@ -237,7 +238,7 @@ fun PhoenixSanctuaryScreen(
                             text = "Stage $activeStage • ${currentStageObj.name}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Text(
                             text = currentStageObj.subtitle,
@@ -359,7 +360,7 @@ fun PhoenixSanctuaryScreen(
                             text = stage.name,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White,
+                            color = LocalDynamicThemeColors.current.textPrimary,
                             textAlign = TextAlign.Center,
                             maxLines = 1
                         )
@@ -401,7 +402,7 @@ fun PhoenixSanctuaryScreen(
                                         text = "EQUIPPED",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Black,
-                                        color = Color.White
+                                        color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                 } else {
                                     Icon(
@@ -469,7 +470,7 @@ fun PhoenixSanctuaryScreen(
                         text = equippedToast ?: "",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }
@@ -570,7 +571,7 @@ private fun PhoenixStageDetailSheet(
             text = stage.name,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             textAlign = TextAlign.Center
         )
         Text(

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.auth
+﻿package com.simats.codeingo.ui.auth
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -94,6 +94,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlin.math.cos
 import kotlin.math.sin
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * ProfileCreationScreen faithfully synchronized with iOS ProfileCreationFlowView.swift.
@@ -172,7 +173,7 @@ fun ProfileCreationScreen(
                         Icon(
                             imageVector = if (currentStep == 1) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White.copy(alpha = 0.85f),
+                            tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -183,7 +184,7 @@ fun ProfileCreationScreen(
                         text = "CREATE ACCOUNT",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         letterSpacing = 1.sp
                     )
 
@@ -221,7 +222,7 @@ fun ProfileCreationScreen(
                                     if (isFilled) {
                                         Brush.horizontalGradient(listOf(AmberGold, Color(0xFFFF8C1A)))
                                     } else {
-                                        SolidColor(Color.White.copy(alpha = 0.12f))
+                                        SolidColor(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
                                     }
                                 )
                         )
@@ -313,7 +314,7 @@ fun ProfileCreationScreen(
                             text = "By creating an account, you agree to our Terms of Service & Privacy Policy.",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White.copy(alpha = 0.40f),
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.40f),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -424,7 +425,7 @@ private fun AgeStepView(
                     text = motivationalText,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -437,14 +438,14 @@ private fun AgeStepView(
                 text = "How old are you?",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Providing your age ensures you get the right learning experience.",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.60f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.60f),
                 textAlign = TextAlign.Center
             )
         }
@@ -468,7 +469,7 @@ private fun AgeStepView(
                     .background(Color(0xFF141F36).copy(alpha = 0.85f))
                     .border(
                         if (isAgeFocused) 2.dp else 1.2.dp,
-                        if (isAgeFocused) AmberGold else if (ageText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.14f),
+                        if (isAgeFocused) AmberGold else if (ageText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.14f),
                         RoundedCornerShape(14.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 14.dp),
@@ -489,7 +490,7 @@ private fun AgeStepView(
                         .weight(1f)
                         .onFocusChanged { onFocusChange(it.isFocused) },
                     textStyle = TextStyle(
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     ),
@@ -499,7 +500,7 @@ private fun AgeStepView(
                         if (ageText.isEmpty()) {
                             Text(
                                 text = "e.g. 21",
-                                color = Color.White.copy(alpha = 0.35f),
+                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -512,7 +513,7 @@ private fun AgeStepView(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Clear",
-                        tint = Color.White.copy(alpha = 0.40f),
+                        tint = LocalDynamicThemeColors.current.placeholder,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onAgeChange("") }
@@ -530,7 +531,7 @@ private fun AgeStepView(
                 text = "QUICK SELECT",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White.copy(alpha = 0.45f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
             )
 
             Row(
@@ -543,7 +544,7 @@ private fun AgeStepView(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (isSelected) AmberGold.copy(alpha = 0.25f) else Color(0xFF141F36).copy(alpha = 0.70f))
-                            .border(1.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                            .border(1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
                             .clickable { onAgeChange(preset) }
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
@@ -551,7 +552,7 @@ private fun AgeStepView(
                             text = if (preset == "32") "32+" else preset,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.70f)
+                            color = if (isSelected) Color.White else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f)
                         )
                     }
                 }
@@ -595,14 +596,14 @@ private fun GoalStepView(
                 text = "What is your main coding goal?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Choose your focus path to customize your learning tree:",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.65f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
                 textAlign = TextAlign.Center
             )
         }
@@ -647,14 +648,14 @@ private fun GoalStepView(
                                 text = goal.title,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White,
+                                color = LocalDynamicThemeColors.current.textPrimary,
                                 modifier = Modifier.weight(1f)
                             )
                             Text(
                                 text = goal.tag,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (isSelected) AmberGold else Color.White.copy(alpha = 0.40f),
+                                color = if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
                                     .background(if (isSelected) AmberGold.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.06f))
@@ -666,7 +667,7 @@ private fun GoalStepView(
                             text = goal.desc,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White.copy(alpha = 0.55f),
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f),
                             lineHeight = 15.sp
                         )
                     }
@@ -678,7 +679,7 @@ private fun GoalStepView(
                             .size(22.dp)
                             .clip(CircleShape)
                             .background(if (isSelected) AmberGold else Color.Transparent)
-                            .border(1.5.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.25f), CircleShape)
+                            .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), CircleShape)
                     ) {
                         if (isSelected) {
                             Icon(
@@ -700,7 +701,7 @@ private fun GoalStepView(
                 .height(46.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(Color.White.copy(alpha = 0.06f))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
                 .clickable { onGoogleSignUp() },
             contentAlignment = Alignment.Center
         ) {
@@ -713,7 +714,7 @@ private fun GoalStepView(
                     text = "Or sign up instantly with Google",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                 )
             }
         }
@@ -751,14 +752,14 @@ private fun CredentialsStepView(
                 text = "Create Your Profile",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Choose your name and secure password to save your progress.",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.65f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
                 textAlign = TextAlign.Center
             )
         }
@@ -780,7 +781,7 @@ private fun CredentialsStepView(
                     .background(Color(0xFF141F36).copy(alpha = 0.85f))
                     .border(
                         if (isNameFocused) 2.dp else 1.2.dp,
-                        if (isNameFocused) AmberGold else if (nameText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.12f),
+                        if (isNameFocused) AmberGold else if (nameText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
                         RoundedCornerShape(14.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 14.dp),
@@ -800,11 +801,11 @@ private fun CredentialsStepView(
                     modifier = Modifier
                         .weight(1f)
                         .onFocusChanged { onNameFocus(it.isFocused) },
-                    textStyle = TextStyle(color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    textStyle = TextStyle(color = LocalDynamicThemeColors.current.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium),
                     cursorBrush = SolidColor(AmberGold),
                     decorationBox = { inner ->
                         if (nameText.isEmpty()) {
-                            Text(text = "e.g. Vishal Rao", color = Color.White.copy(alpha = 0.35f), fontSize = 15.sp)
+                            Text(text = "e.g. Vishal Rao", color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f), fontSize = 15.sp)
                         }
                         inner()
                     }
@@ -814,7 +815,7 @@ private fun CredentialsStepView(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Clear",
-                        tint = Color.White.copy(alpha = 0.4f),
+                        tint = LocalDynamicThemeColors.current.placeholder,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onNameChange("") }
@@ -840,7 +841,7 @@ private fun CredentialsStepView(
                     .background(Color(0xFF141F36).copy(alpha = 0.85f))
                     .border(
                         if (isEmailFocused) 2.dp else 1.2.dp,
-                        if (isEmailFocused) AmberGold else if (emailText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.12f),
+                        if (isEmailFocused) AmberGold else if (emailText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
                         RoundedCornerShape(14.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 14.dp),
@@ -861,11 +862,11 @@ private fun CredentialsStepView(
                         .weight(1f)
                         .onFocusChanged { onEmailFocus(it.isFocused) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    textStyle = TextStyle(color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    textStyle = TextStyle(color = LocalDynamicThemeColors.current.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium),
                     cursorBrush = SolidColor(AmberGold),
                     decorationBox = { inner ->
                         if (emailText.isEmpty()) {
-                            Text(text = "name@example.com", color = Color.White.copy(alpha = 0.35f), fontSize = 15.sp)
+                            Text(text = "name@example.com", color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f), fontSize = 15.sp)
                         }
                         inner()
                     }
@@ -875,7 +876,7 @@ private fun CredentialsStepView(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Clear",
-                        tint = Color.White.copy(alpha = 0.4f),
+                        tint = LocalDynamicThemeColors.current.placeholder,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { onEmailChange("") }
@@ -901,7 +902,7 @@ private fun CredentialsStepView(
                     .background(Color(0xFF141F36).copy(alpha = 0.85f))
                     .border(
                         if (isPasswordFocused) 2.dp else 1.2.dp,
-                        if (isPasswordFocused) AmberGold else if (passwordText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.12f),
+                        if (isPasswordFocused) AmberGold else if (passwordText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
                         RoundedCornerShape(14.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 14.dp),
@@ -923,11 +924,11 @@ private fun CredentialsStepView(
                         .onFocusChanged { onPasswordFocus(it.isFocused) },
                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    textStyle = TextStyle(color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Medium),
+                    textStyle = TextStyle(color = LocalDynamicThemeColors.current.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium),
                     cursorBrush = SolidColor(AmberGold),
                     decorationBox = { inner ->
                         if (passwordText.isEmpty()) {
-                            Text(text = "At least 6 characters", color = Color.White.copy(alpha = 0.35f), fontSize = 15.sp)
+                            Text(text = "At least 6 characters", color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f), fontSize = 15.sp)
                         }
                         inner()
                     }
@@ -1079,14 +1080,14 @@ private fun CelebrationStepView(
                 text = "Account Successfully Created! 🎉",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Welcome to Code in Go, $displayName! Your Phoenix is ready to conquer Data Structures.",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.70f),
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
                 textAlign = TextAlign.Center,
                 lineHeight = 18.sp,
                 modifier = Modifier.padding(horizontal = 12.dp)
@@ -1124,7 +1125,7 @@ private fun CelebrationStepView(
                     text = displayName,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "@$handle",
@@ -1139,7 +1140,7 @@ private fun CelebrationStepView(
                     text = "1-Day Streak",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "🔥 Daily Fire",

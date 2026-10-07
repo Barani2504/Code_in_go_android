@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.onboarding
+﻿package com.simats.codeingo.ui.onboarding
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedContent
@@ -74,6 +74,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🚀 BeginnerOnboardingFlowView — 12-Step Journey with Phoenix
@@ -157,7 +158,7 @@ fun BeginnerOnboardingFlowView(
                             Icon(
                                 imageVector = Icons.Default.ChevronLeft,
                                 contentDescription = "Back",
-                                tint = Color.White.copy(alpha = 0.85f)
+                                tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                             )
                         }
                     } else {
@@ -173,7 +174,7 @@ fun BeginnerOnboardingFlowView(
                             .height(14.dp)
                             .clip(RoundedCornerShape(100.dp))
                             .background(Color(0xFF141224).copy(alpha = 0.85f))
-                            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(100.dp))
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(100.dp))
                     ) {
                         Box(
                             modifier = Modifier
@@ -355,13 +356,13 @@ private fun LanguageSelectionStepView(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(if (isSelected) AmberGold.copy(alpha = 0.18f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(1.5.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
                         .clickable { onSelect(lang) }
                         .padding(horizontal = 18.dp, vertical = 14.dp)
                 ) {
                     Text(
                         text = lang,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -417,13 +418,13 @@ private fun ReferralStepView(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(if (isSelected) AmberGold.copy(alpha = 0.18f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(1.5.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
                         .clickable { onSelect(goal) }
                         .padding(horizontal = 18.dp, vertical = 14.dp)
                 ) {
                     Text(
                         text = goal,
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -497,7 +498,7 @@ private fun SentenceCompletionStepView(
 
         Text(
             text = "Complete the DSA Concept",
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 20.sp,
             fontWeight = FontWeight.Black
         )
@@ -510,12 +511,12 @@ private fun SentenceCompletionStepView(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color(0xFF141F38).copy(alpha = 0.9f))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
             Text(
                 text = "In contiguous memory, an Array's first element is always stored at index",
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 22.sp
@@ -529,12 +530,12 @@ private fun SentenceCompletionStepView(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (placedWord != null) AmberGold else Color.White.copy(alpha = 0.08f))
-                    .border(1.5.dp, if (placedWord != null) AmberGold else Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                     .padding(horizontal = 20.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = placedWord ?: "  [ ? ]  ",
-                    color = if (placedWord != null) Color(0xFF1A1205) else Color.White.copy(alpha = 0.4f),
+                    color = if (placedWord != null) Color(0xFF1A1205) else LocalDynamicThemeColors.current.placeholder,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black
                 )
@@ -556,13 +557,13 @@ private fun SentenceCompletionStepView(
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
                         .background(if (isUsed) Color.Transparent else Color(0xFF141F38))
-                        .border(1.5.dp, if (isUsed) Color.White.copy(alpha = 0.1f) else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                        .border(1.5.dp, if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f) else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                         .clickable(enabled = !isChecked) { onPlaceWord(word) }
                         .padding(vertical = 12.dp)
                 ) {
                     Text(
                         text = word,
-                        color = if (isUsed) Color.White.copy(alpha = 0.2f) else Color.White,
+                        color = if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f) else Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Black
                     )
@@ -653,7 +654,7 @@ private fun StreakEarnedStepView(
 
         Text(
             text = "DAY STREAK!",
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp
@@ -696,20 +697,20 @@ private fun StreakGoalStepView(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38))
-                        .border(1.5.dp, if (isSelected) AmberGold else Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
                         .clickable { onSelectDays(days) }
                         .padding(horizontal = 18.dp, vertical = 16.dp)
                 ) {
                     Column {
                         Text(
                             text = "$days-Day Streak Challenge",
-                            color = Color.White,
+                            color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Black
                         )
                         Text(
                             text = if (days == 7) "Casual" else if (days == 14) "Regular" else if (days == 30) "Serious" else "Master",
-                            color = Color.White.copy(alpha = 0.6f),
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -770,7 +771,7 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "COMPILING ENVIRONMENT...",
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 18.sp,
             fontWeight = FontWeight.Black,
             fontFamily = FontFamily.SansSerif,
@@ -779,7 +780,7 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Tailoring algorithms to your selected language",
-            color = Color.White.copy(alpha = 0.7f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium
         )

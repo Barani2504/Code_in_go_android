@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.phoenix
+﻿package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -63,6 +63,7 @@ import com.simats.codeingo.data.model.filtered
 import com.simats.codeingo.domain.EmotionRule
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 📱 PhoenixEmotionPickerSheet — 28 Mascot Catalog & Rule Tester
@@ -115,7 +116,7 @@ fun PhoenixEmotionPickerSheet(
             ) {
                 Text(
                     text = "App Icon & Emotions",
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.SansSerif
@@ -124,7 +125,7 @@ fun PhoenixEmotionPickerSheet(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.6f)
+                        tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -176,7 +177,7 @@ fun PhoenixEmotionPickerSheet(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = currentEmotion.title,
-                            color = Color.White,
+                            color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black
                         )
@@ -184,7 +185,7 @@ fun PhoenixEmotionPickerSheet(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "\"${currentEmotion.quote}\"",
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -212,7 +213,7 @@ fun PhoenixEmotionPickerSheet(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Auto Dynamic Emotion",
-                                color = Color.White,
+                                color = LocalDynamicThemeColors.current.textPrimary,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -220,7 +221,7 @@ fun PhoenixEmotionPickerSheet(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Mascot and logo automatically react to streaks, time of day, and quiz results.",
-                            color = Color.White.copy(alpha = 0.6f),
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             lineHeight = 16.sp
                         )
@@ -229,7 +230,7 @@ fun PhoenixEmotionPickerSheet(
                         checked = isAutoEnabled,
                         onCheckedChange = { emotionManager.syncAutoEmotion() },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
+                            checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
                             checkedTrackColor = AmberGold
                         )
                     )
@@ -254,7 +255,7 @@ fun PhoenixEmotionPickerSheet(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Live Simulation Triggers",
-                            color = Color.White,
+                            color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -288,7 +289,7 @@ fun PhoenixEmotionPickerSheet(
                             ) {
                                 Text(
                                     text = label,
-                                    color = Color.White,
+                                    color = LocalDynamicThemeColors.current.textPrimary,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -360,7 +361,7 @@ fun PhoenixEmotionPickerSheet(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = emotion.feeling,
-                                color = if (isCurrent) emotion.auraColor else Color.White.copy(alpha = 0.8f),
+                                color = if (isCurrent) emotion.auraColor else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1

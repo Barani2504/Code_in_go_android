@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -37,6 +37,7 @@ import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.InputBorder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun LoadingScreen(
@@ -131,7 +132,7 @@ fun LoadingScreen(
                 text = "LOADING...",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 letterSpacing = 1.5.sp
             )
 

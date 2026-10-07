@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.worlds.stack
+﻿package com.simats.codeingo.ui.worlds.stack
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -70,6 +70,7 @@ import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.worlds.array.KingdomGameSpeed
 import kotlinx.coroutines.delay
 import kotlin.random.Random
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +132,7 @@ fun StackTowerArenaScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -139,30 +140,30 @@ fun StackTowerArenaScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.Black.copy(alpha = 0.45f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
-                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
 
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.Black.copy(alpha = 0.45f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
-                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
 
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.Black.copy(alpha = 0.45f))
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                             .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
-                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
 
@@ -214,7 +215,7 @@ fun StackTowerArenaScreen(
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
-                            .border(1.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                            .border(1.dp, if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                             .clickable(enabled = isUnlocked) { currentLevel = lvl }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -265,11 +266,11 @@ fun StackTowerArenaScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF1E1710))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🥞 LIFO Spire Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "🥞 LIFO Spire Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -299,7 +300,7 @@ fun StackTowerArenaScreen(
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -324,7 +325,7 @@ fun StackTowerArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "🥞 TOWER ELEVATED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
-                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
                         title = "ASCEND NEXT SPIRE ➔",
                         style = Duolingo3DButtonStyle.AMBER,
@@ -381,7 +382,7 @@ fun StackTowerArenaScreen(
                     Text(
                         text = "A Stack is a Last-In, First-Out (LIFO) structure where elements are added and removed only from the top. All operations:\n- PUSH(item): O(1) time\n- POP(): O(1) time\n- PEEK(): O(1) time\n\nStacks power function call stacks, undo/redo mechanisms, syntax bracket validation, and DFS traversals.",
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
                     )
                 }
@@ -406,7 +407,7 @@ fun StackTowerArenaScreen(
                             StackTowerLevel.BOSS_BATTLE -> "Spam POP to get rid of incoming unstable blocks before height hits 6!"
                         },
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -451,7 +452,7 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
                 text = "🥞 The Stack Tower: Elements stack vertically. The TOP pointer points to the most recently added item!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -475,10 +476,10 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
                             .size(110.dp, 36.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(if (isTop) Color(0xFFFF9500) else Color(0xFFB35900))
-                            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
+                            .border(1.dp, LocalDynamicThemeColors.current.textSecondary, RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (isTop) "$v (TOP)" else "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = if (isTop) "$v (TOP)" else "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }
@@ -506,7 +507,7 @@ private fun StackLevel2Content(onComplete: () -> Unit) {
     var pushedCount by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PUSH drops a new block onto the top of the stack.", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "PUSH drops a new block onto the top of the stack.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Box(
             modifier = Modifier
@@ -527,7 +528,7 @@ private fun StackLevel2Content(onComplete: () -> Unit) {
                             .background(if (idx == 0) Color(0xFFFF9500) else Color(0xFFB35900)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }
@@ -551,7 +552,7 @@ private fun StackLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
     val stack = remember { mutableStateListOf(10, 20, 30, 40) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "POP removes the topmost element (40).", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "POP removes the topmost element (40).", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Box(
             modifier = Modifier
@@ -572,7 +573,7 @@ private fun StackLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                             .background(if (idx == 0) DuolingoRed else Color(0xFFB35900)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }
@@ -598,7 +599,7 @@ private fun StackLevel4Content(onComplete: () -> Unit) {
     var peekedValue by remember { mutableStateOf<Int?>(null) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PEEK inspects the TOP element without removing it!", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "PEEK inspects the TOP element without removing it!", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Box(
             modifier = Modifier
@@ -650,7 +651,7 @@ private fun StackLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
         Text(
             text = "🔮 We pushed: [1] then [2] then [3].\nWhich element will POP() return?",
             fontSize = 15.sp,
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
@@ -673,7 +674,7 @@ private fun StackLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$opt", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "$opt", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -688,7 +689,7 @@ private fun StackLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Text(text = "⚡ Execute the sequence: PUSH ➔ PUSH ➔ POP", fontSize = 14.sp, color = AmberGold, fontWeight = FontWeight.Bold)
 
-        Text(text = "Step ${step + 1} of 3: Need ${requiredOps.getOrNull(step) ?: "DONE"}", fontSize = 13.sp, color = Color.White)
+        Text(text = "Step ${step + 1} of 3: Need ${requiredOps.getOrNull(step) ?: "DONE"}", fontSize = 13.sp, color = LocalDynamicThemeColors.current.textPrimary)
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Duolingo3DButton(
@@ -764,7 +765,7 @@ private fun StackBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                             .background(Color(0xFFFF5252)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$v", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "$v", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }

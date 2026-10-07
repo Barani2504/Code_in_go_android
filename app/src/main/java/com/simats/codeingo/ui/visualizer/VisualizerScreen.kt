@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.visualizer
+﻿package com.simats.codeingo.ui.visualizer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -87,6 +87,7 @@ import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 enum class VisualizerDisplayMode {
     LIST,
@@ -254,7 +255,7 @@ private fun VisualizerHeaderBar(
                         text = "All Topics",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }
@@ -264,7 +265,7 @@ private fun VisualizerHeaderBar(
                     text = "DSA Visualizer",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "Watch structures & code come alive",
@@ -293,7 +294,7 @@ private fun VisualizerHeaderBar(
                     text = currentLanguageName,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -343,7 +344,7 @@ private fun TopicListView(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = Color.White.copy(alpha = 0.6f),
+                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                     modifier = Modifier.size(18.dp)
                 )
                 BasicTextField(
@@ -351,7 +352,7 @@ private fun TopicListView(
                     onValueChange = onSearchQueryChange,
                     modifier = Modifier.weight(1f),
                     textStyle = TextStyle(
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     ),
@@ -442,7 +443,7 @@ private fun TopicListView(
                         .size(42.dp)
                         .clip(CircleShape)
                         .background(DsaBlue.copy(alpha = 0.22f))
-                        .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape),
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "✨", fontSize = 18.sp)
@@ -452,7 +453,7 @@ private fun TopicListView(
                         text = "Interactive DSA Directory",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Text(
                         text = "Tap any structure below to open its visualizer & live code",
@@ -579,7 +580,7 @@ private fun ArenaCard(
                 text = title,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = subtitle,
@@ -669,7 +670,7 @@ private fun DSATopicListCard(
                     text = type.title,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -709,7 +710,7 @@ private fun DSATopicListCard(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = Color.White.copy(alpha = 0.9f)
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f)
                         )
                     }
                 }
@@ -727,7 +728,7 @@ private fun DSATopicListCard(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -759,7 +760,7 @@ private fun DSATopicListCard(
                         text = "Open",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
@@ -885,7 +886,7 @@ private fun TopicDetailView(
                             text = "Explore ${next.title}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                     Icon(
@@ -998,7 +999,7 @@ private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
                     text = type.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
         }
@@ -1035,7 +1036,7 @@ private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(text = "⏱️ Time:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                    Text(text = type.timeComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.White)
+                    Text(text = type.timeComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
 
@@ -1051,7 +1052,7 @@ private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(text = "💾 Space:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                    Text(text = type.spaceComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.White)
+                    Text(text = type.spaceComplexity, fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
@@ -1079,7 +1080,7 @@ private fun DSARealWorldApplicationsCard(type: DSAVisualizerType) {
                 text = "Real-World Systems & Applications",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
         }
 
@@ -1094,7 +1095,7 @@ private fun DSARealWorldApplicationsCard(type: DSAVisualizerType) {
                         text = app,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 17.sp
                     )
                 }
@@ -1161,7 +1162,7 @@ private fun StackVisualizer() {
                                 text = if (isTop) "$value (TOP)" else "$value",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = LocalDynamicThemeColors.current.textPrimary
                             )
                         }
                     }
@@ -1274,7 +1275,7 @@ private fun QueueVisualizer() {
                                     text = "$value",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = LocalDynamicThemeColors.current.textPrimary
                                 )
                             }
                         }
@@ -1358,7 +1359,7 @@ private fun ArrayVisualizer() {
                             text = "Array Visualizer",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Text(
                             text = "Sequential memory cells with index access",
@@ -1568,7 +1569,7 @@ private fun ArrayVisualizer() {
                         value = searchTargetText,
                         onValueChange = { searchTargetText = it },
                         singleLine = true,
-                        textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
+                        textStyle = TextStyle(color = LocalDynamicThemeColors.current.textPrimary, fontSize = 13.sp),
                         cursorBrush = SolidColor(DsaGreen),
                         modifier = Modifier.weight(1f),
                         decorationBox = { innerTextField ->
@@ -1684,7 +1685,7 @@ private fun LinkedListVisualizer() {
                                             .padding(2.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(text = "$valNum", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text(text = "$valNum", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                                     }
                                     // Pointer box
                                     Box(
@@ -2007,7 +2008,7 @@ private fun AVLNodeBadge(value: Int, bf: Int) {
                 .border(2.dp, DsaTeal, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "$value", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+            Text(text = "$value", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Box(
@@ -2082,7 +2083,7 @@ private fun TrieVisualizer() {
                     BasicTextField(
                         value = searchPrefix,
                         onValueChange = { searchPrefix = it.uppercase() },
-                        textStyle = TextStyle(color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold),
+                        textStyle = TextStyle(color = LocalDynamicThemeColors.current.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold),
                         cursorBrush = SolidColor(Color.Cyan),
                         modifier = Modifier.weight(1f),
                         decorationBox = { innerTextField ->
@@ -2108,7 +2109,7 @@ private fun TrieVisualizer() {
                             .border(1.dp, Color.Cyan, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "ROOT", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        Text(text = "ROOT", fontSize = 8.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -2447,7 +2448,7 @@ private fun StepRecorderVisualizer() {
                         fontWeight = FontWeight.Black,
                         color = AmberGold
                     )
-                    Text(text = current.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = current.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 // Array State Box
@@ -2465,7 +2466,7 @@ private fun StepRecorderVisualizer() {
                                 .border(1.5.dp, if (stepIdx == 3 && i == 2) DuolingoGreen else DsaBlue, RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                         }
                     }
                 }
@@ -2525,10 +2526,10 @@ private fun ComplexityCard(time: String, space: String) {
     ) {
         Text(text = "TIME COMPLEXITY", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+        Text(text = time, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "SPACE COMPLEXITY", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = space, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+        Text(text = space, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
     }
 }

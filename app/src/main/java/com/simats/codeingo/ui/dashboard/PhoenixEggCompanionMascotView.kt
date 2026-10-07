@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.dashboard
+﻿package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -55,6 +55,7 @@ import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoRed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun PhoenixEggCompanionMascotView(
@@ -245,7 +246,7 @@ fun PhoenixEggCompanionMascotView(
                     drawPath(
                         path = eggPath,
                         brush = Brush.linearGradient(
-                            colors = listOf(Color.White.copy(alpha = 0.7f), AmberGold.copy(alpha = 0.3f), Color.Transparent),
+                            colors = listOf(LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f), AmberGold.copy(alpha = 0.3f), Color.Transparent),
                             start = Offset(0f, 0f),
                             end = Offset(w, h)
                         ),
@@ -254,7 +255,7 @@ fun PhoenixEggCompanionMascotView(
 
                     // Gloss highlight
                     drawOval(
-                        color = Color.White.copy(alpha = 0.45f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f),
                         topLeft = Offset(w * 0.22f, h * 0.14f),
                         size = Size(w * 0.20f, h * 0.26f)
                     )

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -38,6 +38,7 @@ import com.simats.codeingo.ui.theme.DuolingoInputBorder
 import com.simats.codeingo.ui.theme.DuolingoPlaceholder
 import com.simats.codeingo.ui.theme.DuolingoSubtext
 import androidx.compose.foundation.background
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * Themed text input matching the iOS customTextField style.
@@ -60,7 +61,7 @@ fun CustomTextField(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
         ),
@@ -140,7 +141,7 @@ fun CustomSecureField(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
-            color = Color.White,
+            color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
         ),

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * Animated capsule progress bar matching Duolingo lesson progress style.
@@ -57,7 +58,7 @@ fun ProgressBarAnimated(
                         .fillMaxWidth()
                         .height(height * 0.35f)
                         .clip(RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp))
-                        .background(Color.White.copy(alpha = 0.25f))
+                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f))
                 )
             }
         }

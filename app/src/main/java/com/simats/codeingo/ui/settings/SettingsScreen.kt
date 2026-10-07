@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.settings
+﻿package com.simats.codeingo.ui.settings
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -342,7 +342,7 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Done, contentDescription = null, tint = DuolingoGreen, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Progress reset successfully!", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Progress reset successfully!", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
         }
@@ -532,9 +532,9 @@ private fun AppearanceSection(
                     ThemeManager.instance.toggleDarkMode(toDark)
                 },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
+                    checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
                     checkedTrackColor = AmberGold,
-                    uncheckedThumbColor = Color.White,
+                    uncheckedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
                     uncheckedTrackColor = cardBorder
                 )
             )
@@ -938,9 +938,9 @@ private fun ToggleRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
+                checkedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
                 checkedTrackColor = DuolingoBlue,
-                uncheckedThumbColor = Color.White,
+                uncheckedThumbcolor = LocalDynamicThemeColors.current.textPrimary,
                 uncheckedTrackColor = textSecondary.copy(alpha = 0.35f)
             )
         )

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.worlds.linkedlist
+﻿package com.simats.codeingo.ui.worlds.linkedlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +56,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.worlds.array.KingdomGameSpeed
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,18 +127,18 @@ fun LinkedListRoadArenaScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Close, contentDescription = "Exit", tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "❤️ $hearts", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "⭐ +$sessionXP", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
-                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
-                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.45f)).border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 3.dp)) {
+                        Text(text = "💎 $gemsCount", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
 
@@ -189,7 +190,7 @@ fun LinkedListRoadArenaScreen(
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
-                            .border(1.dp, if (isSelected) Color.White else Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
+                            .border(1.dp, if (isSelected) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
                             .clickable(enabled = isUnlocked) { currentLevel = lvl }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -235,11 +236,11 @@ fun LinkedListRoadArenaScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF260D12))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🔗 Pointer Chain Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "🔗 Pointer Chain Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -269,7 +270,7 @@ fun LinkedListRoadArenaScreen(
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+                        Text(text = "Skip ⏭", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -284,7 +285,7 @@ fun LinkedListRoadArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "🔗 POINTERS LINKED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
-                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
                         title = "NEXT ROAD ➔",
                         style = Duolingo3DButtonStyle.GREEN,
@@ -328,7 +329,7 @@ fun LinkedListRoadArenaScreen(
                     Text(
                         text = "A Linked List consists of separate Node objects allocated dynamically in heap memory. Each node has:\n1. data (value)\n2. next (memory pointer to the next node)\n\nAdvantages:\n- Dynamic resizing without memory relocation.\n- O(1) insertion/deletion at HEAD.\n\nDisadvantages:\n- O(n) access time (cannot index directly like array[i]).",
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
                     )
                 }
@@ -350,7 +351,7 @@ fun LinkedListRoadArenaScreen(
                             LinkedListRoadLevel.BOSS_BATTLE -> "Tap the broken pointer to bridge the gap and defeat the boss!"
                         },
                         fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -371,7 +372,7 @@ private fun LLLevel1Content(onComplete: () -> Unit) {
                 text = "🔗 Meet the Node: A memory container with [ DATA | NEXT POINTER ➔ ].",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
@@ -389,7 +390,7 @@ private fun LLLevel1Content(onComplete: () -> Unit) {
                 modifier = Modifier.size(60.dp).background(Color(0xFFEF4444).copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "42", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "42", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
             Box(
                 modifier = Modifier.size(50.dp, 60.dp).background(Color.White.copy(alpha = 0.05f)),
@@ -414,7 +415,7 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
     val chain = listOf(10, 20, 30)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Follow the Chain: Traversing step $step of 3", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "Follow the Chain: Traversing step $step of 3", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -430,7 +431,7 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
                         .background(if (isCurrent) Color(0xFFEF4444) else Color(0xFF330F16)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
                 if (idx < chain.size - 1) {
                     Text(text = "➔", fontSize = 14.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Black)
@@ -456,17 +457,17 @@ private fun LLLevel3Content(onComplete: () -> Unit) {
     var isLinked by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Build the Chain: Connect Node [A] to Node [B]", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "Build the Chain: Connect Node [A] to Node [B]", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFEF4444)), contentAlignment = Alignment.Center) {
-                Text(text = "A (10)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "A (10)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
 
             Text(text = if (isLinked) "════➔" else "- - - ❓", fontSize = 14.sp, color = if (isLinked) DuolingoGreen else Color.White)
 
             Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFEF4444)), contentAlignment = Alignment.Center) {
-                Text(text = "B (20)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                Text(text = "B (20)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
             }
         }
 
@@ -489,16 +490,16 @@ private fun LLLevel4Content(onComplete: () -> Unit) {
     var isInserted by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Insert Node [15] between [10] and [20].", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "Insert Node [15] between [10] and [20].", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "[10]", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = "[10]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
             Text(text = "➔", color = Color(0xFFEF4444))
             if (isInserted) {
                 Text(text = "[15]", color = DuolingoGreen, fontWeight = FontWeight.Black)
                 Text(text = "➔", color = Color(0xFFEF4444))
             }
-            Text(text = "[20]", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = "[20]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
         }
 
         if (!isInserted) {
@@ -520,16 +521,16 @@ private fun LLLevel5Content(onComplete: () -> Unit) {
     var isDeleted by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Delete Node [20]: Bypass with 10.next = 30.", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(text = "Delete Node [20]: Bypass with 10.next = 30.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "[10]", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = "[10]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
             Text(text = "➔", color = Color(0xFFEF4444))
             if (!isDeleted) {
                 Text(text = "[20]", color = DuolingoRed, fontWeight = FontWeight.Black)
                 Text(text = "➔", color = Color(0xFFEF4444))
             }
-            Text(text = "[30]", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = "[30]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
         }
 
         if (!isDeleted) {

@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.profile
+﻿package com.simats.codeingo.ui.profile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -59,6 +59,7 @@ import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun ProfileScreen(
@@ -163,7 +164,7 @@ fun ProfileScreen(
                 title = {
                     Text(
                         text = "Sign Out",
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontWeight = FontWeight.Black
                     )
                 },
@@ -186,7 +187,7 @@ fun ProfileScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showSignOutAlert = false }) {
-                        Text("Cancel", color = Color.White.copy(alpha = 0.7f))
+                        Text("Cancel", color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f))
                     }
                 }
             )
@@ -232,7 +233,7 @@ private fun AuthenticatedProfileBody(
                     text = "PROFILE",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
 
@@ -240,7 +241,7 @@ private fun AuthenticatedProfileBody(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
                     .clickable { onSignOutClick() }
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
@@ -248,12 +249,12 @@ private fun AuthenticatedProfileBody(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(text = "↪", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                    Text(text = "↪", fontSize = 12.sp, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
                     Text(
                         text = "Sign Out",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -348,7 +349,7 @@ private fun UserHeaderCard(
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), CircleShape)
                     .clickable { onOpenEditProfile() },
                 contentAlignment = Alignment.Center
             ) {
@@ -417,7 +418,7 @@ private fun UserHeaderCard(
                             text = currentEmotion.title,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = LocalDynamicThemeColors.current.textPrimary
                         )
                         Text(text = "✨", fontSize = 11.sp)
                     }
@@ -436,7 +437,7 @@ private fun UserHeaderCard(
                     text = userName,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
 
                 Text(
@@ -450,7 +451,7 @@ private fun UserHeaderCard(
                     text = "Joined September 2026",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.4f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.4f)
                 )
 
                 // Following / Followers Row
@@ -478,7 +479,7 @@ private fun UserHeaderCard(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.07f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                     .padding(8.dp)
             ) {
                 Text(text = flagEmoji, fontSize = 28.sp)
@@ -508,7 +509,7 @@ private fun StatisticsSection(
                 text = "STATISTICS",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
         }
 
@@ -587,13 +588,13 @@ private fun ProfileStatCard(
                 text = value,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
                 text = label,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.5f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.5f)
             )
         }
     }
@@ -626,7 +627,7 @@ private fun AchievementsSection(
                     text = "ACHIEVEMENTS",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
 
@@ -714,7 +715,7 @@ private fun AchievementRow(
                     text = "LVL $level",
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f)
                 )
             }
         }
@@ -731,13 +732,13 @@ private fun AchievementRow(
                     text = title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "$progress/$maxProgress",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.45f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
                 )
             }
 
@@ -763,7 +764,7 @@ private fun AchievementRow(
                 text = subtitle,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.45f)
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
             )
         }
     }
@@ -787,7 +788,7 @@ private fun AddFriendsSection() {
                 text = "ADD FRIENDS",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = LocalDynamicThemeColors.current.textPrimary
             )
         }
 
@@ -819,7 +820,7 @@ private fun AddFriendsSection() {
                     text = "Find Friends",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -827,7 +828,7 @@ private fun AddFriendsSection() {
                     text = "›",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.35f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f)
                 )
             }
 
@@ -858,7 +859,7 @@ private fun AddFriendsSection() {
                     text = "Invite Friends",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -866,7 +867,7 @@ private fun AddFriendsSection() {
                     text = "›",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.35f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f)
                 )
             }
         }
@@ -909,7 +910,7 @@ private fun UnauthenticatedProfileBody(
                     text = "PROFILE",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
             }
 
@@ -917,7 +918,7 @@ private fun UnauthenticatedProfileBody(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
                     .padding(6.dp)
             ) {
                 Text(text = flagEmoji, fontSize = 22.sp)
@@ -1001,7 +1002,7 @@ private fun UnauthenticatedProfileBody(
                     text = "Create a Profile to Save Your Progress",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White,
+                    color = LocalDynamicThemeColors.current.textPrimary,
                     textAlign = TextAlign.Center
                 )
 
@@ -1009,7 +1010,7 @@ private fun UnauthenticatedProfileBody(
                     text = "Join thousands of engineers leveling up Data Structures, saving daily streaks, and climbing the global Obsidian League.",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.65f),
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
                     textAlign = TextAlign.Center,
                     lineHeight = 18.sp
                 )
@@ -1102,7 +1103,7 @@ private fun UnauthenticatedProfileBody(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White.copy(alpha = 0.06f))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                 .clickable { onQuickDemoSignIn() }
                 .padding(vertical = 10.dp, horizontal = 14.dp),
             contentAlignment = Alignment.Center
@@ -1116,7 +1117,7 @@ private fun UnauthenticatedProfileBody(
                     text = "Demo: One-Tap Sign In as Vishal Rao",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f)
                 )
             }
         }
@@ -1156,14 +1157,14 @@ private fun BenefitCard(
             text = title,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White
+            color = LocalDynamicThemeColors.current.textPrimary
         )
 
         Text(
             text = subtitle,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.55f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f),
             lineHeight = 15.sp
         )
     }

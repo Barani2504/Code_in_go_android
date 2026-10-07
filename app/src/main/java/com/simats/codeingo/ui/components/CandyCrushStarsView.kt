@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun CandyCrushStarsView(
@@ -65,7 +66,7 @@ fun CandyCrushStarsView(
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Star ${index + 1}",
-                    tint = if (lit) AmberGold else Color.White.copy(alpha = 0.2f),
+                    tint = if (lit) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f),
                     modifier = Modifier.size(starSize)
                 )
             }

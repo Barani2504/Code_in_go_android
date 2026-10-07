@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.components
+﻿package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 📱 HeaderView — Top Bar with Brand Logo & Language Selector Pill
@@ -73,7 +74,7 @@ fun HeaderView(
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
                     .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(100.dp))
+                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.20f), RoundedCornerShape(100.dp))
                     .clickable { onOpenLanguagePicker() }
                     .padding(horizontal = 11.dp, vertical = 6.dp)
             ) {
@@ -92,7 +93,7 @@ fun HeaderView(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = selectedLanguage!!.name.uppercase(),
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.SansSerif
@@ -100,7 +101,7 @@ fun HeaderView(
                 } else {
                     Text(
                         text = "SITE LANGUAGE",
-                        color = Color.White,
+                        color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.SansSerif
@@ -118,7 +119,7 @@ fun HeaderView(
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.35f),
+                            LocalDynamicThemeColors.current.placeholder,
                             AmberGold.copy(alpha = 0.30f),
                             Color.Transparent
                         )

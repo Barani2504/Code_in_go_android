@@ -1,4 +1,4 @@
-package com.simats.codeingo.ui.auth
+﻿package com.simats.codeingo.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,6 +45,7 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoGreenDark
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 enum class ForgotPasswordStep {
     ENTER_EMAIL,
@@ -107,7 +108,7 @@ fun ForgotPasswordSheet(
                     text = "RESET PASSWORD",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.White
+                    color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.size(48.dp))
@@ -121,7 +122,7 @@ fun ForgotPasswordSheet(
                         text = "Forgot your password?",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -165,7 +166,7 @@ fun ForgotPasswordSheet(
                         text = "Sending recovery code...",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
 
@@ -174,7 +175,7 @@ fun ForgotPasswordSheet(
                         text = "Enter Verification Code",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -215,7 +216,7 @@ fun ForgotPasswordSheet(
                         text = "Create New Password",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomSecureField(
@@ -267,7 +268,7 @@ fun ForgotPasswordSheet(
                         text = "Password Reset Complete!",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White
+                        color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
