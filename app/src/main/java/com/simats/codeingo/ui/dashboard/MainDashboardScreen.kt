@@ -68,6 +68,8 @@ import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.navigation.BottomNavBar
+import com.simats.codeingo.ui.gamification.DSAChapterStoryIntroSheet
+import com.simats.codeingo.ui.gamification.DSAFinalMasterJourneyView
 import com.simats.codeingo.ui.leaderboards.LeaderboardsScreen
 import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
@@ -129,6 +131,8 @@ fun MainDashboardScreen(
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
     var showHeartsSheet by remember { mutableStateOf(false) }
+    var showFinalMasterJourney by remember { mutableStateOf(false) }
+    var storySelectedChapter by remember { mutableStateOf<com.simats.codeingo.data.model.DSAChapterModel?>(null) }
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
     var activeWorldArena by remember { mutableStateOf<String?>(null) }
 
@@ -308,7 +312,14 @@ fun MainDashboardScreen(
                                         UnitSectionBanner(
                                             unit = unit,
                                             isUnlocked = isUnitOpen,
-                                            onGuidebookClick = { guideSelectedUnit = unit }
+                                            onGuidebookClick = {
+                                                val chapter = com.simats.codeingo.data.model.DSA5ChapterData.chapters.firstOrNull { it.id == unit.id }
+                                                if (chapter != null) {
+                                                    storySelectedChapter = chapter
+                                                } else {
+                                                    guideSelectedUnit = unit
+                                                }
+                                            }
                                         )
 
                                         // Winding 3D Level Nodes
@@ -365,7 +376,13 @@ fun MainDashboardScreen(
                                 GrandMasterJourneyCard(
                                     completedCount = unlockedLevels.size,
                                     totalCount = 25,
-                                    onOpenSanctuary = onOpenPhoenixSanctuary
+                                    onOpenSanctuary = {
+                                        if (unlockedLevels.size >= 25) {
+                                            showFinalMasterJourney = true
+                                        } else {
+                                            onOpenPhoenixSanctuary()
+                                        }
+                                    }
                                 )
 
                                 Spacer(modifier = Modifier.height(40.dp))
@@ -531,6 +548,40 @@ fun MainDashboardScreen(
                     fromStageId = evolutionFromStage,
                     toStageId = evolutionToStage,
                     onDismiss = { gameManager.dismissEvolutionModal() }
+                )
+            }
+        }
+
+        // DSA Final Master Journey Fullscreen Celebration Modal
+        if (showFinalMasterJourney) {
+            Dialog(
+                onDismissRequest = { showFinalMasterJourney = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                DSAFinalMasterJourneyView(
+                    totalXP = totalXP,
+                    totalLessons = unlockedLevels.size,
+                    correctAnswers = unlockedLevels.size * 5,
+                    perfectLessons = maxOf(1, unlockedLevels.size / 2),
+                    currentStreak = if (streakDays > 0) streakDays else 3,
+                    onDismiss = { showFinalMasterJourney = false }
+                )
+            }
+        }
+
+        // DSA Chapter Story Intro Sheet Modal
+        storySelectedChapter?.let { chapter ->
+            Dialog(
+                onDismissRequest = { storySelectedChapter = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                DSAChapterStoryIntroSheet(
+                    chapter = chapter,
+                    onStartFirstLevel = {
+                        val firstLevel = chapter.levels.firstOrNull()?.levelNumber ?: 1
+                        onStartLesson(chapter.id, firstLevel, chapter.levels.size, false)
+                    },
+                    onDismiss = { storySelectedChapter = null }
                 )
             }
         }
