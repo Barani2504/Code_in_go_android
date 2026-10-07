@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +24,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Moon
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,28 +55,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.AppTheme
+import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.domain.ThemeManager
-import com.simats.codeingo.domain.GameManager
-import com.simats.codeingo.ui.theme.CardBackground
-import com.simats.codeingo.ui.theme.DarkBackground
+import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ══════════════════════════════════════════════════════════════════
 // ⚙️  SettingsScreen — Full 4-Tab parity with iOS SettingsView.swift
 // Tabs: Preferences | Notifications | Courses | Account
+// Seamlessly adapts to Light, Dark, and System Theme modes
 // ══════════════════════════════════════════════════════════════════
 
 private val tabTitles = listOf("Preferences", "Notifications", "Courses", "Account")
@@ -90,6 +96,15 @@ fun SettingsScreen(
 
     // ── Collected state ─────────────────────────────────────────
     val currentTheme by themeManager.currentTheme.collectAsState()
+    val isSystemDark = isSystemInDarkTheme()
+    val isDark = when (currentTheme) {
+        AppTheme.DARK -> true
+        AppTheme.LIGHT -> false
+        AppTheme.SYSTEM -> isSystemDark
+    }
+
+    val dynamicColors = LocalDynamicThemeColors.current
+
     val isAutoEmotion by emotionManager.isAutoEmotionEnabled.collectAsState()
     val userName by locManager.userName.collectAsState()
     val userHandle by locManager.userHandle.collectAsState()
@@ -97,7 +112,7 @@ fun SettingsScreen(
     val streakDays by gameManager.streakDays.collectAsState()
 
     // ── Tab state ────────────────────────────────────────────────
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     // ── Lesson Experience toggles ─────────────────────────────────
     var soundEffects by remember { mutableStateOf(true) }
@@ -124,9 +139,11 @@ fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
 
-    // ── Background colour driven by theme ────────────────────────
-    val bgColor = if (currentTheme == AppTheme.LIGHT) Color(0xFFF5F5F5) else DarkBackground
-    val textPrimary = if (currentTheme == AppTheme.LIGHT) Color(0xFF111111) else Color.White
+    // ── Dynamic Theme adaptive colors ────────────────────────────
+    val textPrimary = dynamicColors.textPrimary
+    val textSecondary = dynamicColors.textSecondary
+    val cardBg = dynamicColors.cardBackground
+    val cardBorder = dynamicColors.inputBorder
 
     // ── Reset progress alert dialog ──────────────────────────────
     if (showResetAlert) {
@@ -144,14 +161,13 @@ fun SettingsScreen(
                 Text(
                     "Are you sure you want to reset all your progress in this course? This cannot be undone.",
                     fontSize = 14.sp,
-                    color = SubtextGray
+                    color = textSecondary
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     showResetAlert = false
-                    // Reset: unlock-level progress reset
-                    GameManager.instance.resetAllProgress()
+                    gameManager.resetAllProgress()
                     scope.launch {
                         showResetToast = true
                         delay(2500)
@@ -166,15 +182,17 @@ fun SettingsScreen(
                     Text("CANCEL", color = DuolingoBlue, fontWeight = FontWeight.Bold)
                 }
             },
-            containerColor = CardBackground
+            containerColor = cardBg
         )
     }
 
     Box(modifier = modifier.fillMaxSize()) {
+        // Living Phoenix Atmospheric Background with Light/Dark transition
+        PhoenixAtmosphericBackgroundView()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(bgColor)
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
@@ -189,18 +207,17 @@ fun SettingsScreen(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = SubtextGray
+                        tint = textSecondary
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "SETTINGS",
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
                     color = textPrimary
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                // Done button (mirrors iOS)
                 TextButton(onClick = onDismiss) {
                     Text(
                         text = "Done",
@@ -217,7 +234,8 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(CardBackground),
+                    .background(cardBg)
+                    .border(1.dp, cardBorder, RoundedCornerShape(14.dp)),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 tabTitles.forEachIndexed { index, label ->
@@ -230,7 +248,7 @@ fun SettingsScreen(
                         text = label,
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                        color = if (isSelected) Color.White else SubtextGray,
+                        color = if (isSelected) Color.White else textSecondary,
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
@@ -254,6 +272,7 @@ fun SettingsScreen(
                 when (selectedTab) {
                     0 -> PreferencesTab(
                         currentTheme = currentTheme,
+                        isDark = isDark,
                         onThemeChange = { themeManager.setTheme(it) },
                         isAutoEmotion = isAutoEmotion,
                         onAutoEmotionChange = { emotionManager.setAutoEmotionEnabled(it) },
@@ -268,7 +287,10 @@ fun SettingsScreen(
                         streakDays = streakDays,
                         onAddDay = { gameManager.completeLessonAndExtendStreak() },
                         onResetStreak = { gameManager.debugResetStreak() },
-                        textPrimary = textPrimary
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        cardBg = cardBg,
+                        cardBorder = cardBorder
                     )
                     1 -> NotificationsTab(
                         notifLessons = notifLessons, onNotifLessons = { notifLessons = it },
@@ -282,19 +304,28 @@ fun SettingsScreen(
                         showTimePicker = showTimePicker,
                         onShowTimePicker = { showTimePicker = it },
                         onTimeSelected = { practiceTime = it; showTimePicker = false },
-                        textPrimary = textPrimary
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        cardBg = cardBg,
+                        cardBorder = cardBorder
                     )
                     2 -> CoursesTab(
                         flagEmoji = selectedLang?.flagEmoji ?: "🇺🇸",
                         langName = selectedLang?.name ?: "English",
                         onResetClick = { showResetAlert = true },
-                        textPrimary = textPrimary
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        cardBg = cardBg,
+                        cardBorder = cardBorder
                     )
                     3 -> AccountTab(
                         userName = userName.ifEmpty { "Learner" },
                         userHandle = userHandle.ifEmpty { "learner" },
                         onLogout = onLogout,
-                        textPrimary = textPrimary
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        cardBg = cardBg,
+                        cardBorder = cardBorder
                     )
                 }
                 Spacer(modifier = Modifier.height(40.dp))
@@ -327,6 +358,7 @@ fun SettingsScreen(
 @Composable
 private fun PreferencesTab(
     currentTheme: AppTheme,
+    isDark: Boolean,
     onThemeChange: (AppTheme) -> Unit,
     isAutoEmotion: Boolean,
     onAutoEmotionChange: (Boolean) -> Unit,
@@ -341,43 +373,61 @@ private fun PreferencesTab(
     streakDays: Int,
     onAddDay: () -> Unit,
     onResetStreak: () -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color
 ) {
     // Appearance section
-    SectionHeader("Appearance", textPrimary)
+    SectionHeader("Appearance", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    AppearanceSection(currentTheme = currentTheme, onThemeChange = onThemeChange, textPrimary = textPrimary)
+    AppearanceSection(
+        currentTheme = currentTheme,
+        isDark = isDark,
+        onThemeChange = onThemeChange,
+        textPrimary = textPrimary,
+        textSecondary = textSecondary,
+        cardBg = cardBg,
+        cardBorder = cardBorder
+    )
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // Live Emotion Icon
-    SectionHeader("Live Emotion Icon", textPrimary)
+    SectionHeader("Live Emotion Icon", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
-        ToggleRow(title = "Auto Emotion", checked = isAutoEmotion, onCheckedChange = onAutoEmotionChange, textPrimary = textPrimary)
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        ToggleRow(
+            title = "Auto Emotion",
+            subtitle = if (isAutoEmotion) "Changes automatically based on app activity" else "Static icon active",
+            checked = isAutoEmotion,
+            onCheckedChange = onAutoEmotionChange,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary
+        )
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // Lesson Experience
-    SectionHeader("Lesson Experience", textPrimary)
+    SectionHeader("Lesson Experience", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
-        ToggleRow(title = "Sound Effects", checked = soundEffects, onCheckedChange = onSoundEffectsChange, textPrimary = textPrimary)
-        SettingsDivider()
-        ToggleRow(title = "Animations", checked = animations, onCheckedChange = onAnimationsChange, textPrimary = textPrimary)
-        SettingsDivider()
-        ToggleRow(title = "Motivational Messages", checked = motivationalMessages, onCheckedChange = onMotivationalChange, textPrimary = textPrimary)
-        SettingsDivider()
-        ToggleRow(title = "Listening Exercises", checked = listeningExercises, onCheckedChange = onListeningChange, textPrimary = textPrimary)
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        ToggleRow(title = "Sound Effects", checked = soundEffects, onCheckedChange = onSoundEffectsChange, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        ToggleRow(title = "Animations", checked = animations, onCheckedChange = onAnimationsChange, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        ToggleRow(title = "Motivational Messages", checked = motivationalMessages, onCheckedChange = onMotivationalChange, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        ToggleRow(title = "Listening Exercises", checked = listeningExercises, onCheckedChange = onListeningChange, textPrimary = textPrimary, textSecondary = textSecondary)
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // Daily Fire Streak
-    SectionHeader("Daily Fire Streak", textPrimary)
+    SectionHeader("Daily Fire Streak", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -387,7 +437,7 @@ private fun PreferencesTab(
             Text("🔥 Streak Days", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
             Text("$streakDays", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF6B35))
         }
-        SettingsDivider()
+        SettingsDivider(cardBorder)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -404,27 +454,27 @@ private fun PreferencesTab(
     Spacer(modifier = Modifier.height(24.dp))
 
     // Account navigation rows
-    SectionHeader("Account", textPrimary)
+    SectionHeader("Account", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
-        NavigationRow(title = "Account", detail = "", textPrimary = textPrimary)
-        SettingsDivider()
-        NavigationRow(title = "Preferences", detail = "", textPrimary = textPrimary)
-        SettingsDivider()
-        NavigationRow(title = "Profile", detail = "", textPrimary = textPrimary)
-        SettingsDivider()
-        NavigationRow(title = "Notifications", detail = "", textPrimary = textPrimary)
-        SettingsDivider()
-        NavigationRow(title = "Courses", detail = "", textPrimary = textPrimary)
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        NavigationRow(title = "Account", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        NavigationRow(title = "Preferences", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        NavigationRow(title = "Profile", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        NavigationRow(title = "Notifications", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        NavigationRow(title = "Courses", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // Support row
-    SectionHeader("Support", textPrimary)
+    SectionHeader("Support", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
-        NavigationRow(title = "Help & Support", detail = "", textPrimary = textPrimary)
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        NavigationRow(title = "Help & Support", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
     }
 }
 
@@ -432,23 +482,77 @@ private fun PreferencesTab(
 @Composable
 private fun AppearanceSection(
     currentTheme: AppTheme,
+    isDark: Boolean,
     onThemeChange: (AppTheme) -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color
 ) {
-    val isDark = currentTheme == AppTheme.DARK
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        // Dark Mode quick toggle (with iOS-style status and icons)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isDark) Brush.linearGradient(listOf(Color(0xFF3F51B5), Color(0xFF1A237E)))
+                        else Brush.linearGradient(listOf(AmberGold, Color(0xFFFF9800)))
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isDark) "🌙" else "☀️",
+                    fontSize = 22.sp
+                )
+            }
 
-    SettingsCard {
-        // Dark Mode quick toggle
-        ToggleRow(
-            title = "Dark Mode",
-            checked = isDark,
-            onCheckedChange = { ThemeManager.instance.toggleDarkMode(it) },
-            textPrimary = textPrimary
-        )
-        SettingsDivider()
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Dark Mode",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    text = if (isDark) "Midnight obsidian theme active" else "Luminous daytime theme active",
+                    fontSize = 12.sp,
+                    color = if (isDark) AmberGold else textSecondary
+                )
+            }
+
+            Switch(
+                checked = isDark,
+                onCheckedChange = { toDark ->
+                    ThemeManager.instance.toggleDarkMode(toDark)
+                },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = AmberGold,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = cardBorder
+                )
+            )
+        }
+
+        SettingsDivider(cardBorder)
+
         // 3-way theme picker
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Text("Theme", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+            Text(
+                "Theme Mode",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = textPrimary
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -459,6 +563,10 @@ private fun AppearanceSection(
                         theme = theme,
                         isSelected = currentTheme == theme,
                         onSelect = { onThemeChange(theme) },
+                        textPrimary = textPrimary,
+                        textSecondary = textSecondary,
+                        cardBg = cardBg,
+                        cardBorder = cardBorder,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -472,6 +580,10 @@ private fun ThemeModeCard(
     theme: AppTheme,
     isSelected: Boolean,
     onSelect: () -> Unit,
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color,
     modifier: Modifier = Modifier
 ) {
     val emoji = when (theme) {
@@ -479,37 +591,44 @@ private fun ThemeModeCard(
         AppTheme.LIGHT -> "☀️"
         AppTheme.SYSTEM -> "⚙️"
     }
+
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) DuolingoBlue else InputBorder,
+        targetValue = if (isSelected) AmberGold else cardBorder,
         animationSpec = tween(200), label = "themeBorder"
     )
+
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) DuolingoBlue.copy(alpha = 0.12f) else Color.Transparent)
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (isSelected) AmberGold.copy(alpha = 0.12f) else cardBg)
+            .border(if (isSelected) 2.dp else 1.dp, borderColor, RoundedCornerShape(14.dp))
             .clickable { onSelect() }
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(emoji, fontSize = 22.sp)
+        Text(emoji, fontSize = 24.sp)
         Text(
             text = theme.title,
-            fontSize = 11.sp,
+            fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-            color = if (isSelected) DuolingoBlue else SubtextGray,
+            color = if (isSelected) AmberGold else textSecondary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
         if (isSelected) {
             Box(
                 modifier = Modifier
-                    .size(18.dp)
+                    .size(16.dp)
                     .clip(CircleShape)
-                    .background(DuolingoBlue),
+                    .background(AmberGold),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = Color(0xFF1A0F00),
+                    modifier = Modifier.size(10.dp)
+                )
             }
         }
     }
@@ -531,7 +650,10 @@ private fun NotificationsTab(
     showTimePicker: Boolean,
     onShowTimePicker: (Boolean) -> Unit,
     onTimeSelected: (String) -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color
 ) {
     Text(
         text = "Notifications",
@@ -542,38 +664,38 @@ private fun NotificationsTab(
     Spacer(modifier = Modifier.height(20.dp))
 
     // General section
-    SectionHeader("General", textPrimary)
+    SectionHeader("General", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
-        CheckboxRow(title = "Lessons & XP Updates", checked = notifLessons, onCheckedChange = onNotifLessons, textPrimary = textPrimary)
-        SettingsDivider()
-        CheckboxRow(title = "Streak Alerts", checked = notifStreakAlerts, onCheckedChange = onNotifStreakAlerts, textPrimary = textPrimary)
-        SettingsDivider()
-        CheckboxRow(title = "Achievement Unlocked", checked = notifAchievements, onCheckedChange = onNotifAchievements, textPrimary = textPrimary)
-        SettingsDivider()
-        CheckboxRow(title = "Leaderboard Changes", checked = notifLeaderboard, onCheckedChange = onNotifLeaderboard, textPrimary = textPrimary)
-        SettingsDivider()
-        CheckboxRow(title = "Tips & Suggestions", checked = notifTips, onCheckedChange = onNotifTips, textPrimary = textPrimary)
-        SettingsDivider()
-        CheckboxRow(title = "App Updates & News", checked = notifUpdates, onCheckedChange = onNotifUpdates, textPrimary = textPrimary)
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        CheckboxRow(title = "Lessons & XP Updates", checked = notifLessons, onCheckedChange = onNotifLessons, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Streak Alerts", checked = notifStreakAlerts, onCheckedChange = onNotifStreakAlerts, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Achievement Unlocked", checked = notifAchievements, onCheckedChange = onNotifAchievements, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Leaderboard Changes", checked = notifLeaderboard, onCheckedChange = onNotifLeaderboard, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Tips & Suggestions", checked = notifTips, onCheckedChange = onNotifTips, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "App Updates & News", checked = notifUpdates, onCheckedChange = onNotifUpdates, textPrimary = textPrimary, textSecondary = textSecondary)
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 
     // Daily Reminders
-    SectionHeader("Daily Reminders", textPrimary)
+    SectionHeader("Daily Reminders", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
-    SettingsCard {
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
         CheckboxRow(
             title = "Daily Practice Reminder",
             checked = dailyReminderEnabled,
-            onCheckedChange = onDailyReminderChange,
-            textPrimary = textPrimary
+            onCheckedChange = dailyReminderChange,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary
         )
         if (dailyReminderEnabled) {
-            SettingsDivider()
-            // Time picker dropdown
-            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            SettingsDivider(cardBorder)
+            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                 Column {
                     Text(
                         "Reminder Time",
@@ -586,8 +708,8 @@ private fun NotificationsTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(CardBackground)
-                            .border(1.5.dp, InputBorder, RoundedCornerShape(12.dp))
+                            .background(cardBg)
+                            .border(1.5.dp, cardBorder, RoundedCornerShape(12.dp))
                             .clickable { onShowTimePicker(true) }
                             .padding(horizontal = 16.dp, vertical = 14.dp)
                     ) {
@@ -602,18 +724,19 @@ private fun NotificationsTab(
                             Icon(
                                 Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
-                                tint = SubtextGray,
+                                tint = textSecondary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
                     }
                     DropdownMenu(
                         expanded = showTimePicker,
-                        onDismissRequest = { onShowTimePicker(false) }
+                        onDismissRequest = { onShowTimePicker(false) },
+                        modifier = Modifier.background(cardBg)
                     ) {
                         listOf("9:00 AM", "12:00 PM", "5:00 PM", "7:00 PM", "9:00 PM").forEach { time ->
                             DropdownMenuItem(
-                                text = { Text(time, fontWeight = FontWeight.Bold) },
+                                text = { Text(time, fontWeight = FontWeight.Bold, color = textPrimary) },
                                 onClick = { onTimeSelected(time) }
                             )
                         }
@@ -633,7 +756,10 @@ private fun CoursesTab(
     flagEmoji: String,
     langName: String,
     onResetClick: () -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color
 ) {
     Text(
         text = "Courses",
@@ -642,7 +768,7 @@ private fun CoursesTab(
         color = textPrimary
     )
     Spacer(modifier = Modifier.height(20.dp))
-    SettingsCard {
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -663,7 +789,7 @@ private fun CoursesTab(
                     text = "RESET",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = SubtextGray
+                    color = textSecondary
                 )
             }
         }
@@ -678,7 +804,10 @@ private fun AccountTab(
     userName: String,
     userHandle: String,
     onLogout: () -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color,
+    cardBg: Color,
+    cardBorder: Color
 ) {
     Text(
         text = "Account Details",
@@ -689,7 +818,7 @@ private fun AccountTab(
     Spacer(modifier = Modifier.height(20.dp))
 
     // Profile info card
-    SettingsCard {
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -697,9 +826,9 @@ private fun AccountTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Name", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
-            Text(userName, fontSize = 15.sp, color = SubtextGray)
+            Text(userName, fontSize = 15.sp, color = textSecondary)
         }
-        HorizontalDivider(color = InputBorder.copy(alpha = 0.6f))
+        SettingsDivider(cardBorder)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -710,7 +839,7 @@ private fun AccountTab(
             Text(
                 text = if (userHandle.startsWith("@")) userHandle else "@$userHandle",
                 fontSize = 15.sp,
-                color = SubtextGray
+                color = textSecondary
             )
         }
     }
@@ -741,35 +870,39 @@ private fun AccountTab(
 // ══════════════════════════════════════════════════════════════════
 
 @Composable
-private fun SectionHeader(title: String, textPrimary: Color) {
+private fun SectionHeader(title: String, textSecondary: Color) {
     Text(
         text = title.uppercase(),
         fontSize = 12.sp,
         fontWeight = FontWeight.Black,
-        color = SubtextGray,
+        color = textSecondary,
         letterSpacing = 1.sp
     )
 }
 
 @Composable
-private fun SettingsCard(content: @Composable () -> Unit) {
+private fun SettingsCard(
+    cardBg: Color,
+    cardBorder: Color,
+    content: @Composable () -> Unit
+) {
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(CardBackground)
-            .border(1.5.dp, InputBorder, shape)
+            .background(cardBg)
+            .border(1.2.dp, cardBorder, shape)
     ) {
         content()
     }
 }
 
 @Composable
-private fun SettingsDivider() {
+private fun SettingsDivider(color: Color) {
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),
-        color = InputBorder.copy(alpha = 0.6f),
+        color = color.copy(alpha = 0.6f),
         thickness = 1.dp
     )
 }
@@ -777,9 +910,11 @@ private fun SettingsDivider() {
 @Composable
 private fun ToggleRow(
     title: String,
+    subtitle: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color
 ) {
     Row(
         modifier = Modifier
@@ -787,21 +922,29 @@ private fun ToggleRow(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = textPrimary,
-            modifier = Modifier.weight(1f)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = textPrimary
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
+        }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
                 checkedTrackColor = DuolingoBlue,
-                uncheckedThumbColor = SubtextGray,
-                uncheckedTrackColor = Color(0xFF1B2631)
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = textSecondary.copy(alpha = 0.35f)
             )
         )
     }
@@ -812,7 +955,8 @@ private fun CheckboxRow(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color
 ) {
     Row(
         modifier = Modifier
@@ -832,7 +976,7 @@ private fun CheckboxRow(
                 .size(24.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(if (checked) DuolingoBlue else Color.Transparent)
-                .border(2.dp, if (checked) DuolingoBlue else SubtextGray, RoundedCornerShape(6.dp))
+                .border(2.dp, if (checked) DuolingoBlue else textSecondary, RoundedCornerShape(6.dp))
                 .clickable { onCheckedChange(!checked) },
             contentAlignment = Alignment.Center
         ) {
@@ -852,7 +996,8 @@ private fun CheckboxRow(
 private fun NavigationRow(
     title: String,
     detail: String,
-    textPrimary: Color
+    textPrimary: Color,
+    textSecondary: Color
 ) {
     Row(
         modifier = Modifier
@@ -869,13 +1014,13 @@ private fun NavigationRow(
             modifier = Modifier.weight(1f)
         )
         if (detail.isNotEmpty()) {
-            Text(text = detail, fontSize = 14.sp, color = SubtextGray)
+            Text(text = detail, fontSize = 14.sp, color = textSecondary)
             Spacer(modifier = Modifier.width(6.dp))
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = SubtextGray,
+            tint = textSecondary,
             modifier = Modifier.size(18.dp)
         )
     }
