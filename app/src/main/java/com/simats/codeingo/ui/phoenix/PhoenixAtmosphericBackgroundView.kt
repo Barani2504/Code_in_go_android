@@ -1,5 +1,6 @@
 package com.simats.codeingo.ui.phoenix
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,19 +12,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.simats.codeingo.domain.AppTheme
+import com.simats.codeingo.domain.ThemeManager
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlin.math.sin
 
 // ══════════════════════════════════════════════════════════════════
 // 🌌 PhoenixAtmosphericBackgroundView — Cosmic Realm Background
 // Exact parity with iOS PhoenixAtmosphericBackgroundView.swift:
-// - Deep volcanic obsidian canvas (#080E1A -> #0B111F -> #111222)
+// - Dark Mode: Deep volcanic obsidian canvas (#080E1A -> #0B111F -> #111222)
+// - Light Mode: Luminous golden sunrise celestial canvas (#F5F7FC -> #ECF1FA -> #F2F5FD)
 // - Floating animated embers drifting upward with shimmer
 // - Celestial star dust with gentle pulse
 // ══════════════════════════════════════════════════════════════════
@@ -50,6 +56,16 @@ fun PhoenixAtmosphericBackgroundView(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {}
 ) {
+    val themeManager = ThemeManager.instance
+    val currentTheme by themeManager.currentTheme.collectAsState()
+    val isSystemDark = isSystemInDarkTheme()
+
+    val isDark = when (currentTheme) {
+        AppTheme.DARK -> true
+        AppTheme.LIGHT -> false
+        AppTheme.SYSTEM -> isSystemDark
+    }
+
     val infiniteTransition = rememberInfiniteTransition(label = "emberAnim")
     val animTime by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -81,7 +97,7 @@ fun PhoenixAtmosphericBackgroundView(
             EmberSeed(15, 0.65f, 0.25f, 23.0f, 2.2f, Color(0xFFFF6626)),
             EmberSeed(16, 0.75f, 0.55f, 16.0f, 3.5f, Color(0xFFFF4D38)),
             EmberSeed(17, 0.84f, 0.38f, 20.5f, 2.8f, AmberGold),
-            EmberSeed(18, 0.05f, 0.22f, 18.5f, 3.2f, Color(0xFFA61F)),
+            EmberSeed(18, 0.05f, 0.22f, 18.5f, 3.2f, Color(0xFFFF6B1A)),
             EmberSeed(19, 0.92f, 0.18f, 17.0f, 3.6f, Color(0xFFFF5933)),
             EmberSeed(20, 0.16f, 0.12f, 15.0f, 2.8f, AmberGold),
             EmberSeed(21, 0.32f, 0.15f, 19.0f, 3.5f, Color(0xFFFF7A26)),
@@ -109,38 +125,47 @@ fun PhoenixAtmosphericBackgroundView(
         )
     }
 
-    val backgroundBrush = remember {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFF080E1A),
-                Color(0xFF0B111F),
-                Color(0xFF111222)
-            )
-        )
-    }
+    val topColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF080E1A) else Color(0xFFF5F7FC),
+        animationSpec = tween(300),
+        label = "topBgColor"
+    )
+    val midColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF0B111F) else Color(0xFFECF1FA),
+        animationSpec = tween(300),
+        label = "midBgColor"
+    )
+    val bottomColor by animateColorAsState(
+        targetValue = if (isDark) Color(0xFF111222) else Color(0xFFF2F5FD),
+        animationSpec = tween(300),
+        label = "bottomBgColor"
+    )
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(backgroundBrush)
+            .background(Brush.verticalGradient(listOf(topColor, midColor, bottomColor)))
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
+            val density = this.density
 
             // 1. Draw glowing radiant nebulae
+            val nebulaAlpha = if (isDark) 0.12f else 0.06f
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(AmberGold.copy(alpha = 0.12f), Color.Transparent),
+                    colors = listOf(AmberGold.copy(alpha = nebulaAlpha), Color.Transparent),
                     center = Offset(width * 0.5f, height * 0.25f),
                     radius = width * 0.6f
                 ),
                 radius = width * 0.6f,
                 center = Offset(width * 0.5f, height * 0.25f)
             )
+            val crimsonAlpha = if (isDark) 0.08f else 0.04f
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFFFF3B30).copy(alpha = 0.08f), Color.Transparent),
+                    colors = listOf(Color(0xFFFF3B30).copy(alpha = crimsonAlpha), Color.Transparent),
                     center = Offset(width * 0.75f, height * 0.70f),
                     radius = width * 0.5f
                 ),
@@ -148,12 +173,14 @@ fun PhoenixAtmosphericBackgroundView(
                 center = Offset(width * 0.75f, height * 0.70f)
             )
 
-            // 2. Draw stars
+            // 2. Draw stars (more subtle in light mode)
+            val starBaseAlpha = if (isDark) 0.25f else 0.10f
+            val starColor = if (isDark) Color.White else Color(0xFFB0B7C6)
             for (star in stars) {
                 val pulse = (sin((animTime * star.pulseSpeed).toDouble()).toFloat() + 1f) * 0.5f
-                val alpha = 0.25f + 0.65f * pulse
+                val alpha = starBaseAlpha + 0.65f * pulse
                 drawCircle(
-                    color = Color.White.copy(alpha = alpha),
+                    color = starColor.copy(alpha = alpha.coerceIn(0f, 1f)),
                     radius = star.size * density,
                     center = Offset(star.xRatio * width, star.yRatio * height)
                 )
@@ -170,10 +197,11 @@ fun PhoenixAtmosphericBackgroundView(
                 val curX = (ember.xRatio * width) + sway
 
                 val yRatio = (curY / height).coerceIn(0f, 1f)
-                val alpha = (sin((yRatio * Math.PI).toDouble()).toFloat()).coerceIn(0.2f, 0.85f)
+                val alphaBase = (sin((yRatio * Math.PI).toDouble()).toFloat()).coerceIn(0.2f, 0.85f)
+                val effectiveAlpha = if (isDark) alphaBase else alphaBase * 0.7f
 
                 drawCircle(
-                    color = ember.color.copy(alpha = alpha),
+                    color = ember.color.copy(alpha = effectiveAlpha),
                     radius = (ember.size * 0.5f) * density,
                     center = Offset(curX, curY)
                 )
