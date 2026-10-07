@@ -29,9 +29,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Moon
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -689,7 +686,7 @@ private fun NotificationsTab(
         CheckboxRow(
             title = "Daily Practice Reminder",
             checked = dailyReminderEnabled,
-            onCheckedChange = dailyReminderChange,
+            onCheckedChange = onDailyReminderChange,
             textPrimary = textPrimary,
             textSecondary = textSecondary
         )
