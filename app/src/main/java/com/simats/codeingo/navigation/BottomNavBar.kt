@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * BottomNavBar — Liquid Glass Docked Tab Bar matching iOS MainDashboardView TabView.
@@ -52,6 +53,9 @@ fun BottomNavBar(
     onTabSelected: (DashboardTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
     val coreTabs = listOf(
         DashboardTab.LEARN,
         DashboardTab.VISUALIZER,
@@ -62,7 +66,7 @@ fun BottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF0C101A).copy(alpha = 0.94f))
+            .background(if (isDark) Color(0xFF0C101A).copy(alpha = 0.94f) else Color.White.copy(alpha = 0.95f))
             .navigationBarsPadding()
     ) {
         // Top hairline glass stroke
@@ -70,7 +74,7 @@ fun BottomNavBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color.White.copy(alpha = 0.12f))
+                .background(if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFFD7DEEB))
                 .align(Alignment.TopCenter)
         )
 
@@ -83,8 +87,9 @@ fun BottomNavBar(
         ) {
             coreTabs.forEach { tab ->
                 val isSelected = selectedTab == tab
+                val unselectedColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B)
                 val iconColor by animateColorAsState(
-                    targetValue = if (isSelected) Color(0xFF1CB0F6) else Color(0xFF94A3B8),
+                    targetValue = if (isSelected) Color(0xFF1CB0F6) else unselectedColor,
                     animationSpec = spring(),
                     label = "tabColor"
                 )
@@ -115,7 +120,7 @@ fun BottomNavBar(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(if (isSelected) Color(0xFF1CB0F6).copy(alpha = 0.18f) else Color.Transparent)
+                            .background(if (isSelected) Color(0xFF1CB0F6).copy(alpha = if (isDark) 0.18f else 0.12f) else Color.Transparent)
                     ) {
                         Icon(
                             imageVector = tabIcon,

@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.theme
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 
 // ══════════════════════════════════════════════════════
@@ -62,23 +64,58 @@ val LiquidGlassTint      = Color(0xFF14_1E_38)
 val EmeraldGreen         = Color(0xFF00_C8_5A)
 
 // ══════════════════════════════════════════════════════
-// LEGACY ALIASES — Phoenix equivalents
-// Every screen using these names automatically renders
-// in the Phoenix palette without any view-level changes.
+// THEME-ADAPTIVE LEGACY ALIASES — Phoenix equivalents
+// Mirrors iOS Core/Theme.swift dynamicColor getters.
+// Automatically flips between Dark Mode and Light Mode
+// so every screen using these names automatically matches the theme.
 // ══════════════════════════════════════════════════════
 
 // Backgrounds
-val DuolingoDarkBg       = PhoenixObsidian
-val DuolingoHeaderBg     = PhoenixDeepNavy
+val DuolingoDarkBg: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.background
+
+val DuolingoHeaderBg: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.headerBackground
 
 // Cards & Inputs
-val DuolingoCardBg       = PhoenixCard
-val DuolingoInputBg      = PhoenixInput
-val DuolingoInputBorder  = PhoenixBorder
-val DuolingoInputText    = Color.White
-val DuolingoPlaceholder  = PhoenixPlaceholder
-val DuolingoTextGray     = PhoenixSubtext
-val DuolingoSubtext      = PhoenixSubtext
+val DuolingoCardBg: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.cardBackground
+
+val DuolingoInputBg: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.inputBackground
+
+val DuolingoInputBorder: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.inputBorder
+
+val DuolingoInputText: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.inputText
+
+val DuolingoPlaceholder: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.placeholder
+
+val DuolingoTextGray: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.textSecondary
+
+val DuolingoSubtext: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.textSecondary
 
 // Accents — legacy "Blue" → Phoenix amber/ember
 val DuolingoBlue         = AmberGold
@@ -94,11 +131,30 @@ val DuolingoOrangeDark   = Color(0xFFCC_43_0E)
 val DuolingoRed          = PhoenixCrimson
 val DuolingoRedDark      = Color(0xFFBB_1C_0A)
 
-val DarkBackground       = DuolingoDarkBg
-val CardBackground       = DuolingoCardBg
-val InputBackground      = DuolingoInputBg
-val InputBorder          = DuolingoInputBorder
-val SubtextGray          = DuolingoSubtext
+val DarkBackground: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = DuolingoDarkBg
+
+val CardBackground: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = DuolingoCardBg
+
+val InputBackground: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = DuolingoInputBg
+
+val InputBorder: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = DuolingoInputBorder
+
+val SubtextGray: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = DuolingoSubtext
 
 // ══════════════════════════════════════════════════════
 // DSA DIFFICULTY TIER COLORS  (unchanged visual values)

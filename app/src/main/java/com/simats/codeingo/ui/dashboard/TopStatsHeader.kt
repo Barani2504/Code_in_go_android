@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.dashboard
+package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.liquidGlassIsland
 
 /**
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
@@ -58,6 +59,9 @@ fun TopStatsHeader(
     onHeartsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -68,14 +72,9 @@ fun TopStatsHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1523).copy(alpha = 0.88f))
-                .border(
-                    1.dp,
-                    Brush.linearGradient(
-                        listOf(LocalDynamicThemeColors.current.placeholder, AmberGold.copy(alpha = 0.25f), Color.White.copy(alpha = 0.08f))
-                    ),
-                    RoundedCornerShape(24.dp)
+                .liquidGlassIsland(
+                    cornerRadius = 24.dp,
+                    glowColor = AmberGold.copy(alpha = if (isDark) 0.18f else 0.08f)
                 )
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -86,11 +85,12 @@ fun TopStatsHeader(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
                     .border(
                         1.dp,
                         Brush.linearGradient(
-                            listOf(LocalDynamicThemeColors.current.placeholder, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
+                            if (isDark) listOf(Color.White.copy(alpha = 0.40f), Color.White.copy(alpha = 0.10f))
+                            else listOf(Color.Black.copy(alpha = 0.14f), Color.Black.copy(alpha = 0.05f))
                         ),
                         CircleShape
                     )
@@ -100,7 +100,7 @@ fun TopStatsHeader(
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Side Menu",
-                    tint = Color.White,
+                    tint = if (isDark) Color.White else Color(0xFF182030),
                     modifier = Modifier.size(15.dp)
                 )
             }
@@ -121,16 +121,18 @@ fun TopStatsHeader(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val pillBg = if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.03f)
+
                 // 3. Streak Pill
                 val streakEmoji = if (isStreakPendingRestore) "🧊" else "🔥"
                 val streakVal = if (isStreakPendingRestore) savedStreakDays else streakDays
-                val streakColor = if (isStreakPendingRestore) Color(0xFF22D3EE) else Color(0xFFFF9500)
+                val streakColor = if (isStreakPendingRestore) Color(0xFF22D3EE) else (if (isDark) Color(0xFFFF9500) else Color(0xFFE66600))
 
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(0.9.dp, streakColor.copy(alpha = 0.35f), CircleShape)
+                        .background(pillBg)
+                        .border(0.9.dp, streakColor.copy(alpha = if (isDark) 0.35f else 0.45f), CircleShape)
                         .clickable { onStreakClick() }
                         .padding(horizontal = 6.dp, vertical = 3.5.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -146,13 +148,14 @@ fun TopStatsHeader(
                 }
 
                 // 4. Stars Pill
+                val starsColor = if (isDark) Color(0xFFFFD700) else Color(0xFFC78500)
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
+                        .background(pillBg)
                         .border(
                             0.9.dp,
-                            if (isBossActive) Color.Red.copy(alpha = 0.6f) else Color(0xFFFFD700).copy(alpha = 0.35f),
+                            if (isBossActive) Color.Red.copy(alpha = 0.6f) else starsColor.copy(alpha = if (isDark) 0.35f else 0.40f),
                             CircleShape
                         )
                         .padding(horizontal = 6.dp, vertical = 3.5.dp),
@@ -164,16 +167,17 @@ fun TopStatsHeader(
                         text = "$totalStars",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color(0xFFFFD700)
+                        color = starsColor
                     )
                 }
 
                 // 5. XP Pill
+                val xpColor = if (isDark) AmberGold else Color(0xFFC77300)
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(0.9.dp, AmberGold.copy(alpha = 0.35f), CircleShape)
+                        .background(pillBg)
+                        .border(0.9.dp, xpColor.copy(alpha = if (isDark) 0.35f else 0.40f), CircleShape)
                         .padding(horizontal = 6.dp, vertical = 3.5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.5.dp)
@@ -183,7 +187,7 @@ fun TopStatsHeader(
                         text = "$totalXP",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmberGold
+                        color = xpColor
                     )
                 }
 
@@ -191,8 +195,8 @@ fun TopStatsHeader(
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(0.9.dp, Color(0xFFFF4D4D).copy(alpha = 0.35f), CircleShape)
+                        .background(pillBg)
+                        .border(0.9.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.35f else 0.45f), CircleShape)
                         .clickable { onHeartsClick() }
                         .padding(horizontal = 6.dp, vertical = 3.5.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -210,7 +214,7 @@ fun TopStatsHeader(
                             text = heartTimerString,
                             fontSize = 8.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFF8888)
+                            color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040)
                         )
                     }
                 }

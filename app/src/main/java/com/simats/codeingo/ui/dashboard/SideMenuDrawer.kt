@@ -30,6 +30,7 @@ import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
 fun SideMenuDrawer(
@@ -114,7 +115,7 @@ fun SideMenuDrawer(
                         text = tab.title.uppercase(),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = if (isSelected && !isMore) DuolingoBlue else Color.White
+                        color = if (isSelected && !isMore) DuolingoBlue else LocalDynamicThemeColors.current.textPrimary
                     )
                 }
             }

@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.components
+package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,11 +46,12 @@ fun HeaderView(
 ) {
     val localizationManager = LocalizationManager.instance
     val selectedLanguage by localizationManager.selectedLanguage.collectAsState()
+    val isDark = LocalDynamicThemeColors.current.isDark
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF0D1626).copy(alpha = 0.95f))
+            .background(if (isDark) Color(0xFF0D1626).copy(alpha = 0.95f) else Color.White.copy(alpha = 0.95f))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -73,15 +74,15 @@ fun HeaderView(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.20f), RoundedCornerShape(100.dp))
+                    .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
+                    .border(1.dp, if (isDark) Color.White.copy(alpha = 0.20f) else Color(0xFFD7DEEB), RoundedCornerShape(100.dp))
                     .clickable { onOpenLanguagePicker() }
                     .padding(horizontal = 11.dp, vertical = 6.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Language,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = if (isDark) Color.White else Color(0xFF182030),
                     modifier = Modifier.size(13.dp)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
@@ -118,8 +119,12 @@ fun HeaderView(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.horizontalGradient(
-                        colors = listOf(
-                            LocalDynamicThemeColors.current.placeholder,
+                        colors = if (isDark) listOf(
+                            Color.White.copy(alpha = 0.35f),
+                            AmberGold.copy(alpha = 0.30f),
+                            Color.Transparent
+                        ) else listOf(
+                            Color(0xFFD7DEEB),
                             AmberGold.copy(alpha = 0.30f),
                             Color.Transparent
                         )

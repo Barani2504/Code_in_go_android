@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.dashboard
+package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -60,6 +60,9 @@ fun UnitSectionBanner(
         else -> "Data Structures & Algorithmic Principles"
     }
 
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -67,24 +70,26 @@ fun UnitSectionBanner(
     ) {
         if (isUnlocked) {
             // Unlocked Chapter Banner
+            val bannerGradient = if (isDark) listOf(
+                unit.themeColor.copy(alpha = 0.42f),
+                unit.themeDarkColor.copy(alpha = 0.35f),
+                Color(0xFF0A1020).copy(alpha = 0.75f)
+            ) else listOf(
+                unit.themeColor.copy(alpha = 0.85f),
+                unit.themeDarkColor.copy(alpha = 0.90f),
+                Color(0xFF121C30)
+            )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                unit.themeColor.copy(alpha = 0.42f),
-                                unit.themeDarkColor.copy(alpha = 0.35f),
-                                Color(0xFF0A1020).copy(alpha = 0.85f)
-                            )
-                        )
-                    )
+                    .background(Brush.linearGradient(bannerGradient))
                     .border(
                         1.5.dp,
                         Brush.linearGradient(
                             listOf(
-                                LocalDynamicThemeColors.current.placeholder,
+                                Color.White.copy(alpha = 0.48f),
                                 unit.themeColor.copy(alpha = 0.65f),
                                 Color.White.copy(alpha = 0.08f)
                             )
@@ -103,8 +108,8 @@ fun UnitSectionBanner(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
-                            .border(0.9.dp, LocalDynamicThemeColors.current.placeholder, CircleShape)
+                            .background(Color.Black.copy(alpha = 0.32f))
+                            .border(0.9.dp, Color.White.copy(alpha = 0.30f), CircleShape)
                             .padding(horizontal = 9.dp, vertical = 4.dp)
                     ) {
                         Text(
@@ -112,7 +117,7 @@ fun UnitSectionBanner(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = LocalDynamicThemeColors.current.textPrimary
+                            color = Color.White
                         )
                     }
 
@@ -120,14 +125,14 @@ fun UnitSectionBanner(
                         text = unit.titleDefault,
                         fontSize = 19.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary
+                        color = Color.White
                     )
 
                     Text(
                         text = topicsPreview,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.88f),
+                        color = Color.White.copy(alpha = 0.88f),
                         lineHeight = 16.sp
                     )
                 }
@@ -136,11 +141,11 @@ fun UnitSectionBanner(
                 Row(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
+                        .background(Color.Black.copy(alpha = 0.32f))
                         .border(
                             1.1.dp,
                             Brush.linearGradient(
-                                listOf(LocalDynamicThemeColors.current.textSecondary, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
+                                listOf(Color.White.copy(alpha = 0.45f), Color.White.copy(alpha = 0.15f))
                             ),
                             CircleShape
                         )
@@ -159,7 +164,7 @@ fun UnitSectionBanner(
                         text = "Guide",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary
+                        color = Color.White
                     )
                 }
             }
@@ -169,8 +174,12 @@ fun UnitSectionBanner(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFF0F1420).copy(alpha = 0.75f))
-                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(22.dp))
+                    .background(if (isDark) Color(0xFF0F1420).copy(alpha = 0.75f) else Color.White.copy(alpha = 0.85f))
+                    .border(
+                        1.dp,
+                        if (isDark) dynamicColors.placeholder.copy(alpha = 0.10f) else Color(0xFFD7DEEB),
+                        RoundedCornerShape(22.dp)
+                    )
                     .padding(16.dp),
                 verticalAlignment = Alignment.Top
             ) {
@@ -180,21 +189,21 @@ fun UnitSectionBanner(
                         fontSize = 9.5.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f)
+                        color = dynamicColors.textPrimary.copy(alpha = 0.55f)
                     )
 
                     Text(
                         text = unit.titleDefault,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f)
+                        color = dynamicColors.textPrimary.copy(alpha = 0.65f)
                     )
 
                     Text(
                         text = "🔒 Complete Unit ${unit.unitNumber - 1} to unlock this world!",
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.50f)
+                        color = dynamicColors.textPrimary.copy(alpha = 0.50f)
                     )
                 }
             }

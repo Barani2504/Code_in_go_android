@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.theme.PhoenixPlaceholder
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
 // 🔘 Duolingo 3D Tactile Push Button (Exact Parity with iOS)
@@ -62,29 +63,41 @@ enum class Duolingo3DButtonColor {
     }
 
     val surfaceColor: Color
-        get() = when (this) {
-            GREEN -> Color(0xFF58CC02)
-            BLUE -> Color(0xFF1CB0F6)
-            AMBER -> AmberGold
-            WHITE -> Color(0xFF243240)
-            DISABLED -> Color(0xFF283644)
+        @Composable
+        get() {
+            val isDark = LocalDynamicThemeColors.current.isDark
+            return when (this) {
+                GREEN -> Color(0xFF58CC02)
+                BLUE -> Color(0xFF1CB0F6)
+                AMBER -> AmberGold
+                WHITE -> if (isDark) Color(0xFF243240) else Color.White
+                DISABLED -> if (isDark) Color(0xFF283644) else Color(0xFFE5E5E5)
+            }
         }
 
     val shadowColor: Color
-        get() = when (this) {
-            GREEN -> Color(0xFF46A302)
-            BLUE -> Color(0xFF188ECE)
-            AMBER -> AmberGoldDark
-            WHITE -> Color(0xFF19232D)
-            DISABLED -> Color(0xFF1E2832)
+        @Composable
+        get() {
+            val isDark = LocalDynamicThemeColors.current.isDark
+            return when (this) {
+                GREEN -> Color(0xFF46A302)
+                BLUE -> Color(0xFF188ECE)
+                AMBER -> AmberGoldDark
+                WHITE -> if (isDark) Color(0xFF19232D) else Color(0xFFD7DEEB)
+                DISABLED -> if (isDark) Color(0xFF1E2832) else Color(0xFFCCCCCC)
+            }
         }
 
     val textColor: Color
-        get() = when (this) {
-            GREEN, BLUE -> Color.White
-            AMBER -> Color(0xFF1A1205)
-            WHITE -> Color(0xFF1CB0F6)
-            DISABLED -> PhoenixPlaceholder
+        @Composable
+        get() {
+            val isDark = LocalDynamicThemeColors.current.isDark
+            return when (this) {
+                GREEN, BLUE -> Color.White
+                AMBER -> Color(0xFF1A1205)
+                WHITE -> if (isDark) Color(0xFF1CB0F6) else Color(0xFF1CB0F6)
+                DISABLED -> if (isDark) PhoenixPlaceholder else Color(0xFFAFAFAF)
+            }
         }
 }
 
