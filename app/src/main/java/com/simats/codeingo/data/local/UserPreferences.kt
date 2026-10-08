@@ -33,6 +33,10 @@ class UserPreferences(private val context: Context) {
         val KEY_COMPLETED_LESSONS = stringSetPreferencesKey("completed_lessons")
         val KEY_COMPLETED_BOSSES = stringSetPreferencesKey("completed_bosses")
         val KEY_UNLOCKED_LEVELS = stringSetPreferencesKey("unlocked_levels")
+        val KEY_MAX_UNLOCKED_CHAPTER = intPreferencesKey("dsa_shared_max_unlocked_chapter")
+        val KEY_COMPLETED_CHAPTERS = stringSetPreferencesKey("dsa_shared_completed_chapters")
+        val KEY_COMPLETED_LEVEL_INDICES = stringSetPreferencesKey("home_completed_levels")
+        val KEY_ACTIVE_LEVEL_INDEX = intPreferencesKey("home_active_level_index")
     }
 
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { it[KEY_IS_LOGGED_IN] ?: false }
@@ -56,6 +60,18 @@ class UserPreferences(private val context: Context) {
     }
     val unlockedLevels: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_UNLOCKED_LEVELS] ?: setOf("1")
+    }
+    val maxUnlockedChapter: Flow<Int> = context.dataStore.data.map {
+        it[KEY_MAX_UNLOCKED_CHAPTER] ?: 1
+    }
+    val completedChapters: Flow<Set<String>> = context.dataStore.data.map {
+        it[KEY_COMPLETED_CHAPTERS] ?: emptySet()
+    }
+    val completedLevelIndices: Flow<Set<String>> = context.dataStore.data.map {
+        it[KEY_COMPLETED_LEVEL_INDICES] ?: emptySet()
+    }
+    val activeLevelIndex: Flow<Int> = context.dataStore.data.map {
+        it[KEY_ACTIVE_LEVEL_INDEX] ?: 1
     }
 
     suspend fun setLoggedIn(loggedIn: Boolean, name: String = "", email: String = "") {
@@ -109,6 +125,45 @@ class UserPreferences(private val context: Context) {
             val bosses = (it[KEY_COMPLETED_BOSSES] ?: emptySet()).toMutableSet()
             bosses.add(bossId)
             it[KEY_COMPLETED_BOSSES] = bosses
+        }
+    }
+
+    suspend fun setMaxUnlockedChapter(chapterId: Int) {
+        context.dataStore.edit {
+            val current = it[KEY_MAX_UNLOCKED_CHAPTER] ?: 1
+            it[KEY_MAX_UNLOCKED_CHAPTER] = maxOf(current, chapterId)
+        }
+    }
+
+    suspend fun markChapterCompleted(chapterId: Int) {
+        context.dataStore.edit {
+            val current = (it[KEY_COMPLETED_CHAPTERS] ?: emptySet()).toMutableSet()
+            current.add(chapterId.toString())
+            it[KEY_COMPLETED_CHAPTERS] = current
+        }
+    }
+
+    suspend fun setActiveLevelIndex(level: Int) {
+        context.dataStore.edit {
+            it[KEY_ACTIVE_LEVEL_INDEX] = level
+        }
+    }
+
+    suspend fun markLevelCompleted(level: Int) {
+        context.dataStore.edit {
+            val current = (it[KEY_COMPLETED_LEVEL_INDICES] ?: emptySet()).toMutableSet()
+            current.add(level.toString())
+            it[KEY_COMPLETED_LEVEL_INDICES] = current
+        }
+    }
+
+    suspend fun resetChapterProgression() {
+        context.dataStore.edit {
+            it[KEY_MAX_UNLOCKED_CHAPTER] = 1
+            it[KEY_COMPLETED_CHAPTERS] = emptySet()
+            it[KEY_COMPLETED_LEVEL_INDICES] = emptySet()
+            it[KEY_ACTIVE_LEVEL_INDEX] = 1
+            it[KEY_UNLOCKED_LEVELS] = setOf("1")
         }
     }
 

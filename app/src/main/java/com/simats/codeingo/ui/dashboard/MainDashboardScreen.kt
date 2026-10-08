@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -130,6 +131,11 @@ fun MainDashboardScreen(
     val evolutionFromStage by gameManager.evolutionFromStage.collectAsState()
     val evolutionToStage by gameManager.evolutionToStage.collectAsState()
 
+    val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
+    val completedChapters by gameManager.completedChapters.collectAsState()
+    val completedLevelIndices by gameManager.completedLevelIndices.collectAsState()
+    val activeLevelIndex by gameManager.activeLevelIndex.collectAsState()
+
     var selectedTab by remember { mutableStateOf(DashboardTab.LEARN) }
     var showSideMenu by remember { mutableStateOf(false) }
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
@@ -140,15 +146,16 @@ fun MainDashboardScreen(
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
     var activeWorldArena by remember { mutableStateOf<String?>(null) }
 
-    // Active Node & Locked Selection State
-    var activeLevelIndex by remember { mutableIntStateOf(1) }
+    // Sequential Chapter Review & Replay Navigation State
+    var reviewingPreviousUnitId by remember { mutableStateOf<Int?>(null) }
+    var replayReturnLevelIndex by remember { mutableStateOf<Int?>(null) }
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
 
     // Keep activeLevelIndex in sync whenever a stage is unlocked (mirrors iOS onComplete)
     LaunchedEffect(unlockedLevels) {
         val maxUnlocked = unlockedLevels.maxOrNull() ?: 1
-        if (maxUnlocked > activeLevelIndex) {
-            activeLevelIndex = maxUnlocked
+        if (maxUnlocked > activeLevelIndex && reviewingPreviousUnitId == null) {
+            gameManager.setActiveLevel(maxUnlocked)
             selectedLockedNodeId = null
         }
     }
@@ -256,6 +263,55 @@ fun MainDashboardScreen(
         )
     }
 
+    fun finishReplayAndReturnToCurrentLevel(): Boolean {
+        val returnLevel = replayReturnLevelIndex ?: return false
+        replayReturnLevelIndex = null
+        reviewingPreviousUnitId = null
+        gameManager.setActiveLevel(returnLevel)
+        selectedLockedNodeId = null
+        return true
+    }
+
+    fun showPreviousChapterPath() {
+        if (maxUnlockedChapter <= 1) return
+        replayReturnLevelIndex = activeLevelIndex
+        val targetUnitId = maxUnlockedChapter - 1
+        reviewingPreviousUnitId = targetUnitId
+        val firstLevel = masterUnits.firstOrNull { it.id == targetUnitId }?.nodes?.firstOrNull()?.levelNumber ?: 1
+        gameManager.setActiveLevel(firstLevel)
+    }
+
+    fun returnToCurrentChapterPath() {
+        if (!finishReplayAndReturnToCurrentLevel()) {
+            reviewingPreviousUnitId = null
+            val currentUnit = masterUnits.firstOrNull { it.id == maxUnlockedChapter }
+            if (currentUnit != null) {
+                val unlocked = currentUnit.nodes.map { it.levelNumber }.filter { unlockedLevels.contains(it) }
+                val target = unlocked.lastOrNull() ?: currentUnit.nodes.firstOrNull()?.levelNumber ?: 1
+                gameManager.setActiveLevel(target)
+            }
+        }
+    }
+
+    val visibleUnits = remember(reviewingPreviousUnitId, maxUnlockedChapter, masterUnits) {
+        val reviewId = reviewingPreviousUnitId
+        if (reviewId != null) {
+            masterUnits.filter { it.id == reviewId }
+        } else {
+            masterUnits.filter { unit ->
+                unit.id >= maxUnlockedChapter && unit.id <= minOf(maxUnlockedChapter + 1, masterUnits.size)
+            }
+        }
+    }
+
+    val dashboardScrollState = rememberScrollState()
+
+    // Auto-scroll smoothly to active target node
+    LaunchedEffect(activeLevelIndex) {
+        val targetScroll = ((activeLevelIndex - 1) * 260).coerceAtLeast(0)
+        dashboardScrollState.animateScrollTo(targetScroll)
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -286,7 +342,7 @@ fun MainDashboardScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
+                                    .verticalScroll(dashboardScrollState),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 // Spacing for floating top stats header
@@ -294,6 +350,7 @@ fun MainDashboardScreen(
 
                                 // 1. 3D INTERACTIVE WORLDS CAROUSEL
                                 InteractiveGamesSection(
+                                    maxUnlockedChapter = maxUnlockedChapter,
                                     onOpenWorld = { worldKey ->
                                         activeWorldArena = worldKey
                                     }
@@ -301,9 +358,9 @@ fun MainDashboardScreen(
 
                                 Spacer(modifier = Modifier.height(18.dp))
 
-                                // 2. 5 CHAPTER UNITS PATH
-                                masterUnits.forEach { unit ->
-                                    val isUnitOpen = unit.id == 1 || (unit.nodes.firstOrNull()?.let { unlockedLevels.contains(it.levelNumber) } ?: false)
+                                // 2. CHAPTER UNITS PATH (Visible Current + 1 Next Preview)
+                                visibleUnits.forEach { unit ->
+                                    val isUnitOpen = unit.id <= maxUnlockedChapter
 
                                     Column(
                                         modifier = Modifier
@@ -326,6 +383,15 @@ fun MainDashboardScreen(
                                             }
                                         )
 
+                                        // Review Navigation Banner (Return to Current / Review Previous)
+                                        ReviewNavigationButton(
+                                            unit = unit,
+                                            maxUnlockedChapter = maxUnlockedChapter,
+                                            reviewingPreviousUnitId = reviewingPreviousUnitId,
+                                            onReturnToCurrent = { returnToCurrentChapterPath() },
+                                            onShowPrevious = { showPreviousChapterPath() }
+                                        )
+
                                         // Winding 3D Level Nodes
                                         unit.nodes.forEach { node ->
                                             val isNodeUnlocked = isUnitOpen && unlockedLevels.contains(node.levelNumber)
@@ -346,13 +412,16 @@ fun MainDashboardScreen(
                                                     xOffset = if (isActiveTarget) 0.dp else node.xOffset * 0.45f,
                                                     onNodeClick = {
                                                         if (isNodeUnlocked) {
-                                                            activeLevelIndex = node.levelNumber
+                                                            gameManager.setActiveLevel(node.levelNumber)
                                                             selectedLockedNodeId = null
                                                         } else {
                                                             selectedLockedNodeId = node.id
                                                         }
                                                     },
                                                     onStartClick = {
+                                                        if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
+                                                            replayReturnLevelIndex = activeLevelIndex
+                                                        }
                                                         if (node.isBoss) {
                                                             onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
                                                         } else {
@@ -618,6 +687,7 @@ fun MainDashboardScreen(
 // MARK: - 3D Interactive Worlds Section
 @Composable
 private fun InteractiveGamesSection(
+    maxUnlockedChapter: Int,
     onOpenWorld: (String) -> Unit
 ) {
     Column(
@@ -639,7 +709,7 @@ private fun InteractiveGamesSection(
                 color = AmberGold
             )
             Text(
-                text = "5 ARENAS UNLOCKED",
+                text = "${minOf(maxUnlockedChapter, 5)} / 5 ARENAS UNLOCKED",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
@@ -653,11 +723,11 @@ private fun InteractiveGamesSection(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            WorldPortalCard("tree", "🌲 BINARY TREE FOREST", "Explore BST Canopies & Lost Forest", Color(0xFF10B981), onOpenWorld)
-            WorldPortalCard("array", "🏰 ARRAY KINGDOM", "Traverse Contiguous Memory Mazes", AmberGold, onOpenWorld)
-            WorldPortalCard("stack", "🥞 SOLAR STACK TOWER", "Ascend Solar Plates & Escape the Spire", Color(0xFFF59E0B), onOpenWorld)
-            WorldPortalCard("queue", "🎫 ASTRAL QUEUE STATION", "Manage FIFO Rail Networks & Dispatch", Color(0xFFA855F7), onOpenWorld)
-            WorldPortalCard("linkedlist", "🔗 LINKED LIST ROAD", "Follow Pointers Across Pointer Bridges", Color(0xFFEF4444), onOpenWorld)
+            WorldPortalCard("array", 1, "🏰 ARRAY KINGDOM", "Traverse Contiguous Memory Mazes", AmberGold, maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard("linkedlist", 2, "🔗 LINKED LIST ROAD", "Follow Pointers Across Pointer Bridges", Color(0xFFEF4444), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard("stack", 3, "🥞 SOLAR STACK TOWER", "Ascend Solar Plates & Escape the Spire", Color(0xFFF59E0B), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard("queue", 4, "🎫 ASTRAL QUEUE STATION", "Manage FIFO Rail Networks & Dispatch", Color(0xFFA855F7), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard("tree", 5, "🌲 BINARY TREE FOREST", "Explore BST Canopies & Lost Forest", Color(0xFF10B981), maxUnlockedChapter, onOpenWorld)
         }
     }
 }
@@ -665,58 +735,244 @@ private fun InteractiveGamesSection(
 @Composable
 private fun WorldPortalCard(
     worldKey: String,
+    chapterId: Int,
     title: String,
     subtitle: String,
     accentColor: Color,
+    maxUnlockedChapter: Int,
     onOpenWorld: (String) -> Unit
 ) {
     val isDark = LocalDynamicThemeColors.current.isDark
-    Row(
+    val isUnlocked = chapterId <= maxUnlockedChapter
+
+    Box(
         modifier = Modifier
             .width(300.dp)
+            .height(84.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(if (isDark) Color(0xFF0F1523).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.95f))
-            .border(
-                1.2.dp,
-                Brush.linearGradient(listOf(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), accentColor.copy(alpha = 0.45f))),
-                RoundedCornerShape(18.dp)
-            )
-            .clickable { onOpenWorld(worldKey) }
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        Row(
             modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(accentColor.copy(alpha = 0.20f))
-                .border(1.5.dp, accentColor, CircleShape)
+                .fillMaxSize()
+                .background(if (isDark) Color(0xFF0F1523).copy(alpha = if (isUnlocked) 0.85f else 0.45f) else Color.White.copy(alpha = if (isUnlocked) 0.95f else 0.55f))
+                .border(
+                    1.2.dp,
+                    Brush.linearGradient(listOf(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), accentColor.copy(alpha = if (isUnlocked) 0.45f else 0.20f))),
+                    RoundedCornerShape(18.dp)
+                )
+                .clickable {
+                    if (isUnlocked) {
+                        onOpenWorld(worldKey)
+                    }
+                }
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.SportsEsports,
-                contentDescription = title,
-                tint = accentColor,
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = 0.20f))
+                    .border(1.5.dp, accentColor, CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SportsEsports,
+                    contentDescription = title,
+                    tint = accentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = LocalDynamicThemeColors.current.textPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
+                    lineHeight = 15.sp
+                )
+            }
         }
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Black,
-                color = LocalDynamicThemeColors.current.textPrimary
+        if (!isUnlocked) {
+            ArenaLockOverlay(
+                requiredChapter = chapterId,
+                accentColor = accentColor
             )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
-                lineHeight = 15.sp
+        }
+    }
+}
+
+// MARK: - Arena Lock Overlay
+@Composable
+private fun ArenaLockOverlay(
+    requiredChapter: Int,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                if (isDark) Color(0xFF0A0F1D).copy(alpha = 0.88f)
+                else Color.White.copy(alpha = 0.92f)
             )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = 0.20f))
+                    .border(1.2.dp, accentColor.copy(alpha = 0.45f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Locked",
+                    tint = accentColor,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(accentColor.copy(alpha = 0.18f))
+                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "LOCKED",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accentColor
+                    )
+                }
+                Text(
+                    text = "Finish Chapter ${requiredChapter - 1} to unlock",
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Color.White.copy(alpha = 0.85f) else Color(0xFF192337)
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Review Navigation Button
+@Composable
+private fun ReviewNavigationButton(
+    unit: UnitModel,
+    maxUnlockedChapter: Int,
+    reviewingPreviousUnitId: Int?,
+    onReturnToCurrent: () -> Unit,
+    onShowPrevious: () -> Unit
+) {
+    if (reviewingPreviousUnitId == unit.id) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFF58CC02), Color(0xFF26A640))
+                    )
+                )
+                .clickable { onReturnToCurrent() }
+                .padding(horizontal = 16.dp, vertical = 11.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "➡️", fontSize = 14.sp)
+                    Text(
+                        text = "Return to Current Chapter ($maxUnlockedChapter)",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                }
+                Text(text = "✨", fontSize = 12.sp)
+            }
+        }
+    } else if (maxUnlockedChapter > 1 && reviewingPreviousUnitId == null) {
+        val isDark = LocalDynamicThemeColors.current.isDark
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (isDark) Color.White.copy(alpha = 0.06f) else Color.White)
+                .border(
+                    1.dp,
+                    if (isDark) Color.White.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.06f),
+                    RoundedCornerShape(14.dp)
+                )
+                .clickable { onShowPrevious() }
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "🔄", fontSize = 13.sp)
+                    Text(
+                        text = "Review Previous Chapter (${maxUnlockedChapter - 1})",
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isDark) Color.White else Color(0xFF1E283C)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Review",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF414B5F)
+                    )
+                    Text(
+                        text = "›",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF414B5F)
+                    )
+                }
+            }
         }
     }
 }

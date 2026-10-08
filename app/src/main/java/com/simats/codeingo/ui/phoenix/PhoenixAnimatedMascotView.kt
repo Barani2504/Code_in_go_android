@@ -144,12 +144,9 @@ fun PhoenixAnimatedMascotView(
                 )
             }
             is PhoenixMascotPose.Flying -> {
-                PhoenixMascotImage(
-                    emotion = phoenixEmotion(2), // Celebrating Wings
+                SmoothFlyingPhoenixView(
                     size = size,
-                    modifier = Modifier
-                        .offset(y = hoverY.dp)
-                        .scale(1.08f)
+                    modifier = Modifier.scale(1.08f)
                 )
             }
             else -> {

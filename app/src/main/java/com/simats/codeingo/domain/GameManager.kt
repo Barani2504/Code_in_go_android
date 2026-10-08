@@ -112,6 +112,18 @@ class GameManager private constructor() {
     private val _unlockedLevelIndices = MutableStateFlow<Set<Int>>(setOf(1))
     val unlockedLevelIndices: StateFlow<Set<Int>> = _unlockedLevelIndices.asStateFlow()
 
+    private val _maxUnlockedChapter = MutableStateFlow(1)
+    val maxUnlockedChapter: StateFlow<Int> = _maxUnlockedChapter.asStateFlow()
+
+    private val _completedChapters = MutableStateFlow<Set<Int>>(emptySet())
+    val completedChapters: StateFlow<Set<Int>> = _completedChapters.asStateFlow()
+
+    private val _completedLevelIndices = MutableStateFlow<Set<Int>>(emptySet())
+    val completedLevelIndices: StateFlow<Set<Int>> = _completedLevelIndices.asStateFlow()
+
+    private val _activeLevelIndex = MutableStateFlow(1)
+    val activeLevelIndex: StateFlow<Int> = _activeLevelIndex.asStateFlow()
+
     private val _totalStars = MutableStateFlow(15)
     val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
 
@@ -139,6 +151,10 @@ class GameManager private constructor() {
             _completedBossIds.value = p.completedBosses.first()
             _unlockedLevelIndices.value = p.unlockedLevels.first().mapNotNull { it.toIntOrNull() }.toSet()
                 .ifEmpty { setOf(1) }
+            _maxUnlockedChapter.value = p.maxUnlockedChapter.first()
+            _completedChapters.value = p.completedChapters.first().mapNotNull { it.toIntOrNull() }.toSet()
+            _completedLevelIndices.value = p.completedLevelIndices.first().mapNotNull { it.toIntOrNull() }.toSet()
+            _activeLevelIndex.value = p.activeLevelIndex.first()
 
             // Re-evaluate streak with restored persisted timestamp
             evaluateStreakOnLaunch()
@@ -225,11 +241,59 @@ class GameManager private constructor() {
     fun resetAllProgress() {
         _totalXP.value = 0
         _unlockedLevelIndices.value = setOf(1)
+        _maxUnlockedChapter.value = 1
+        _completedChapters.value = emptySet()
+        _completedLevelIndices.value = emptySet()
+        _activeLevelIndex.value = 1
         _streakDays.value = 0
         _savedStreakDays.value = 0
         _isStreakLostPendingRestore.value = false
         _lastPlayedDateUnix.value = 0.0
         persistStats()
+        val p = prefs
+        if (p != null) {
+            scope.launch { p.resetChapterProgression() }
+        }
+    }
+
+    // ── Chapter & Arena Progression API ───────────────────────────────────────
+
+    fun isArenaUnlocked(chapterId: Int): Boolean = chapterId <= _maxUnlockedChapter.value
+
+    fun isChapterCompleted(chapterId: Int): Boolean = _completedChapters.value.contains(chapterId)
+
+    fun markChapterCompleted(chapterId: Int) {
+        _completedChapters.value = _completedChapters.value + chapterId
+        val p = prefs ?: return
+        scope.launch { p.markChapterCompleted(chapterId) }
+    }
+
+    fun unlockNextChapter(nextId: Int) {
+        _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, nextId)
+        val p = prefs ?: return
+        scope.launch { p.setMaxUnlockedChapter(nextId) }
+    }
+
+    fun setActiveLevel(level: Int) {
+        _activeLevelIndex.value = level
+        val p = prefs ?: return
+        scope.launch { p.setActiveLevelIndex(level) }
+    }
+
+    fun markLevelCompleted(level: Int) {
+        _completedLevelIndices.value = _completedLevelIndices.value + level
+        val p = prefs ?: return
+        scope.launch { p.markLevelCompleted(level) }
+    }
+
+    fun resetChapterProgression() {
+        _maxUnlockedChapter.value = 1
+        _completedChapters.value = emptySet()
+        _completedLevelIndices.value = emptySet()
+        _activeLevelIndex.value = 1
+        _unlockedLevelIndices.value = setOf(1)
+        val p = prefs ?: return
+        scope.launch { p.resetChapterProgression() }
     }
 
     fun completeLessonAndExtendStreak() {
@@ -394,12 +458,18 @@ class GameManager private constructor() {
         isBoss: Boolean = false,
         nextUnitFirstLevelIndex: Int? = null
     ) {
+        markLevelCompleted(currentLevelIndex)
         val nextLevel = if (isBoss) {
+            val currentUnitId = ((currentLevelIndex - 1) / 5) + 1
+            markChapterCompleted(currentUnitId)
+            val nextUnitId = currentUnitId + 1
+            unlockNextChapter(nextUnitId)
             nextUnitFirstLevelIndex ?: (currentLevelIndex + 1)
         } else {
             currentLevelIndex + 1
         }
         _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevel
+        setActiveLevel(nextLevel)
 
         if (isBoss) {
             _eggCrackLevel.value = 0
