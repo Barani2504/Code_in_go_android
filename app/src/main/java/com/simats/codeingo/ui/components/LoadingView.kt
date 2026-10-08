@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.components
+package com.simats.codeingo.ui.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.R
+import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlinx.coroutines.delay
@@ -114,15 +115,13 @@ fun LoadingView(
                         .offset(x = 10.dp, y = (-95).dp + (mascotY * 0.5f).dp)
                 )
 
-                // Mascot
-                Image(
-                    painter = painterResource(id = R.drawable.phoenix),
-                    contentDescription = "Loading Phoenix",
+                // Animated GIF Mascot
+                AnimatedGIFView(
+                    resourceName = "phoenix_flying",
+                    size = 175.dp,
                     modifier = Modifier
-                        .size(175.dp)
                         .offset(y = mascotY.dp)
                         .rotate(mascotRotation)
-                        .shadow(14.dp, CircleShape, spotColor = AmberGold)
                 )
             }
 

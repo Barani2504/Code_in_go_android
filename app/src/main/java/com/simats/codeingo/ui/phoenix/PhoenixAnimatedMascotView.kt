@@ -135,12 +135,9 @@ fun PhoenixAnimatedMascotView(
                 )
             }
             is PhoenixMascotPose.Singing -> {
-                PhoenixMascotImage(
-                    emotion = phoenixEmotion(8), // Laughing / Singing
+                SmoothFlyingPhoenixView(
                     size = size,
-                    modifier = Modifier
-                        .offset(y = hoverY.dp)
-                        .rotate(waddleTilt * 0.5f)
+                    modifier = Modifier.scale(1.05f)
                 )
             }
             is PhoenixMascotPose.Flying -> {
@@ -150,9 +147,8 @@ fun PhoenixAnimatedMascotView(
                 )
             }
             else -> {
-                // Welcoming / Default Pose
-                PhoenixMascotImage(
-                    emotion = phoenixEmotion(0),
+                // Welcoming / Default Pose — Smooth Animated Flying Phoenix GIF
+                SmoothFlyingPhoenixView(
                     size = size,
                     modifier = Modifier.offset(y = breathY.dp)
                 )

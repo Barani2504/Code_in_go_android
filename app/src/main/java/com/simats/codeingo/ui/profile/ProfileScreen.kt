@@ -54,12 +54,14 @@ import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
+import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotImage
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.liquidGlassCard
 
 @Composable
 fun ProfileScreen(
@@ -87,7 +89,7 @@ fun ProfileScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -289,14 +291,14 @@ private fun AuthenticatedProfileBody(
         // 4. Add Friends Section
         AddFriendsSection()
 
-        // Bottom Destructive Sign Out Button
+        val isDark = LocalDynamicThemeColors.current.isDark
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF330D0D).copy(alpha = 0.55f))
-                .border(1.5.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                .background(if (isDark) Color(0xFF330D0D).copy(alpha = 0.55f) else Color(0xFFFFEAEA))
+                .border(1.5.dp, Color.Red.copy(alpha = if (isDark) 0.3f else 0.35f), RoundedCornerShape(14.dp))
                 .clickable { onSignOutClick() },
             contentAlignment = Alignment.Center
         ) {
@@ -309,7 +311,7 @@ private fun AuthenticatedProfileBody(
                     text = "SIGN OUT OF PROFILE",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color(0xFFFF7266)
+                    color = if (isDark) Color(0xFFFF7266) else Color(0xFFD32F2F)
                 )
             }
         }
@@ -335,14 +337,12 @@ private fun UserHeaderCard(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Phoenix Avatar Box (Liquid Glass)
+        val isDark = LocalDynamicThemeColors.current.isDark
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1726))
-                .border(1.dp, AmberGold.copy(alpha = 0.25f), RoundedCornerShape(24.dp))
-                .shadow(12.dp, RoundedCornerShape(24.dp), spotColor = AmberGold.copy(alpha = 0.2f))
+                .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 24.dp)
         ) {
             // Edit Pencil in Top Right
             val editBtnBg = if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f)
@@ -398,7 +398,7 @@ private fun UserHeaderCard(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        PhoenixMascotImage(emotion = currentEmotion, size = 66.dp)
+                        AnimatedGIFView(resourceName = "phoenix_flying", size = 66.dp)
                     }
                 }
 
@@ -569,9 +569,7 @@ private fun ProfileStatCard(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF0F1726))
-            .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .liquidGlassCard(accentGlow = accentColor, cornerRadius = 16.dp)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -695,9 +693,7 @@ private fun AchievementRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF0F1726))
-            .border(1.dp, barColor.copy(alpha = 0.25f), RoundedCornerShape(18.dp))
+            .liquidGlassCard(accentGlow = barColor, cornerRadius = 18.dp)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -719,7 +715,7 @@ private fun AchievementRow(
                     text = "LVL $level",
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f)
+                    color = Color.White
                 )
             }
         }
@@ -801,9 +797,7 @@ private fun AddFriendsSection() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0F1726))
-                    .border(1.dp, DuolingoBlue.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                    .liquidGlassCard(accentGlow = DuolingoBlue, cornerRadius = 16.dp)
                     .clickable { }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -840,9 +834,7 @@ private fun AddFriendsSection() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0F1726))
-                    .border(1.dp, AmberGold.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                    .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 16.dp)
                     .clickable { }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -972,7 +964,7 @@ private fun UnauthenticatedProfileBody(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    PhoenixMascotImage(emotion = currentEmotion, size = 72.dp)
+                    AnimatedGIFView(resourceName = "phoenix_flying", size = 72.dp)
                 }
             }
 

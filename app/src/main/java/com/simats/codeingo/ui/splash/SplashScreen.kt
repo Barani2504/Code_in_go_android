@@ -1,15 +1,9 @@
 package com.simats.codeingo.ui.splash
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,357 +15,344 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.R
-import com.simats.codeingo.ui.components.ProgressBarAnimated
+import com.simats.codeingo.ui.phoenix.SmoothFlyingPhoenixView
 import com.simats.codeingo.ui.theme.AmberGold
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.exp
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.sin
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
-// 🌌 SplashScreen — Phoenix Bird Flight Theme with Soaring Dynamics
+// 🌌 SplashScreen — Exact Parity with iOS SplashScreenView.swift
+// 3D Glossy Ember Particles, Physics Timeline, Spiral Vortex,
+// Kinetic Energy Squeeze, Dual Shockwaves & Elastic Landing
 // ══════════════════════════════════════════════════════════════════
+
+private data class RealisticSplashBubble(
+    val baseAngle: Double,
+    val maxDistance: Float,
+    val size: Float,
+    val color: Color,
+    val swirlDirection: Double
+)
 
 @Composable
 fun SplashScreen(
     onFinishedSplash: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val progress = remember { Animatable(0f) }
-    val mascotScale = remember { Animatable(0.2f) }
-    val mascotAlpha = remember { Animatable(0f) }
-    val entranceOffsetY = remember { Animatable(100f) }
-    val entranceBanking = remember { Animatable(-12f) }
-    val titleAlpha = remember { Animatable(0f) }
-    val titleOffsetY = remember { Animatable(30f) }
-    val bubbleExplosion = remember { Animatable(0f) }
+    var elapsedTimeSec by remember { mutableFloatStateOf(0f) }
 
-    // 🕊️ Continuous Flight Dynamics Transitions
-    val infiniteTransition = rememberInfiniteTransition(label = "PhoenixFlight")
-
-    // 1. Soaring altitude bobbing (graceful vertical gliding lift)
-    val flightAltitude by infiniteTransition.animateFloat(
-        initialValue = -13f,
-        targetValue = 13f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "flightAltitude"
-    )
-
-    // 2. Aerodynamic banking roll / tilt during flight
-    val flightBanking by infiniteTransition.animateFloat(
-        initialValue = -5f,
-        targetValue = 5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2300, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "flightBanking"
-    )
-
-    // 3. Wing flap aerodynamic breathing (wings spread & lift)
-    val wingFlapScaleY by infiniteTransition.animateFloat(
-        initialValue = 0.95f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(650, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "wingFlapScaleY"
-    )
-    val wingFlapScaleX by infiniteTransition.animateFloat(
-        initialValue = 1.04f,
-        targetValue = 0.96f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(650, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "wingFlapScaleX"
-    )
-
-    // 4. Downward air slipstream & particle progression
-    val flightStreamProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "flightStreamProgress"
-    )
-
-    // 5. Thermal flight shockwave pulse
-    val thermalPulseScale by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1.45f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "thermalPulseScale"
-    )
-    val thermalPulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.65f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "thermalPulseAlpha"
-    )
-
-    LaunchedEffect(Unit) {
-        // Mascot swoops up into flight
-        launch {
-            mascotAlpha.animateTo(1f, tween(400))
-        }
-        launch {
-            mascotScale.animateTo(1.15f, tween(500, easing = FastOutSlowInEasing))
-            mascotScale.animateTo(1.0f, tween(350, easing = FastOutSlowInEasing))
-        }
-        launch {
-            entranceOffsetY.animateTo(0f, tween(800, easing = FastOutSlowInEasing))
-        }
-        launch {
-            entranceBanking.animateTo(0f, tween(900, easing = FastOutSlowInEasing))
-        }
-        // Fiery ember blast
-        launch {
-            delay(400)
-            bubbleExplosion.animateTo(1f, tween(1200, easing = FastOutSlowInEasing))
-        }
-        // Title entrance
-        launch {
-            delay(500)
-            titleAlpha.animateTo(1f, tween(600))
-        }
-        launch {
-            delay(500)
-            titleOffsetY.animateTo(0f, tween(600, easing = FastOutSlowInEasing))
-        }
-        // Progress bar fills over 2.6 seconds
-        launch {
-            progress.animateTo(1f, tween(2600, easing = LinearEasing))
-            delay(300)
-            onFinishedSplash()
+    // Pre-generate 32 realistic 3D glossy fiery ember particles (Phoenix Palette)
+    val bubbles = remember {
+        val colors = listOf(
+            AmberGold,
+            Color(0xFFFF7A1A),
+            Color(0xFFFFC733),
+            Color(0xFFF2401F),
+            Color(0xFFFF9E0D),
+            Color.White,
+            Color(0xFFFF590D)
+        )
+        (0 until 32).map { i ->
+            val angle = (i.toDouble() / 32.0) * 2.0 * PI + (Math.random() - 0.5) * 0.24
+            val distance = (110f + Math.random().toFloat() * 110f)
+            val size = (14f + Math.random().toFloat() * 22f)
+            val color = colors[i % colors.size]
+            val swirlDir = if (i % 2 == 0) 1.0 else -1.0
+            RealisticSplashBubble(
+                baseAngle = angle,
+                maxDistance = distance,
+                size = size,
+                color = color,
+                swirlDirection = swirlDir
+            )
         }
     }
+
+    LaunchedEffect(Unit) {
+        val startNanos = System.nanoTime()
+        while (true) {
+            withFrameNanos { frameTimeNanos ->
+                elapsedTimeSec = (frameTimeNanos - startNanos) / 1_000_000_000f
+            }
+            if (elapsedTimeSec >= 3.5f) {
+                onFinishedSplash()
+                break
+            }
+        }
+    }
+
+    val t = elapsedTimeSec
+
+    // Phase 0: Distance Fly-In [0.0 ... 0.45s]
+    val p0 = min(1.0f, max(0.0f, t / 0.45f))
+    val easeFlyIn = 1.0f - (1.0f - p0).pow(3)
+
+    // Phase 0.5: Kinetic Energy Squeeze [0.45s ... 0.62s]
+    val pSqueeze = min(1.0f, max(0.0f, (t - 0.45f) / 0.17f))
+    val squeezeAmount = sin(pSqueeze * PI.toFloat())
+
+    // Phase 1: Explosion Blast into 3D Embers [0.62s ... 1.25s]
+    val pBlast = min(1.0f, max(0.0f, (t - 0.62f) / 0.58f))
+    val easeBlast = 1.0f - (1.0f - pBlast).pow(2.8f)
+
+    // Phase 2: Spiral Vortex Magnetic Fusion [1.25s ... 1.95s]
+    val pVortex = min(1.0f, max(0.0f, (t - 1.25f) / 0.70f))
+    val easeVortex = pVortex.pow(2.2f)
+
+    // Phase 3: Fluid Mascot Re-Formation & Elastic Landing [1.95s ... 3.5s]
+    val pLanding = min(1.0f, max(0.0f, (t - 1.95f) / 0.55f))
+    val springBounce = (exp(-5.5f * pLanding) * cos(14.0f * pLanding))
+
+    // Continuous Floating Hover Loop
+    val hoverTime = max(0f, t - 2.45f)
+    val hoverY = sin(hoverTime * 3.5f) * 7.0f
+    val hoverRot = sin(hoverTime * 2.8f) * 3.5f
+
+    // Mascot Character Transformations
+    val mascotYOffset: Float = when {
+        t < 0.45f -> -380.0f * (1.0f - easeFlyIn)
+        t < 0.62f -> 14.0f * squeezeAmount
+        t < 0.82f -> -10.0f * (t - 0.62f) / 0.20f
+        t < 1.95f -> -5.0f * sin(((t - 0.82f) / 1.13f) * PI.toFloat())
+        else -> -14.0f * (1.0f - springBounce) + hoverY
+    }
+
+    val mascotScaleX: Float = when {
+        t < 0.45f -> 0.20f + 0.85f * easeFlyIn
+        t < 0.62f -> 1.05f + 0.28f * squeezeAmount
+        t < 0.78f -> 1.25f - (t - 0.62f) * 2.0f
+        t < 1.95f -> 0.88f + 0.12f * sin(((t - 0.78f) / 1.17f) * PI.toFloat())
+        else -> 1.0f + 0.20f * springBounce
+    }
+
+    val mascotScaleY: Float = when {
+        t < 0.45f -> 0.20f + 0.85f * easeFlyIn
+        t < 0.62f -> 1.05f - 0.32f * squeezeAmount
+        t < 0.78f -> 0.85f + (t - 0.62f) * 2.0f
+        t < 1.95f -> 0.88f + 0.12f * sin(((t - 0.78f) / 1.17f) * PI.toFloat())
+        else -> 1.0f - 0.20f * springBounce
+    }
+
+    val mascotOpacity: Float = when {
+        t < 0.15f -> t / 0.15f
+        t < 0.62f -> 1.0f
+        t < 1.25f -> max(0.65f, 1.0f - pBlast * 0.35f)
+        t < 1.95f -> min(1.0f, 0.65f + easeVortex * 0.35f)
+        else -> 1.0f
+    }
+
+    val mascotRotation: Float = when {
+        t < 0.45f -> -25.0f * (1.0f - easeFlyIn)
+        t > 2.45f -> hoverRot
+        else -> 0.0f
+    }
+
+    // Shockwaves
+    val sw1Scale = if (t in 0.62f..1.15f) 0.2f + 2.2f * ((t - 0.62f) / 0.53f) else 0.1f
+    val sw1Opacity = if (t in 0.62f..1.15f) sin(((t - 0.62f) / 0.53f) * PI.toFloat()) * 0.65f else 0.0f
+
+    val sw2Scale = if (t in 0.65f..1.25f) 0.1f + 2.6f * ((t - 0.65f) / 0.60f) else 0.1f
+    val sw2Opacity = if (t in 0.65f..1.25f) sin(((t - 0.65f) / 0.60f) * PI.toFloat()) * 0.45f else 0.0f
+
+    // Central Energy Orb
+    val orbProgress = min(1.0f, max(0.0f, (t - 1.65f) / 0.35f))
+    val orbScale = sin(orbProgress * PI.toFloat()) * 1.8f
+    val orbOpacity = sin(orbProgress * PI.toFloat())
+
+    // Logo & Progress
+    val logoOpacity = min(1.0f, max(0.0f, t / 0.40f))
+    val logoScale = 0.90f + 0.10f * min(1.0f, max(0.0f, (t - 1.95f) / 0.45f))
+    val logoYOffset = if (t < 1.95f) 0.0f else 4.0f * sin(min(1.0f, (t - 1.95f) / 0.35f) * PI.toFloat())
+    val progressRatio = min(1.0f, t / 3.3f)
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
+                Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFF080E1A),
-                        Color(0xFF0B111F),
-                        Color(0xFF111222)
+                        Color(0xFF0F_0A_1A),
+                        Color(0xFF3D_14_08),
+                        Color(0xFF12_0D_21)
                     )
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
-        // 🌌 Background Flight Atmosphere: Airflow Streaks, Embers & Expanding Shockwaves
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(size.width / 2f, size.height / 2f - 40.dp.toPx())
-            val explosion = bubbleExplosion.value
-            val streamT = flightStreamProgress
-
-            // 1. Expanding Thermal Flight Wave
-            val waveRadius = 140.dp.toPx() * thermalPulseScale
-            drawCircle(
-                color = AmberGold.copy(alpha = (thermalPulseAlpha * 0.4f).coerceIn(0f, 1f)),
-                radius = waveRadius,
-                center = center,
-                style = Stroke(width = 2.5.dp.toPx())
-            )
-
-            // 2. High-Speed Aerodynamic Wind Slipstreams rushing downwards
-            for (i in 0 until 16) {
-                val xRel = ((i * 39) % 280 - 140).dp.toPx()
-                val length = (30 + (i * 11) % 45).dp.toPx()
-                val speed = 0.8f + (i % 4) * 0.25f
-                val yRelProgress = (streamT * speed + (i * 0.13f)) % 1f
-                val startY = center.y - 120.dp.toPx() + (yRelProgress * 320.dp.toPx())
-                val endY = startY + length
-                val alpha = (sin(yRelProgress * Math.PI.toFloat()) * 0.42f).coerceIn(0f, 1f)
-
-                drawLine(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            AmberGold.copy(alpha = alpha),
-                            Color.White.copy(alpha = alpha * 0.9f),
-                            Color.Transparent
-                        ),
-                        startY = startY,
-                        endY = endY
-                    ),
-                    start = Offset(center.x + xRel, startY),
-                    end = Offset(center.x + xRel, endY),
-                    strokeWidth = (1.5f + (i % 3) * 0.8f).dp.toPx(),
-                    cap = StrokeCap.Round
-                )
-            }
-
-            // 3. Fiery Plumage Sparks & Flight Wake Embers
-            for (i in 0 until 24) {
-                val phase = (streamT + (i * 0.042f)) % 1f
-                val driftAngle = ((i * 53) % 70 - 35) * (Math.PI / 180.0)
-                val dist = phase * 150.dp.toPx()
-                val px = center.x + (sin(driftAngle) * dist).toFloat() + ((i % 5 - 2) * 14.dp.toPx())
-                val py = center.y + 30.dp.toPx() + (cos(driftAngle) * dist).toFloat()
-                val pAlpha = ((1f - phase) * 0.8f).coerceIn(0f, 1f)
-                val pSize = (4f + (i % 4) * 2.5f).dp.toPx() * (1f - phase * 0.4f)
-
-                val color = when (i % 5) {
-                    0 -> AmberGold
-                    1 -> Color(0xFFFF6D00)
-                    2 -> Color(0xFFFFAB40)
-                    3 -> Color(0xFFFF3D00)
-                    else -> Color.White
-                }
-
-                drawCircle(
-                    color = color.copy(alpha = pAlpha),
-                    radius = pSize,
-                    center = Offset(px, py)
-                )
-            }
-
-            // 4. Initial Ember Burst Animation
-            if (explosion > 0.05f) {
-                val emberColors = listOf(
-                    AmberGold,
-                    Color(0xFFFF7A1A),
-                    Color(0xFFFFC733),
-                    Color(0xFFFF401F),
-                    Color(0xFFFF9E0D),
-                    Color.White,
-                    Color(0xFFFF590D)
-                )
-                for (i in 0 until 32) {
-                    val angle = (i.toFloat() / 32f) * 2f * Math.PI.toFloat()
-                    val radius = (90.dp.toPx() + (i % 6) * 22.dp.toPx()) * explosion
-                    val x = center.x + cos(angle.toDouble()).toFloat() * radius
-                    val y = center.y + sin(angle.toDouble()).toFloat() * radius
-                    val bubbleSize = (8.dp.toPx() + (i % 4) * 4.dp.toPx()) * (1f - explosion * 0.25f)
-                    val alpha = (1f - explosion * 0.65f).coerceIn(0f, 1f)
-
-                    drawCircle(
-                        color = emberColors[i % emberColors.size].copy(alpha = alpha * 0.85f),
-                        radius = bubbleSize,
-                        center = Offset(x, y)
-                    )
-                }
-            }
-        }
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
-            // 🦅 Center Phoenix Flying Mascot
+            // Stage: Mascot + Embers + Shockwaves
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(210.dp)
-                    .graphicsLayer {
-                        val currentY = entranceOffsetY.value + flightAltitude
-                        translationY = currentY.dp.toPx()
-                        scaleX = mascotScale.value * wingFlapScaleX
-                        scaleY = mascotScale.value * wingFlapScaleY
-                        rotationZ = entranceBanking.value + flightBanking
-                        alpha = mascotAlpha.value
-                    }
+                modifier = Modifier.size(260.dp)
             ) {
-                // Outer Pulsing Celestial Flight Halo
+                // Ground Soft Shadow
                 Box(
                     modifier = Modifier
-                        .size(190.dp)
+                        .size(width = 140.dp, height = 26.dp)
+                        .offset(y = 85.dp)
+                        .scale(if (t < 0.45f) 0.05f + 0.95f * easeFlyIn else 1.0f)
                         .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    AmberGold.copy(alpha = 0.42f),
-                                    Color(0xFFFF6D00).copy(alpha = 0.22f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .blur(8.dp)
                 )
 
-                // Inner Radiant Core
+                // Canvas for Shockwaves & 3D Glossy Ember Particles
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
+
+                    // Shockwave 1
+                    if (sw1Opacity > 0f) {
+                        drawCircle(
+                            color = AmberGold.copy(alpha = sw1Opacity),
+                            radius = (95.dp.toPx()) * sw1Scale,
+                            center = centerOffset,
+                            style = Stroke(width = 6.dp.toPx())
+                        )
+                    }
+
+                    // Shockwave 2
+                    if (sw2Opacity > 0f) {
+                        drawCircle(
+                            color = Color(0xFFFF7A1A).copy(alpha = sw2Opacity),
+                            radius = (95.dp.toPx()) * sw2Scale,
+                            center = centerOffset,
+                            style = Stroke(width = 4.dp.toPx())
+                        )
+                    }
+
+                    // 32 3D Glossy Ember Particles
+                    for (b in bubbles) {
+                        val (dist, angle, scale, opacity) = when {
+                            t < 0.62f -> listOf(0f, b.baseAngle.toFloat(), 0f, 0f)
+                            t < 1.25f -> {
+                                val d = b.maxDistance * easeBlast
+                                val s = sin(pBlast * (PI.toFloat() / 2f)) * 1.15f
+                                val op = min(1.0f, pBlast * 4f)
+                                listOf(d, b.baseAngle.toFloat(), s, op)
+                            }
+                            t < 1.95f -> {
+                                val d = b.maxDistance * (1.0f - easeVortex)
+                                val swirlAngle = (b.baseAngle + b.swirlDirection * easeVortex * PI * 2.2).toFloat()
+                                val s = 1.15f * (1.0f - easeVortex * 0.75f)
+                                val op = max(0.0f, 1.0f - pVortex.pow(2.5f))
+                                listOf(d, swirlAngle, s, op)
+                            }
+                            else -> listOf(0f, b.baseAngle.toFloat(), 0f, 0f)
+                        }
+
+                        if (opacity > 0f && scale > 0f) {
+                            val px = centerOffset.x + cos(angle) * dist * density
+                            val py = centerOffset.y + sin(angle) * dist * density
+                            val radius = (b.size / 2f) * scale * density
+
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        b.color.copy(alpha = opacity * 0.98f),
+                                        b.color.copy(alpha = opacity * 0.65f)
+                                    ),
+                                    center = Offset(px - radius * 0.3f, py - radius * 0.3f),
+                                    radius = radius * 1.2f
+                                ),
+                                radius = radius,
+                                center = Offset(px, py)
+                            )
+                            // Specular Top-Left Highlight
+                            drawCircle(
+                                color = Color.White.copy(alpha = opacity * 0.85f),
+                                radius = radius * 0.35f,
+                                center = Offset(px - radius * 0.35f, py - radius * 0.35f)
+                            )
+                        }
+                    }
+
+                    // Central Energy Orb
+                    if (orbOpacity > 0f) {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color.White, AmberGold, Color(0xFFFF590D)),
+                                center = centerOffset,
+                                radius = 40.dp.toPx() * orbScale
+                            ),
+                            radius = 35.dp.toPx() * orbScale,
+                            center = centerOffset,
+                            alpha = orbOpacity
+                        )
+                    }
+                }
+
+                // Smooth Flying Phoenix Mascot Character
                 Box(
                     modifier = Modifier
-                        .size(140.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFFFFD54F).copy(alpha = 0.35f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
-
-                // Phoenix Bird Image
-                Image(
-                    painter = painterResource(id = R.drawable.phoenix),
-                    contentDescription = "Code in Go Phoenix Mascot",
-                    modifier = Modifier.size(165.dp)
-                )
+                        .size(205.dp)
+                        .graphicsLayer {
+                            scaleX = mascotScaleX
+                            scaleY = mascotScaleY
+                            translationY = mascotYOffset * density
+                            rotationZ = mascotRotation
+                            this.alpha = mascotOpacity
+                        }
+                ) {
+                    SmoothFlyingPhoenixView(size = 205.dp)
+                }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Brand Titles
+            // Animated Brand Title "Ashnode"
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .alpha(titleAlpha.value)
-                    .offset(y = titleOffsetY.value.dp)
+                modifier = Modifier.graphicsLayer {
+                    scaleX = logoScale
+                    scaleY = logoScale
+                    translationY = logoYOffset * density
+                    this.alpha = logoOpacity
+                }
             ) {
                 Text(
-                    text = "Code in Go",
-                    fontSize = 44.sp,
+                    text = "Ashnode",
+                    fontSize = 46.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.SansSerif,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Master Data Structures & Algorithms",
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
                     color = AmberGold
@@ -380,20 +361,29 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Bottom Loading Progress
+            // Bottom Glowing Progress Bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp, vertical = 48.dp)
+                    .padding(horizontal = 60.dp)
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.12f))
             ) {
-                ProgressBarAnimated(
-                    progress = progress.value,
-                    height = 12.dp,
-                    barColor = AmberGold,
-                    trackColor = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.15f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progressRatio)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(AmberGold, Color(0xFFFF8C1A))
+                            )
+                        )
                 )
             }
+
+            Spacer(modifier = Modifier.height(50.dp))
         }
     }
 }
-

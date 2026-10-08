@@ -1,8 +1,10 @@
-﻿package com.simats.codeingo.ui.auth
+package com.simats.codeingo.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,18 +36,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.components.GoogleLogoView
-import com.simats.codeingo.ui.theme.CardBackground
+import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DarkBackground
-import com.simats.codeingo.ui.theme.DuolingoBlue
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.staggeredAppear
+import kotlinx.coroutines.delay
+
+// ══════════════════════════════════════════════════════════════════
+// 🌐 GoogleAuthSheet — Fluid Google Account Selection Sheet
+// ══════════════════════════════════════════════════════════════════
 
 data class GoogleAccountItem(
     val name: String,
@@ -62,6 +71,7 @@ fun GoogleAuthSheet(
     var isAuthenticating by remember { mutableStateOf(false) }
     var selectedName by remember { mutableStateOf("") }
     var selectedEmail by remember { mutableStateOf("") }
+    val isDark = LocalDynamicThemeColors.current.isDark
 
     val defaultAccounts = listOf(
         GoogleAccountItem(
@@ -80,7 +90,7 @@ fun GoogleAuthSheet(
 
     LaunchedEffect(isAuthenticating) {
         if (isAuthenticating) {
-            delay(1200)
+            delay(1000)
             onSelectAccount(selectedName, selectedEmail)
             onDismiss()
         }
@@ -91,6 +101,8 @@ fun GoogleAuthSheet(
             .fillMaxSize()
             .background(DarkBackground)
     ) {
+        PhoenixAtmosphericBackgroundView()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,6 +110,7 @@ fun GoogleAuthSheet(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Header Close
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -106,111 +119,145 @@ fun GoogleAuthSheet(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = SubtextGray
+                        tint = if (isDark) Color.White.copy(alpha = 0.85f) else Color(0xFF12_18_26)
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                GoogleLogoView(size = 28.dp)
+                Text(
+                    text = "SIGN IN WITH GOOGLE",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.SansSerif,
+                    color = if (isDark) Color.White else Color(0xFF12_18_26),
+                    letterSpacing = 0.8.sp
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.size(48.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = "Sign in with Google",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                color = LocalDynamicThemeColors.current.textPrimary
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Choose an account to continue to Code in Go",
-                fontSize = 14.sp,
-                color = SubtextGray,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            if (isAuthenticating) {
-                Spacer(modifier = Modifier.height(40.dp))
-                CircularProgressIndicator(color = DuolingoBlue, modifier = Modifier.size(48.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Signing in as $selectedName...",
-                    fontSize = 15.sp,
-                    color = LocalDynamicThemeColors.current.textPrimary
-                )
-            } else {
-                // List of Google Accounts
+            // Google Logo Header Card
+            AppCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .staggeredAppear(0),
+                cornerRadius = 24.dp,
+                accentGlow = AmberGold.copy(alpha = 0.15f)
+            ) {
                 Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    defaultAccounts.forEach { account ->
-                        val shape = RoundedCornerShape(16.dp)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp)
-                                .clip(shape)
-                                .background(CardBackground)
-                                .border(1.dp, InputBorder, shape)
-                                .clickable {
-                                    selectedName = account.name
-                                    selectedEmail = account.email
-                                    isAuthenticating = true
-                                }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.10f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GoogleLogoView(size = 32.dp)
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "Choose an account",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.SansSerif,
+                        color = if (isDark) Color.White else Color(0xFF12_18_26)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "to continue to Ashnode DSA",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = FontFamily.SansSerif,
+                        color = if (isDark) Color.White.copy(alpha = 0.60f) else Color(0xFF64_74_8B)
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    if (isAuthenticating) {
+                        CircularProgressIndicator(color = AmberGold, modifier = Modifier.size(36.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Signing in as $selectedName...",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AmberGold
+                        )
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(CircleShape)
-                                    .background(account.avatarBgColor),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = account.avatarInitial,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalDynamicThemeColors.current.textPrimary
-                                )
-                            }
+                            defaultAccounts.forEachIndexed { index, account ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .pressScale(targetScale = 0.96f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(
+                                            if (isDark) Color(0xFF14_1F_36).copy(alpha = 0.70f)
+                                            else Color(0xFFF1_F4_FA)
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7_DE_EB),
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
+                                            selectedName = account.name
+                                            selectedEmail = account.email
+                                            isAuthenticating = true
+                                        }
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(CircleShape)
+                                            .background(account.avatarBgColor),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = account.avatarInitial,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
 
-                            Spacer(modifier = Modifier.width(14.dp))
-
-                            Column {
-                                Text(
-                                    text = account.name,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalDynamicThemeColors.current.textPrimary
-                                )
-                                Text(
-                                    text = account.email,
-                                    fontSize = 13.sp,
-                                    color = SubtextGray
-                                )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = account.name,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            fontFamily = FontFamily.SansSerif,
+                                            color = if (isDark) Color.White else Color(0xFF12_18_26)
+                                        )
+                                        Text(
+                                            text = account.email,
+                                            fontSize = 12.sp,
+                                            fontFamily = FontFamily.SansSerif,
+                                            color = if (isDark) Color.White.copy(alpha = 0.60f) else Color(0xFF64_74_8B)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = "To continue, Google will share your name, email address, and profile picture with Code in Go.",
-                fontSize = 11.sp,
-                color = SubtextGray.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 16.sp,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)
-            )
         }
     }
 }

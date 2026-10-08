@@ -183,7 +183,7 @@ fun AssessmentScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         if (isFinished) {
             // Phoenix Egg Hatch 3D Cutscene with CandyCrushStarsView

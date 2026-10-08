@@ -44,25 +44,13 @@ fun SmoothFlyingPhoenixView(
     size: Dp = 120.dp,
     speed: Double = 1.0
 ) {
-    val frames = remember {
-        listOf(
-            R.drawable.fly_0,
-            R.drawable.fly_1,
-            R.drawable.fly_2,
-            R.drawable.fly_3,
-            R.drawable.fly_4,
-            R.drawable.fly_5,
-            R.drawable.fly_6,
-            R.drawable.fly_7,
-            R.drawable.fly_8,
-            R.drawable.fly_9,
-            R.drawable.fly_10,
-            R.drawable.fly_11,
-            R.drawable.fly_12,
-            R.drawable.fly_13,
-            R.drawable.fly_14,
-            R.drawable.fly_15
-        )
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val frames = remember(context) {
+        val list = (0..15).mapNotNull { i ->
+            val id = context.resources.getIdentifier("fly_$i", "drawable", context.packageName)
+            if (id != 0) id else null
+        }
+        if (list.isNotEmpty()) list else listOf(R.drawable.phoenix_stage_1)
     }
 
     var currentFrameIndex by remember { mutableIntStateOf(0) }

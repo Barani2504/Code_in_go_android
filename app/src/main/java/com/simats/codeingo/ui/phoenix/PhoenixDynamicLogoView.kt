@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.RepeatMode
@@ -190,30 +190,33 @@ fun PhoenixMascotImage(
     size: Dp,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val resName = "phoenix_emotion_${emotion.id}"
-    val resId = remember(emotion.id) {
-        context.resources.getIdentifier(resName, "drawable", context.packageName).let { id ->
-            if (id != 0) id else context.resources.getIdentifier("phoenix_emotion_0", "drawable", context.packageName)
-        }
-    }
-
-    if (resId != 0) {
-        Image(
-            painter = painterResource(id = resId),
-            contentDescription = emotion.title,
+    if (emotion.id == 0) {
+        AnimatedGIFView(
+            resourceName = "phoenix_flying",
+            size = size,
             modifier = modifier
-                .size(size)
-                .clip(CircleShape)
         )
     } else {
-        Icon(
-            imageVector = Icons.Default.LocalFireDepartment,
-            contentDescription = emotion.title,
-            tint = AmberGold,
-            modifier = modifier
-                .size(size)
-                .padding(size * 0.15f)
-        )
+        val context = LocalContext.current
+        val resName = "phoenix_emotion_${emotion.id}"
+        val resId = remember(emotion.id) {
+            context.resources.getIdentifier(resName, "drawable", context.packageName)
+        }
+
+        if (resId != 0) {
+            Image(
+                painter = painterResource(id = resId),
+                contentDescription = emotion.title,
+                modifier = modifier
+                    .size(size)
+                    .clip(CircleShape)
+            )
+        } else {
+            AnimatedGIFView(
+                resourceName = "phoenix_flying",
+                size = size,
+                modifier = modifier
+            )
+        }
     }
 }

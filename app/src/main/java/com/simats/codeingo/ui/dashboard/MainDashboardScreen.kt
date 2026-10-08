@@ -315,7 +315,7 @@ fun MainDashboardScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -568,7 +568,7 @@ fun MainDashboardScreen(
         guideSelectedUnit?.let { unit ->
             ModalBottomSheet(
                 onDismissRequest = { guideSelectedUnit = null },
-                containerColor = DarkBackground
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 ChapterGuidebookSheet(
                     unit = unit,
@@ -581,7 +581,7 @@ fun MainDashboardScreen(
         if (showStreakSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showStreakSheet = false },
-                containerColor = DarkBackground
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 StreakInfoSheet(
                     streakDays = streakDays,
@@ -600,7 +600,7 @@ fun MainDashboardScreen(
         if (showHeartsSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showHeartsSheet = false },
-                containerColor = DarkBackground
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 HeartsInfoSheet(
                     heartsCount = heartsCount,

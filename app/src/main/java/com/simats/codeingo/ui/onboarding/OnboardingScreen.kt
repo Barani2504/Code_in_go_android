@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.onboarding
+package com.simats.codeingo.ui.onboarding
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -74,6 +74,7 @@ import com.simats.codeingo.data.model.Language
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.components.HeaderView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
@@ -531,10 +532,9 @@ fun AnimatedHomeMascotView(
                     .blur(22.dp)
             )
 
-            Image(
-                painter = painterResource(id = R.drawable.phoenix),
-                contentDescription = "Code in Go Phoenix",
-                modifier = Modifier.size(175.dp)
+            AnimatedGIFView(
+                resourceName = "phoenix_flying",
+                size = 175.dp
             )
         }
 

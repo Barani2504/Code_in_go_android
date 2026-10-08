@@ -415,7 +415,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
 
                 // The Slot
@@ -461,7 +461,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
             } else {
                 Text(
@@ -469,7 +469,7 @@ fun FillCodeExerciseView(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
             }
         }

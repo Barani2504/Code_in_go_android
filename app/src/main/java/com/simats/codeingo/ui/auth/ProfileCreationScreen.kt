@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.auth
+package com.simats.codeingo.ui.auth
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -90,6 +90,7 @@ import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
 import com.simats.codeingo.ui.components.GoogleLogoView
+import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlin.math.cos
@@ -286,26 +287,26 @@ fun ProfileCreationScreen(
             ) {
                 when (currentStep) {
                     1 -> {
-                        Duolingo3DButton(
+                        com.simats.codeingo.ui.components.AppButton(
                             title = "NEXT",
-                            style = if (ageText.isNotEmpty()) Duolingo3DButtonStyle.Amber else Duolingo3DButtonStyle.Disabled,
+                            style = if (ageText.isNotEmpty()) com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER else com.simats.codeingo.ui.components.AppButtonStyle.DISABLED,
                             isEnabled = ageText.isNotEmpty(),
                             onClick = { currentStep = 2 },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                     2 -> {
-                        Duolingo3DButton(
+                        com.simats.codeingo.ui.components.AppButton(
                             title = "NEXT",
-                            style = Duolingo3DButtonStyle.Amber,
+                            style = com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER,
                             onClick = { currentStep = 3 },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                     3 -> {
-                        Duolingo3DButton(
+                        com.simats.codeingo.ui.components.AppButton(
                             title = "CREATE ACCOUNT",
-                            style = if (isCredentialsValid) Duolingo3DButtonStyle.Amber else Duolingo3DButtonStyle.Disabled,
+                            style = if (isCredentialsValid) com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER else com.simats.codeingo.ui.components.AppButtonStyle.DISABLED,
                             isEnabled = isCredentialsValid,
                             onClick = { currentStep = 4 },
                             modifier = Modifier.fillMaxWidth()
@@ -319,9 +320,9 @@ fun ProfileCreationScreen(
                         )
                     }
                     4 -> {
-                        Duolingo3DButton(
+                        com.simats.codeingo.ui.components.AppButton(
                             title = "CONTINUE",
-                            style = Duolingo3DButtonStyle.Amber,
+                            style = com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER,
                             onClick = {
                                 localizationManager.updateUserProfile(displayName, generatedHandle)
                                 localizationManager.setLoggedIn(true)
@@ -1024,10 +1025,9 @@ private fun CelebrationStepView(
                     )
                     .border(2.dp, AmberGold, CircleShape)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.phoenix),
-                    contentDescription = "Phoenix",
-                    modifier = Modifier.size(80.dp)
+                AnimatedGIFView(
+                    resourceName = "phoenix_flying",
+                    size = 80.dp
                 )
             }
 

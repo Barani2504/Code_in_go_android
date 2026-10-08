@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.auth
+package com.simats.codeingo.ui.auth
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -66,6 +66,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -77,14 +78,17 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.R
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
 import com.simats.codeingo.ui.components.GoogleLogoView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
  * LoginScreen faithfully synchronized with iOS LoginView.swift.
@@ -181,6 +185,7 @@ fun LoginScreen(
                 // CREATE ACCOUNT Pill
                 Box(
                     modifier = Modifier
+                        .pressScale(targetScale = 0.94f)
                         .clip(RoundedCornerShape(12.dp))
                         .background(AmberGold.copy(alpha = 0.14f))
                         .border(1.2.dp, AmberGold.copy(alpha = 0.40f), RoundedCornerShape(12.dp))
@@ -192,6 +197,7 @@ fun LoginScreen(
                         text = "CREATE ACCOUNT",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.SansSerif,
                         color = AmberGold
                     )
                 }
@@ -561,9 +567,9 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Duolingo3DButton(
+                AppButton(
                     title = "LOG IN",
-                    style = if (isFormValid) Duolingo3DButtonStyle.Amber else Duolingo3DButtonStyle.Disabled,
+                    style = if (isFormValid) com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER else com.simats.codeingo.ui.components.AppButtonStyle.DISABLED,
                     isEnabled = isFormValid,
                     onClick = {
                         val trimmed = emailOrUsername.trim()
