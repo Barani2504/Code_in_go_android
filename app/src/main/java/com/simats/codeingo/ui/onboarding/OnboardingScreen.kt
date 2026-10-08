@@ -189,19 +189,19 @@ fun OnboardingScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // GET STARTED — Phoenix Primary 3D Button (Amber Gold)
-                Duolingo3DButton(
+                com.simats.codeingo.ui.components.AppButton(
                     title = localizationManager.string("get_started_caps"),
-                    style = Duolingo3DButtonStyle.Amber,
+                    style = com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER,
                     onClick = {
                         showBeginnerOnboarding = true
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // I ALREADY HAVE AN ACCOUNT — Duolingo 3D Button (White / Liquid Glass)
-                Duolingo3DButton(
+                // I ALREADY HAVE AN ACCOUNT — 3D Secondary Glass Button
+                com.simats.codeingo.ui.components.AppButton(
                     title = localizationManager.string("already_have_account_caps"),
-                    style = Duolingo3DButtonStyle.White,
+                    style = com.simats.codeingo.ui.components.AppButtonStyle.SECONDARY_GLASS,
                     onClick = onLoginClick,
                     modifier = Modifier.fillMaxWidth()
                 )

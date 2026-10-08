@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.onboarding
+package com.simats.codeingo.ui.onboarding
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedContent
@@ -20,6 +20,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,16 +66,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
+import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.components.CandyCrushStarsView
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
 import com.simats.codeingo.ui.components.DuolingoSpeechBubbleView
 import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
-import kotlinx.coroutines.delay
+import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.PhoenixMotion
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.staggeredAppear
+import kotlinx.coroutines.delay
 
 // ══════════════════════════════════════════════════════════════════
 // 🚀 BeginnerOnboardingFlowView — 12-Step Journey with Phoenix
@@ -98,55 +104,57 @@ enum class OnboardingStep(val stepIndex: Int) {
 
 @Composable
 fun BeginnerOnboardingFlowView(
-    modifier: Modifier = Modifier,
-    onCompleteOnboarding: () -> Unit
+    onCompleteOnboarding: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var currentStep by remember { mutableStateOf(OnboardingStep.WELCOME) }
-    val view = LocalView.current
-
-    // Step states
-    var selectedLanguage by remember { mutableStateOf<String?>(null) }
-    var selectedReferral by remember { mutableStateOf<String?>(null) }
+    var selectedLanguage by remember { mutableStateOf<String?>("Python 🐍") }
+    var selectedReferral by remember { mutableStateOf<String?>("LeetCode & Tech Interviews 💼") }
     var placedWord by remember { mutableStateOf<String?>(null) }
     var isSentenceChecked by remember { mutableStateOf(false) }
     var isSentenceCorrect by remember { mutableStateOf(false) }
     var streakCountDisplay by remember { mutableIntStateOf(0) }
     var selectedStreakGoalDays by remember { mutableIntStateOf(7) }
 
+    val totalSteps = OnboardingStep.entries.size
+    val currentProgress = (currentStep.stepIndex + 1).toFloat() / totalSteps.toFloat()
+    val animatedProgress by animateFloatAsState(
+        targetValue = currentProgress,
+        animationSpec = PhoenixMotion.SnappySpring,
+        label = "onboardingProgress"
+    )
+
     fun advanceStep() {
-        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
         val nextIdx = currentStep.stepIndex + 1
-        if (nextIdx < OnboardingStep.entries.size) {
+        if (nextIdx < totalSteps) {
             currentStep = OnboardingStep.entries[nextIdx]
         } else {
             onCompleteOnboarding()
         }
     }
 
-    PhoenixAtmosphericBackgroundView(modifier = modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+    ) {
+        PhoenixAtmosphericBackgroundView()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(vertical = 12.dp)
         ) {
-            // Top Progress Bar (Steps 0 - 10)
+            // Top Bar: Back button + Animated Progress Bar
             if (currentStep != OnboardingStep.LOADING_CEFR) {
-                val progress = currentStep.stepIndex.toFloat() / (OnboardingStep.entries.size - 1).toFloat()
-                val animatedProgress by animateFloatAsState(
-                    targetValue = progress,
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f),
-                    label = "progress"
-                )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .padding(horizontal = 18.dp, vertical = 12.dp)
                 ) {
-                    if (currentStep != OnboardingStep.WELCOME) {
+                    if (currentStep.stepIndex > 0) {
                         IconButton(
                             onClick = {
                                 if (currentStep.stepIndex > 0) {
@@ -167,20 +175,20 @@ fun BeginnerOnboardingFlowView(
 
                     Spacer(modifier = Modifier.width(14.dp))
 
-                    // Progress Bar
+                    // Segmented / Glowing Progress Bar
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(14.dp)
-                            .clip(RoundedCornerShape(100.dp))
-                            .background(Color(0xFF141224).copy(alpha = 0.85f))
-                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(100.dp))
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color(0xFF14_12_24).copy(alpha = 0.85f))
+                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(50))
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(animatedProgress.coerceAtLeast(0.06f))
-                                .height(14.dp)
-                                .clip(RoundedCornerShape(100.dp))
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(50))
                                 .background(
                                     Brush.horizontalGradient(
                                         listOf(AmberGold, Color(0xFFFF8C1A))
@@ -286,7 +294,7 @@ fun BeginnerOnboardingFlowView(
 }
 
 // ══════════════════════════════════════════════════════════════════
-// Individual Step Composable Views
+// Step Composable Views
 // ══════════════════════════════════════════════════════════════════
 
 @Composable
@@ -302,7 +310,7 @@ private fun WelcomeStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "CONTINUE", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -319,7 +327,7 @@ private fun TenQuestionsStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "CONTINUE", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -349,30 +357,34 @@ private fun LanguageSelectionStepView(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            for (lang in languages) {
+            languages.forEachIndexed { index, lang ->
                 val isSelected = selected == lang
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .staggeredAppear(index, baseDelayMs = 35)
+                        .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = 0.18f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
-                        .clickable { onSelect(lang) }
-                        .padding(horizontal = 18.dp, vertical = 14.dp)
+                        .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38).copy(alpha = 0.8f))
+                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(lang) }
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = lang,
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
                     )
                 }
             }
         }
 
-        Duolingo3DButton(
+        AppButton(
             title = "CONTINUE",
-            style = if (selected != null) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.DISABLED,
+            style = if (selected != null) AppButtonStyle.PRIMARY_AMBER else AppButtonStyle.DISABLED,
             isEnabled = selected != null,
             onClick = onContinue
         )
@@ -411,30 +423,34 @@ private fun ReferralStepView(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            for (goal in goals) {
+            goals.forEachIndexed { index, goal ->
                 val isSelected = selected == goal
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .staggeredAppear(index, baseDelayMs = 35)
+                        .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = 0.18f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
-                        .clickable { onSelect(goal) }
-                        .padding(horizontal = 18.dp, vertical = 14.dp)
+                        .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38).copy(alpha = 0.8f))
+                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(goal) }
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = goal,
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
                     )
                 }
             }
         }
 
-        Duolingo3DButton(
+        AppButton(
             title = "CONTINUE",
-            style = if (selected != null) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.DISABLED,
+            style = if (selected != null) AppButtonStyle.PRIMARY_AMBER else AppButtonStyle.DISABLED,
             isEnabled = selected != null,
             onClick = onContinue
         )
@@ -458,7 +474,7 @@ private fun FirstLessonIntroStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "CONTINUE", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -473,24 +489,26 @@ private fun SentenceCompletionStepView(
     onRetry: () -> Unit
 ) {
     val choices = listOf("0", "1", "NULL", "n - 1")
+    val isDark = LocalDynamicThemeColors.current.isDark
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        // Concept Badge
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
                 .background(AmberGold.copy(alpha = 0.18f))
-                .border(1.dp, AmberGold.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
             Text(
                 text = "DATA HIGHWAY: ZERO-BASED INDEX",
                 color = AmberGold,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Black
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.SansSerif
             )
         }
 
@@ -498,47 +516,49 @@ private fun SentenceCompletionStepView(
 
         Text(
             text = "Complete the DSA Concept",
-            color = LocalDynamicThemeColors.current.textPrimary,
+            color = if (isDark) Color.White else Color(0xFF12_18_26),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Black
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sentence Box
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF141F38).copy(alpha = 0.9f))
-                .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
-                .padding(16.dp)
+        // Sentence Card
+        AppCard(
+            modifier = Modifier.fillMaxWidth(),
+            cornerRadius = 18.dp,
+            accentGlow = AmberGold.copy(alpha = 0.15f),
+            contentPadding = 18.dp
         ) {
-            Text(
-                text = "In contiguous memory, an Array's first element is always stored at index",
-                color = LocalDynamicThemeColors.current.textPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 22.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Slot
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (placedWord != null) AmberGold else Color.White.copy(alpha = 0.08f))
-                    .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-            ) {
+            Column {
                 Text(
-                    text = placedWord ?: "  [ ? ]  ",
-                    color = if (placedWord != null) Color(0xFF1A1205) else LocalDynamicThemeColors.current.placeholder,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Black
+                    text = "In contiguous memory, an Array's first element is always stored at index",
+                    color = if (isDark) Color.White else Color(0xFF12_18_26),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif,
+                    lineHeight = 22.sp
                 )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (placedWord != null) AmberGold else Color.White.copy(alpha = 0.08f))
+                        .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = placedWord ?: "  [ ? ]  ",
+                        color = if (placedWord != null) Color(0xFF1A1205) else LocalDynamicThemeColors.current.placeholder,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
             }
         }
 
@@ -555,17 +575,19 @@ private fun SentenceCompletionStepView(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .weight(1f)
+                        .pressScale(targetScale = 0.93f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isUsed) Color.Transparent else Color(0xFF141F38))
-                        .border(1.5.dp, if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f) else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                        .clickable(enabled = !isChecked) { onPlaceWord(word) }
+                        .background(if (isUsed) Color.Transparent else (if (isDark) Color(0xFF14_1F_38) else Color(0xFFE2_E8_F0)))
+                        .border(1.5.dp, if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f) else AmberGold.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                        .clickable(enabled = !isChecked, interactionSource = remember { MutableInteractionSource() }, indication = null) { onPlaceWord(word) }
                         .padding(vertical = 12.dp)
                 ) {
                     Text(
                         text = word,
-                        color = if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f) else Color.White,
+                        color = if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f) else (if (isDark) Color.White else Color(0xFF12_18_26)),
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Black
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
             }
@@ -573,20 +595,21 @@ private fun SentenceCompletionStepView(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Feedback
+        // Feedback Text
         if (isChecked) {
             Text(
                 text = if (isCorrect) "Awesome! In programming, array indexing starts at 0!" else "Not quite! Remember: base offset starts at index 0.",
                 color = if (isCorrect) AmberGold else Color(0xFFFF4B4B),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
         }
 
-        Duolingo3DButton(
+        AppButton(
             title = if (isChecked) (if (isCorrect) "CONTINUE" else "TRY AGAIN") else "CHECK",
-            style = if (isChecked) (if (isCorrect) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.WHITE) else Duolingo3DButtonColor.AMBER,
+            style = if (isChecked) (if (isCorrect) AppButtonStyle.SUCCESS_GREEN else AppButtonStyle.DANGER_CRIMSON) else AppButtonStyle.PRIMARY_AMBER,
             isEnabled = placedWord != null,
             onClick = {
                 if (!isChecked) onCheck()
@@ -612,7 +635,7 @@ private fun ProudCelebrationStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.StarryEyes, size = 190.dp)
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "CONTINUE", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -657,6 +680,7 @@ private fun StreakEarnedStepView(
             color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif,
             letterSpacing = 1.sp
         )
 
@@ -665,7 +689,7 @@ private fun StreakEarnedStepView(
         DuolingoSpeechBubbleView(text = "Practice every day to keep your fire burning strong!")
 
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "CONTINUE", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -695,10 +719,11 @@ private fun StreakGoalStepView(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38))
                         .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
-                        .clickable { onSelectDays(days) }
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelectDays(days) }
                         .padding(horizontal = 18.dp, vertical = 16.dp)
                 ) {
                     Column {
@@ -706,13 +731,15 @@ private fun StreakGoalStepView(
                             text = "$days-Day Streak Challenge",
                             color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif
                         )
                         Text(
                             text = if (days == 7) "Casual" else if (days == 14) "Regular" else if (days == 30) "Serious" else "Master",
                             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = FontFamily.SansSerif
                         )
                     }
 
@@ -728,7 +755,7 @@ private fun StreakGoalStepView(
             }
         }
 
-        Duolingo3DButton(title = "SET GOAL", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "SET GOAL", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -745,7 +772,7 @@ private fun WidgetCheerStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.StreakFlame, size = 190.dp)
         Spacer(modifier = Modifier.weight(1f))
-        Duolingo3DButton(title = "LET'S CODE!", style = Duolingo3DButtonColor.AMBER, onClick = onContinue)
+        AppButton(title = "LET'S CODE!", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
@@ -782,7 +809,8 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
             text = "Tailoring algorithms to your selected language",
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.SansSerif
         )
     }
 }
