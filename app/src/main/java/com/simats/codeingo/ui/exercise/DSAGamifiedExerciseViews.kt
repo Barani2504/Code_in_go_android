@@ -57,8 +57,10 @@ import com.simats.codeingo.ui.theme.DuolingoInputBorder
 import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoSubtext
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import kotlinx.coroutines.delay
 
 // =========================================================================
 // 1. MATCH PAIRS EXERCISE VIEW
@@ -133,6 +135,7 @@ fun MatchPairsExerciseView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .pressScale(0.96f)
                             .clip(shape)
                             .background(bgColor)
                             .border(if (isSelected || isMatched) 2.dp else 1.dp, borderColor, shape)
@@ -194,6 +197,7 @@ fun MatchPairsExerciseView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .pressScale(0.96f)
                             .clip(shape)
                             .background(bgColor)
                             .border(if (isMatched || isWrong) 2.dp else 1.dp, borderColor, shape)
@@ -494,6 +498,7 @@ fun FillCodeExerciseView(
 
                     Box(
                         modifier = Modifier
+                            .pressScale(0.94f)
                             .clip(shape)
                             .background(if (isSelected) DuolingoBlue.copy(alpha = 0.22f) else DuolingoCardBg)
                             .border(
@@ -631,6 +636,7 @@ fun ComplexityDialExerciseView(
                             Row(
                                 modifier = Modifier
                                     .weight(1f)
+                                    .pressScale(0.96f)
                                     .clip(shape)
                                     .background(bgColor)
                                     .border(if (isSelected) 2.dp else 1.dp, borderColor, shape)
@@ -646,7 +652,7 @@ fun ComplexityDialExerciseView(
                                         .size(8.dp)
                                         .clip(CircleShape)
                                         .background(item.color)
-                                )
+                                    )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -759,7 +765,7 @@ fun TrueFalseSwipeExerciseView(
             }
         }
 
-        // Two Interactive Decision Buttons: TRUE or FALSE
+        // Two Interactive Decision Buttons: TRUE or FALSE with pressScale
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -770,6 +776,7 @@ fun TrueFalseSwipeExerciseView(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .pressScale(0.95f)
                     .clip(trueShape)
                     .background(if (isTrueSelected) DuolingoGreen.copy(alpha = 0.25f) else DuolingoCardBg)
                     .border(
@@ -797,6 +804,7 @@ fun TrueFalseSwipeExerciseView(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .pressScale(0.95f)
                     .clip(falseShape)
                     .background(if (isFalseSelected) DuolingoRed.copy(alpha = 0.25f) else DuolingoCardBg)
                     .border(

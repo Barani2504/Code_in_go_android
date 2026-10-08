@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.UnitModel
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
 
 /**
  * UnitSectionBanner — DSA Chapter Header Banner Card with Lore Era Tag & Guidebook Button.
@@ -71,12 +73,12 @@ fun UnitSectionBanner(
         if (isUnlocked) {
             // Unlocked Chapter Banner
             val bannerGradient = if (isDark) listOf(
-                unit.themeColor.copy(alpha = 0.42f),
-                unit.themeDarkColor.copy(alpha = 0.35f),
-                Color(0xFF0A1020).copy(alpha = 0.75f)
+                unit.themeColor.copy(alpha = 0.50f),
+                unit.themeDarkColor.copy(alpha = 0.40f),
+                Color(0xFF0A1020).copy(alpha = 0.85f)
             ) else listOf(
-                unit.themeColor.copy(alpha = 0.85f),
-                unit.themeDarkColor.copy(alpha = 0.90f),
+                unit.themeColor.copy(alpha = 0.90f),
+                unit.themeDarkColor.copy(alpha = 0.95f),
                 Color(0xFF121C30)
             )
 
@@ -89,13 +91,14 @@ fun UnitSectionBanner(
                         1.5.dp,
                         Brush.linearGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.48f),
-                                unit.themeColor.copy(alpha = 0.65f),
-                                Color.White.copy(alpha = 0.08f)
+                                Color.White.copy(alpha = 0.50f),
+                                unit.themeColor.copy(alpha = 0.70f),
+                                Color.White.copy(alpha = 0.10f)
                             )
                         ),
                         RoundedCornerShape(22.dp)
                     )
+                    .shadow(12.dp, RoundedCornerShape(22.dp), spotColor = unit.themeColor.copy(alpha = 0.30f))
                     .padding(18.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -108,9 +111,9 @@ fun UnitSectionBanner(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.32f))
-                            .border(0.9.dp, Color.White.copy(alpha = 0.30f), CircleShape)
-                            .padding(horizontal = 9.dp, vertical = 4.dp)
+                            .background(Color.Black.copy(alpha = 0.35f))
+                            .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = eraLore.uppercase(),
@@ -137,15 +140,16 @@ fun UnitSectionBanner(
                     )
                 }
 
-                // Guide Button
+                // Guide Button with pressScale
                 Row(
                     modifier = Modifier
+                        .pressScale(0.92f)
                         .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.32f))
+                        .background(Color.Black.copy(alpha = 0.35f))
                         .border(
-                            1.1.dp,
+                            1.2.dp,
                             Brush.linearGradient(
-                                listOf(Color.White.copy(alpha = 0.45f), Color.White.copy(alpha = 0.15f))
+                                listOf(Color.White.copy(alpha = 0.50f), Color.White.copy(alpha = 0.15f))
                             ),
                             CircleShape
                         )
@@ -158,7 +162,7 @@ fun UnitSectionBanner(
                         imageVector = Icons.Default.LocalFireDepartment,
                         contentDescription = "Guide",
                         tint = unit.themeColor,
-                        modifier = Modifier.size(13.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                     Text(
                         text = "Guide",
@@ -177,7 +181,7 @@ fun UnitSectionBanner(
                     .background(if (isDark) Color(0xFF0F1420).copy(alpha = 0.75f) else Color.White.copy(alpha = 0.85f))
                     .border(
                         1.dp,
-                        if (isDark) dynamicColors.placeholder.copy(alpha = 0.10f) else Color(0xFFD7DEEB),
+                        if (isDark) dynamicColors.placeholder.copy(alpha = 0.12f) else Color(0xFFD7DEEB),
                         RoundedCornerShape(22.dp)
                     )
                     .padding(16.dp),

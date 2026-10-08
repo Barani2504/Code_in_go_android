@@ -30,11 +30,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,8 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -55,20 +52,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
+import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.CardBackground
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoRed
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.PhoenixGreen
+import com.simats.codeingo.ui.theme.floating
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.staggeredAppear
 
 // ══════════════════════════════════════════════════════════════════
-// 🏆  LeaderboardsScreen — Full iOS LeaderboardsView.swift parity
-// Locked view (< 3 lessons): 3-shield graphic, headline, info card,
-//   skeleton preview list
-// Unlocked view (>= 3 lessons): Bronze League header + active rankings
+// 🏆 LeaderboardsScreen — 3D Metallic Podium & League Ranks
+// Exact parity with iOS LeaderboardsView.swift
 // ══════════════════════════════════════════════════════════════════
 
 private data class RankEntry(
@@ -97,509 +94,354 @@ fun LeaderboardsScreen(
     modifier: Modifier = Modifier
 ) {
     val isUnlocked = completedLessons >= 3
+    val isDark = LocalDynamicThemeColors.current.isDark
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(LocalDynamicThemeColors.current.background)
     ) {
-        // Phoenix atmospheric background
         PhoenixAtmosphericBackgroundView()
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 60.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            if (!isUnlocked) {
-                // ── LOCKED STATE ─────────────────────────────────────
-                item { LockedHeaderGraphic() }
-                item {
-                    LockedHeadlineAndButton(
-                        completedLessons = completedLessons,
-                        onStartLesson = onStartLesson
-                    )
-                }
-                item { WhatAreLeaderboardsCard() }
-                item { LockedSkeletonPreviewList() }
-            } else {
-                // ── UNLOCKED STATE ────────────────────────────────────
-                item { UnlockedLeagueHeader() }
-                item { ActiveRankingsList() }
-            }
+        if (!isUnlocked) {
+            LockedLeaderboardsView(completedLessons = completedLessons, onStartLesson = onStartLesson)
+        } else {
+            UnlockedLeaderboardsView()
         }
     }
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 1. Locked 3-Shield Graphic Header
-// ══════════════════════════════════════════════════════════════════
 @Composable
-private fun LockedHeaderGraphic() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .padding(top = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        // Ambient glow ellipse
-        Box(
-            modifier = Modifier
-                .size(180.dp, 80.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(AmberGold.copy(alpha = 0.18f), Color.Transparent)
-                    )
-                )
-                .blur(20.dp)
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left Bronze Shield
-            Box(
-                modifier = Modifier
-                    .offset(x = 14.dp, y = 8.dp)
-                    .size(65.dp, 75.dp)
-                    .rotate(-14f)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFFCC7333), Color(0xFF7A3B10))
-                        )
-                    )
-                    .shadow(6.dp, RoundedCornerShape(18.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Shield, null,
-                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-
-            // Center Phoenix Gold Shield (zIndex front)
-            Box(
-                modifier = Modifier
-                    .size(85.dp, 95.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(
-                        Brush.linearGradient(listOf(AmberGold, Color(0xFFF2A000)))
-                    )
-                    .border(2.dp, LocalDynamicThemeColors.current.textSecondary, RoundedCornerShape(22.dp))
-                    .shadow(12.dp, RoundedCornerShape(22.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.LocalFireDepartment, null,
-                    tint = Color.White,
-                    modifier = Modifier.size(38.dp)
-                )
-            }
-
-            // Right Silver Shield
-            Box(
-                modifier = Modifier
-                    .offset(x = (-14).dp, y = 8.dp)
-                    .size(65.dp, 75.dp)
-                    .rotate(14f)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFFC8C8C8), Color(0xFF7F7F7F))
-                        )
-                    )
-                    .shadow(6.dp, RoundedCornerShape(18.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Shield, null,
-                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 2. Locked Headline, Subtitle & Start Button
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun LockedHeadlineAndButton(
+private fun LockedLeaderboardsView(
     completedLessons: Int,
     onStartLesson: (() -> Unit)?
 ) {
-    val lessonsNeeded = maxOf(1, 3 - completedLessons)
+    val isDark = LocalDynamicThemeColors.current.isDark
+    val remaining = (3 - completedLessons).coerceAtLeast(1)
+
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Unlock Leaderboards",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            color = LocalDynamicThemeColors.current.textPrimary,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "Complete $lessonsNeeded more lesson${if (lessonsNeeded > 1) "s" else ""} to start competing!",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f),
-            textAlign = TextAlign.Center
-        )
-        Button(
-            onClick = { onStartLesson?.invoke() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .height(50.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent
-            ),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFFE55A0C), Color(0xFFB23205))
-                        ),
-                        shape = RoundedCornerShape(14.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "START A LESSON",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary
-                )
-            }
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 3. "WHAT ARE LEADERBOARDS?" Info Card
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun WhatAreLeaderboardsCard() {
-    val emotion by PhoenixEmotionManager.instance.currentEmotion.collectAsState()
-    val infiniteTransition = rememberInfiniteTransition(label = "mascotBob")
-    val bobOffset by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = -5f,
-        animationSpec = infiniteRepeatable(
-            tween(1800, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ), label = "bob"
-    )
-
-    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(CardBackground.copy(alpha = 0.75f))
-            .border(1.5.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Icon(
-                    Icons.Default.LocalFireDepartment, null,
-                    tint = AmberGold,
-                    modifier = Modifier.size(14.dp)
-                )
-                Text(
-                    "WHAT ARE LEADERBOARDS?",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    color = AmberGold
-                )
-            }
-            Text(
-                "Do lessons, earn XP",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = LocalDynamicThemeColors.current.textPrimary
-            )
-            Text(
-                "Earn XP by completing lessons and compete with learners around the world each week.",
-                fontSize = 12.sp,
-                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
-                lineHeight = 17.sp
-            )
-        }
-
-        // Phoenix emotion mascot with bobbing animation
+        // 3D Metallic Shield Emblem
         Box(
             modifier = Modifier
-                .offset(y = bobOffset.dp)
-                .size(64.dp),
+                .size(100.dp)
+                .floating(distanceDp = 6.dp, durationMs = 2200)
+                .clip(CircleShape)
+                .background(AmberGold.copy(alpha = 0.18f))
+                .border(2.dp, AmberGold.copy(alpha = 0.45f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            // Aura glow
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(
-                        Brush.radialGradient(listOf(AmberGold.copy(alpha = 0.3f), Color.Transparent))
-                    )
-                    .blur(6.dp)
+            Icon(
+                imageVector = Icons.Default.Shield,
+                contentDescription = "Leaderboards Shield",
+                tint = AmberGold,
+                modifier = Modifier.size(52.dp)
             )
-            Text(emotion.emoji, fontSize = 40.sp)
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Unlock Leaderboards!",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif,
+            color = if (isDark) Color.White else Color(0xFF12_18_26),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Complete $remaining more lesson${if (remaining > 1) "s" else ""} to enter the Bronze League and compete with coders worldwide!",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.SansSerif,
+            color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
+        )
+
+        if (onStartLesson != null) {
+            Spacer(modifier = Modifier.height(28.dp))
+            AppButton(
+                title = "START NEXT LESSON",
+                style = AppButtonStyle.PRIMARY_AMBER,
+                onClick = onStartLesson
+            )
         }
     }
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 4. Locked Skeleton Preview List (fade-out shimmer rows)
-// ══════════════════════════════════════════════════════════════════
 @Composable
-private fun LockedSkeletonPreviewList() {
-    val namePillWidths = listOf(80.dp, 110.dp, 95.dp, 120.dp, 75.dp, 100.dp)
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.padding(vertical = 8.dp)
+private fun UnlockedLeaderboardsView() {
+    val isDark = LocalDynamicThemeColors.current.isDark
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        repeat(6) { idx ->
-            val opacity = (6 - idx) * 0.18f
+        item {
+            // League Header Card
+            AppCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .staggeredAppear(0),
+                cornerRadius = 24.dp,
+                accentGlow = AmberGold.copy(alpha = 0.20f),
+                contentPadding = 18.dp
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .clip(CircleShape)
+                            .background(AmberGold.copy(alpha = 0.20f))
+                            .border(1.5.dp, AmberGold, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🥉", fontSize = 28.sp)
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "BRONZE LEAGUE",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            color = AmberGold,
+                            letterSpacing = 0.8.sp
+                        )
+                        Text(
+                            text = "Top 3 advance to Silver League in 3 days!",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = FontFamily.SansSerif,
+                            color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B)
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            // 3D Top 3 Podium Stage
+            PodiumStageView(staticRankings.take(3))
+        }
+
+        item {
+            // Promotion Zone Divider
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White.copy(alpha = opacity * 0.3f))
-                    .border(1.dp, Color.White.copy(alpha = opacity * 0.5f), RoundedCornerShape(14.dp))
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Rank dot
                 Box(
                     modifier = Modifier
-                        .size(14.dp)
-                        .clip(CircleShape)
-                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f))
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(PhoenixGreen.copy(alpha = 0.4f))
                 )
-                // Avatar circle
+                Text(
+                    text = "PROMOTION ZONE",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.SansSerif,
+                    color = PhoenixGreen,
+                    letterSpacing = 1.sp
+                )
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
-                )
-                // Name pill
-                Box(
-                    modifier = Modifier
-                        .height(14.dp)
-                        .width(namePillWidths[idx % 6])
-                        .clip(RoundedCornerShape(7.dp))
-                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                // XP pill
-                Box(
-                    modifier = Modifier
-                        .height(14.dp)
-                        .width(45.dp)
-                        .clip(RoundedCornerShape(7.dp))
-                        .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f))
-                )
-            }
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 5. Unlocked — League Header (Bronze League iOS style)
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun UnlockedLeagueHeader() {
-    val infiniteTransition = rememberInfiniteTransition(label = "trophyGlow")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.35f, targetValue = 0.65f,
-        animationSpec = infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "glowAlpha"
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        // Trophy badge with glow
-        Box(contentAlignment = Alignment.Center) {
-            // Ambient glow
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(AmberGold.copy(alpha = glowAlpha * 0.5f), Color.Transparent)
-                        )
-                    )
-                    .blur(12.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(listOf(AmberGold, Color(0xFFFF8C00)))
-                    )
-                    .shadow(10.dp, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.EmojiEvents, null,
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(PhoenixGreen.copy(alpha = 0.4f))
                 )
             }
         }
 
-        Text(
-            "Bronze League",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            color = LocalDynamicThemeColors.current.textPrimary
-        )
-
-        // Top 20% advance pill
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50.dp))
-                .background(AmberGold.copy(alpha = 0.18f))
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(50.dp))
-                .padding(horizontal = 16.dp, vertical = 6.dp)
-        ) {
-            Text(
-                "TOP 20% ADVANCE TO SILVER",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Black,
-                color = AmberGold
-            )
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 6. Active Rankings List
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun ActiveRankingsList() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        staticRankings.forEach { item ->
-            RankRowView(entry = item)
+        // Remaining Rank Items (4 to 8)
+        itemsIndexed(staticRankings.drop(3)) { index, entry ->
+            RankRowCard(entry = entry, index = index + 4)
         }
     }
 }
 
 @Composable
-private fun RankRowView(entry: RankEntry) {
-    val dynamicColors = LocalDynamicThemeColors.current
-    val isDark = dynamicColors.isDark
-    val isTop3 = entry.rank <= 3
-    val bgColor = when {
-        entry.isUser -> AmberGold.copy(alpha = 0.15f)
-        isTop3 -> CardBackground.copy(alpha = 0.88f)
-        else -> if (isDark) Color(0xFF101824).copy(alpha = 0.75f) else dynamicColors.cardBackground.copy(alpha = 0.85f)
-    }
-    val borderColor = when {
-        entry.isUser -> AmberGold
-        entry.rank == 1 -> AmberGold
-        entry.rank == 2 -> if (isDark) Color(0xFFDDDDDD) else Color(0xFF94A3B8)
-        entry.rank == 3 -> Color(0xFFCD7F32)
-        else -> InputBorder
-    }
-    val nameColor = if (entry.isUser) AmberGold else dynamicColors.textPrimary
-    val xpColor = if (isTop3) (if (isDark) AmberGold else Color(0xFFC77300)) else SubtextGray
-    val xpBg = if (isTop3) AmberGold.copy(alpha = 0.15f) else (if (isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f))
-    val xpBorder = if (isTop3) AmberGold.copy(alpha = 0.4f) else dynamicColors.placeholder.copy(alpha = 0.10f)
-    val avatarBg = if (entry.isUser) AmberGold.copy(alpha = 0.25f) else (if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
-    val avatarBorder = if (entry.isUser) AmberGold.copy(alpha = 0.7f) else dynamicColors.placeholder.copy(alpha = 0.12f)
-    val shape = RoundedCornerShape(16.dp)
+private fun PodiumStageView(topThree: List<RankEntry>) {
+    if (topThree.size < 3) return
+    val first = topThree[0]
+    val second = topThree[1]
+    val third = topThree[2]
+    val isDark = LocalDynamicThemeColors.current.isDark
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(bgColor)
-            .border(if (entry.isUser || isTop3) 1.5.dp else 1.dp, borderColor, shape)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .staggeredAppear(1)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        // 2nd Place (Silver)
+        PodiumPedestal(entry = second, place = 2, height = 110.dp, color = Color(0xFFC0C0C0), modifier = Modifier.weight(1f))
+
+        // 1st Place (Gold)
+        PodiumPedestal(entry = first, place = 1, height = 140.dp, color = AmberGold, modifier = Modifier.weight(1.1f))
+
+        // 3rd Place (Bronze)
+        PodiumPedestal(entry = third, place = 3, height = 90.dp, color = Color(0xFFCD7F32), modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun PodiumPedestal(
+    entry: RankEntry,
+    place: Int,
+    height: androidx.compose.ui.unit.Dp,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Avatar + Crown
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.25f))
+                .border(2.dp, color, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = entry.avatar, fontSize = 26.sp)
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = entry.name.substringBefore(" "),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.SansSerif,
+            color = if (isDark) Color.White else Color(0xFF12_18_26),
+            maxLines = 1
+        )
+
+        Text(
+            text = "${entry.xp} XP",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif,
+            color = AmberGold
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // 3D Pedestal Block
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(color.copy(alpha = if (isDark) 0.35f else 0.25f), color.copy(alpha = if (isDark) 0.15f else 0.08f))
+                    )
+                )
+                .border(
+                    1.5.dp,
+                    Brush.verticalGradient(listOf(color, color.copy(alpha = 0.3f))),
+                    RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "$place",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.SansSerif,
+                color = color
+            )
+        }
+    }
+}
+
+@Composable
+private fun RankRowCard(entry: RankEntry, index: Int) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .staggeredAppear(index, baseDelayMs = 30)
+            .pressScale(targetScale = 0.98f)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                if (entry.isUser) AmberGold.copy(alpha = if (isDark) 0.18f else 0.12f)
+                else (if (isDark) Color(0xFF14_1F_36).copy(alpha = 0.70f) else Color(0xFFF1_F4_FA))
+            )
+            .border(
+                if (entry.isUser) 1.8.dp else 1.dp,
+                if (entry.isUser) AmberGold else (if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFD7_DE_EB)),
+                RoundedCornerShape(16.dp)
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Rank badge
-        Box(modifier = Modifier.width(28.dp), contentAlignment = Alignment.Center) {
-            when (entry.rank) {
-                1 -> Text("🥇", fontSize = 20.sp)
-                2 -> Text("🥈", fontSize = 20.sp)
-                3 -> Text("🥉", fontSize = 20.sp)
-                else -> Text(
-                    "${entry.rank}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
-                )
-            }
-        }
+        Text(
+            text = "${entry.rank}",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif,
+            color = if (entry.isUser) AmberGold else (if (isDark) Color.White.copy(alpha = 0.6f) else Color(0xFF64_74_8B)),
+            modifier = Modifier.width(22.dp)
+        )
 
-        // Avatar circle
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(38.dp)
                 .clip(CircleShape)
-                .background(avatarBg)
-                .border(if (entry.isUser) 2.dp else 1.dp, avatarBorder, CircleShape),
+                .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Text(entry.avatar, fontSize = 22.sp)
+            Text(text = entry.avatar, fontSize = 20.sp)
         }
 
-        // Name
         Text(
             text = entry.name,
-            fontSize = 16.sp,
+            fontSize = 15.sp,
             fontWeight = if (entry.isUser) FontWeight.Black else FontWeight.Bold,
-            color = nameColor,
+            fontFamily = FontFamily.SansSerif,
+            color = if (isDark) Color.White else Color(0xFF12_18_26),
             modifier = Modifier.weight(1f)
         )
 
-        // XP badge
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(xpBg)
-                .border(1.dp, xpBorder, RoundedCornerShape(20.dp))
-                .padding(horizontal = 10.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                "${entry.xp} XP",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Black,
-                color = xpColor,
-                fontFamily = FontFamily.Monospace
-            )
-        }
+        Text(
+            text = "${entry.xp} XP",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.SansSerif,
+            color = AmberGold
+        )
     }
 }

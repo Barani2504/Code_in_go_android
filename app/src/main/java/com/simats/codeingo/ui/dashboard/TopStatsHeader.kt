@@ -1,8 +1,13 @@
 package com.simats.codeingo.ui.dashboard
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,6 +24,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,17 +37,19 @@ import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.liquidGlassIsland
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.pulse
 
 /**
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
  * Exact parity with iOS MainDashboardView.swift topStatsHeader.
  * Features:
- * - Circular side menu trigger button
+ * - Circular side menu trigger button with pressScale
  * - PhoenixDynamicLogoView (size 28dp) with live emotion aura & tap sheet
  * - Streak pill (Ice 🧊 if pending restore, Flame 🔥 otherwise)
  * - Stars pill (🌟)
  * - XP pill (⚡)
- * - Hearts pill (❤️ with 5-minute regeneration countdown)
+ * - Hearts pill (❤️ with 5-minute regeneration countdown & low-heart pulse)
  */
 @Composable
 fun TopStatsHeader(
@@ -74,7 +82,7 @@ fun TopStatsHeader(
                 .fillMaxWidth()
                 .liquidGlassIsland(
                     cornerRadius = 24.dp,
-                    glowColor = AmberGold.copy(alpha = if (isDark) 0.18f else 0.08f)
+                    glowColor = AmberGold.copy(alpha = if (isDark) 0.22f else 0.10f)
                 )
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -83,7 +91,8 @@ fun TopStatsHeader(
             // 1. Side Menu Hamburger Button
             Box(
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(32.dp)
+                    .pressScale(0.90f)
                     .clip(CircleShape)
                     .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
                     .border(
@@ -101,7 +110,7 @@ fun TopStatsHeader(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Side Menu",
                     tint = if (isDark) Color.White else Color(0xFF182030),
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
@@ -109,7 +118,7 @@ fun TopStatsHeader(
             PhoenixDynamicLogoView(
                 showTitle = false,
                 showSubtitleBadge = false,
-                size = 26.dp,
+                size = 28.dp,
                 enableTapSheet = true,
                 onTap = onPhoenixClick
             )
@@ -118,10 +127,10 @@ fun TopStatsHeader(
 
             // Stats Pill Row (Compact & Horizontally Scrollable on ultra-narrow displays)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val pillBg = if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.03f)
+                val pillBg = if (isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f)
 
                 // 3. Streak Pill
                 val streakEmoji = if (isStreakPendingRestore) "🧊" else "🔥"
@@ -130,89 +139,119 @@ fun TopStatsHeader(
 
                 Row(
                     modifier = Modifier
+                        .pressScale(0.92f)
                         .clip(CircleShape)
                         .background(pillBg)
-                        .border(0.9.dp, streakColor.copy(alpha = if (isDark) 0.35f else 0.45f), CircleShape)
+                        .border(1.dp, streakColor.copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
                         .clickable { onStreakClick() }
-                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                        .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = streakEmoji, fontSize = 11.5.sp)
-                    Text(
-                        text = "$streakVal",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = streakColor
-                    )
+                    Text(text = streakEmoji, fontSize = 12.sp)
+                    AnimatedContent(
+                        targetState = streakVal,
+                        transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
+                        label = "streakAnim"
+                    ) { count ->
+                        Text(
+                            text = "$count",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = streakColor
+                        )
+                    }
                 }
 
                 // 4. Stars Pill
                 val starsColor = if (isDark) Color(0xFFFFD700) else Color(0xFFC78500)
                 Row(
                     modifier = Modifier
+                        .pressScale(0.92f)
                         .clip(CircleShape)
                         .background(pillBg)
                         .border(
-                            0.9.dp,
-                            if (isBossActive) Color.Red.copy(alpha = 0.6f) else starsColor.copy(alpha = if (isDark) 0.35f else 0.40f),
+                            1.dp,
+                            if (isBossActive) Color.Red.copy(alpha = 0.7f) else starsColor.copy(alpha = if (isDark) 0.45f else 0.50f),
                             CircleShape
                         )
-                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                        .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = "🌟", fontSize = 11.sp)
-                    Text(
-                        text = "$totalStars",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = starsColor
-                    )
+                    Text(text = "🌟", fontSize = 12.sp)
+                    AnimatedContent(
+                        targetState = totalStars,
+                        transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
+                        label = "starsAnim"
+                    ) { count ->
+                        Text(
+                            text = "$count",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = starsColor
+                        )
+                    }
                 }
 
                 // 5. XP Pill
                 val xpColor = if (isDark) AmberGold else Color(0xFFC77300)
                 Row(
                     modifier = Modifier
+                        .pressScale(0.92f)
                         .clip(CircleShape)
                         .background(pillBg)
-                        .border(0.9.dp, xpColor.copy(alpha = if (isDark) 0.35f else 0.40f), CircleShape)
-                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                        .border(1.dp, xpColor.copy(alpha = if (isDark) 0.45f else 0.50f), CircleShape)
+                        .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = "⚡", fontSize = 11.sp)
-                    Text(
-                        text = "$totalXP",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = xpColor
-                    )
+                    Text(text = "⚡", fontSize = 12.sp)
+                    AnimatedContent(
+                        targetState = totalXP,
+                        transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
+                        label = "xpAnim"
+                    ) { count ->
+                        Text(
+                            text = "$count",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = xpColor
+                        )
+                    }
                 }
 
-                // 6. Hearts Pill (with countdown if regenerating)
+                // 6. Hearts Pill (with countdown if regenerating & pulse if low)
+                val isHeartLow = heartsCount <= 2
                 Row(
                     modifier = Modifier
+                        .pressScale(0.92f)
+                        .then(if (isHeartLow) Modifier.pulse(0.94f..1.06f) else Modifier)
                         .clip(CircleShape)
                         .background(pillBg)
-                        .border(0.9.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.35f else 0.45f), CircleShape)
+                        .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
                         .clickable { onHeartsClick() }
-                        .padding(horizontal = 6.dp, vertical = 3.5.dp),
+                        .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = "❤️", fontSize = 11.sp)
-                    Text(
-                        text = "$heartsCount",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFFF4D4D)
-                    )
+                    Text(text = "❤️", fontSize = 12.sp)
+                    AnimatedContent(
+                        targetState = heartsCount,
+                        transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
+                        label = "heartsAnim"
+                    ) { count ->
+                        Text(
+                            text = "$count",
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFF4D4D)
+                        )
+                    }
                     if (heartTimerString != null) {
                         Text(
                             text = heartTimerString,
-                            fontSize = 8.5.sp,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040)
                         )

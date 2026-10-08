@@ -1,8 +1,14 @@
 package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -45,6 +51,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -56,16 +68,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.LessonNodeItem
 import com.simats.codeingo.data.model.UnitModel
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.PhoenixMotion
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
 
 /**
  * LessonNodeButton — 3D Bevel Pushable Node Button Component.
  * Exact parity with iOS MainDashboardView.swift pushable3DNodeButton.
  * Features:
- * - 3D physical bevel shadow extrusion with animated compression
- * - Active target pulsing aura ring
+ * - 3D physical bevel shadow extrusion with animated compression ($7\text{dp} \to 2\text{dp}$)
+ * - Glossy top-rim specular highlight
+ * - Active target pulsing aura ring with infinite breath animation
  * - Active target start tooltip with downward triangle pointer
  * - Locked node explanation popover with 3D disabled LOCKED button
  */
@@ -85,9 +103,19 @@ fun LessonNodeButton(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val isBoss = node.isBoss
-    val size = if (isBoss) 76.dp else 68.dp
-    val shadowOffset = if (isPressed) 2.dp else 7.dp
-    val faceOffset = if (isPressed) 5.dp else 0.dp
+    val size = if (isBoss) 78.dp else 68.dp
+
+    // Animated spring depth
+    val animatedShadowOffset by animateDpAsState(
+        targetValue = if (isPressed) 2.dp else 7.dp,
+        animationSpec = PhoenixMotion.PressSpringDp,
+        label = "shadowDepth"
+    )
+    val animatedFaceOffset by animateDpAsState(
+        targetValue = if (isPressed) 5.dp else 0.dp,
+        animationSpec = PhoenixMotion.PressSpringDp,
+        label = "faceOffset"
+    )
 
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
@@ -103,6 +131,27 @@ fun LessonNodeButton(
         isUnlocked -> unit.themeDarkColor
         else -> if (isDark) Color(0xFF141F28) else Color(0xFFC8D2E2)
     }
+
+    // Infinite breathing scale for active target aura
+    val infiniteTransition = rememberInfiniteTransition(label = "auraTransition")
+    val auraScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.14f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "auraScale"
+    )
+    val auraAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.75f,
+        targetValue = 0.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "auraAlpha"
+    )
 
     Column(
         modifier = modifier
@@ -120,7 +169,7 @@ fun LessonNodeButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .offset(y = (-6).dp)
-                    .width(195.dp)
+                    .width(200.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -131,7 +180,8 @@ fun LessonNodeButton(
                                 listOf(unit.themeColor, unit.themeDarkColor)
                             )
                         )
-                        .border(1.2.dp, Color.White.copy(alpha = 0.40f), RoundedCornerShape(16.dp))
+                        .border(1.2.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
+                        .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = unit.themeColor.copy(alpha = 0.4f))
                         .padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -158,31 +208,13 @@ fun LessonNodeButton(
                         )
                     }
 
-                    // START Action Button inside Tooltip
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (isBoss) Color.Red else Color.White)
-                            .clickable { onStartClick() }
-                            .padding(vertical = 7.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = if (isBoss) Icons.Default.LocalFireDepartment else Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            tint = if (isBoss) Color.White else unit.themeColor,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = if (isBoss) "BOSS BATTLE ⚔️" else "START • 5 QUESTIONS",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = if (isBoss) Color.White else unit.themeColor
-                        )
-                    }
+                    // START Action 3D Button inside Tooltip
+                    AppButton(
+                        title = if (isBoss) "BOSS BATTLE ⚔️" else "START • 5 QUESTIONS",
+                        style = if (isBoss) AppButtonStyle.DANGER_CRIMSON else AppButtonStyle.PRIMARY_AMBER,
+                        onClick = onStartClick,
+                        modifier = Modifier.fillMaxWidth().height(36.dp)
+                    )
                 }
 
                 // Downward Pointer Tip Triangle
@@ -208,14 +240,12 @@ fun LessonNodeButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .offset(y = (-6).dp)
-                    .width(180.dp)
+                    .width(185.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(dynamicColors.cardBackground)
-                        .border(1.2.dp, dynamicColors.inputBorder, RoundedCornerShape(16.dp))
+                        .liquidGlassCard(cornerRadius = 16.dp)
                         .padding(12.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -236,37 +266,13 @@ fun LessonNodeButton(
                     )
 
                     // 3D Pushable Disabled LOCKED Button
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(36.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(32.dp)
-                                .offset(y = 2.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isDark) Color(0xFF141F26) else Color(0xFFD7DEEB))
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(32.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isDark) Color(0xFF1C2B35) else dynamicColors.inputBackground)
-                                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "LOCKED",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Black,
-                                color = dynamicColors.textSecondary
-                            )
-                        }
-                    }
+                    AppButton(
+                        title = "🔒 LOCKED",
+                        style = AppButtonStyle.DISABLED,
+                        onClick = {},
+                        isEnabled = false,
+                        modifier = Modifier.fillMaxWidth().height(34.dp)
+                    )
                 }
 
                 // Downward Pointer Tip
@@ -285,18 +291,23 @@ fun LessonNodeButton(
         // 3. Central 3D Pushable Node Button with Target Ring
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(size + 16.dp)
+            modifier = Modifier.size(size + 20.dp)
         ) {
-            // Target Aura Ring around Active Node
+            // Target Pulsing Aura Ring around Active Node
             if (isActiveTarget) {
                 Box(
                     modifier = Modifier
                         .size(size + 14.dp)
+                        .scale(auraScale)
                         .clip(CircleShape)
                         .border(
                             3.5.dp,
                             Brush.linearGradient(
-                                listOf(AmberGold, unit.themeColor, Color(0xFFFF4026))
+                                listOf(
+                                    AmberGold.copy(alpha = auraAlpha),
+                                    unit.themeColor.copy(alpha = auraAlpha),
+                                    Color(0xFFFF4026).copy(alpha = auraAlpha)
+                                )
                             ),
                             CircleShape
                         )
@@ -316,23 +327,34 @@ fun LessonNodeButton(
                 // 3D Depth Shadow Extrusion
                 Box(
                     modifier = Modifier
-                        .offset(y = shadowOffset)
+                        .offset(y = animatedShadowOffset)
                         .size(size)
                         .clip(CircleShape)
                         .background(shadowColor)
                 )
 
-                // 3D Top Surface Button Face
+                // 3D Top Surface Button Face with glossy top-rim highlight
                 Box(
                     modifier = Modifier
-                        .offset(y = faceOffset)
+                        .offset(y = animatedFaceOffset)
                         .size(size)
                         .clip(CircleShape)
                         .background(faceColor)
+                        .drawBehind {
+                            if (isUnlocked) {
+                                // Glossy top-half highlight arc
+                                drawRoundRect(
+                                    color = Color.White.copy(alpha = 0.22f),
+                                    topLeft = Offset(4.dp.toPx(), 2.dp.toPx()),
+                                    size = Size(size.toPx() - 8.dp.toPx(), size.toPx() * 0.45f),
+                                    cornerRadius = CornerRadius(size.toPx() / 2, size.toPx() / 2)
+                                )
+                            }
+                        }
                         .border(
                             if (isBoss) 2.5.dp else 2.dp,
                             if (isUnlocked) {
-                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.25f)
+                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.35f)
                             } else {
                                 dynamicColors.inputBorder
                             },
@@ -349,7 +371,7 @@ fun LessonNodeButton(
                             isBoss -> Color(0xFFFFD700)
                             else -> Color.White
                         },
-                        modifier = Modifier.size(if (isBoss) 32.dp else 26.dp)
+                        modifier = Modifier.size(if (isBoss) 34.dp else 28.dp)
                     )
                 }
             }

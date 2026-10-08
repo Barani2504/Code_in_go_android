@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +57,8 @@ import com.simats.codeingo.data.model.DSAExerciseType
 import com.simats.codeingo.data.repository.QuizQuestion
 import com.simats.codeingo.data.repository.QuizQuestionsData
 import com.simats.codeingo.domain.GameManager
-import com.simats.codeingo.ui.components.DuolingoButton
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.ProgressBarAnimated
 import com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView
 import com.simats.codeingo.ui.theme.AmberGold
@@ -73,8 +75,11 @@ import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoRedDark
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.pulse
+import kotlinx.coroutines.delay
 
 @Composable
 fun AssessmentScreen(
@@ -248,12 +253,11 @@ fun AssessmentScreen(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(32.dp))
-                DuolingoButton(
-                    text = "RETURN TO DASHBOARD",
-                    faceColor = DuolingoBlue,
-                    shadowColor = DuolingoBlueDark,
+                AppButton(
+                    title = "RETURN TO DASHBOARD",
+                    style = AppButtonStyle.ACTION_BLUE,
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
                 )
             }
         } else {
@@ -471,6 +475,7 @@ fun AssessmentScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .pressScale(0.96f)
                                             .clip(shape)
                                             .background(bgColor)
                                             .border(if (isSelected) 2.dp else 1.dp, borderColor, shape)
@@ -632,20 +637,14 @@ fun AssessmentScreen(
                     }
 
                     val canCheck = hasSelection || isChecked
-                    val isDark = LocalDynamicThemeColors.current.isDark
-                    DuolingoButton(
-                        text = if (!isChecked) "CHECK" else "CONTINUE",
-                        faceColor = when {
-                            !canCheck -> if (isDark) CardBackground else Color(0xFFE5E5E5)
-                            isChecked && !isAnswerCorrect -> DuolingoRed
-                            else -> DuolingoGreen
+                    AppButton(
+                        title = if (!isChecked) "CHECK ANSWER" else "CONTINUE",
+                        style = when {
+                            !canCheck -> AppButtonStyle.DISABLED
+                            isChecked && !isAnswerCorrect -> AppButtonStyle.DANGER_CRIMSON
+                            else -> AppButtonStyle.SUCCESS_GREEN
                         },
-                        shadowColor = when {
-                            !canCheck -> if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)
-                            isChecked && !isAnswerCorrect -> DuolingoRedDark
-                            else -> DuolingoGreenDark
-                        },
-                        textColor = if (!canCheck) SubtextGray else Color.White,
+                        isEnabled = canCheck,
                         onClick = {
                             if (!isChecked) {
                                 if (hasSelection) {
@@ -691,7 +690,7 @@ fun AssessmentScreen(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(52.dp)
                     )
                 }
             }

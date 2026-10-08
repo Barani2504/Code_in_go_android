@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.gamification
+package com.simats.codeingo.ui.gamification
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,7 +43,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSAChapterModel
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
 
 /**
  * DSAChapterStoryIntroSheet
@@ -105,6 +107,7 @@ fun DSAChapterStoryIntroSheet(
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
+                        .pressScale()
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -256,6 +259,7 @@ fun DSAChapterStoryIntroSheet(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White.copy(alpha = 0.05f))
+                                    .pressScale()
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -266,7 +270,7 @@ fun DSAChapterStoryIntroSheet(
                                         .clip(CircleShape)
                                         .background(
                                             if (lvl.isBoss) Color.Yellow.copy(alpha = 0.2f)
-                                            else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f)
+                                             else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f)
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -312,38 +316,21 @@ fun DSAChapterStoryIntroSheet(
                     }
                 }
 
-                // Start Chapter Action Button
+                // Start Chapter Action Button using AppButton
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(chapter.accentColor)
-                        .shadow(10.dp, RoundedCornerShape(16.dp), spotColor = chapter.accentColor)
-                        .clickable {
+                ) {
+                    AppButton(
+                        title = "ENTER CHAPTER ${chapter.number} →",
+                        style = AppButtonStyle.PRIMARY_AMBER,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
                             onDismiss()
                             onStartFirstLevel()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "ENTER CHAPTER ${chapter.number}",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.Black
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = null,
-                            tint = Color.Black,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(28.dp))

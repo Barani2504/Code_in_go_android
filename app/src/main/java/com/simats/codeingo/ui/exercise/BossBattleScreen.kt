@@ -53,7 +53,8 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSABossSpec
 import com.simats.codeingo.data.repository.CourseRepository
 import com.simats.codeingo.domain.GameManager
-import com.simats.codeingo.ui.components.DuolingoButton
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.ProgressBarAnimated
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -65,8 +66,11 @@ import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoRedDark
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.SubtextGray
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
+import kotlinx.coroutines.delay
 
 @Composable
 fun BossBattleScreen(
@@ -209,12 +213,11 @@ fun BossBattleScreen(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(40.dp))
-                DuolingoButton(
-                    text = "TRY AGAIN",
-                    faceColor = DuolingoBlue,
-                    shadowColor = DuolingoBlueDark,
+                AppButton(
+                    title = "TRY AGAIN",
+                    style = AppButtonStyle.ACTION_BLUE,
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
                 )
             }
         } else {
@@ -346,9 +349,10 @@ fun BossBattleScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .pressScale(0.96f)
                                     .clip(shape)
-                                    .background(if (isSelected) DuolingoBlue.copy(alpha = 0.2f) else CardBackground)
-                                    .border(1.5.dp, if (isSelected) DuolingoBlue else InputBorder, shape)
+                                    .background(if (isSelected) DuolingoBlue.copy(alpha = 0.22f) else CardBackground)
+                                    .border(if (isSelected) 2.dp else 1.2.dp, if (isSelected) DuolingoBlue else InputBorder, shape)
                                     .clickable { selectedOption = idx }
                                     .padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -366,18 +370,17 @@ fun BossBattleScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // Attack Action Button
+                // Attack Action 3D Button
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp)
                 ) {
-                    val isDark = LocalDynamicThemeColors.current.isDark
-                    DuolingoButton(
-                        text = "ATTACK BOSS",
-                        faceColor = if (selectedOption != null) DuolingoRed else (if (isDark) CardBackground else Color(0xFFE5E5E5)),
-                        shadowColor = if (selectedOption != null) DuolingoRedDark else (if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)),
-                        textColor = if (selectedOption != null) Color.White else SubtextGray,
+                    val canAttack = selectedOption != null
+                    AppButton(
+                        title = "⚔️ ATTACK BOSS",
+                        style = if (canAttack) AppButtonStyle.DANGER_CRIMSON else AppButtonStyle.DISABLED,
+                        isEnabled = canAttack,
                         onClick = {
                             if (selectedOption != null) {
                                 val curQ = questions[questionIdx % questions.size]
@@ -403,7 +406,7 @@ fun BossBattleScreen(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(52.dp)
                     )
                 }
             }

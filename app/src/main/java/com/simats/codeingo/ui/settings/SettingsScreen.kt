@@ -62,12 +62,15 @@ import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.domain.ThemeManager
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -596,6 +599,7 @@ private fun ThemeModeCard(
 
     Column(
         modifier = modifier
+            .pressScale(0.94f)
             .clip(RoundedCornerShape(14.dp))
             .background(if (isSelected) AmberGold.copy(alpha = 0.12f) else cardBg)
             .border(if (isSelected) 2.dp else 1.dp, borderColor, RoundedCornerShape(14.dp))
@@ -843,23 +847,13 @@ private fun AccountTab(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    // Log out button
-    Button(
+    // Log out 3D extruded button
+    AppButton(
+        title = "🚪 LOG OUT OF PROFILE",
+        style = AppButtonStyle.DANGER_CRIMSON,
         onClick = onLogout,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = DuolingoRed.copy(alpha = 0.12f),
-            contentColor = DuolingoRed
-        )
-    ) {
-        Text(
-            text = "LOG OUT",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Black,
-            modifier = Modifier.padding(vertical = 6.dp)
-        )
-    }
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    )
 }
 
 // ══════════════════════════════════════════════════════════════════

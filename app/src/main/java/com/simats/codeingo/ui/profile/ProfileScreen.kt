@@ -50,8 +50,8 @@ import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.auth.LoginScreen
 import com.simats.codeingo.ui.auth.ProfileCreationScreen
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
@@ -62,6 +62,8 @@ import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
 
 @Composable
 fun ProfileScreen(
@@ -291,30 +293,12 @@ private fun AuthenticatedProfileBody(
         // 4. Add Friends Section
         AddFriendsSection()
 
-        val isDark = LocalDynamicThemeColors.current.isDark
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(if (isDark) Color(0xFF330D0D).copy(alpha = 0.55f) else Color(0xFFFFEAEA))
-                .border(1.5.dp, Color.Red.copy(alpha = if (isDark) 0.3f else 0.35f), RoundedCornerShape(14.dp))
-                .clickable { onSignOutClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(text = "🚪", fontSize = 15.sp)
-                Text(
-                    text = "SIGN OUT OF PROFILE",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    color = if (isDark) Color(0xFFFF7266) else Color(0xFFD32F2F)
-                )
-            }
-        }
+        AppButton(
+            title = "🚪 SIGN OUT OF PROFILE",
+            style = AppButtonStyle.DANGER_CRIMSON,
+            onClick = onSignOutClick,
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        )
 
         Spacer(modifier = Modifier.height(72.dp))
     }
@@ -1017,18 +1001,18 @@ private fun UnauthenticatedProfileBody(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Duolingo3DButton(
+                AppButton(
                     title = "🔥 CREATE ACCOUNT",
-                    style = Duolingo3DButtonStyle.GREEN,
+                    style = AppButtonStyle.SUCCESS_GREEN,
                     onClick = onCreateAccount,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
                 )
 
-                Duolingo3DButton(
+                AppButton(
                     title = "👤 SIGN IN",
-                    style = Duolingo3DButtonStyle.WHITE,
+                    style = AppButtonStyle.SECONDARY_GLASS,
                     onClick = onSignIn,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
                 )
             }
         }

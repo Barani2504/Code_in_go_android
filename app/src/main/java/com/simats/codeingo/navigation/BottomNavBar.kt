@@ -1,6 +1,8 @@
 package com.simats.codeingo.navigation
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -30,23 +33,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.PhoenixMotion
+import com.simats.codeingo.ui.theme.pressScale
 
-/**
- * BottomNavBar — Liquid Glass Docked Tab Bar matching iOS MainDashboardView TabView.
- * Core Tabs:
- * - LEARN (Home)
- * - VISUALIZER (Lab / Tools)
- * - LEADERBOARDS (Ranks)
- * - PROFILE (Developer Profile)
- */
+// ══════════════════════════════════════════════════════════════════
+// 📱 BottomNavBar — Floating Liquid Glass Docked Navigation Bar
+// Exact parity with iOS MainDashboardView TabView & Liquid Glass System
+// ══════════════════════════════════════════════════════════════════
+
 @Composable
 fun BottomNavBar(
     selectedTab: DashboardTab,
@@ -55,6 +61,7 @@ fun BottomNavBar(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val view = LocalView.current
 
     val coreTabs = listOf(
         DashboardTab.LEARN,
@@ -66,32 +73,54 @@ fun BottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (isDark) Color(0xFF0C101A).copy(alpha = 0.94f) else Color.White.copy(alpha = 0.95f))
+            .background(
+                if (isDark) Color(0xFF07_0D_17).copy(alpha = 0.96f)
+                else Color.White.copy(alpha = 0.96f)
+            )
             .navigationBarsPadding()
     ) {
-        // Top hairline glass stroke
+        // Top Hairline Specular Glass Stroke
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFFD7DEEB))
+                .background(
+                    Brush.horizontalGradient(
+                        if (isDark) listOf(
+                            Color.White.copy(alpha = 0.05f),
+                            AmberGold.copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.05f)
+                        ) else listOf(
+                            Color.Transparent,
+                            Color(0xFFD7_DE_EB),
+                            Color.Transparent
+                        )
+                    )
+                )
                 .align(Alignment.TopCenter)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+                .padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             coreTabs.forEach { tab ->
                 val isSelected = selectedTab == tab
-                val unselectedColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B)
-                val iconColor by animateColorAsState(
-                    targetValue = if (isSelected) Color(0xFF1CB0F6) else unselectedColor,
+                val interactionSource = remember { MutableInteractionSource() }
+
+                val iconScale by animateFloatAsState(
+                    targetValue = if (isSelected) 1.18f else 1.0f,
+                    animationSpec = PhoenixMotion.BounceSpring,
+                    label = "tabIconScale_${tab.name}"
+                )
+
+                val tabColor by animateColorAsState(
+                    targetValue = if (isSelected) AmberGold else (if (isDark) Color.White.copy(alpha = 0.50f) else Color(0xFF64_74_8B)),
                     animationSpec = spring(),
-                    label = "tabColor"
+                    label = "tabColor_${tab.name}"
                 )
 
                 val tabIcon: ImageVector = when (tab) {
@@ -102,40 +131,46 @@ fun BottomNavBar(
                     else -> Icons.Default.Home
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
+                        .pressScale(targetScale = 0.92f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (isSelected) AmberGold.copy(alpha = if (isDark) 0.15f else 0.10f)
+                            else Color.Transparent
+                        )
                         .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
+                            interactionSource = interactionSource,
                             indication = null
-                        ) { onTabSelected(tab) }
-                        .padding(vertical = 4.dp)
+                        ) {
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            onTabSelected(tab)
+                        }
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Selected active pill glow
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(if (isSelected) Color(0xFF1CB0F6).copy(alpha = if (isDark) 0.18f else 0.12f) else Color.Transparent)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         Icon(
                             imageVector = tabIcon,
-                            contentDescription = tab.title,
-                            tint = iconColor,
-                            modifier = Modifier.size(20.dp)
+                            contentDescription = tab.name,
+                            tint = tabColor,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .scale(iconScale)
+                        )
+                        Text(
+                            text = tab.name,
+                            fontSize = 11.sp,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = tabColor,
+                            letterSpacing = 0.4.sp
                         )
                     }
-
-                    Text(
-                        text = tab.title,
-                        fontSize = 11.sp,
-                        fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                        color = iconColor
-                    )
                 }
             }
         }
