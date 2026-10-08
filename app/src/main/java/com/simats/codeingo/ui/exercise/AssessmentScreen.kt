@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.exercise
+package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -632,15 +632,16 @@ fun AssessmentScreen(
                     }
 
                     val canCheck = hasSelection || isChecked
+                    val isDark = LocalDynamicThemeColors.current.isDark
                     DuolingoButton(
                         text = if (!isChecked) "CHECK" else "CONTINUE",
                         faceColor = when {
-                            !canCheck -> CardBackground
+                            !canCheck -> if (isDark) CardBackground else Color(0xFFE5E5E5)
                             isChecked && !isAnswerCorrect -> DuolingoRed
                             else -> DuolingoGreen
                         },
                         shadowColor = when {
-                            !canCheck -> Color(0xFF142028)
+                            !canCheck -> if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)
                             isChecked && !isAnswerCorrect -> DuolingoRedDark
                             else -> DuolingoGreenDark
                         },

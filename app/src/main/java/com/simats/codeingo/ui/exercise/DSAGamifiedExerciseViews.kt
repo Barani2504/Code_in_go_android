@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.exercise
+package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -148,7 +148,7 @@ fun MatchPairsExerciseView(
                             text = item,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isMatched) DuolingoGreen else Color.White,
+                            color = if (isMatched) DuolingoGreen else LocalDynamicThemeColors.current.textPrimary,
                             modifier = Modifier.weight(1f)
                         )
                         if (isMatched) {
@@ -218,7 +218,7 @@ fun MatchPairsExerciseView(
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = if (isMatched) DuolingoGreen else Color.White,
+                            color = if (isMatched) DuolingoGreen else LocalDynamicThemeColors.current.textPrimary,
                             modifier = Modifier.weight(1f)
                         )
                         if (isMatched) {
@@ -514,7 +514,7 @@ fun FillCodeExerciseView(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = if (isSelected) DuolingoBlue else Color.White
+                            color = if (isSelected) DuolingoBlue else LocalDynamicThemeColors.current.textPrimary
                         )
                     }
                 }
@@ -588,7 +588,7 @@ fun ComplexityDialExerciseView(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.Monospace,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
             }
         }

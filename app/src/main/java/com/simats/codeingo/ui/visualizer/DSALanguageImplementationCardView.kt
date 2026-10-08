@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.visualizer
+package com.simats.codeingo.ui.visualizer
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -242,8 +242,8 @@ fun DSALanguageImplementationCardView(
                             Row(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(if (copied) DuolingoGreen.copy(alpha = 0.2f) else CardBackground)
-                                    .border(1.dp, if (copied) DuolingoGreen else InputBorder, RoundedCornerShape(8.dp))
+                                    .background(if (copied) DuolingoGreen.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.12f))
+                                    .border(1.dp, if (copied) DuolingoGreen else Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
                                     .clickable {
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                         val clip = ClipData.newPlainText("$activeLanguage Code", codeString)

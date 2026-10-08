@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.profile
+package com.simats.codeingo.ui.profile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -237,10 +237,13 @@ private fun AuthenticatedProfileBody(
                 )
             }
 
+            val isDark = LocalDynamicThemeColors.current.isDark
+            val pillBg = if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f)
+
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(pillBg)
                     .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
                     .clickable { onSignOutClick() }
                     .padding(horizontal = 10.dp, vertical = 6.dp)
@@ -342,13 +345,14 @@ private fun UserHeaderCard(
                 .shadow(12.dp, RoundedCornerShape(24.dp), spotColor = AmberGold.copy(alpha = 0.2f))
         ) {
             // Edit Pencil in Top Right
+            val editBtnBg = if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f)
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(12.dp)
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(editBtnBg)
                     .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), CircleShape)
                     .clickable { onOpenEditProfile() },
                 contentAlignment = Alignment.Center
@@ -381,7 +385,7 @@ private fun UserHeaderCard(
                         modifier = Modifier
                             .size(84.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(Color(0xFF0D1426))
+                            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0D1426) else Color.White)
                             .border(
                                 width = 2.dp,
                                 brush = Brush.linearGradient(
@@ -404,7 +408,7 @@ private fun UserHeaderCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
                         .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .clickable { onOpenEmotionSheet() }
                         .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -478,7 +482,7 @@ private fun UserHeaderCard(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.07f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f))
                     .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                     .padding(8.dp)
             ) {
@@ -748,7 +752,7 @@ private fun AchievementRow(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.08f))
             ) {
                 val fraction = if (maxProgress > 0) (progress.toFloat() / maxProgress).coerceIn(0f, 1f) else 0f
                 Box(
@@ -917,7 +921,7 @@ private fun UnauthenticatedProfileBody(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
                     .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
                     .padding(6.dp)
             ) {
@@ -930,7 +934,7 @@ private fun UnauthenticatedProfileBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1726))
+                .background(LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
                 .shadow(16.dp, RoundedCornerShape(24.dp), spotColor = AmberGold.copy(alpha = 0.25f))
                 .padding(20.dp),
@@ -1102,7 +1106,7 @@ private fun UnauthenticatedProfileBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color.White.copy(alpha = 0.06f))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.04f))
                 .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                 .clickable { onQuickDemoSignIn() }
                 .padding(vertical = 10.dp, horizontal = 14.dp),

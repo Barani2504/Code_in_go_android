@@ -158,11 +158,12 @@ fun PhoenixEggCompanionMascotView(
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val isDark = LocalDynamicThemeColors.current.isDark
         // Floating Speech Bubble
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF141C26))
+                .background(if (isDark) Color(0xFF141C26) else Color.White)
                 .border(
                     width = 1.5.dp,
                     color = if (currentLevel == 5 || isFullyHatched) AmberGold else DuolingoOrange,
@@ -174,7 +175,7 @@ fun PhoenixEggCompanionMascotView(
                 text = statusPhrase,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
-                color = if (currentLevel == 5 || isFullyHatched) AmberGold else Color.White
+                color = if (currentLevel == 5 || isFullyHatched) AmberGold else if (isDark) Color.White else LocalDynamicThemeColors.current.textPrimary
             )
         }
 

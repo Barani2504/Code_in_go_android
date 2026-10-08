@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.exercise
+package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -245,7 +245,7 @@ fun BossBattleScreen(
                             text = "${timeRemaining}s",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Black,
-                            color = if (timeRemaining <= 15) DuolingoRed else Color.White
+                            color = if (timeRemaining <= 15) DuolingoRed else LocalDynamicThemeColors.current.textPrimary
                         )
                     }
 
@@ -372,10 +372,11 @@ fun BossBattleScreen(
                         .fillMaxWidth()
                         .padding(24.dp)
                 ) {
+                    val isDark = LocalDynamicThemeColors.current.isDark
                     DuolingoButton(
                         text = "ATTACK BOSS",
-                        faceColor = if (selectedOption != null) DuolingoRed else CardBackground,
-                        shadowColor = if (selectedOption != null) DuolingoRedDark else Color(0xFF142028),
+                        faceColor = if (selectedOption != null) DuolingoRed else (if (isDark) CardBackground else Color(0xFFE5E5E5)),
+                        shadowColor = if (selectedOption != null) DuolingoRedDark else (if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)),
                         textColor = if (selectedOption != null) Color.White else SubtextGray,
                         onClick = {
                             if (selectedOption != null) {

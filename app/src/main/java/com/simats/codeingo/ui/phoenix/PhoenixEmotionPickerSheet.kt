@@ -94,10 +94,13 @@ fun PhoenixEmotionPickerSheet(
         label = "glowScale"
     )
 
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color(0xFF0D1626),
+        containerColor = dynamicColors.cardBackground,
         dragHandle = null
     ) {
         Column(
@@ -156,8 +159,8 @@ fun PhoenixEmotionPickerSheet(
                         modifier = Modifier
                             .size(112.dp)
                             .clip(RoundedCornerShape(26.dp))
-                            .background(Color(0xFF0D1A2D))
-                            .border(1.5.dp, Color(0xFF2A3D59), RoundedCornerShape(26.dp))
+                            .background(if (isDark) Color(0xFF0D1A2D) else dynamicColors.inputBackground)
+                            .border(1.5.dp, if (isDark) Color(0xFF2A3D59) else dynamicColors.inputBorder, RoundedCornerShape(26.dp))
                             .shadow(12.dp, RoundedCornerShape(26.dp), spotColor = currentEmotion.auraColor)
                     ) {
                         PhoenixMascotImage(
@@ -198,8 +201,8 @@ fun PhoenixEmotionPickerSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF131F33))
-                        .border(1.dp, Color(0xFF20324E), RoundedCornerShape(16.dp))
+                        .background(if (isDark) Color(0xFF131F33) else dynamicColors.inputBackground)
+                        .border(1.dp, if (isDark) Color(0xFF20324E) else dynamicColors.inputBorder, RoundedCornerShape(16.dp))
                         .padding(16.dp)
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -241,8 +244,8 @@ fun PhoenixEmotionPickerSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF131F33))
-                        .border(1.dp, Color(0xFF20324E), RoundedCornerShape(16.dp))
+                        .background(if (isDark) Color(0xFF131F33) else dynamicColors.inputBackground)
+                        .border(1.dp, if (isDark) Color(0xFF20324E) else dynamicColors.inputBorder, RoundedCornerShape(16.dp))
                         .padding(16.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -282,8 +285,8 @@ fun PhoenixEmotionPickerSheet(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(100.dp))
-                                    .background(Color(0xFF1C2C45))
-                                    .border(1.dp, Color(0xFF2D4263), RoundedCornerShape(100.dp))
+                                    .background(if (isDark) Color(0xFF1C2C45) else Color.White)
+                                    .border(1.dp, if (isDark) Color(0xFF2D4263) else dynamicColors.inputBorder, RoundedCornerShape(100.dp))
                                     .clickable { emotionManager.simulateTrigger(triggerKey) }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
@@ -310,13 +313,13 @@ fun PhoenixEmotionPickerSheet(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(100.dp))
-                                .background(if (isSelected) AmberGold else Color(0xFF182438))
+                                .background(if (isSelected) AmberGold else if (isDark) Color(0xFF182438) else Color(0xFFE8EEF8))
                                 .clickable { selectedCategory = category }
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                         ) {
                             Text(
                                 text = category.displayName,
-                                color = if (isSelected) Color(0xFF1A1205) else Color.White,
+                                color = if (isSelected) Color(0xFF1A1205) else dynamicColors.textPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -333,15 +336,19 @@ fun PhoenixEmotionPickerSheet(
                 ) {
                     for (emotion in selectedCategory.filtered()) {
                         val isCurrent = emotion.id == currentEmotion.id
+                        val itemBg = if (isCurrent) (if (isDark) Color(0xFF1E314D) else AmberGold.copy(alpha = 0.20f))
+                                     else (if (isDark) Color(0xFF131E30) else dynamicColors.inputBackground)
+                        val itemBorder = if (isCurrent) emotion.auraColor
+                                         else (if (isDark) Color(0xFF243652) else dynamicColors.inputBorder)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .width(74.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(if (isCurrent) Color(0xFF1E314D) else Color(0xFF131E30))
+                                .background(itemBg)
                                 .border(
                                     width = if (isCurrent) 2.dp else 1.dp,
-                                    color = if (isCurrent) emotion.auraColor else Color(0xFF243652),
+                                    color = itemBorder,
                                     shape = RoundedCornerShape(14.dp)
                                 )
                                 .clickable {

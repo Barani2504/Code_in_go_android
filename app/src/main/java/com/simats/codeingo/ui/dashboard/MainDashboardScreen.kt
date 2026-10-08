@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.dashboard
+package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -89,6 +89,9 @@ import com.simats.codeingo.ui.worlds.tree.BinaryTreeForestArenaScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.DarkBackground
+import com.simats.codeingo.ui.theme.CardBackground
+import com.simats.codeingo.ui.theme.liquidGlassCard
 
 /**
  * MainDashboardScreen faithfully synchronized with iOS MainDashboardView.swift (commit 2b2c2ab).
@@ -256,7 +259,7 @@ fun MainDashboardScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF070B12))
+            .background(DarkBackground)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -496,7 +499,7 @@ fun MainDashboardScreen(
         guideSelectedUnit?.let { unit ->
             ModalBottomSheet(
                 onDismissRequest = { guideSelectedUnit = null },
-                containerColor = Color(0xFF0F1420)
+                containerColor = DarkBackground
             ) {
                 ChapterGuidebookSheet(
                     unit = unit,
@@ -509,7 +512,7 @@ fun MainDashboardScreen(
         if (showStreakSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showStreakSheet = false },
-                containerColor = Color(0xFF0F1420)
+                containerColor = DarkBackground
             ) {
                 StreakInfoSheet(
                     streakDays = streakDays,
@@ -528,7 +531,7 @@ fun MainDashboardScreen(
         if (showHeartsSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showHeartsSheet = false },
-                containerColor = Color(0xFF0F1420)
+                containerColor = DarkBackground
             ) {
                 HeartsInfoSheet(
                     heartsCount = heartsCount,
@@ -667,11 +670,12 @@ private fun WorldPortalCard(
     accentColor: Color,
     onOpenWorld: (String) -> Unit
 ) {
+    val isDark = LocalDynamicThemeColors.current.isDark
     Row(
         modifier = Modifier
             .width(300.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF0F1523).copy(alpha = 0.85f))
+            .background(if (isDark) Color(0xFF0F1523).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.95f))
             .border(
                 1.2.dp,
                 Brush.linearGradient(listOf(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f), accentColor.copy(alpha = 0.45f))),
@@ -728,13 +732,7 @@ private fun GrandMasterJourneyCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFF1E1428), Color(0xFF0F0B18))
-                )
-            )
-            .border(1.5.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(22.dp))
+            .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 22.dp)
             .clickable { onOpenSanctuary() }
             .padding(20.dp)
     ) {
@@ -949,7 +947,7 @@ private fun HeartsInfoSheet(
                     text = "REFILL HEARTS (10 ❤️)",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = Color.White
                 )
             }
         }

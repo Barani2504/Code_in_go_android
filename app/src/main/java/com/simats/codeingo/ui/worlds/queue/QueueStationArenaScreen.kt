@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.worlds.queue
+package com.simats.codeingo.ui.worlds.queue
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -324,7 +324,7 @@ fun QueueStationArenaScreen(
         }
 
         if (showTheoryCodex) {
-            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = Color(0xFF1E0E2B)) {
+            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "🎫 Queue Station Codex (FIFO)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
                     Text(
@@ -338,7 +338,7 @@ fun QueueStationArenaScreen(
         }
 
         if (showHintSheet) {
-            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = Color(0xFF1E0E2B)) {
+            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "💡 Station Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
                     Text(

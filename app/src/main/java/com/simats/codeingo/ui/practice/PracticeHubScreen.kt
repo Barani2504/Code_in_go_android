@@ -689,10 +689,11 @@ private fun DailyReviewTab(
                 }
             }
 
+            val isDark = LocalDynamicThemeColors.current.isDark
             DuolingoButton(
                 text = if (!isAnswerChecked) "CHECK" else if (currentReviewIdx < drillQuestions.lastIndex) "NEXT QUESTION" else "FINISH REVIEW",
-                faceColor = if (selectedOption != null) DuolingoGreen else CardBackground,
-                shadowColor = if (selectedOption != null) DuolingoGreenDark else Color(0xFF142028),
+                faceColor = if (selectedOption != null) DuolingoGreen else (if (isDark) CardBackground else Color(0xFFE5E5E5)),
+                shadowColor = if (selectedOption != null) DuolingoGreenDark else (if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)),
                 textColor = if (selectedOption != null) Color.White else SubtextGray,
                 onClick = {
                     if (!isAnswerChecked) {

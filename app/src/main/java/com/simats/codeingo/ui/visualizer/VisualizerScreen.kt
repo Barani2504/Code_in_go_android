@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.visualizer
+package com.simats.codeingo.ui.visualizer
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -248,7 +248,7 @@ private fun VisualizerHeaderBar(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White,
+                        tint = LocalDynamicThemeColors.current.textPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
@@ -1149,20 +1149,21 @@ private fun StackVisualizer() {
                 } else {
                     items.reversed().forEachIndexed { index, value ->
                         val isTop = index == 0
+                        val isDark = LocalDynamicThemeColors.current.isDark
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)
                                 .height(42.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(if (isTop) DsaBlue else Color(0xFF1E3A5F))
-                                .border(1.5.dp, if (isTop) Color.White else DsaBlue.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
+                                .background(if (isTop) DsaBlue else if (isDark) Color(0xFF1E3A5F) else DsaBlue.copy(alpha = 0.25f))
+                                .border(1.5.dp, if (isTop) (if (isDark) Color.White else DsaBlue) else DsaBlue.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = if (isTop) "$value (TOP)" else "$value",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = LocalDynamicThemeColors.current.textPrimary
+                                color = if (isTop) Color.White else LocalDynamicThemeColors.current.textPrimary
                             )
                         }
                     }
@@ -1176,6 +1177,7 @@ private fun StackVisualizer() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val isDark = LocalDynamicThemeColors.current.isDark
             DuolingoButton(
                 text = "PUSH",
                 faceColor = DsaBlue,
@@ -1204,8 +1206,8 @@ private fun StackVisualizer() {
             DuolingoButton(
                 text = "CLEAR",
                 faceColor = CardBackground,
-                shadowColor = Color(0xFF142028),
-                textColor = SubtextGray,
+                shadowColor = if (isDark) Color(0xFF142028) else Color(0xFFD7DEEB),
+                textColor = LocalDynamicThemeColors.current.textPrimary,
                 onClick = { items.clear() },
                 modifier = Modifier.weight(1f)
             )
@@ -1514,10 +1516,11 @@ private fun ArrayVisualizer() {
                         modifier = Modifier.weight(1f)
                     )
 
+                    val isDark = LocalDynamicThemeColors.current.isDark
                     DuolingoButton(
                         text = "DELETE",
                         faceColor = if (selectedIndex != null) DsaRed else CardBackground,
-                        shadowColor = if (selectedIndex != null) Color(0xFFD23232) else Color(0xFF142028),
+                        shadowColor = if (selectedIndex != null) Color(0xFFD23232) else (if (isDark) Color(0xFF142028) else Color(0xFFD7DEEB)),
                         textColor = if (selectedIndex != null) Color.White else SubtextGray,
                         enabled = selectedIndex != null,
                         onClick = {
@@ -1718,7 +1721,7 @@ private fun LinkedListVisualizer() {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF1E2832))
+                                .background(CardBackground)
                                 .border(1.5.dp, InputBorder, RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 10.dp)
                         ) {
@@ -2148,11 +2151,12 @@ private fun TrieVisualizer() {
 @Composable
 private fun TrieNodeItem(char: String, isEnd: Boolean = false, isMatch: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        val isDark = LocalDynamicThemeColors.current.isDark
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (isMatch) Color.Cyan else Color(0xFF1E2832))
+                .background(if (isMatch) Color.Cyan else (if (isDark) Color(0xFF1E2832) else CardBackground))
                 .border(1.5.dp, Color.Cyan, RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
@@ -2160,7 +2164,7 @@ private fun TrieNodeItem(char: String, isEnd: Boolean = false, isMatch: Boolean 
                 text = char,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black,
-                color = if (isMatch) Color.Black else Color.White
+                color = if (isMatch) Color.Black else LocalDynamicThemeColors.current.textPrimary
             )
         }
         if (isEnd) {
@@ -2392,11 +2396,12 @@ private fun SortingVisualizer() {
                 modifier = Modifier.weight(1f)
             )
 
+            val isDark = LocalDynamicThemeColors.current.isDark
             DuolingoButton(
                 text = "RESET",
                 faceColor = CardBackground,
-                shadowColor = Color(0xFF142028),
-                textColor = SubtextGray,
+                shadowColor = if (isDark) Color(0xFF142028) else Color(0xFFD7DEEB),
+                textColor = LocalDynamicThemeColors.current.textPrimary,
                 onClick = {
                     items.clear()
                     items.addAll(listOf(64, 34, 25, 12, 22, 11, 90))
@@ -2486,11 +2491,12 @@ private fun StepRecorderVisualizer() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val isDark = LocalDynamicThemeColors.current.isDark
             DuolingoButton(
                 text = "PREVIOUS",
                 faceColor = CardBackground,
-                shadowColor = Color(0xFF142028),
-                textColor = if (stepIdx > 0) Color.White else SubtextGray,
+                shadowColor = if (isDark) Color(0xFF142028) else Color(0xFFD7DEEB),
+                textColor = if (stepIdx > 0) LocalDynamicThemeColors.current.textPrimary else SubtextGray,
                 onClick = { if (stepIdx > 0) stepIdx -= 1 },
                 modifier = Modifier.weight(1f)
             )

@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.worlds.linkedlist
+package com.simats.codeingo.ui.worlds.linkedlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -323,7 +323,7 @@ fun LinkedListRoadArenaScreen(
         }
 
         if (showTheoryCodex) {
-            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = Color(0xFF240A0F)) {
+            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "🔗 Linked List Codex (Pointers)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     Text(
@@ -337,7 +337,7 @@ fun LinkedListRoadArenaScreen(
         }
 
         if (showHintSheet) {
-            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = Color(0xFF240A0F)) {
+            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "💡 Road Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     Text(

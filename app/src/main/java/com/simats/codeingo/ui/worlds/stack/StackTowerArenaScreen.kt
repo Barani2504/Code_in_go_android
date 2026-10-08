@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.worlds.stack
+package com.simats.codeingo.ui.worlds.stack
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -375,7 +375,7 @@ fun StackTowerArenaScreen(
         if (showTheoryCodex) {
             ModalBottomSheet(
                 onDismissRequest = { showTheoryCodex = false },
-                containerColor = Color(0xFF1A1208)
+                containerColor = DarkBackground
             ) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "🥞 Stack Tower Codex (LIFO)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
@@ -392,7 +392,7 @@ fun StackTowerArenaScreen(
         if (showHintSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showHintSheet = false },
-                containerColor = Color(0xFF1A1208)
+                containerColor = DarkBackground
             ) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "💡 Spire Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))

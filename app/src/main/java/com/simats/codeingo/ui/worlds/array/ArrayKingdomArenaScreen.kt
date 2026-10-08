@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.worlds.array
+package com.simats.codeingo.ui.worlds.array
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -216,7 +216,7 @@ fun ArrayKingdomArenaScreen(
         if (showTheoryCodex) {
             ModalBottomSheet(
                 onDismissRequest = { showTheoryCodex = false },
-                containerColor = Color(0xFF0F1726)
+                containerColor = DarkBackground
             ) {
                 ArrayKingdomCodexSheet(onClose = { showTheoryCodex = false })
             }
@@ -225,7 +225,7 @@ fun ArrayKingdomArenaScreen(
         if (showHintSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showHintSheet = false },
-                containerColor = Color(0xFF0F1726)
+                containerColor = DarkBackground
             ) {
                 ArrayKingdomHintSheet(currentLevel = currentLevel, onClose = { showHintSheet = false })
             }
@@ -1123,7 +1123,7 @@ private fun ArenaVictoryOverlay(
             modifier = Modifier
                 .fillMaxWidth(0.85f)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1726))
+                .background(DarkBackground)
                 .border(2.dp, AmberGold, RoundedCornerShape(24.dp))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -1159,7 +1159,7 @@ private fun ArenaBossVictoryOverlay(onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(0.85f)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF0F1726))
+                .background(DarkBackground)
                 .border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.leaderboards
+package com.simats.codeingo.ui.leaderboards
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -101,7 +101,7 @@ fun LeaderboardsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0B0F17))
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         // Phoenix atmospheric background
         PhoenixAtmosphericBackgroundView()
@@ -514,25 +514,27 @@ private fun ActiveRankingsList() {
 
 @Composable
 private fun RankRowView(entry: RankEntry) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
     val isTop3 = entry.rank <= 3
     val bgColor = when {
         entry.isUser -> AmberGold.copy(alpha = 0.15f)
         isTop3 -> CardBackground.copy(alpha = 0.88f)
-        else -> Color(0xFF101824).copy(alpha = 0.75f)
+        else -> if (isDark) Color(0xFF101824).copy(alpha = 0.75f) else dynamicColors.cardBackground.copy(alpha = 0.85f)
     }
     val borderColor = when {
         entry.isUser -> AmberGold
         entry.rank == 1 -> AmberGold
-        entry.rank == 2 -> Color(0xFFDDDDDD)
+        entry.rank == 2 -> if (isDark) Color(0xFFDDDDDD) else Color(0xFF94A3B8)
         entry.rank == 3 -> Color(0xFFCD7F32)
         else -> InputBorder
     }
-    val nameColor = if (entry.isUser) AmberGold else Color.White
-    val xpColor = if (isTop3) AmberGold else SubtextGray
-    val xpBg = if (isTop3) AmberGold.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.07f)
-    val xpBorder = if (isTop3) AmberGold.copy(alpha = 0.4f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f)
-    val avatarBg = if (entry.isUser) AmberGold.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f)
-    val avatarBorder = if (entry.isUser) AmberGold.copy(alpha = 0.7f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f)
+    val nameColor = if (entry.isUser) AmberGold else dynamicColors.textPrimary
+    val xpColor = if (isTop3) (if (isDark) AmberGold else Color(0xFFC77300)) else SubtextGray
+    val xpBg = if (isTop3) AmberGold.copy(alpha = 0.15f) else (if (isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f))
+    val xpBorder = if (isTop3) AmberGold.copy(alpha = 0.4f) else dynamicColors.placeholder.copy(alpha = 0.10f)
+    val avatarBg = if (entry.isUser) AmberGold.copy(alpha = 0.25f) else (if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
+    val avatarBorder = if (entry.isUser) AmberGold.copy(alpha = 0.7f) else dynamicColors.placeholder.copy(alpha = 0.12f)
     val shape = RoundedCornerShape(16.dp)
 
     Row(

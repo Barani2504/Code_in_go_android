@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.worlds.tree
+package com.simats.codeingo.ui.worlds.tree
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -323,7 +323,7 @@ fun BinaryTreeForestArenaScreen(
         }
 
         if (showTheoryCodex) {
-            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = Color(0xFF0A2417)) {
+            ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "🌲 Binary Tree Codex", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
                     Text(
@@ -337,7 +337,7 @@ fun BinaryTreeForestArenaScreen(
         }
 
         if (showHintSheet) {
-            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = Color(0xFF0A2417)) {
+            ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "💡 Forest Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
                     Text(

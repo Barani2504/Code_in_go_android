@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.dashboard
+package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -89,16 +89,19 @@ fun LessonNodeButton(
     val shadowOffset = if (isPressed) 2.dp else 7.dp
     val faceOffset = if (isPressed) 5.dp else 0.dp
 
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
     val faceColor = when {
         isUnlocked && isBoss -> Color(0xFFFF3B30)
         isUnlocked -> unit.themeColor
-        else -> Color(0xFF1E2832)
+        else -> dynamicColors.cardBackground
     }
 
     val shadowColor = when {
         isUnlocked && isBoss -> Color(0xFFA51919)
         isUnlocked -> unit.themeDarkColor
-        else -> Color(0xFF141F28)
+        else -> if (isDark) Color(0xFF141F28) else Color(0xFFC8D2E2)
     }
 
     Column(
@@ -128,7 +131,7 @@ fun LessonNodeButton(
                                 listOf(unit.themeColor, unit.themeDarkColor)
                             )
                         )
-                        .border(1.2.dp, LocalDynamicThemeColors.current.placeholder, RoundedCornerShape(16.dp))
+                        .border(1.2.dp, Color.White.copy(alpha = 0.40f), RoundedCornerShape(16.dp))
                         .padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -137,7 +140,7 @@ fun LessonNodeButton(
                         text = node.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary,
+                        color = Color.White,
                         textAlign = TextAlign.Center,
                         maxLines = 2
                     )
@@ -151,7 +154,7 @@ fun LessonNodeButton(
                             text = "5 Questions • +${unit.unitNumber * 5 + 5} XP • +1 Ember",
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Black,
-                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.95f)
+                            color = Color.White.copy(alpha = 0.95f)
                         )
                     }
 
@@ -211,8 +214,8 @@ fun LessonNodeButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF1E2832))
-                        .border(1.2.dp, Color(0xFF2E3E4E), RoundedCornerShape(16.dp))
+                        .background(dynamicColors.cardBackground)
+                        .border(1.2.dp, dynamicColors.inputBorder, RoundedCornerShape(16.dp))
                         .padding(12.dp),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -221,7 +224,7 @@ fun LessonNodeButton(
                         text = node.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary,
+                        color = dynamicColors.textPrimary,
                         maxLines = 2
                     )
 
@@ -229,10 +232,10 @@ fun LessonNodeButton(
                         text = "Complete previous levels to unlock!",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
+                        color = dynamicColors.textSecondary
                     )
 
-                    // 3D Pushable Dark Gray Disabled LOCKED Button
+                    // 3D Pushable Disabled LOCKED Button
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -245,22 +248,22 @@ fun LessonNodeButton(
                                 .height(32.dp)
                                 .offset(y = 2.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF141F26))
+                                .background(if (isDark) Color(0xFF141F26) else Color(0xFFD7DEEB))
                         )
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(32.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(Color(0xFF1C2B35))
-                                .border(1.dp, Color(0xFF2E3E4E), RoundedCornerShape(10.dp)),
+                                .background(if (isDark) Color(0xFF1C2B35) else dynamicColors.inputBackground)
+                                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "LOCKED",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
-                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.5f)
+                                color = dynamicColors.textSecondary
                             )
                         }
                     }
@@ -274,7 +277,7 @@ fun LessonNodeButton(
                         lineTo(drawContext.size.width, 0f)
                         close()
                     }
-                    drawPath(path, Color(0xFF1E2832))
+                    drawPath(path, dynamicColors.cardBackground)
                 }
             }
         }
@@ -329,9 +332,9 @@ fun LessonNodeButton(
                         .border(
                             if (isBoss) 2.5.dp else 2.dp,
                             if (isUnlocked) {
-                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.28f)
+                                if (isBoss) Color(0xFFFFD700).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.25f)
                             } else {
-                                Color(0xFF2E3E4E)
+                                dynamicColors.inputBorder
                             },
                             CircleShape
                         ),
@@ -342,7 +345,7 @@ fun LessonNodeButton(
                         imageVector = iconVector,
                         contentDescription = node.title,
                         tint = when {
-                            !isUnlocked -> LocalDynamicThemeColors.current.placeholder
+                            !isUnlocked -> dynamicColors.textSecondary
                             isBoss -> Color(0xFFFFD700)
                             else -> Color.White
                         },

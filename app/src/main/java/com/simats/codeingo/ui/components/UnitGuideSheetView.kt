@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.components
+package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -123,7 +123,7 @@ fun UnitGuideSheetView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.04f))
                         .padding(12.dp)
                 ) {
                     Text(
@@ -202,7 +202,7 @@ private fun GuideInfoRow(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.08f)),
+                .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f)),
             contentAlignment = Alignment.Center
         ) {
             Text(text = emoji, fontSize = 18.sp)
