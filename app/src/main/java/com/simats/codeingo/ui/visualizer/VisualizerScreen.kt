@@ -35,15 +35,30 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.data.model.DSA5ChapterData
+import com.simats.codeingo.data.model.DSAChapterModel
+import com.simats.codeingo.ui.gamification.DSAChapterStoryIntroSheet
+import com.simats.codeingo.ui.theme.liquidGlassCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -108,6 +123,13 @@ fun VisualizerScreen(
     val selectedLanguageCode by localizationManager.selectedLanguageCode.collectAsState()
     val selectedLangObj by localizationManager.selectedLanguage.collectAsState()
 
+    val gameManager = GameManager.instance
+    val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
+    val completedChapters by gameManager.completedChapters.collectAsState()
+
+    var activePopupChapter by remember { mutableStateOf<DSAChapterModel?>(null) }
+    var selectedStoryChapter by remember { mutableStateOf<DSAChapterModel?>(null) }
+
     var displayMode by remember { mutableStateOf(VisualizerDisplayMode.LIST) }
     var selectedType by remember { mutableStateOf(DSAVisualizerType.STACK) }
     var searchQuery by remember { mutableStateOf("") }
@@ -170,7 +192,7 @@ fun VisualizerScreen(
             )
 
             if (displayMode == VisualizerDisplayMode.LIST) {
-                // Topic List View
+                // Topic List View with 5-Chapter Progressive Roadmap
                 TopicListView(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
@@ -178,9 +200,20 @@ fun VisualizerScreen(
                     selectedCategory = selectedCategory,
                     onCategorySelect = { selectedCategory = it },
                     filteredStructures = filteredStructures,
+                    maxUnlockedChapter = maxUnlockedChapter,
+                    completedChapters = completedChapters,
                     onSelectTopic = { type ->
                         selectedType = type
                         displayMode = VisualizerDisplayMode.VISUALIZER
+                    },
+                    onChapterTap = { chapter ->
+                        activePopupChapter = chapter
+                    },
+                    onUnlockNextChapter = { nextId ->
+                        gameManager.unlockNextChapter(nextId)
+                    },
+                    onResetProgression = {
+                        gameManager.resetChapterProgression()
                     },
                     onOpenArrayKingdom = onOpenArrayKingdom,
                     onOpenStackTower = onOpenStackTower,
@@ -211,6 +244,73 @@ fun VisualizerScreen(
                         showLanguagePicker = false
                     },
                     onDismiss = { showLanguagePicker = false }
+                )
+            }
+        }
+
+        // Active Chapter Popup Modal
+        activePopupChapter?.let { chapter ->
+            Dialog(
+                onDismissRequest = { activePopupChapter = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                DSAChapterPopupCard(
+                    chapter = chapter,
+                    isCompleted = completedChapters.contains(chapter.id),
+                    onPlay3D = {
+                        activePopupChapter = null
+                        when (chapter.id) {
+                            1 -> onOpenArrayKingdom?.invoke()
+                            2 -> onOpenLinkedListRoad?.invoke()
+                            3 -> onOpenStackTower?.invoke()
+                            4 -> onOpenQueueStation?.invoke()
+                            5 -> onOpenBinaryTreeForest?.invoke()
+                        }
+                    },
+                    onLearnVisualizer = {
+                        activePopupChapter = null
+                        selectedType = when (chapter.id) {
+                            1 -> DSAVisualizerType.ARRAY
+                            2 -> DSAVisualizerType.LINKED_LIST
+                            3 -> DSAVisualizerType.STACK
+                            4 -> DSAVisualizerType.QUEUE
+                            5 -> DSAVisualizerType.BINARY_TREE
+                            else -> DSAVisualizerType.ARRAY
+                        }
+                        displayMode = VisualizerDisplayMode.VISUALIZER
+                    },
+                    onOpenStory = {
+                        activePopupChapter = null
+                        selectedStoryChapter = chapter
+                    },
+                    onCompleteLevel = {
+                        gameManager.markChapterCompleted(chapter.id)
+                        activePopupChapter = null
+                    },
+                    onDismiss = { activePopupChapter = null }
+                )
+            }
+        }
+
+        // Chapter Field Story Modal
+        selectedStoryChapter?.let { chapter ->
+            Dialog(
+                onDismissRequest = { selectedStoryChapter = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                DSAChapterStoryIntroSheet(
+                    chapter = chapter,
+                    onStartFirstLevel = {
+                        selectedStoryChapter = null
+                        when (chapter.id) {
+                            1 -> onOpenArrayKingdom?.invoke()
+                            2 -> onOpenLinkedListRoad?.invoke()
+                            3 -> onOpenStackTower?.invoke()
+                            4 -> onOpenQueueStation?.invoke()
+                            5 -> onOpenBinaryTreeForest?.invoke()
+                        }
+                    },
+                    onDismiss = { selectedStoryChapter = null }
                 )
             }
         }
@@ -315,7 +415,12 @@ private fun TopicListView(
     selectedCategory: String,
     onCategorySelect: (String) -> Unit,
     filteredStructures: List<DSAVisualizerType>,
+    maxUnlockedChapter: Int,
+    completedChapters: Set<Int>,
     onSelectTopic: (DSAVisualizerType) -> Unit,
+    onChapterTap: (DSAChapterModel) -> Unit,
+    onUnlockNextChapter: (Int) -> Unit,
+    onResetProgression: () -> Unit,
     onOpenArrayKingdom: (() -> Unit)?,
     onOpenStackTower: (() -> Unit)?,
     onOpenQueueStation: (() -> Unit)?,
@@ -327,6 +432,76 @@ private fun TopicListView(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // 1. CHAPTER ROADMAP PROGRESS HEADER
+        ChapterRoadmapHeader(
+            maxUnlockedChapter = maxUnlockedChapter,
+            completedChapters = completedChapters,
+            onReset = onResetProgression
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // 2. 5 CHAPTER SUMMARY CARDS WITH PROGRESSIVE UNLOCKING
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            DSA5ChapterData.chapters.forEach { chapter ->
+                val isUnlocked = chapter.id <= maxUnlockedChapter
+                val isCompleted = completedChapters.contains(chapter.id)
+                val isCurrentInProgress = chapter.id == maxUnlockedChapter && !isCompleted
+
+                DSAChapterSummaryCard(
+                    chapter = chapter,
+                    isUnlocked = isUnlocked,
+                    isCompleted = isCompleted,
+                    isCurrentInProgress = isCurrentInProgress,
+                    onTap = {
+                        if (isUnlocked) {
+                            onChapterTap(chapter)
+                        }
+                    }
+                )
+
+                // UNLOCK NEXT CHAPTER BUTTON after completing current level
+                if (isCompleted && chapter.id == maxUnlockedChapter && chapter.id < 5) {
+                    val nextChapter = DSA5ChapterData.chapters.firstOrNull { it.id == chapter.id + 1 }
+                    if (nextChapter != null) {
+                        UnlockNextChapterButton(
+                            nextChapter = nextChapter,
+                            onUnlock = { onUnlockNextChapter(nextChapter.id) }
+                        )
+                    }
+                } else if (isCompleted && chapter.id == 5) {
+                    GrandChampionBanner()
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Section Title: Interactive Visualizer Directory
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "⚡ EXPLORE DATA STRUCTURES & ALGORITHMS",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Monospace,
+                color = AmberGold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         // Search Bar
         Box(
             modifier = Modifier
@@ -415,6 +590,7 @@ private fun TopicListView(
 
         // 3D Game Arenas Quick Access Carousel
         VisualizerGameArenasRow(
+            maxUnlockedChapter = maxUnlockedChapter,
             onOpenArrayKingdom = onOpenArrayKingdom,
             onOpenStackTower = onOpenStackTower,
             onOpenQueueStation = onOpenQueueStation,
@@ -487,6 +663,7 @@ private fun TopicListView(
 
 @Composable
 private fun VisualizerGameArenasRow(
+    maxUnlockedChapter: Int,
     onOpenArrayKingdom: (() -> Unit)?,
     onOpenStackTower: (() -> Unit)?,
     onOpenQueueStation: (() -> Unit)?,
@@ -498,9 +675,11 @@ private fun VisualizerGameArenasRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Array Kingdom
+        // Array Kingdom (Chapter 1)
         item {
             ArenaCard(
+                chapterId = 1,
+                maxUnlockedChapter = maxUnlockedChapter,
                 title = "👑 ARRAY KINGDOM",
                 subtitle = "3D Sorting Arena",
                 accentColor = AmberGold,
@@ -508,29 +687,11 @@ private fun VisualizerGameArenasRow(
                 onClick = { onOpenArrayKingdom?.invoke() }
             )
         }
-        // Stack Tower
+        // Linked List Road (Chapter 2)
         item {
             ArenaCard(
-                title = "🗼 STACK TOWER",
-                subtitle = "3D LIFO Tower & Boss",
-                accentColor = Color(0xFF00E5FF),
-                emotionRes = R.drawable.phoenix_emotion_28,
-                onClick = { onOpenStackTower?.invoke() }
-            )
-        }
-        // Queue Station
-        item {
-            ArenaCard(
-                title = "🚋 QUEUE STATION",
-                subtitle = "3D FIFO Station & Boss",
-                accentColor = DuolingoGreen,
-                emotionRes = R.drawable.phoenix_emotion_25,
-                onClick = { onOpenQueueStation?.invoke() }
-            )
-        }
-        // Linked List Road
-        item {
-            ArenaCard(
+                chapterId = 2,
+                maxUnlockedChapter = maxUnlockedChapter,
                 title = "🛣️ LINKED LIST ROAD",
                 subtitle = "3D Pointer Highway & Boss",
                 accentColor = Color(0xFF00E5FF),
@@ -538,9 +699,35 @@ private fun VisualizerGameArenasRow(
                 onClick = { onOpenLinkedListRoad?.invoke() }
             )
         }
-        // Binary Tree Forest
+        // Stack Tower (Chapter 3)
         item {
             ArenaCard(
+                chapterId = 3,
+                maxUnlockedChapter = maxUnlockedChapter,
+                title = "🗼 STACK TOWER",
+                subtitle = "3D LIFO Tower & Boss",
+                accentColor = Color(0xFF00E5FF),
+                emotionRes = R.drawable.phoenix_emotion_28,
+                onClick = { onOpenStackTower?.invoke() }
+            )
+        }
+        // Queue Station (Chapter 4)
+        item {
+            ArenaCard(
+                chapterId = 4,
+                maxUnlockedChapter = maxUnlockedChapter,
+                title = "🚋 QUEUE STATION",
+                subtitle = "3D FIFO Station & Boss",
+                accentColor = DuolingoGreen,
+                emotionRes = R.drawable.phoenix_emotion_25,
+                onClick = { onOpenQueueStation?.invoke() }
+            )
+        }
+        // Binary Tree Forest (Chapter 5)
+        item {
+            ArenaCard(
+                chapterId = 5,
+                maxUnlockedChapter = maxUnlockedChapter,
                 title = "🌲 BINARY TREE FOREST",
                 subtitle = "3D Tree Canopies & Boss",
                 accentColor = Color(0xFF00CD9C),
@@ -553,19 +740,22 @@ private fun VisualizerGameArenasRow(
 
 @Composable
 private fun ArenaCard(
+    chapterId: Int,
+    maxUnlockedChapter: Int,
     title: String,
     subtitle: String,
     accentColor: Color,
     emotionRes: Int,
     onClick: () -> Unit
 ) {
+    val isUnlocked = chapterId <= maxUnlockedChapter
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = Modifier
             .clip(shape)
-            .background(CardBackground.copy(alpha = 0.85f))
-            .border(1.5.dp, accentColor.copy(alpha = 0.45f), shape)
-            .clickable { onClick() }
+            .background(CardBackground.copy(alpha = if (isUnlocked) 0.85f else 0.45f))
+            .border(1.5.dp, accentColor.copy(alpha = if (isUnlocked) 0.45f else 0.20f), shape)
+            .clickable { if (isUnlocked) onClick() }
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -583,16 +773,16 @@ private fun ArenaCard(
                 color = LocalDynamicThemeColors.current.textPrimary
             )
             Text(
-                text = subtitle,
+                text = if (isUnlocked) subtitle else "Locked (Finish Ch. ${chapterId - 1})",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = accentColor
+                color = if (isUnlocked) accentColor else Color.Gray
             )
         }
         Icon(
-            imageVector = Icons.Default.ArrowForward,
+            imageVector = if (isUnlocked) Icons.Default.ArrowForward else Icons.Default.Lock,
             contentDescription = null,
-            tint = accentColor,
+            tint = if (isUnlocked) accentColor else Color.Gray,
             modifier = Modifier.size(16.dp)
         )
     }
@@ -2537,5 +2727,611 @@ private fun ComplexityCard(time: String, space: String) {
         Text(text = "SPACE COMPLEXITY", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = space, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 🗺️ Chapter Roadmap & Unlock Banner Composables (Parity with iOS)
+// ══════════════════════════════════════════════════════════════════
+
+@Composable
+private fun ChapterRoadmapHeader(
+    maxUnlockedChapter: Int,
+    completedChapters: Set<Int>,
+    onReset: () -> Unit
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    val isAllMastered = maxUnlockedChapter >= 5 && completedChapters.contains(5)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 18.dp)
+            .padding(14.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(AmberGold.copy(alpha = 0.35f), Color(0xFFFF9800).copy(alpha = 0.2f))
+                                )
+                            )
+                            .border(1.2.dp, AmberGold.copy(alpha = 0.55f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.EmojiEvents,
+                            contentDescription = null,
+                            tint = if (isDark) AmberGold else Color(0xFFD97706),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(
+                                        (if (isDark) AmberGold else Color(0xFFC66900)).copy(alpha = 0.15f)
+                                    )
+                                    .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                            ) {
+                                Text(
+                                    text = "CHAPTER ${minOf(maxUnlockedChapter, 5)} OF 5",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = if (isDark) AmberGold else Color(0xFFC66900)
+                                )
+                            }
+
+                            if (maxUnlockedChapter >= 5) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFE91E63).copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                ) {
+                                    Text(
+                                        text = "FINAL ROUND",
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color(0xFFE91E63)
+                                    )
+                                }
+                            }
+                        }
+
+                        Text(
+                            text = if (isAllMastered) "All Chapters Mastered!" else "5 Flagship 3D DSA Chapters",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            color = LocalDynamicThemeColors.current.textPrimary
+                        )
+                    }
+                }
+
+                // Dev/Testing Reset Button
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f))
+                        .clickable { onReset() }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Reset",
+                            tint = if (isDark) Color.White.copy(alpha = 0.6f) else Color(0xFF64748B),
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = "Reset",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDark) Color.White.copy(alpha = 0.6f) else Color(0xFF64748B)
+                        )
+                    }
+                }
+            }
+
+            // Step Indicator Dots
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                (1..5).forEach { round ->
+                    val color = when {
+                        completedChapters.contains(round) -> DuolingoGreen
+                        round == maxUnlockedChapter -> AmberGold
+                        else -> if (isDark) Color.White.copy(alpha = 0.18f) else Color.Black.copy(alpha = 0.12f)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(5.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DSAChapterSummaryCard(
+    chapter: DSAChapterModel,
+    isUnlocked: Boolean,
+    isCompleted: Boolean,
+    isCurrentInProgress: Boolean,
+    onTap: () -> Unit
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+
+    val cardBg = if (isUnlocked) {
+        if (isDark) Color(0xFF182032) else Color.White
+    } else {
+        if (isDark) Color.White.copy(alpha = 0.03f) else Color.Black.copy(alpha = 0.02f)
+    }
+
+    val strokeColor = when {
+        isCurrentInProgress -> chapter.primaryColor.copy(alpha = 0.85f)
+        isUnlocked -> chapter.primaryColor.copy(alpha = 0.30f)
+        else -> Color.Gray.copy(alpha = 0.20f)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(cardBg)
+            .border(1.2.dp, strokeColor, RoundedCornerShape(20.dp))
+            .clickable { onTap() }
+            .padding(14.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Mascot Avatar / Lock Icon
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isUnlocked) {
+                            Brush.linearGradient(
+                                listOf(chapter.primaryColor.copy(alpha = 0.32f), chapter.darkColor.copy(alpha = 0.15f))
+                            )
+                        } else {
+                            Brush.linearGradient(
+                                listOf(Color.Gray.copy(alpha = 0.2f), Color.Gray.copy(alpha = 0.1f))
+                            )
+                        }
+                    )
+                    .border(
+                        1.4.dp,
+                        if (isUnlocked) chapter.primaryColor.copy(alpha = 0.55f) else Color.Gray.copy(alpha = 0.3f),
+                        CircleShape
+                    )
+            ) {
+                if (isUnlocked) {
+                    Text(text = chapter.characterEmoji, fontSize = 28.sp)
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Locked",
+                        tint = if (isDark) Color.White.copy(alpha = 0.4f) else Color(0xFF94A3B8),
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                // Mini Status Badge
+                if (isCompleted) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Completed",
+                        tint = DuolingoGreen,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                            .background(Color.White, CircleShape)
+                    )
+                } else if (isCurrentInProgress) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFF9800))
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = "GO",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Middle Info
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(
+                                if (isUnlocked) chapter.primaryColor.copy(alpha = 0.14f)
+                                else Color.Gray.copy(alpha = 0.12f)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "CHAPTER ${chapter.number}",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (isUnlocked) chapter.primaryColor else Color.Gray
+                        )
+                    }
+
+                    if (isCompleted) {
+                        Text(
+                            text = "MASTERED",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = DuolingoGreen
+                        )
+                    } else if (isCurrentInProgress) {
+                        Text(
+                            text = "IN PROGRESS",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = AmberGold
+                        )
+                    }
+                }
+
+                Text(
+                    text = chapter.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (isUnlocked) LocalDynamicThemeColors.current.textPrimary else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
+                )
+
+                Text(
+                    text = chapter.subtitle,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isUnlocked) LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f) else LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.35f),
+                    lineHeight = 14.sp
+                )
+            }
+
+            // Right Chevron / Lock
+            Icon(
+                imageVector = if (isUnlocked) Icons.Default.ArrowForward else Icons.Default.Lock,
+                contentDescription = null,
+                tint = if (isUnlocked) chapter.primaryColor else Color.Gray.copy(alpha = 0.4f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun UnlockNextChapterButton(
+    nextChapter: DSAChapterModel,
+    onUnlock: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(nextChapter.primaryColor, nextChapter.darkColor)
+                )
+            )
+            .border(1.5.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+            .clickable { onUnlock() }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.25f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LockOpen,
+                        contentDescription = "Unlock",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "LEVEL COMPLETED! TAP TO UNLOCK",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                    Text(
+                        text = "Unlock Chapter ${nextChapter.number}: ${nextChapter.title}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun GrandChampionBanner() {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 18.dp)
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.EmojiEvents,
+                contentDescription = null,
+                tint = AmberGold,
+                modifier = Modifier.size(28.dp)
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "ALL 5 CHAPTERS COMPLETED!",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (isDark) AmberGold else Color(0xFFC66900)
+                )
+                Text(
+                    text = "You have mastered all data structure arenas & visualizers.",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.75f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DSAChapterPopupCard(
+    chapter: DSAChapterModel,
+    isCompleted: Boolean,
+    onPlay3D: () -> Unit,
+    onLearnVisualizer: () -> Unit,
+    onOpenStory: () -> Unit,
+    onCompleteLevel: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(if (isDark) Color(0xFF0F1523) else Color.White)
+            .border(1.5.dp, chapter.primaryColor.copy(alpha = 0.45f), RoundedCornerShape(24.dp))
+            .padding(20.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Top Bar
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(chapter.primaryColor, chapter.darkColor)
+                                )
+                            )
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "${chapter.characterEmoji} CHAPTER ${chapter.number}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(chapter.primaryColor.copy(alpha = 0.12f))
+                            .border(1.dp, chapter.primaryColor.copy(alpha = 0.35f), CircleShape)
+                            .padding(horizontal = 9.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "${chapter.theme.emoji} ${chapter.theme.displayName}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = chapter.primaryColor
+                        )
+                    }
+                }
+
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { onDismiss() }
+                )
+            }
+
+            // Title & Story
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = chapter.title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    color = LocalDynamicThemeColors.current.textPrimary
+                )
+                Text(
+                    text = chapter.story,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.75f),
+                    lineHeight = 18.sp
+                )
+            }
+
+            // Action Buttons
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Enter 3D Arena
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(chapter.primaryColor, chapter.darkColor)
+                            )
+                        )
+                        .clickable { onPlay3D() }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        Text(text = "ENTER 3D ARENA", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    }
+                }
+
+                // Launch Visualizer
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f))
+                        .border(1.dp, chapter.primaryColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .clickable { onLearnVisualizer() }
+                        .padding(vertical = 11.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Visibility, contentDescription = null, tint = chapter.primaryColor, modifier = Modifier.size(16.dp))
+                        Text(text = "LAUNCH VISUALIZER", fontSize = 12.5.sp, fontWeight = FontWeight.Black, color = chapter.primaryColor)
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Read Story
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.04f))
+                            .clickable { onOpenStory() }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.MenuBook, contentDescription = null, tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f), modifier = Modifier.size(15.dp))
+                            Text(text = "Field Story", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
+                        }
+                    }
+
+                    // Complete Level
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (isCompleted) DuolingoGreen.copy(alpha = 0.15f) else AmberGold.copy(alpha = 0.15f))
+                            .clickable { onCompleteLevel() }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (isCompleted) "✓ Mastered" else "Mark Complete",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (isCompleted) DuolingoGreen else AmberGold
+                        )
+                    }
+                }
+            }
+        }
     }
 }
