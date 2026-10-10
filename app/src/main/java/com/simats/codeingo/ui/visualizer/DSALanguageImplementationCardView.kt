@@ -52,8 +52,9 @@ import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 
 @Composable
 fun DSALanguageImplementationCardView(
@@ -105,6 +106,7 @@ fun DSALanguageImplementationCardView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .pressScale()
                 .clickable { isExpanded = !isExpanded }
                 .padding(horizontal = 18.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -163,6 +165,7 @@ fun DSALanguageImplementationCardView(
                                 .clip(chipShape)
                                 .background(if (isSelected) DsaBlue else DarkBackground)
                                 .border(1.dp, if (isSelected) DsaBlue else InputBorder, chipShape)
+                                .pressScale()
                                 .clickable {
                                     activeLanguage = lang
                                     copied = false
@@ -244,6 +247,7 @@ fun DSALanguageImplementationCardView(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(if (copied) DuolingoGreen.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.12f))
                                     .border(1.dp, if (copied) DuolingoGreen else Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                                    .pressScale()
                                     .clickable {
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                         val clip = ClipData.newPlainText("$activeLanguage Code", codeString)

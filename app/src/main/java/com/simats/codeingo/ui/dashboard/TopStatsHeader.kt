@@ -59,12 +59,16 @@ fun TopStatsHeader(
     totalStars: Int = 12,
     totalXP: Int = 120,
     heartsCount: Int = 10,
+    gemsCount: Int = 450,
     heartTimerString: String? = null,
     isBossActive: Boolean = false,
     onMenuClick: () -> Unit,
     onPhoenixClick: () -> Unit = {},
     onStreakClick: () -> Unit = {},
+    onStarsClick: () -> Unit = {},
+    onXpClick: () -> Unit = {},
     onHeartsClick: () -> Unit = {},
+    onGemsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
@@ -103,7 +107,7 @@ fun TopStatsHeader(
                         ),
                         CircleShape
                     )
-                    .clickable { onMenuClick() },
+                    .clickable { onMenuClick() }
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -114,7 +118,7 @@ fun TopStatsHeader(
                 )
             }
 
-            // 2. Phoenix Dynamic Emotion Logo (26dp, opens emotion sheet on tap)
+            // 2. Phoenix Dynamic Emotion Logo (28dp, opens emotion sheet on tap)
             PhoenixDynamicLogoView(
                 showTitle = false,
                 showSubtitleBadge = false,
@@ -125,9 +129,9 @@ fun TopStatsHeader(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Stats Pill Row (Compact & Horizontally Scrollable on ultra-narrow displays)
+            // Stats Pill Row
             Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val pillBg = if (isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f)
@@ -148,7 +152,11 @@ fun TopStatsHeader(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = streakEmoji, fontSize = 12.sp)
+                    Text(
+                        text = streakEmoji,
+                        fontSize = 12.sp,
+                        modifier = if (!isStreakPendingRestore) Modifier.pulse(0.96f..1.12f) else Modifier
+                    )
                     AnimatedContent(
                         targetState = streakVal,
                         transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
@@ -163,33 +171,30 @@ fun TopStatsHeader(
                     }
                 }
 
-                // 4. Stars Pill
-                val starsColor = if (isDark) Color(0xFFFFD700) else Color(0xFFC78500)
+                // 4. Gems / Diamonds Pill (Matches iOS 💎 reward tracking)
+                val gemColor = Color(0xFF1CA6FF)
                 Row(
                     modifier = Modifier
                         .pressScale(0.92f)
                         .clip(CircleShape)
                         .background(pillBg)
-                        .border(
-                            1.dp,
-                            if (isBossActive) Color.Red.copy(alpha = 0.7f) else starsColor.copy(alpha = if (isDark) 0.45f else 0.50f),
-                            CircleShape
-                        )
+                        .border(1.dp, gemColor.copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
+                        .clickable { onGemsClick() }
                         .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(text = "🌟", fontSize = 12.sp)
+                    Text(text = "💎", fontSize = 12.sp)
                     AnimatedContent(
-                        targetState = totalStars,
+                        targetState = gemsCount,
                         transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
-                        label = "starsAnim"
+                        label = "gemsAnim"
                     ) { count ->
                         Text(
                             text = "$count",
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.Black,
-                            color = starsColor
+                            color = gemColor
                         )
                     }
                 }
@@ -202,6 +207,7 @@ fun TopStatsHeader(
                         .clip(CircleShape)
                         .background(pillBg)
                         .border(1.dp, xpColor.copy(alpha = if (isDark) 0.45f else 0.50f), CircleShape)
+                        .clickable { onXpClick() }
                         .padding(horizontal = 7.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(3.dp)
@@ -222,11 +228,11 @@ fun TopStatsHeader(
                 }
 
                 // 6. Hearts Pill (with countdown if regenerating & pulse if low)
-                val isHeartLow = heartsCount <= 2
+                val isHeartLow = heartsCount <= 3
                 Row(
                     modifier = Modifier
                         .pressScale(0.92f)
-                        .then(if (isHeartLow) Modifier.pulse(0.94f..1.06f) else Modifier)
+                        .then(if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
                         .clip(CircleShape)
                         .background(pillBg)
                         .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)

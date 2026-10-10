@@ -331,6 +331,8 @@ fun ForgotPasswordSheet(
                                     } else if (newPassword != confirmPassword) {
                                         errorMessage = "Passwords do not match."
                                     } else {
+                                        errorMessage = null
+                                        com.simats.codeingo.domain.AuthService.shared.updatePassword(email, newPassword)
                                         step = ForgotPasswordStep.SUCCESS
                                     }
                                 }

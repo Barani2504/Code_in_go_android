@@ -573,22 +573,23 @@ fun LoginScreen(
                     isEnabled = isFormValid,
                     onClick = {
                         val trimmed = emailOrUsername.trim()
-                        val resolvedName = if (trimmed.contains("@")) {
-                            trimmed.substringBefore("@").replaceFirstChar { it.uppercase() }
-                        } else {
-                            trimmed.replaceFirstChar { it.uppercase() }
+                        val isPasswordCorrect = com.simats.codeingo.domain.AuthService.shared.verifyPassword(trimmed, password)
+                        if (!isPasswordCorrect) {
+                            isSuccessToast = false
+                            toastMessage = "Incorrect password. Please try again or tap 'Forgot password?'."
+                            return@AppButton
                         }
-                        val resolvedHandle = trimmed.substringBefore("@").lowercase() + "28"
 
-                        localizationManager.updateUserProfile(resolvedName, resolvedHandle)
+                        val profile = com.simats.codeingo.domain.AuthService.shared.signInWithEmail(trimmed)
+                        localizationManager.updateUserProfile(profile.name, profile.handle)
                         localizationManager.setLoggedIn(true)
 
                         isSuccessToast = true
-                        toastMessage = "Signed in successfully as $resolvedName!"
+                        toastMessage = "Welcome back, ${profile.name}!"
 
                         coroutineScope.launch {
-                            delay(600)
-                            onLoginSuccess(resolvedName, emailOrUsername)
+                            delay(500)
+                            onLoginSuccess(profile.name, profile.email)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()

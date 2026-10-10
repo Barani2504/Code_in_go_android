@@ -13,5 +13,6 @@ class CodeingoApp : Application() {
         ThemeManager.instance.initialize(this)
         LocalizationManager.instance.initialize(this)
         GameManager.instance.initialize(this)
+        com.simats.codeingo.domain.AuthService.instance.initialize(this)
     }
 }

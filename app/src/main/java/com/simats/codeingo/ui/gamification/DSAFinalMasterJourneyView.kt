@@ -1,8 +1,7 @@
-﻿package com.simats.codeingo.ui.gamification
+package com.simats.codeingo.ui.gamification
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,8 +46,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
 
 /**
  * DSAFinalMasterJourneyView
@@ -116,6 +117,7 @@ fun DSAFinalMasterJourneyView(
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f))
+                        .pressScale()
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -221,26 +223,13 @@ fun DSAFinalMasterJourneyView(
                     currentStreak = currentStreak
                 )
 
-                // Finish Action Button
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.horizontalGradient(listOf(Color.Yellow, Color(0xFFFF8C00)))
-                        )
-                        .shadow(12.dp, RoundedCornerShape(16.dp), spotColor = Color.Yellow)
-                        .clickable { onDismiss() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "CLAIM MASTER TROPHY",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.Black
-                    )
-                }
+                // Finish Action Button using AppButton
+                AppButton(
+                    title = "CLAIM MASTER TROPHY 🏆",
+                    style = AppButtonStyle.PRIMARY_AMBER,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onDismiss() }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -445,6 +434,8 @@ private fun StatTile(
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.07f))
             .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+            .tilt3D()
+            .pressScale()
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

@@ -59,6 +59,8 @@ import com.simats.codeingo.data.model.DSA5ChapterData
 import com.simats.codeingo.data.model.DSAChapterModel
 import com.simats.codeingo.ui.gamification.DSAChapterStoryIntroSheet
 import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -755,6 +757,7 @@ private fun ArenaCard(
             .clip(shape)
             .background(CardBackground.copy(alpha = if (isUnlocked) 0.85f else 0.45f))
             .border(1.5.dp, accentColor.copy(alpha = if (isUnlocked) 0.45f else 0.20f), shape)
+            .pressScale()
             .clickable { if (isUnlocked) onClick() }
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -800,6 +803,7 @@ private fun DSATopicListCard(
             .clip(cardShape)
             .background(CardBackground.copy(alpha = 0.85f))
             .border(1.5.dp, type.color.copy(alpha = 0.45f), cardShape)
+            .pressScale()
             .clickable { onSelect() }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -3063,6 +3067,7 @@ private fun UnlockNextChapterButton(
                 )
             )
             .border(1.5.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+            .pressScale()
             .clickable { onUnlock() }
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -3224,6 +3229,7 @@ private fun DSAChapterPopupCard(
                     tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                     modifier = Modifier
                         .size(24.dp)
+                        .pressScale()
                         .clickable { onDismiss() }
                 )
             }
@@ -3257,6 +3263,7 @@ private fun DSAChapterPopupCard(
                                 listOf(chapter.primaryColor, chapter.darkColor)
                             )
                         )
+                        .pressScale()
                         .clickable { onPlay3D() }
                         .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center
@@ -3277,6 +3284,7 @@ private fun DSAChapterPopupCard(
                         .clip(RoundedCornerShape(14.dp))
                         .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f))
                         .border(1.dp, chapter.primaryColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                        .pressScale()
                         .clickable { onLearnVisualizer() }
                         .padding(vertical = 11.dp),
                     contentAlignment = Alignment.Center
@@ -3300,6 +3308,7 @@ private fun DSAChapterPopupCard(
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
                             .background(if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.04f))
+                            .pressScale()
                             .clickable { onOpenStory() }
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
@@ -3319,6 +3328,7 @@ private fun DSAChapterPopupCard(
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
                             .background(if (isCompleted) DuolingoGreen.copy(alpha = 0.15f) else AmberGold.copy(alpha = 0.15f))
+                            .pressScale()
                             .clickable { onCompleteLevel() }
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center

@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
@@ -56,6 +58,8 @@ import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotImage
+import com.simats.codeingo.ui.shop.CosmeticsCatalog
+import com.simats.codeingo.ui.shop.GemShopSheet
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
@@ -82,11 +86,13 @@ fun ProfileScreen(
     val currentEmotion by emotionManager.currentEmotion.collectAsState()
     val streakDays by gameManager.streakDays.collectAsState()
     val totalXP by gameManager.totalXP.collectAsState()
+    val gemsCount by gameManager.gemsCount.collectAsState()
 
     var showEmotionSheet by remember { mutableStateOf(false) }
     var showCreateAccountSheet by remember { mutableStateOf(false) }
     var showSignInSheet by remember { mutableStateOf(false) }
     var showSignOutAlert by remember { mutableStateOf(false) }
+    var showGemShopSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -101,10 +107,12 @@ fun ProfileScreen(
                 userHandle = userHandle,
                 flagEmoji = selectedLanguage?.flagEmoji ?: "🇮🇳",
                 streakDays = streakDays,
+                gemsCount = gemsCount,
                 totalXP = totalXP,
                 currentEmotion = currentEmotion,
                 onOpenEmotionSheet = { showEmotionSheet = true },
                 onOpenEditProfile = { showCreateAccountSheet = true },
+                onOpenGemShop = { showGemShopSheet = true },
                 onSignOutClick = { showSignOutAlert = true }
             )
         } else {
@@ -196,6 +204,13 @@ fun ProfileScreen(
                 }
             )
         }
+
+        // Duolingo Gem Shop Modal
+        if (showGemShopSheet) {
+            GemShopSheet(
+                onDismiss = { showGemShopSheet = false }
+            )
+        }
     }
 }
 
@@ -208,10 +223,12 @@ private fun AuthenticatedProfileBody(
     userHandle: String,
     flagEmoji: String,
     streakDays: Int,
+    gemsCount: Int,
     totalXP: Int,
     currentEmotion: com.simats.codeingo.data.model.PhoenixEmotion,
     onOpenEmotionSheet: () -> Unit,
     onOpenEditProfile: () -> Unit,
+    onOpenGemShop: () -> Unit,
     onSignOutClick: () -> Unit
 ) {
     Column(
@@ -277,20 +294,36 @@ private fun AuthenticatedProfileBody(
             onOpenEditProfile = onOpenEditProfile
         )
 
-        // 2. Statistics Section (2x2 Grid)
+        // 2. Level & XP Progress Card (Matches iOS ProfileView)
+        LevelProgressCard(
+            currentLevel = 8,
+            totalXP = totalXP,
+            maxLevelXP = 1000
+        )
+
+        // 3. Customization: YOUR PHOENIX Section (Matches iOS ProfileView)
+        YourPhoenixCustomizationSection(
+            onOpenGemShop = onOpenGemShop
+        )
+
+        // 4. Statistics Section (2x2 Grid)
         StatisticsSection(
             streakDays = streakDays,
+            gemsCount = gemsCount,
             totalXP = totalXP
         )
 
-        // 3. Achievements Section
+        // 5. Learning Journey Section (Matches iOS ProfileView)
+        LearningJourneySection()
+
+        // 6. Achievements Section
         AchievementsSection(
             streakDays = streakDays,
             totalXP = totalXP,
             onViewAllClick = {}
         )
 
-        // 4. Add Friends Section
+        // 7. Add Friends Section
         AddFriendsSection()
 
         AppButton(
@@ -477,11 +510,225 @@ private fun UserHeaderCard(
 }
 
 // ══════════════════════════════════════════════════════════════════
+// ⚡ Level & XP Progress Card (Matches iOS ProfileView)
+// ══════════════════════════════════════════════════════════════════
+@Composable
+private fun LevelProgressCard(
+    currentLevel: Int = 8,
+    totalXP: Int = 860,
+    maxLevelXP: Int = 1000
+) {
+    val remainingXP = (maxLevelXP - totalXP).coerceAtLeast(0)
+    val progress = (totalXP.toFloat() / maxLevelXP.toFloat()).coerceIn(0f, 1f)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 20.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(text = "👑", fontSize = 16.sp)
+                Text(
+                    text = "LEVEL $currentLevel",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black,
+                    color = LocalDynamicThemeColors.current.textPrimary
+                )
+            }
+            Text(
+                text = "$totalXP / $maxLevelXP XP",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                color = AmberGold
+            )
+        }
+
+        // Smooth Capsule Progress Bar (16dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f)
+                    else Color.Black.copy(alpha = 0.06f)
+                )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .height(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(Color(0xFFFFB300), Color(0xFFFF8C00))
+                        )
+                    )
+            )
+        }
+
+        // Bottom Info
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(text = "⚡", fontSize = 12.sp)
+            Text(
+                text = "$remainingXP XP to Level ${currentLevel + 1}",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f)
+            )
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 🦅 Customization: YOUR PHOENIX Section (Matches iOS ProfileView)
+// ══════════════════════════════════════════════════════════════════
+@Composable
+private fun YourPhoenixCustomizationSection(
+    onOpenGemShop: () -> Unit
+) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("dsa_cosmetics_prefs", Context.MODE_PRIVATE) }
+    val headId = prefs.getString("dsaEquippedHeadwear", "cap_grad") ?: "cap_grad"
+    val outfitId = prefs.getString("dsaEquippedOutfit", "none_outfit") ?: "none_outfit"
+    val accId = prefs.getString("dsaEquippedAccessory", "glasses_nerd") ?: "glasses_nerd"
+
+    val headItem = CosmeticsCatalog.item(headId)
+    val outfitItem = CosmeticsCatalog.item(outfitId)
+    val accItem = CosmeticsCatalog.item(accId)
+
+    val headEmoji = headItem?.emoji ?: "🎓"
+    val outfitEmoji = outfitItem?.emoji ?: ""
+    val accEmoji = accItem?.emoji ?: "👓"
+
+    val headName = headItem?.name ?: "Natural"
+    val accName = accItem?.name ?: "None"
+    val outfitName = outfitItem?.name
+
+    val subtitle = buildString {
+        append(headName)
+        if (outfitName != null && outfitId != "none_outfit") {
+            append(" • ")
+            append(outfitName)
+        }
+        append(" • ")
+        append(accName)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "YOUR PHOENIX",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Black,
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
+            letterSpacing = 0.5.sp
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlassCard(accentGlow = Color(0xFF58CC02), cornerRadius = 20.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Preview Icon Circle
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(AmberGold.copy(alpha = 0.18f))
+                        .border(1.dp, AmberGold.copy(alpha = 0.35f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "$headEmoji$outfitEmoji$accEmoji",
+                        fontSize = 18.sp
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = "Equipped Cosmetics",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = LocalDynamicThemeColors.current.textPrimary
+                    )
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
+                        maxLines = 1
+                    )
+                }
+            }
+
+            // Prominent "Customize Phoenix" Button (Duolingo 3D Button Aesthetic)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pressScale()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        ambientColor = Color(0xFF46A302),
+                        spotColor = Color(0xFF46A302)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF58CC02))
+                    .border(1.5.dp, Color(0xFF46A302), RoundedCornerShape(16.dp))
+                    .clickable { onOpenGemShop() }
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "✨", fontSize = 16.sp)
+                    Text(
+                        text = "Customize Phoenix",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
 // 📊 Statistics Section (2x2 Grid)
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun StatisticsSection(
     streakDays: Int,
+    gemsCount: Int,
     totalXP: Int
 ) {
     Column(
@@ -507,16 +754,16 @@ private fun StatisticsSection(
         ) {
             ProfileStatCard(
                 icon = "🔥",
-                value = "$streakDays",
-                label = "Day Streak",
+                value = "$streakDays days",
+                label = "STREAK",
                 accentColor = Color(0xFFFF9500),
                 modifier = Modifier.weight(1f)
             )
             ProfileStatCard(
-                icon = "⚡",
-                value = "$totalXP XP",
-                label = "Total XP",
-                accentColor = AmberGold,
+                icon = "💎",
+                value = "$gemsCount",
+                label = "GEMS",
+                accentColor = Color(0xFF1CA6FF),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -526,19 +773,163 @@ private fun StatisticsSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ProfileStatCard(
-                icon = "🛡️",
-                value = "Obsidian",
-                label = "Current League",
-                accentColor = Color(0xFFC0A060),
+                icon = "⚡",
+                value = "$totalXP XP",
+                label = "TOTAL XP",
+                accentColor = AmberGold,
                 modifier = Modifier.weight(1f)
             )
             ProfileStatCard(
-                icon = "🎯",
-                value = "0",
-                label = "Top 3 Finishes",
+                icon = "🏆",
+                value = "#1 Diamond",
+                label = "CURRENT LEAGUE",
                 accentColor = Color(0xFF8CE036),
                 modifier = Modifier.weight(1f)
             )
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 🗺️ Learning Journey Section (Matches iOS ProfileView)
+// ══════════════════════════════════════════════════════════════════
+private data class LearningJourneyTopic(
+    val id: String,
+    val name: String,
+    val iconEmoji: String,
+    val color: Color,
+    val progress: Float,
+    val isLocked: Boolean
+) {
+    val progressText: String
+        get() = if (isLocked) "LOCKED" else "${(progress * 100).toInt()}%"
+}
+
+@Composable
+private fun LearningJourneySection() {
+    val topics = remember {
+        listOf(
+            LearningJourneyTopic("array", "Array", "📦", Color(0xFF2B70CA), 0.85f, false),
+            LearningJourneyTopic("stack", "Stack", "🥞", Color(0xFFF5A623), 0.70f, false),
+            LearningJourneyTopic("queue", "Queue", "🚶‍♂️", Color(0xFF58CC02), 0.55f, false),
+            LearningJourneyTopic("linked_list", "Linked List", "🔗", Color(0xFFA659F2), 0.30f, false),
+            LearningJourneyTopic("binary_tree", "Binary Tree", "🌲", Color(0xFFEB4747), 0.0f, true)
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "LEARNING JOURNEY",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Black,
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
+            letterSpacing = 0.5.sp
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlassCard(accentGlow = Color(0xFF22D3EE), cornerRadius = 20.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            topics.forEachIndexed { index, topic ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // Topic Icon Badge
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (topic.isLocked) Color.White.copy(alpha = 0.05f)
+                                else topic.color.copy(alpha = 0.18f)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = if (topic.isLocked) "🔒" else topic.iconEmoji, fontSize = 20.sp)
+                    }
+
+                    // Topic Name & Progress Bar
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = topic.name,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (topic.isLocked) LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.5f)
+                            else LocalDynamicThemeColors.current.textPrimary
+                        )
+
+                        if (!topic.isLocked) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(
+                                        if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f)
+                                        else Color.Black.copy(alpha = 0.06f)
+                                    )
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(topic.progress)
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp))
+                                        .background(topic.color)
+                                )
+                            }
+                        }
+                    }
+
+                    // Progress % or LOCKED pill
+                    if (topic.isLocked) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.White.copy(alpha = 0.08f))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = topic.progressText,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.5f)
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = topic.progressText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = topic.color
+                        )
+                    }
+                }
+
+                if (index < topics.size - 1) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 74.dp)
+                            .height(1.dp)
+                            .background(
+                                if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f)
+                                else Color.Black.copy(alpha = 0.06f)
+                            )
+                    )
+                }
+            }
         }
     }
 }

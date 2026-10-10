@@ -28,7 +28,7 @@ class GameManager private constructor() {
 
     // ── Core stats ────────────────────────────────────────────────────────────
 
-    private val _totalXP = MutableStateFlow(120)
+    private val _totalXP = MutableStateFlow(860)
     val totalXP: StateFlow<Int> = _totalXP.asStateFlow()
 
     private val _gemsCount = MutableStateFlow(450)
@@ -328,28 +328,36 @@ class GameManager private constructor() {
         persistStats()
     }
 
+    fun awardStageCompletion(xp: Int = 12, diamonds: Int = 5) {
+        _totalXP.value += xp
+        _gemsCount.value += diamonds
+        _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
+        persistStats()
+    }
+
     fun awardLessonXP(
         unitId: Int = 1,
         accuracyPercentage: Double = 1.0,
         speedSeconds: Int = 30,
         baseXP: Int? = null
     ): Int {
-        var earned = baseXP ?: (unitId * 10)
+        var earned = baseXP ?: 10
         if (accuracyPercentage >= 1.0) {
-            earned += 10
+            earned += 3
         } else if (accuracyPercentage >= 0.8) {
-            earned += 5
-        }
-        if (speedSeconds < 45) {
-            earned += 5
-        } else if (speedSeconds < 90) {
             earned += 2
         }
-        if (_currentCombo.value >= 5) {
-            earned += 5
+        if (speedSeconds < 45) {
+            earned += 2
+        } else if (speedSeconds < 90) {
+            earned += 1
         }
+        if (_currentCombo.value >= 5) {
+            earned += 2
+        }
+        earned = minOf(earned, 18)
         _totalXP.value += earned
-        _gemsCount.value += maxOf(earned / 5, 2)
+        _gemsCount.value += 5
         _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
         incrementDailyQuest("lessons")
         persistStats()
@@ -376,10 +384,25 @@ class GameManager private constructor() {
         PhoenixEmotionManager.instance.handleHeartsRefilled()
     }
 
+    fun buyHearts(amount: Int, price: Int): Pair<Boolean, String> {
+        if (_heartsCount.value >= 10) {
+            return Pair(false, "Your life hearts are already full! (10/10 ❤️)")
+        }
+        if (_gemsCount.value < price) {
+            val needed = price - _gemsCount.value
+            return Pair(false, "Not enough diamonds! You need $needed more 💎.")
+        }
+        _gemsCount.value -= price
+        _heartsCount.value = minOf(10, _heartsCount.value + amount)
+        persistStats()
+        PhoenixEmotionManager.instance.handleHeartsRefilled()
+        return Pair(true, "Restored +$amount life hearts! ❤️ (${_heartsCount.value}/10)")
+    }
+
     fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {
-        val bossXP = unitId * 50
+        val bossXP = 25
         _totalXP.value += bossXP
-        _gemsCount.value += 50
+        _gemsCount.value += 15
         _completedBossIds.value = _completedBossIds.value + boss.id
         triggerEvolution(boss.targetPhoenixStageAwarded)
         persistStats()

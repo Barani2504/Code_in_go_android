@@ -73,24 +73,42 @@ fun GoogleAuthSheet(
     var selectedEmail by remember { mutableStateOf("") }
     val isDark = LocalDynamicThemeColors.current.isDark
 
-    val defaultAccounts = listOf(
-        GoogleAccountItem(
-            name = "Vishal Rao",
-            email = "vishal.rao@gmail.com",
-            avatarInitial = "V",
-            avatarBgColor = Color(0xFFA560E8)
-        ),
-        GoogleAccountItem(
-            name = "Sail User",
-            email = "sail.dev@gmail.com",
-            avatarInitial = "S",
-            avatarBgColor = Color(0xFF1CB0F6)
+    val savedAccounts by com.simats.codeingo.domain.AuthService.shared.savedGoogleAccounts.collectAsState()
+
+    val displayAccounts = if (savedAccounts.isNotEmpty()) {
+        savedAccounts.map {
+            GoogleAccountItem(
+                name = it.name,
+                email = it.email,
+                avatarInitial = it.avatarInitial,
+                avatarBgColor = when (it.colorIndex % 3) {
+                    0 -> Color(0xFF4285F4)
+                    1 -> Color(0xFF34A853)
+                    else -> Color(0xFFEA4335)
+                }
+            )
+        }
+    } else {
+        listOf(
+            GoogleAccountItem(
+                name = "Lokesh Kumar",
+                email = "lokeshkumar1232005@gmail.com",
+                avatarInitial = "L",
+                avatarBgColor = Color(0xFF4285F4)
+            ),
+            GoogleAccountItem(
+                name = "Lokesh Developer",
+                email = "lokesh.developer@gmail.com",
+                avatarInitial = "L",
+                avatarBgColor = Color(0xFF34A853)
+            )
         )
-    )
+    }
 
     LaunchedEffect(isAuthenticating) {
         if (isAuthenticating) {
             delay(1000)
+            com.simats.codeingo.domain.AuthService.shared.signInWithGoogle(selectedName, selectedEmail)
             onSelectAccount(selectedName, selectedEmail)
             onDismiss()
         }
@@ -110,7 +128,7 @@ fun GoogleAuthSheet(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Close
+            // Header Close with SSL bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -123,14 +141,22 @@ fun GoogleAuthSheet(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "SIGN IN WITH GOOGLE",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
-                    color = if (isDark) Color.White else Color(0xFF12_18_26),
-                    letterSpacing = 0.8.sp
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Black.copy(alpha = 0.25f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text("🔒", fontSize = 11.sp)
+                    Text(
+                        text = "accounts.google.com",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF34A853)
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.size(48.dp))
             }
@@ -195,7 +221,7 @@ fun GoogleAuthSheet(
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            defaultAccounts.forEachIndexed { index, account ->
+                            displayAccounts.forEachIndexed { index, account ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()

@@ -78,6 +78,7 @@ import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -340,6 +341,7 @@ private fun ArenaTopHUD(
             // Speed Toggle Button
             Box(
                 modifier = Modifier
+                    .pressScale()
                     .clip(RoundedCornerShape(8.dp))
                     .background(AmberGold.copy(alpha = 0.18f))
                     .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
@@ -358,6 +360,7 @@ private fun ArenaTopHUD(
             // Hint Button
             Box(
                 modifier = Modifier
+                    .pressScale()
                     .size(28.dp)
                     .clip(CircleShape)
                     .background(Color(0xFFFFD700).copy(alpha = 0.2f))
@@ -390,6 +393,7 @@ private fun ArenaLevelTrack(
 
             Box(
                 modifier = Modifier
+                    .pressScale()
                     .clip(RoundedCornerShape(14.dp))
                     .background(
                         when {
@@ -443,6 +447,7 @@ private fun ArenaBottomBar(
     ) {
         Box(
             modifier = Modifier
+                .pressScale()
                 .clip(RoundedCornerShape(14.dp))
                 .background(Color(0xFF141E30))
                 .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
@@ -466,6 +471,7 @@ private fun ArenaBottomBar(
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Box(
                 modifier = Modifier
+                    .pressScale()
                     .size(38.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF141E30))
@@ -477,6 +483,7 @@ private fun ArenaBottomBar(
 
             Box(
                 modifier = Modifier
+                    .pressScale()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.08f))
                     .clickable { onSkip() }

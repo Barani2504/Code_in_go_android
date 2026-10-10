@@ -1,6 +1,7 @@
 package com.simats.codeingo.ui.practice
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,12 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -45,23 +48,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.res.painterResource
 import com.simats.codeingo.R
 import com.simats.codeingo.data.model.MistakeVaultItem
 import com.simats.codeingo.domain.GameManager
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
-import com.simats.codeingo.ui.components.DuolingoButton
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
@@ -75,8 +74,11 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoGreenDark
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
 
 data class InterviewProblem(
     val title: String,
@@ -173,6 +175,7 @@ fun PracticeHubScreen(
                             .clip(shape)
                             .background(if (isSelected) DuolingoGreen else CardBackground.copy(alpha = 0.75f))
                             .border(1.5.dp, if (isSelected) DuolingoGreen else InputBorder, shape)
+                            .pressScale()
                             .clickable { selectedTab = index }
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
@@ -211,206 +214,204 @@ fun PracticeHubScreen(
                     .fillMaxWidth()
             ) {
                 when (selectedTab) {
-                0 -> MistakeVaultTab(
-                    mistakes = mistakes,
-                    onStartRepair = { mistake -> repairingMistake = mistake }
-                )
-                1 -> DailyReviewTab(
-                    onCompleteReview = {
-                        gameManager.awardLessonXP(baseXP = 25, accuracyPercentage = 1.0, speedSeconds = 30)
-                    }
-                )
-                2 -> InterviewPrepTab(
-                    onSelectProblem = { prob -> selectedProblem = prob }
-                )
-            }
-        }
-
-        // Mistake Repair Bottom Sheet
-        if (repairingMistake != null) {
-            val item = repairingMistake!!
-            ModalBottomSheet(
-                onDismissRequest = { repairingMistake = null },
-                containerColor = DarkBackground
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                ) {
-                    Text(
-                        text = "🛠️ Mistake Repair",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary
+                    0 -> MistakeVaultTab(
+                        mistakes = mistakes,
+                        onStartRepair = { mistake -> repairingMistake = mistake }
                     )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = item.prompt,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = LocalDynamicThemeColors.current.textPrimary
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(CardBackground)
-                            .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
-                            .padding(14.dp)
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "EXPLANATION & WHY:",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                color = DsaOrange
-                            )
-                            Text(
-                                text = item.explanation,
-                                fontSize = 13.sp,
-                                color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
-                                lineHeight = 18.sp
-                            )
-                            Divider(color = InputBorder)
-                            Text(
-                                text = "Correct Answer: ${item.correctAnswer}",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = DuolingoGreen
-                            )
+                    1 -> DailyReviewTab(
+                        onCompleteReview = {
+                            gameManager.awardLessonXP(baseXP = 25, accuracyPercentage = 1.0, speedSeconds = 30)
                         }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    DuolingoButton(
-                        text = "MARK REPAIRED (+10 XP)",
-                        faceColor = DuolingoGreen,
-                        shadowColor = DuolingoGreenDark,
-                        onClick = {
-                            gameManager.repairMistake(item.id)
-                            repairingMistake = null
-                        },
-                        modifier = Modifier.fillMaxWidth()
                     )
-
-                    Spacer(modifier = Modifier.height(20.dp))
+                    2 -> InterviewPrepTab(
+                        onSelectProblem = { prob -> selectedProblem = prob }
+                    )
                 }
             }
-        }
 
-        // Problem Detail Bottom Sheet
-        if (selectedProblem != null) {
-            val prob = selectedProblem!!
-            ModalBottomSheet(
-                onDismissRequest = { selectedProblem = null },
-                containerColor = DarkBackground
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                        .verticalScroll(rememberScrollState())
+            // Mistake Repair Bottom Sheet
+            if (repairingMistake != null) {
+                val item = repairingMistake!!
+                ModalBottomSheet(
+                    onDismissRequest = { repairingMistake = null },
+                    containerColor = DarkBackground
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
                     ) {
                         Text(
-                            text = prob.title,
-                            fontSize = 18.sp,
+                            text = "🛠️ Mistake Repair",
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             color = LocalDynamicThemeColors.current.textPrimary
                         )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Text(
+                            text = item.prompt,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LocalDynamicThemeColors.current.textPrimary
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(prob.diffColor.copy(alpha = 0.2f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(CardBackground)
+                                .border(1.dp, InputBorder, RoundedCornerShape(14.dp))
+                                .padding(14.dp)
                         ) {
-                            Text(
-                                text = prob.difficulty,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                color = prob.diffColor
-                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = "EXPLANATION & WHY:",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = DsaOrange
+                                )
+                                Text(
+                                    text = item.explanation,
+                                    fontSize = 13.sp,
+                                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
+                                    lineHeight = 18.sp
+                                )
+                                Divider(color = InputBorder)
+                                Text(
+                                    text = "Correct Answer: ${item.correctAnswer}",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = DuolingoGreen
+                                )
+                            }
                         }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        AppButton(
+                            title = "MARK REPAIRED (+10 XP) ✨",
+                            style = AppButtonStyle.SUCCESS_GREEN,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                gameManager.repairMistake(item.id)
+                                repairingMistake = null
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = prob.complexity,
-                        fontSize = 13.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "KEY PATTERN & APPROACH",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = SubtextGray
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = prob.approach,
-                        fontSize = 13.sp,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
-                        lineHeight = 18.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "PYTHON IMPLEMENTATION",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = SubtextGray
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Box(
+            // Problem Detail Bottom Sheet
+            if (selectedProblem != null) {
+                val prob = selectedProblem!!
+                ModalBottomSheet(
+                    onDismissRequest = { selectedProblem = null },
+                    containerColor = DarkBackground
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF0F1720))
-                            .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
-                            .padding(14.dp)
+                            .padding(24.dp)
+                            .verticalScroll(rememberScrollState())
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = prob.title,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                color = LocalDynamicThemeColors.current.textPrimary
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(prob.diffColor.copy(alpha = 0.2f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = prob.difficulty,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = prob.diffColor
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
                         Text(
-                            text = prob.sampleCode,
-                            fontSize = 12.sp,
+                            text = prob.complexity,
+                            fontSize = 13.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = Color(0xFF68D391),
-                            lineHeight = 16.sp
+                            color = AmberGold
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "KEY PATTERN & APPROACH",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = SubtextGray
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = prob.approach,
+                            fontSize = 13.sp,
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
+                            lineHeight = 18.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "PYTHON IMPLEMENTATION",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = SubtextGray
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFF0F1720))
+                                .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
+                                .padding(14.dp)
+                        ) {
+                            Text(
+                                text = prob.sampleCode,
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = Color(0xFF68D391),
+                                lineHeight = 16.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        AppButton(
+                            title = "GOT IT! 👍",
+                            style = AppButtonStyle.SUCCESS_GREEN,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { selectedProblem = null }
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    DuolingoButton(
-                        text = "GOT IT!",
-                        faceColor = DuolingoGreen,
-                        shadowColor = DuolingoGreenDark,
-                        onClick = { selectedProblem = null },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }
     }
-}
 }
 
 // ──────────────────────────────────────────────
@@ -603,10 +604,9 @@ private fun DailyReviewTab(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(28.dp))
-            DuolingoButton(
-                text = "CONTINUE",
-                faceColor = DuolingoGreen,
-                shadowColor = DuolingoGreenDark,
+            AppButton(
+                title = "CONTINUE →",
+                style = AppButtonStyle.SUCCESS_GREEN,
                 onClick = {
                     reviewCompleted = false
                     isReviewActive = false
@@ -676,6 +676,7 @@ private fun DailyReviewTab(
                                 },
                                 shape
                             )
+                            .pressScale()
                             .clickable(enabled = !isAnswerChecked) { selectedOption = idx }
                             .padding(16.dp)
                     ) {
@@ -689,12 +690,10 @@ private fun DailyReviewTab(
                 }
             }
 
-            val isDark = LocalDynamicThemeColors.current.isDark
-            DuolingoButton(
-                text = if (!isAnswerChecked) "CHECK" else if (currentReviewIdx < drillQuestions.lastIndex) "NEXT QUESTION" else "FINISH REVIEW",
-                faceColor = if (selectedOption != null) DuolingoGreen else (if (isDark) CardBackground else Color(0xFFE5E5E5)),
-                shadowColor = if (selectedOption != null) DuolingoGreenDark else (if (isDark) Color(0xFF142028) else Color(0xFFCCCCCC)),
-                textColor = if (selectedOption != null) Color.White else SubtextGray,
+            AppButton(
+                title = if (!isAnswerChecked) "CHECK ANSWER" else if (currentReviewIdx < drillQuestions.lastIndex) "NEXT QUESTION →" else "FINISH REVIEW 🏆",
+                style = if (selectedOption != null) AppButtonStyle.SUCCESS_GREEN else AppButtonStyle.SECONDARY_GLASS,
+                isEnabled = selectedOption != null || isAnswerChecked,
                 onClick = {
                     if (!isAnswerChecked) {
                         if (selectedOption != null) isAnswerChecked = true
@@ -709,7 +708,9 @@ private fun DailyReviewTab(
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
             )
         }
     } else {
@@ -726,7 +727,7 @@ private fun DailyReviewTab(
                     .clip(RoundedCornerShape(20.dp))
                     .background(CardBackground)
                     .border(1.5.dp, DuolingoGreen.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                .padding(20.dp)
+                    .padding(20.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(
@@ -751,10 +752,9 @@ private fun DailyReviewTab(
                         Text(text = "🔥", fontSize = 32.sp)
                     }
 
-                    DuolingoButton(
-                        text = "START DAILY REVIEW (+25 XP)",
-                        faceColor = DuolingoGreen,
-                        shadowColor = DuolingoGreenDark,
+                    AppButton(
+                        title = "START DAILY REVIEW (+25 XP)",
+                        style = AppButtonStyle.SUCCESS_GREEN,
                         onClick = { isReviewActive = true },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -838,6 +838,7 @@ private fun InterviewPrepTab(
                     .clip(shape)
                     .background(CardBackground)
                     .border(1.2.dp, InputBorder, shape)
+                    .pressScale()
                     .clickable { onSelectProblem(prob) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -968,6 +969,7 @@ private fun PracticeBannerCard(
             .clip(shape)
             .background(CardBackground.copy(alpha = 0.85f))
             .border(1.5.dp, tagColor.copy(alpha = 0.45f), shape)
+            .pressScale()
             .clickable { onClick() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,

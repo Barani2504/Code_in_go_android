@@ -35,13 +35,13 @@ enum class StackTowerLevel(
     val xpReward: Int,
     val coinReward: Int
 ) {
-    LEVEL_1(1, "What is a Stack?", "Vertical tower & The TOP pointer", "🥞", 20, 10),
-    LEVEL_2(2, "The PUSH Power", "Drop elements onto the TOP", "⬇️", 30, 15),
-    LEVEL_3(3, "The POP Eviction", "Remove only the uppermost block", "⬆️", 40, 20),
-    LEVEL_4(4, "The PEEK Vision", "Inspect TOP without removing it", "👁️", 50, 25),
-    LEVEL_5(5, "LIFO Prediction", "Predict which element pops next", "🔮", 60, 30),
-    LEVEL_6(6, "The LIFO Gauntlet", "Execute speed push & pop sequences", "⚡", 80, 40),
-    BOSS_BATTLE(7, "TOWER COLLAPSE", "Pop destabilized blocks to save the spire!", "💥", 100, 50);
+    LEVEL_1(1, "What is a Stack?", "Vertical tower & The TOP pointer", "🥞", 10, 3),
+    LEVEL_2(2, "The PUSH Power", "Drop elements onto the TOP", "⬇️", 10, 3),
+    LEVEL_3(3, "The POP Eviction", "Remove only the uppermost block", "⬆️", 12, 4),
+    LEVEL_4(4, "The PEEK Vision", "Inspect TOP without removing it", "👁️", 12, 4),
+    LEVEL_5(5, "LIFO Prediction", "Predict which element pops next", "🔮", 14, 5),
+    LEVEL_6(6, "The LIFO Gauntlet", "Execute speed push & pop sequences", "⚡", 15, 5),
+    BOSS_BATTLE(7, "TOWER COLLAPSE", "Pop destabilized blocks to save the spire!", "💥", 25, 15);
 
     companion object {
         fun fromId(id: Int): StackTowerLevel = entries.find { it.id == id } ?: LEVEL_1

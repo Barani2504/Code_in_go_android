@@ -33,13 +33,13 @@ enum class ArrayKingdomLevel(
     val xpReward: Int,
     val coinReward: Int
 ) {
-    LEVEL_1(1, "What is an Array?", "Positions, Elements & 0-Based Indices", "📦", 20, 10),
-    LEVEL_2(2, "Index Hunt", "Tap blocks at target indices", "🎯", 30, 15),
-    LEVEL_3(3, "Treasure Search", "Linear search step-by-step", "🔍", 40, 20),
-    LEVEL_4(4, "Bubble Sort Intro", "Watch larger values bubble to the right", "🔄", 50, 25),
-    LEVEL_5(5, "Control the Sort", "Select adjacent pairs & swap", "👆", 60, 30),
-    LEVEL_6(6, "Speed Challenge", "Sort before the 20s timer expires!", "⏱️", 80, 40),
-    BOSS_BATTLE(7, "The Chaos Array", "Defeat the Glitch Boss with Bubble Sort!", "🔥", 100, 50);
+    LEVEL_1(1, "What is an Array?", "Positions, Elements & 0-Based Indices", "📦", 10, 3),
+    LEVEL_2(2, "Index Hunt", "Tap blocks at target indices", "🎯", 10, 3),
+    LEVEL_3(3, "Treasure Search", "Linear search step-by-step", "🔍", 12, 4),
+    LEVEL_4(4, "Bubble Sort Intro", "Watch larger values bubble to the right", "🔄", 12, 4),
+    LEVEL_5(5, "Control the Sort", "Select adjacent pairs & swap", "👆", 14, 5),
+    LEVEL_6(6, "Speed Challenge", "Sort before the 20s timer expires!", "⏱️", 15, 5),
+    BOSS_BATTLE(7, "The Chaos Array", "Defeat the Glitch Boss with Bubble Sort!", "🔥", 25, 15);
 
     companion object {
         fun fromId(id: Int): ArrayKingdomLevel = entries.find { it.id == id } ?: LEVEL_1

@@ -55,6 +55,7 @@ import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.worlds.array.KingdomGameSpeed
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -146,6 +147,7 @@ fun QueueStationArenaScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
+                            .pressScale()
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFFB946FA).copy(alpha = 0.2f))
                             .border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(8.dp))
@@ -157,6 +159,7 @@ fun QueueStationArenaScreen(
 
                     Box(
                         modifier = Modifier
+                            .pressScale()
                             .size(28.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFFFD700).copy(alpha = 0.2f))
@@ -182,6 +185,7 @@ fun QueueStationArenaScreen(
 
                     Box(
                         modifier = Modifier
+                            .pressScale()
                             .clip(RoundedCornerShape(14.dp))
                             .background(
                                 when {
@@ -235,6 +239,7 @@ fun QueueStationArenaScreen(
             ) {
                 Box(
                     modifier = Modifier
+                        .pressScale()
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF221133))
                         .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
@@ -247,6 +252,7 @@ fun QueueStationArenaScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(
                         modifier = Modifier
+                            .pressScale()
                             .size(38.dp)
                             .clip(CircleShape)
                             .background(Color(0xFF221133))
@@ -262,6 +268,7 @@ fun QueueStationArenaScreen(
 
                     Box(
                         modifier = Modifier
+                            .pressScale()
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color.White.copy(alpha = 0.08f))
                             .clickable {

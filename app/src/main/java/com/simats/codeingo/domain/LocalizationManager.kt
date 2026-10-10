@@ -37,10 +37,10 @@ class LocalizationManager private constructor() {
     private val _isLoggedIn = MutableStateFlow(true)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
-    private val _userName = MutableStateFlow("Vishal Rao")
+    private val _userName = MutableStateFlow("Lokesh Kumar")
     val userName: StateFlow<String> = _userName.asStateFlow()
 
-    private val _userHandle = MutableStateFlow("VishalRao3454")
+    private val _userHandle = MutableStateFlow("lokesh_dev")
     val userHandle: StateFlow<String> = _userHandle.asStateFlow()
 
     private val _dayStreak = MutableStateFlow(1)

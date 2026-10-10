@@ -54,6 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.CandyCrushStarsView
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.theme.AmberGold
@@ -66,9 +68,10 @@ import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoOrangeDark
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
+import kotlinx.coroutines.delay
 
 data class EggParticle(
     val id: Int,
@@ -390,24 +393,23 @@ fun PhoenixEggHatch3DView(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Stats Badges
+            // Stats Badges (Matches iOS PhoenixEggHatch3DView: XP GAINED, DIAMONDS, ACCURACY)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatPill("XP EARNED", "+$xpEarned ⭐", AmberGold, Modifier.weight(1f))
+                StatPill("XP GAINED", "+$xpEarned ⚡", AmberGold, Modifier.weight(1f))
+                StatPill("DIAMONDS", if (isBoss) "+15 💎" else "+5 💎", Color(0xFF1CA6FF), Modifier.weight(1f))
                 StatPill("ACCURACY", "$accuracyPercentage%", DuolingoGreen, Modifier.weight(1f))
-                StatPill("STAGE", "Lv. $levelNumber 🔥", DuolingoOrange, Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
             val isLastLevel = isBoss || levelNumber >= totalLevelsInUnit
-            // Bottom Action Button
-            DuolingoButton(
-                text = if (isLastLevel) "UPGRADE PHOENIX & NEXT UNIT ➔" else (if (onContinue != null || isShattered) "CONTINUE" else "CLAIM REWARDS"),
-                faceColor = if (isLastLevel) DuolingoOrange else DuolingoGreen,
-                shadowColor = if (isLastLevel) DuolingoOrangeDark else DuolingoGreenDark,
+            // Bottom Action Button using AppButton
+            AppButton(
+                title = if (isLastLevel) "UPGRADE PHOENIX & NEXT UNIT ➔" else (if (onContinue != null || isShattered) "CONTINUE →" else "CLAIM REWARDS 🏆"),
+                style = if (isLastLevel) AppButtonStyle.PRIMARY_AMBER else AppButtonStyle.SUCCESS_GREEN,
                 onClick = {
                     if (isLastLevel && onUpgradePhoenixNextUnit != null) {
                         onUpgradePhoenixNextUnit()
@@ -438,6 +440,7 @@ private fun StatPill(
             .clip(shape)
             .background(CardBackground)
             .border(1.dp, InputBorder, shape)
+            .pressScale()
             .padding(vertical = 10.dp, horizontal = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

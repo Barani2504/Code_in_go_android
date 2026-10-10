@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -70,6 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.R
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
@@ -79,9 +81,11 @@ import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
-import kotlinx.coroutines.delay
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.tilt3D
+import kotlinx.coroutines.delay
 
 fun getPhoenixDrawableId(stageId: Int): Int {
     return when (stageId) {
@@ -267,6 +271,7 @@ fun PhoenixSanctuaryScreen(
                             .clip(shape)
                             .background(if (isSelected) AmberGold else CardBackground.copy(alpha = 0.7f))
                             .border(1.dp, if (isSelected) AmberGold else InputBorder, shape)
+                            .pressScale()
                             .clickable { selectedAct = idx }
                             .padding(horizontal = 12.dp, vertical = 7.dp),
                         contentAlignment = Alignment.Center
@@ -308,6 +313,8 @@ fun PhoenixSanctuaryScreen(
                                 color = if (isEquipped) AmberGold else InputBorder,
                                 shape = shape
                             )
+                            .tilt3D()
+                            .pressScale()
                             .clickable { previewStage = stage }
                             .padding(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -380,6 +387,7 @@ fun PhoenixSanctuaryScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(if (isEquipped) DuolingoGreen else AmberGold)
+                                .pressScale()
                                 .clickable {
                                     gameManager.setActivePhoenixStage(stage.id)
                                     equippedToast = "Equipped ${stage.name}!"

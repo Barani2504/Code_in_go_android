@@ -81,6 +81,7 @@ import com.simats.codeingo.ui.profile.ProfileScreen
 import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.shop.GemShopSheet
 import com.simats.codeingo.ui.visualizer.VisualizerScreen
 import com.simats.codeingo.ui.worlds.array.ArrayKingdomArenaScreen
 import com.simats.codeingo.ui.worlds.linkedlist.LinkedListRoadArenaScreen
@@ -121,6 +122,7 @@ fun MainDashboardScreen(
     val emotionManager = PhoenixEmotionManager.instance
 
     val totalXP by gameManager.totalXP.collectAsState()
+    val gemsCount by gameManager.gemsCount.collectAsState()
     val totalStars by gameManager.totalStars.collectAsState()
     val streakDays by gameManager.streakDays.collectAsState()
     val isStreakLostPendingRestore by gameManager.isStreakLostPendingRestore.collectAsState()
@@ -141,6 +143,7 @@ fun MainDashboardScreen(
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
     var showHeartsSheet by remember { mutableStateOf(false) }
+    var showGemShopSheet by remember { mutableStateOf(false) }
     var showFinalMasterJourney by remember { mutableStateOf(false) }
     var storySelectedChapter by remember { mutableStateOf<com.simats.codeingo.data.model.DSAChapterModel?>(null) }
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
@@ -469,11 +472,14 @@ fun MainDashboardScreen(
                                 totalStars = totalStars,
                                 totalXP = totalXP,
                                 heartsCount = heartsCount,
+                                gemsCount = gemsCount,
                                 heartTimerString = heartTimerStr,
                                 onMenuClick = { showSideMenu = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onStreakClick = { showStreakSheet = true },
-                                onHeartsClick = { showHeartsSheet = true }
+                                onXpClick = { selectedTab = DashboardTab.PRACTICE },
+                                onHeartsClick = { showHeartsSheet = true },
+                                onGemsClick = { showGemShopSheet = true }
                             )
                         }
                     }
@@ -609,9 +615,26 @@ fun MainDashboardScreen(
                         gameManager.refillHearts()
                         showHeartsSheet = false
                     },
+                    onRefillWithGems = { amount, price ->
+                        val result = gameManager.buyHearts(amount, price)
+                        if (result.first) {
+                            showHeartsSheet = false
+                        }
+                    },
+                    onOpenShop = {
+                        showHeartsSheet = false
+                        showGemShopSheet = true
+                    },
                     onDismiss = { showHeartsSheet = false }
                 )
             }
+        }
+
+        // Gem Shop & Duolingo Cosmetics Modal Sheet
+        if (showGemShopSheet) {
+            GemShopSheet(
+                onDismiss = { showGemShopSheet = false }
+            )
         }
 
         // Phoenix Evolution Fullscreen Celebration Modal
@@ -1161,6 +1184,8 @@ private fun HeartsInfoSheet(
     heartsCount: Int,
     timerString: String?,
     onRefillHearts: () -> Unit,
+    onRefillWithGems: (Int, Int) -> Unit = { _, _ -> },
+    onOpenShop: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     Column(
@@ -1168,7 +1193,7 @@ private fun HeartsInfoSheet(
             .fillMaxWidth()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text(text = "❤️", fontSize = 48.sp)
         Text(
@@ -1179,7 +1204,7 @@ private fun HeartsInfoSheet(
         )
         Text(
             text = if (heartsCount < 10) {
-                "Next heart regenerates in $timerString. Keep practicing or refill instantly!"
+                "Next heart regenerates in ${timerString ?: "a moment"}. Keep practicing or refill instantly!"
             } else {
                 "You have full hearts! Incorrect answers during lessons will consume 1 heart."
             },
@@ -1190,6 +1215,7 @@ private fun HeartsInfoSheet(
         )
 
         if (heartsCount < 10) {
+            // Free / Instant full refill
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1200,12 +1226,48 @@ private fun HeartsInfoSheet(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "REFILL HEARTS (10 ❤️)",
+                    text = "REFILL FULL HEARTS (10 ❤️)",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
                     color = Color.White
                 )
             }
+
+            // Buy +5 hearts with gems
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF1CA6FF))
+                    .clickable { onRefillWithGems(5, 20) }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "BUY +5 HEARTS (💎 20)",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+            }
+        }
+
+        // Open Gem Shop button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White.copy(alpha = 0.08f))
+                .clickable { onOpenShop() }
+                .padding(vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "🛍️ VISIT GEM SHOP",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                color = LocalDynamicThemeColors.current.textPrimary
+            )
         }
     }
 }

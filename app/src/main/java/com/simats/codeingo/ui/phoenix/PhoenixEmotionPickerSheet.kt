@@ -64,6 +64,7 @@ import com.simats.codeingo.domain.EmotionRule
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.pressScale
 
 // ══════════════════════════════════════════════════════════════════
 // 📱 PhoenixEmotionPickerSheet — 28 Mascot Catalog & Rule Tester
@@ -287,6 +288,7 @@ fun PhoenixEmotionPickerSheet(
                                     .clip(RoundedCornerShape(100.dp))
                                     .background(if (isDark) Color(0xFF1C2C45) else Color.White)
                                     .border(1.dp, if (isDark) Color(0xFF2D4263) else dynamicColors.inputBorder, RoundedCornerShape(100.dp))
+                                    .pressScale()
                                     .clickable { emotionManager.simulateTrigger(triggerKey) }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
@@ -314,6 +316,7 @@ fun PhoenixEmotionPickerSheet(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(100.dp))
                                 .background(if (isSelected) AmberGold else if (isDark) Color(0xFF182438) else Color(0xFFE8EEF8))
+                                .pressScale()
                                 .clickable { selectedCategory = category }
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                         ) {
@@ -351,6 +354,7 @@ fun PhoenixEmotionPickerSheet(
                                     color = itemBorder,
                                     shape = RoundedCornerShape(14.dp)
                                 )
+                                .pressScale()
                                 .clickable {
                                     emotionManager.setEmotion(
                                         emotion = emotion,

@@ -137,6 +137,10 @@ fun SettingsScreen(
     var showResetAlert by remember { mutableStateOf(false) }
     var showResetToast by remember { mutableStateOf(false) }
 
+    // ── Forgot / Change Password Sheet & Toast ─────────────────────
+    var showForgotPasswordSheet by remember { mutableStateOf(false) }
+    var passwordChangeSuccessToast by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
 
     // ── Dynamic Theme adaptive colors ────────────────────────────
@@ -287,6 +291,7 @@ fun SettingsScreen(
                         streakDays = streakDays,
                         onAddDay = { gameManager.completeLessonAndExtendStreak() },
                         onResetStreak = { gameManager.debugResetStreak() },
+                        onOpenForgotPassword = { showForgotPasswordSheet = true },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
@@ -319,8 +324,9 @@ fun SettingsScreen(
                         cardBorder = cardBorder
                     )
                     3 -> AccountTab(
-                        userName = userName.ifEmpty { "Learner" },
-                        userHandle = userHandle.ifEmpty { "learner" },
+                        userName = userName.ifEmpty { "Lokesh Kumar" },
+                        userHandle = userHandle.ifEmpty { "lokesh_dev" },
+                        onOpenForgotPassword = { showForgotPasswordSheet = true },
                         onLogout = onLogout,
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
@@ -349,6 +355,38 @@ fun SettingsScreen(
                 }
             }
         }
+
+        if (passwordChangeSuccessToast) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(cardBg)
+                    .border(1.5.dp, DuolingoGreen, RoundedCornerShape(20.dp))
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Default.Done, contentDescription = null, tint = DuolingoGreen, modifier = Modifier.size(18.dp))
+                    Text("Password updated successfully! 🔥", color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+            }
+        }
+
+        if (showForgotPasswordSheet) {
+            com.simats.codeingo.ui.auth.ForgotPasswordSheet(
+                initialEmail = "lokeshkumar1232005@gmail.com",
+                onPasswordResetSuccess = {
+                    showForgotPasswordSheet = false
+                    scope.launch {
+                        passwordChangeSuccessToast = true
+                        delay(3000)
+                        passwordChangeSuccessToast = false
+                    }
+                },
+                onDismiss = { showForgotPasswordSheet = false }
+            )
+        }
     }
 }
 
@@ -373,6 +411,7 @@ private fun PreferencesTab(
     streakDays: Int,
     onAddDay: () -> Unit,
     onResetStreak: () -> Unit,
+    onOpenForgotPassword: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -390,6 +429,39 @@ private fun PreferencesTab(
         cardBg = cardBg,
         cardBorder = cardBorder
     )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Security & Password Section
+    SectionHeader("Security & Password", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenForgotPassword() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🔑", fontSize = 16.sp)
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                "Change / Forgot Password",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = textPrimary,
+                modifier = Modifier.weight(1f)
+            )
+            Text("Reset", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -804,6 +876,7 @@ private fun CoursesTab(
 private fun AccountTab(
     userName: String,
     userHandle: String,
+    onOpenForgotPassword: () -> Unit,
     onLogout: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
@@ -842,6 +915,30 @@ private fun AccountTab(
                 fontSize = 15.sp,
                 color = textSecondary
             )
+        }
+        SettingsDivider(cardBorder)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Email", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
+            Text("lokeshkumar1232005@gmail.com", fontSize = 14.sp, color = textSecondary)
+        }
+        SettingsDivider(cardBorder)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenForgotPassword() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Password", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Change Password", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+                Text("✏️", fontSize = 12.sp)
+            }
         }
     }
 
