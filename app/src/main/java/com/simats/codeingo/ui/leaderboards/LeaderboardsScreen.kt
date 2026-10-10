@@ -123,64 +123,269 @@ private fun LockedLeaderboardsView(
 ) {
     val isDark = LocalDynamicThemeColors.current.isDark
     val remaining = (3 - completedLessons).coerceAtLeast(1)
+    val emotionManager = PhoenixEmotionManager.instance
+    val currentEmotion by emotionManager.currentEmotion.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // 3D Metallic Shield Emblem
+        // 1. Locked 3-Shield Graphic Header (Phoenix styled)
         Box(
-            modifier = Modifier
-                .size(100.dp)
-                .floating(distanceDp = 6.dp, durationMs = 2200)
-                .clip(CircleShape)
-                .background(AmberGold.copy(alpha = 0.18f))
-                .border(2.dp, AmberGold.copy(alpha = 0.45f), CircleShape),
+            modifier = Modifier.padding(top = 12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Shield,
-                contentDescription = "Leaderboards Shield",
-                tint = AmberGold,
-                modifier = Modifier.size(52.dp)
+            // Ambient glow
+            Box(
+                modifier = Modifier
+                    .size(width = 180.dp, height = 80.dp)
+                    .blur(20.dp)
+                    .clip(CircleShape)
+                    .background(AmberGold.copy(alpha = 0.08f))
             )
+
+            Row(
+                modifier = Modifier.padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy((-14).dp)
+            ) {
+                // Left Bronze Shield (-14° rotation)
+                Box(
+                    modifier = Modifier
+                        .offset(y = 8.dp)
+                        .size(width = 65.dp, height = 75.dp)
+                        .rotate(-14f)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFFCC7333), Color(0xFF80471A))
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = "Bronze Shield",
+                        tint = Color.White.copy(alpha = 0.80f),
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+
+                // Center Phoenix Gold Shield (larger, 0° rotation)
+                Box(
+                    modifier = Modifier
+                        .size(width = 85.dp, height = 95.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(AmberGold, Color(0xFFF2A600))
+                            )
+                        )
+                        .border(2.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(22.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocalFireDepartment,
+                        contentDescription = "Gold Shield Flame",
+                        tint = Color.White,
+                        modifier = Modifier.size(38.dp)
+                    )
+                }
+
+                // Right Silver Shield (+14° rotation)
+                Box(
+                    modifier = Modifier
+                        .offset(y = 8.dp)
+                        .size(width = 65.dp, height = 75.dp)
+                        .rotate(14f)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFFC7C7C7), Color(0xFF808080))
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = "Silver Shield",
+                        tint = Color.White.copy(alpha = 0.80f),
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Unlock Leaderboards!",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
-            color = if (isDark) Color.White else Color(0xFF12_18_26),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Complete $remaining more lesson${if (remaining > 1) "s" else ""} to enter the Bronze League and compete with coders worldwide!",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            fontFamily = FontFamily.SansSerif,
-            color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
-            textAlign = TextAlign.Center,
-            lineHeight = 20.sp
-        )
-
-        if (onStartLesson != null) {
-            Spacer(modifier = Modifier.height(28.dp))
-            AppButton(
-                title = "START NEXT LESSON",
-                style = AppButtonStyle.PRIMARY_AMBER,
-                onClick = onStartLesson
+        // 2. Locked Headline, Subtitle & Start Button
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Unlock Leaderboards!",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.SansSerif,
+                color = if (isDark) Color.White else Color(0xFF12_18_26),
+                textAlign = TextAlign.Center
             )
+
+            Text(
+                text = "Complete $remaining more lesson${if (remaining > 1) "s" else ""} to enter the Bronze League and compete with coders worldwide!",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = FontFamily.SansSerif,
+                color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp
+            )
+
+            if (onStartLesson != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+                AppButton(
+                    title = "START A LESSON",
+                    style = AppButtonStyle.PRIMARY_AMBER,
+                    onClick = onStartLesson,
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                )
+            }
         }
+
+        // 3. "WHAT ARE LEADERBOARDS?" Info Card (Liquid Glass)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlassCard(accentGlow = AmberGold, cornerRadius = 20.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocalFireDepartment,
+                        contentDescription = null,
+                        tint = if (isDark) AmberGold else Color(0xFFC77300),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = "WHAT ARE LEADERBOARDS?",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = if (isDark) AmberGold else Color(0xFFC77300)
+                    )
+                }
+
+                Text(
+                    text = "Do lessons, earn XP",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (isDark) Color.White else Color(0xFF12_18_26)
+                )
+
+                Text(
+                    text = "Earn XP to compete with others and advance through the leagues each week!",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
+                    lineHeight = 16.sp
+                )
+            }
+
+            // Phoenix Emotion Mascot Avatar
+            Box(
+                modifier = Modifier.size(56.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .blur(8.dp)
+                        .clip(CircleShape)
+                        .background(currentEmotion.auraColor.copy(alpha = 0.35f))
+                )
+                Text(
+                    text = currentEmotion.emoji,
+                    fontSize = 32.sp
+                )
+            }
+        }
+
+        // 4. Locked Skeleton Preview List (Liquid Glass with Opacity Decay)
+        val widths = listOf(80.dp, 110.dp, 95.dp, 120.dp, 75.dp, 100.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            for (idx in 0 until 6) {
+                val decayAlpha = ((6 - idx) * 0.16f).coerceIn(0.12f, 1f)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlassCard(cornerRadius = 14.dp)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(
+                                (if (isDark) Color.White.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.10f))
+                                    .copy(alpha = decayAlpha)
+                            )
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(
+                                (if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.07f))
+                                    .copy(alpha = decayAlpha)
+                            )
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .width(widths[idx % 6])
+                            .height(14.dp)
+                            .clip(CircleShape)
+                            .background(
+                                (if (isDark) Color.White.copy(alpha = 0.09f) else Color.Black.copy(alpha = 0.08f))
+                                    .copy(alpha = decayAlpha)
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Box(
+                        modifier = Modifier
+                            .width(45.dp)
+                            .height(14.dp)
+                            .clip(CircleShape)
+                            .background(
+                                (if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.07f))
+                                    .copy(alpha = decayAlpha)
+                            )
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 
