@@ -399,6 +399,13 @@ class GameManager private constructor() {
         return Pair(true, "Restored +$amount life hearts! ❤️ (${_heartsCount.value}/10)")
     }
 
+    fun deductGems(amount: Int): Boolean {
+        if (_gemsCount.value < amount) return false
+        _gemsCount.value -= amount
+        persistStats()
+        return true
+    }
+
     fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {
         val bossXP = 25
         _totalXP.value += bossXP
