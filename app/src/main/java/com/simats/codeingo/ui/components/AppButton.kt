@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -121,6 +122,7 @@ fun AppButton(
     height: Dp = 52.dp,
     cornerRadius: Dp = 16.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp),
+    fontSize: androidx.compose.ui.unit.TextUnit = 15.sp,
     onClick: () -> Unit
 ) {
     val activeStyle = if (isEnabled) style else AppButtonStyle.DISABLED
@@ -145,7 +147,7 @@ fun AppButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(height + depth)
+            .heightIn(min = height + depth)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -162,7 +164,8 @@ fun AppButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height)
+                .matchParentSize()
+                .padding(top = depth)
                 .clip(shape)
                 .background(activeStyle.getShadowColor(isDark))
         )
@@ -171,7 +174,7 @@ fun AppButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(height)
+                .heightIn(min = height)
                 .offset(y = currentOffset - depth)
                 .clip(shape)
                 .background(activeStyle.getFaceBrush(isDark)),
@@ -208,7 +211,7 @@ fun AppButton(
                 Text(
                     text = title.uppercase(),
                     color = activeStyle.getTextColor(isDark),
-                    fontSize = 15.sp,
+                    fontSize = fontSize,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.SansSerif,
                     letterSpacing = 0.8.sp

@@ -1,6 +1,11 @@
 package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -21,6 +26,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -44,15 +54,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlin.math.sin
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,6 +116,7 @@ import com.simats.codeingo.ui.worlds.stack.StackTowerArenaScreen
 import com.simats.codeingo.ui.worlds.tree.BinaryTreeForestArenaScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.CardBackground
@@ -342,14 +369,17 @@ fun MainDashboardScreen(
                     DashboardTab.LEARN -> {
                         // Learn Tab: Curriculum Path with Floating Header
                         Box(modifier = Modifier.fillMaxSize()) {
+                            val topInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout)
+                            val topInsetPadding = topInsets.asPaddingValues().calculateTopPadding()
+
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .verticalScroll(dashboardScrollState),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                // Spacing for floating top stats header
-                                Spacer(modifier = Modifier.height(72.dp))
+                                // Spacing for floating top stats header (status bar + cutout insets + header height)
+                                Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
 
                                 // 1. 3D INTERACTIVE WORLDS CAROUSEL
                                 InteractiveGamesSection(
@@ -395,88 +425,295 @@ fun MainDashboardScreen(
                                             onShowPrevious = { showPreviousChapterPath() }
                                         )
 
-                                        // Winding 3D Level Nodes with Stepping Stones Path
-                                        unit.nodes.forEachIndexed { index, node ->
-                                            val isNodeCompleted = completedLevelIndices.contains(node.levelNumber)
-                                            val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted)
-                                            val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
-                                            val isLockedSelected = selectedLockedNodeId == node.id
+                                        // Winding 3D Level Nodes with Stepping Stones Path & Smooth Flying Mascot
+                                        val nodeCirclePositions = remember { mutableStateMapOf<Int, Offset>() }
+                                        var unitCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+                                        val isUnitActive = unit.nodes.any { it.levelNumber == activeLevelIndex }
 
-                                            val safeXOffset = if (isActiveTarget) {
-                                                (node.xOffset * 0.22f).coerceIn((-10).dp, 10.dp)
-                                            } else {
-                                                (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
-                                            }
+                                        val density = LocalDensity.current
+                                        val mascotSizePx = with(density) { 72.dp.toPx() }
+                                        val mascotHalfPx = mascotSizePx / 2f
 
-                                            val prevNode = if (index > 0) unit.nodes[index - 1] else null
-                                            val prevXOffset = if (prevNode != null) {
-                                                val prevIsActive = isUnitOpen && (prevNode.levelNumber == activeLevelIndex)
-                                                if (prevIsActive) (prevNode.xOffset * 0.22f).coerceIn((-10).dp, 10.dp)
-                                                else (prevNode.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
-                                            } else safeXOffset
+                                        val coroutineScope = rememberCoroutineScope()
+                                        val flightProgress = remember { Animatable(1f) }
+                                        val landingSettle = remember { Animatable(0f) }
+                                        var flightStartPos by remember { mutableStateOf<Offset?>(null) }
+                                        var flightTargetPos by remember { mutableStateOf<Offset?>(null) }
+                                        var isFlying by remember { mutableStateOf(false) }
+                                        var lastTrackedActiveLevel by remember { mutableIntStateOf(activeLevelIndex) }
+                                        var hasInitialFlightPlayed by remember { mutableStateOf(false) }
 
-                                            // Stepping Stone Connector Dots from previous node
-                                            if (index > 0) {
-                                                ConnectorSteppingStones(
-                                                    fromX = prevXOffset,
-                                                    toX = safeXOffset,
-                                                    isActive = isNodeUnlocked || isNodeCompleted,
-                                                    unitColor = unit.themeColor
-                                                )
-                                            }
+                                        val targetOffset = nodeCirclePositions[activeLevelIndex]
 
-                                            Box(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.Center,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    // Companion Mascot sits on the opposite side if offset is positive
-                                                    if (isActiveTarget && safeXOffset > 0.dp) {
-                                                        PhoenixAnimatedMascotView(
-                                                            pose = PhoenixMascotPose.Walking,
-                                                            modifier = Modifier.size(72.dp)
+                                        // Initial appearance flight: triggers once when active level circle position is first laid out
+                                        LaunchedEffect(nodeCirclePositions[activeLevelIndex]) {
+                                            if (!hasInitialFlightPlayed && isUnitActive) {
+                                                val target = nodeCirclePositions[activeLevelIndex]
+                                                if (target != null && target != Offset.Zero) {
+                                                    val prevLevel = activeLevelIndex - 1
+                                                    val prevPos = nodeCirclePositions[prevLevel]
+                                                    if (prevLevel >= 1 && prevPos != null && prevPos != Offset.Zero) {
+                                                        flightStartPos = prevPos
+                                                        flightTargetPos = target
+                                                        hasInitialFlightPlayed = true
+                                                        lastTrackedActiveLevel = activeLevelIndex
+                                                        isFlying = true
+                                                        flightProgress.snapTo(0f)
+                                                        flightProgress.animateTo(
+                                                            targetValue = 1f,
+                                                            animationSpec = tween(durationMillis = 3000, easing = FastOutSlowInEasing)
                                                         )
-                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        isFlying = false
+                                                        landingSettle.snapTo(1f)
+                                                        landingSettle.animateTo(
+                                                            0f,
+                                                            animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)
+                                                        )
+                                                    } else {
+                                                        flightStartPos = target
+                                                        flightTargetPos = target
+                                                        flightProgress.snapTo(1f)
+                                                        hasInitialFlightPlayed = true
+                                                        lastTrackedActiveLevel = activeLevelIndex
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // Level click / level transition flight: keyed ONLY on activeLevelIndex!
+                                        // This ensures clicking another level immediately starts the flight and is never cancelled by layout updates!
+                                        LaunchedEffect(activeLevelIndex) {
+                                            if (isUnitActive && hasInitialFlightPlayed && lastTrackedActiveLevel != activeLevelIndex) {
+                                                val target = nodeCirclePositions[activeLevelIndex]
+                                                val startPos = flightTargetPos ?: nodeCirclePositions[lastTrackedActiveLevel] ?: target ?: Offset.Zero
+                                                val stepDiff = abs(activeLevelIndex - lastTrackedActiveLevel)
+                                                val flightDuration = if (stepDiff <= 1) 3000 else minOf(4200, 3000 + (stepDiff - 1) * 350)
+
+                                                lastTrackedActiveLevel = activeLevelIndex
+                                                if (target != null && target != Offset.Zero) {
+                                                    flightStartPos = startPos
+                                                    flightTargetPos = target
+                                                    isFlying = true
+                                                    flightProgress.snapTo(0f)
+                                                    flightProgress.animateTo(
+                                                        targetValue = 1f,
+                                                        animationSpec = tween(durationMillis = flightDuration, easing = FastOutSlowInEasing)
+                                                    )
+                                                    isFlying = false
+                                                    landingSettle.snapTo(1f)
+                                                    landingSettle.animateTo(
+                                                        0f,
+                                                        animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .onGloballyPositioned { unitCoordinates = it }
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                            ) {
+                                                unit.nodes.forEachIndexed { index, node ->
+                                                    val isNodeCompleted = completedLevelIndices.contains(node.levelNumber)
+                                                    val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted)
+                                                    val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
+                                                    val isLockedSelected = selectedLockedNodeId == node.id
+
+                                                    val safeXOffset = (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+
+                                                    val prevNode = if (index > 0) unit.nodes[index - 1] else null
+                                                    val prevXOffset = if (prevNode != null) {
+                                                        (prevNode.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+                                                    } else safeXOffset
+
+                                                    // Stepping Stone Connector Dots from previous node
+                                                    if (index > 0) {
+                                                        ConnectorSteppingStones(
+                                                            fromX = prevXOffset,
+                                                            toX = safeXOffset,
+                                                            isActive = isNodeUnlocked || isNodeCompleted,
+                                                            unitColor = unit.themeColor
+                                                        )
                                                     }
 
-                                                    LessonNodeButton(
-                                                        node = node,
-                                                        unit = unit,
-                                                        isUnlocked = isNodeUnlocked,
-                                                        isActiveTarget = isActiveTarget,
-                                                        isLockedSelected = isLockedSelected,
-                                                        xOffset = safeXOffset,
-                                                        onNodeClick = {
-                                                            if (isNodeUnlocked) {
-                                                                gameManager.setActiveLevel(node.levelNumber)
-                                                                selectedLockedNodeId = null
-                                                            } else {
-                                                                selectedLockedNodeId = node.id
+                                                    Box(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        LessonNodeButton(
+                                                            node = node,
+                                                            unit = unit,
+                                                            isUnlocked = isNodeUnlocked,
+                                                            isActiveTarget = isActiveTarget,
+                                                            isLockedSelected = isLockedSelected,
+                                                            xOffset = safeXOffset,
+                                                            onCirclePositioned = { circleCoords ->
+                                                                unitCoordinates?.let { parent ->
+                                                                    if (circleCoords.isAttached && parent.isAttached) {
+                                                                        val centerInParent = parent.localPositionOf(
+                                                                            circleCoords,
+                                                                            Offset(circleCoords.size.width / 2f, circleCoords.size.height / 2f)
+                                                                        )
+                                                                        nodeCirclePositions[node.levelNumber] = centerInParent
+                                                                    }
+                                                                }
+                                                            },
+                                                            onNodeClick = {
+                                                                if (isNodeUnlocked) {
+                                                                    gameManager.setActiveLevel(node.levelNumber)
+                                                                    selectedLockedNodeId = null
+                                                                } else {
+                                                                    selectedLockedNodeId = node.id
+                                                                }
+                                                            },
+                                                            onStartClick = {
+                                                                if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
+                                                                    replayReturnLevelIndex = activeLevelIndex
+                                                                }
+                                                                if (node.isBoss) {
+                                                                    onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
+                                                                } else {
+                                                                    onStartLesson(unit.id, node.levelNumber, 5, false)
+                                                                }
                                                             }
-                                                        },
-                                                        onStartClick = {
-                                                            if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
-                                                                replayReturnLevelIndex = activeLevelIndex
-                                                            }
-                                                            if (node.isBoss) {
-                                                                onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
-                                                            } else {
-                                                                onStartLesson(unit.id, node.levelNumber, 5, false)
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            // Smoothly flying Phoenix Mascot across level nodes (Independent Overlay Frame)
+                                            if (isUnitActive && (targetOffset != null || flightTargetPos != null)) {
+                                                val p = flightProgress.value
+                                                val start = flightStartPos ?: targetOffset ?: Offset.Zero
+                                                val target = flightTargetPos ?: targetOffset ?: Offset.Zero
+
+                                                val dx = target.x - start.x
+                                                val dy = target.y - start.y
+                                                val distance = hypot(dx, dy).coerceAtLeast(1f)
+
+                                                // 1. Normal perpendicular unit vector for lateral swing along the curve
+                                                val normX = -dy / distance
+                                                val normY = dx / distance
+
+                                                // 2. Parabolic lateral swing factor: 4 * p * (1 - p), peaks at midpoint (p = 0.5)
+                                                val parabolaFactor = 4f * p * (1f - p)
+
+                                                // Outward lateral swing following the winding stepping stone curves
+                                                val curveDir = when {
+                                                    abs(dx) > 4f -> if (dx > 0) 1f else -1f
+                                                    else -> if (dy >= 0) 1f else -1f
+                                                }
+                                                val maxLateralSwingPx = (max(38f, distance * 0.22f) * curveDir).coerceIn(-75f, 75f)
+                                                val lateralSwingX = normX * maxLateralSwingPx * parabolaFactor
+                                                val lateralSwingY = normY * maxLateralSwingPx * parabolaFactor
+
+                                                // 3. Parabolic altitude lift & dive arc in 3D space
+                                                val arcAltitudePx = with(density) { 62.dp.toPx() }
+                                                val altitudeArcY = if (isFlying) -arcAltitudePx * parabolaFactor else 0f
+
+                                                // 4. Lifelike wing-beat flapping harmonic oscillation
+                                                val wingbeatHeave = if (isFlying) {
+                                                    sin(p * 8f * Math.PI.toFloat()) * with(density) { 3.dp.toPx() }
+                                                } else 0f
+
+                                                // Total 2D coordinates on screen
+                                                val curX = start.x + dx * p + lateralSwingX
+                                                val curY = start.y + dy * p + lateralSwingY + altitudeArcY + wingbeatHeave
+
+                                                // 5. Aerodynamic banking roll into the curve & turns
+                                                val bankTilt = if (isFlying) {
+                                                    val swingBank = (-normX * maxLateralSwingPx * 0.18f * cos(p * Math.PI.toFloat()))
+                                                    val forwardBank = (dx * 0.12f)
+                                                    (swingBank + forwardBank).coerceIn(-26f, 26f) * sin(p * Math.PI.toFloat())
+                                                } else 0f
+
+                                                // 6. Pitch angle (Climb vs dive glide)
+                                                val pitchTilt = if (isFlying) {
+                                                    val flightDirY = if (dy >= 0) 1f else -1f
+                                                    cos(p * Math.PI.toFloat()) * -6f * flightDirY
+                                                } else 0f
+
+                                                // 7. Elevation Scale (Bird flies closer to camera during flight)
+                                                val flightElevationScale = if (isFlying) {
+                                                    1.0f + 0.20f * parabolaFactor
+                                                } else 1.0f
+
+                                                // 8. Landing settle spring (squash and stretch upon touchdown)
+                                                val settleProgress = landingSettle.value
+                                                val settleScaleX = 1.0f + settleProgress * 0.08f
+                                                val settleScaleY = 1.0f - settleProgress * 0.08f
+                                                val settleOffsetY = with(density) { settleProgress * 3.dp.toPx() }
+
+                                                // 9. Perch upon circle alignment
+                                                val perchOffsetPx = with(density) { 10.dp.toPx() }
+                                                val posX = curX - mascotHalfPx
+                                                val posY = curY - mascotHalfPx - perchOffsetPx + settleOffsetY
+
+                                                Box(
+                                                    modifier = Modifier
+                                                        .offset {
+                                                            IntOffset(posX.roundToInt(), posY.roundToInt())
+                                                        }
+                                                        .graphicsLayer {
+                                                            rotationZ = bankTilt + pitchTilt
+                                                            scaleX = flightElevationScale * settleScaleX
+                                                            scaleY = flightElevationScale * settleScaleY
+                                                        }
+                                                        .clickable(
+                                                            interactionSource = remember { MutableInteractionSource() },
+                                                            indication = null
+                                                        ) {
+                                                            // Tapping the bird triggers 3-second celebratory flight from previous circle!
+                                                            val prevPos = nodeCirclePositions[activeLevelIndex - 1] ?: (targetOffset ?: Offset.Zero)
+                                                            flightStartPos = prevPos
+                                                            flightTargetPos = targetOffset
+                                                            coroutineScope.launch {
+                                                                isFlying = true
+                                                                flightProgress.snapTo(0f)
+                                                                flightProgress.animateTo(
+                                                                    targetValue = 1f,
+                                                                    animationSpec = tween(durationMillis = 3000, easing = FastOutSlowInEasing)
+                                                                )
+                                                                isFlying = false
+                                                                landingSettle.snapTo(1f)
+                                                                landingSettle.animateTo(
+                                                                    0f,
+                                                                    animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)
+                                                                )
                                                             }
                                                         }
-                                                    )
-
-                                                    // Companion Mascot sits on right side if offset <= 0
-                                                    if (isActiveTarget && safeXOffset <= 0.dp) {
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        PhoenixAnimatedMascotView(
-                                                            pose = PhoenixMascotPose.Walking,
-                                                            modifier = Modifier.size(72.dp)
+                                                ) {
+                                                    // Dynamic soft ground shadow under the bird during flight
+                                                    if (isFlying) {
+                                                        val groundShadowAlpha = (0.28f - 0.14f * parabolaFactor).coerceIn(0.08f, 0.35f)
+                                                        val groundShadowScale = (1.0f - 0.35f * parabolaFactor)
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(width = 44.dp, height = 12.dp)
+                                                                .align(Alignment.BottomCenter)
+                                                                .offset(y = with(density) { (-altitudeArcY * 0.7f).toDp() + 6.dp })
+                                                                .graphicsLayer {
+                                                                    alpha = groundShadowAlpha
+                                                                    scaleX = groundShadowScale
+                                                                    scaleY = groundShadowScale
+                                                                }
+                                                                .clip(CircleShape)
+                                                                .background(Color.Black.copy(alpha = 0.45f))
                                                         )
                                                     }
+
+                                                    PhoenixEggCompanionMascotView(
+                                                        levelNumber = activeLevelIndex,
+                                                        isBoss = unit.nodes.firstOrNull { it.levelNumber == activeLevelIndex }?.isBoss ?: false,
+                                                        isFlying = isFlying,
+                                                        modifier = Modifier.size(72.dp)
+                                                    )
                                                 }
                                             }
                                         }

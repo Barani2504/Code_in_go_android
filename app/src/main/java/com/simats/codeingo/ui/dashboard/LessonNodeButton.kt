@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -61,6 +63,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -97,7 +101,8 @@ fun LessonNodeButton(
     xOffset: Dp = 0.dp,
     onNodeClick: () -> Unit,
     onStartClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCirclePositioned: ((LayoutCoordinates) -> Unit)? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -153,23 +158,26 @@ fun LessonNodeButton(
         label = "auraAlpha"
     )
 
-    Column(
+    Box(
         modifier = modifier
             .offset(x = xOffset)
             .padding(vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center
     ) {
         // 1. ACTIVE UNLOCKED TARGET TOOLTIP (5 Questions • START)
         AnimatedVisibility(
             visible = isActiveTarget && !isLockedSelected,
             enter = fadeIn() + scaleIn(initialScale = 0.85f),
-            exit = fadeOut() + scaleOut(targetScale = 0.85f)
+            exit = fadeOut() + scaleOut(targetScale = 0.85f),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (-96).dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .offset(y = (-6).dp)
-                    .width(200.dp)
+                    .width(240.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -213,7 +221,10 @@ fun LessonNodeButton(
                         title = if (isBoss) "BOSS BATTLE ⚔️" else "START • 5 QUESTIONS",
                         style = if (isBoss) AppButtonStyle.DANGER_CRIMSON else AppButtonStyle.PRIMARY_AMBER,
                         onClick = onStartClick,
-                        modifier = Modifier.fillMaxWidth().height(36.dp)
+                        height = 38.dp,
+                        fontSize = 12.5.sp,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 38.dp)
                     )
                 }
 
@@ -234,7 +245,10 @@ fun LessonNodeButton(
         AnimatedVisibility(
             visible = isLockedSelected,
             enter = fadeIn() + scaleIn(initialScale = 0.85f),
-            exit = fadeOut() + scaleOut(targetScale = 0.85f)
+            exit = fadeOut() + scaleOut(targetScale = 0.85f),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (-96).dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -318,6 +332,9 @@ fun LessonNodeButton(
             Box(
                 modifier = Modifier
                     .size(width = size + 4.dp, height = size + 8.dp)
+                    .onGloballyPositioned { coords ->
+                        onCirclePositioned?.invoke(coords)
+                    }
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null

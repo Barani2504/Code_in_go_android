@@ -1,0 +1,62 @@
+[
+  {
+    "stage": 1,
+    "file": "phoenix_stage_1",
+    "title": "Ember Hatchling",
+    "glow_rgb": [
+      255,
+      120,
+      30
+    ],
+    "gif_kb": 778,
+    "webp_kb": 737
+  },
+  {
+    "stage": 2,
+    "file": "phoenix_stage_2",
+    "title": "Blaze Fledgling",
+    "glow_rgb": [
+      255,
+      100,
+      20
+    ],
+    "gif_kb": 891,
+    "webp_kb": 804
+  },
+  {
+    "stage": 3,
+    "file": "phoenix_stage_3",
+    "title": "Inferno Phoenix",
+    "glow_rgb": [
+      255,
+      170,
+      40
+    ],
+    "gif_kb": 1001,
+    "webp_kb": 894
+  },
+  {
+    "stage": 4,
+    "file": "phoenix_stage_4",
+    "title": "Solar Phoenix",
+    "glow_rgb": [
+      255,
+      225,
+      110
+    ],
+    "gif_kb": 987,
+    "webp_kb": 885
+  },
+  {
+    "stage": 5,
+    "file": "phoenix_stage_5",
+    "title": "Celestial Phoenix",
+    "glow_rgb": [
+      120,
+      200,
+      255
+    ],
+    "gif_kb": 984,
+    "webp_kb": 944
+  }
+]

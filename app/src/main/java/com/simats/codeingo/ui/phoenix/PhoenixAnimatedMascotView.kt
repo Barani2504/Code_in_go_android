@@ -107,13 +107,8 @@ fun PhoenixAnimatedMascotView(
                 )
             }
             is PhoenixMascotPose.Walking -> {
-                Image(
-                    painter = painterResource(id = R.drawable.phoenix_stage_1),
-                    contentDescription = "Walking Phoenix",
-                    modifier = Modifier
-                        .size(size)
-                        .offset(y = breathY.dp)
-                        .rotate(waddleTilt)
+                com.simats.codeingo.ui.dashboard.PhoenixEggCompanionMascotView(
+                    modifier = Modifier.size(size)
                 )
             }
             is PhoenixMascotPose.StarryEyes -> {
