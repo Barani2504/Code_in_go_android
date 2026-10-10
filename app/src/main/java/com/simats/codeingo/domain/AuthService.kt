@@ -319,6 +319,21 @@ class AuthService private constructor() {
         return profile
     }
 
+    fun signInAsGuest(): UserAuthProfile {
+        val guestId = UUID.randomUUID().toString().take(6)
+        val profile = UserAuthProfile(
+            name = "Guest Adventurer",
+            email = "guest_$guestId@codeingo.app",
+            handle = "guest_$guestId",
+            avatarInitial = "G",
+            avatarColorHex = "#F5A623",
+            provider = AuthProvider.GUEST,
+            isEmailVerified = false
+        )
+        saveSession(profile)
+        return profile
+    }
+
     fun signOut() {
         saveSession(null)
     }
