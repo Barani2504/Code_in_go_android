@@ -1,6 +1,9 @@
 package com.simats.codeingo.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -40,9 +43,52 @@ fun AppNavHost(
     Box(modifier = modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
-            startDestination = Screen.Splash.route
+            startDestination = Screen.Splash.route,
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = spring(
+                        dampingRatio = 0.88f,
+                        stiffness = 380f
+                    )
+                ) + fadeIn(animationSpec = tween(280))
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = spring(
+                        dampingRatio = 0.88f,
+                        stiffness = 380f
+                    ),
+                    targetOffset = { fullWidth -> (fullWidth * 0.35f).toInt() }
+                ) + fadeOut(animationSpec = tween(240))
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = spring(
+                        dampingRatio = 0.88f,
+                        stiffness = 380f
+                    ),
+                    initialOffset = { fullWidth -> (fullWidth * 0.35f).toInt() }
+                ) + fadeIn(animationSpec = tween(280))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = spring(
+                        dampingRatio = 0.88f,
+                        stiffness = 380f
+                    )
+                ) + fadeOut(animationSpec = tween(240))
+            }
         ) {
-            composable(Screen.Splash.route) {
+            composable(
+                route = Screen.Splash.route,
+                exitTransition = {
+                    fadeOut(animationSpec = tween(350))
+                }
+            ) {
                 SplashScreen(
                     onFinishedSplash = {
                         navController.navigate(Screen.Onboarding.route) {

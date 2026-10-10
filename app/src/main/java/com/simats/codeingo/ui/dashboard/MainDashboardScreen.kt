@@ -1,6 +1,8 @@
 package com.simats.codeingo.ui.dashboard
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
@@ -33,6 +35,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -166,6 +170,37 @@ fun MainDashboardScreen(
     val activeLevelIndex by gameManager.activeLevelIndex.collectAsState()
 
     var selectedTab by remember { mutableStateOf(DashboardTab.LEARN) }
+    val dashboardTabs = remember {
+        listOf(
+            DashboardTab.LEARN,
+            DashboardTab.VISUALIZER,
+            DashboardTab.LEADERBOARDS,
+            DashboardTab.SHOP,
+            DashboardTab.PROFILE
+        )
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { dashboardTabs.size }
+    )
+
+    // Sync selectedTab with swipe pager page (swipe without using navigation bar)
+    LaunchedEffect(pagerState.currentPage) {
+        selectedTab = dashboardTabs.getOrElse(pagerState.currentPage) { DashboardTab.LEARN }
+    }
+
+    // Programmatic tab selection scrolls pager smoothly to destination page
+    LaunchedEffect(selectedTab) {
+        val targetIndex = when (selectedTab) {
+            DashboardTab.PRACTICE -> dashboardTabs.indexOf(DashboardTab.VISUALIZER)
+            else -> dashboardTabs.indexOf(selectedTab)
+        }
+        if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
+            pagerState.animateScrollToPage(targetIndex)
+        }
+    }
     var showSideMenu by remember { mutableStateOf(false) }
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
@@ -355,8 +390,15 @@ fun MainDashboardScreen(
                 BottomNavBar(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
+                        val targetIndex = dashboardTabs.indexOf(tab)
+                        if (targetIndex >= 0) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(targetIndex)
+                            }
+                        }
                         selectedTab = tab
-                    }
+                    },
+                    swipePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
                 )
             }
         ) { paddingValues ->
@@ -365,7 +407,13 @@ fun MainDashboardScreen(
                     .fillMaxSize()
                     .padding(bottom = paddingValues.calculateBottomPadding())
             ) {
-                when (selectedTab) {
+                HorizontalPager(
+                    state = pagerState,
+                    beyondViewportPageCount = 1,
+                    modifier = Modifier.fillMaxSize()
+                ) { pageIndex ->
+                    val currentTab = dashboardTabs.getOrElse(pageIndex) { DashboardTab.LEARN }
+                    when (currentTab) {
                     DashboardTab.LEARN -> {
                         // Learn Tab: Curriculum Path with Floating Header
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -751,7 +799,7 @@ fun MainDashboardScreen(
                                 onMenuClick = { showSideMenu = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onStreakClick = { showStreakSheet = true },
-                                onXpClick = { selectedTab = DashboardTab.PRACTICE },
+                                onXpClick = { selectedTab = DashboardTab.VISUALIZER },
                                 onHeartsClick = { showHeartsSheet = true },
                                 onGemsClick = { showGemShopSheet = true }
                             )
@@ -817,6 +865,7 @@ fun MainDashboardScreen(
                 }
             }
         }
+    }
 
         // Side Drawer Menu
         AnimatedVisibility(
