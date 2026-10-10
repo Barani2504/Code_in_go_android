@@ -56,6 +56,11 @@ import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.liquidGlassPill
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixGreen

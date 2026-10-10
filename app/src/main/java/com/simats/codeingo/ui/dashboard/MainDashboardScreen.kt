@@ -395,51 +395,88 @@ fun MainDashboardScreen(
                                             onShowPrevious = { showPreviousChapterPath() }
                                         )
 
-                                        // Winding 3D Level Nodes
-                                        unit.nodes.forEach { node ->
-                                            val isNodeUnlocked = isUnitOpen && unlockedLevels.contains(node.levelNumber)
+                                        // Winding 3D Level Nodes with Stepping Stones Path
+                                        unit.nodes.forEachIndexed { index, node ->
+                                            val isNodeCompleted = completedLevelIndices.contains(node.levelNumber)
+                                            val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted)
                                             val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
                                             val isLockedSelected = selectedLockedNodeId == node.id
 
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.Center,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                LessonNodeButton(
-                                                    node = node,
-                                                    unit = unit,
-                                                    isUnlocked = isNodeUnlocked,
-                                                    isActiveTarget = isActiveTarget,
-                                                    isLockedSelected = isLockedSelected,
-                                                    xOffset = if (isActiveTarget) 0.dp else node.xOffset * 0.45f,
-                                                    onNodeClick = {
-                                                        if (isNodeUnlocked) {
-                                                            gameManager.setActiveLevel(node.levelNumber)
-                                                            selectedLockedNodeId = null
-                                                        } else {
-                                                            selectedLockedNodeId = node.id
-                                                        }
-                                                    },
-                                                    onStartClick = {
-                                                        if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
-                                                            replayReturnLevelIndex = activeLevelIndex
-                                                        }
-                                                        if (node.isBoss) {
-                                                            onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
-                                                        } else {
-                                                            onStartLesson(unit.id, node.levelNumber, 5, false)
-                                                        }
-                                                    }
-                                                )
+                                            val safeXOffset = if (isActiveTarget) {
+                                                (node.xOffset * 0.22f).coerceIn((-10).dp, 10.dp)
+                                            } else {
+                                                (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+                                            }
 
-                                                // Companion Mascot Animation next to Active Target Node
-                                                if (isActiveTarget) {
-                                                    Spacer(modifier = Modifier.width(8.dp))
-                                                    PhoenixAnimatedMascotView(
-                                                        pose = PhoenixMascotPose.Walking,
-                                                        modifier = Modifier.size(72.dp)
+                                            val prevNode = if (index > 0) unit.nodes[index - 1] else null
+                                            val prevXOffset = if (prevNode != null) {
+                                                val prevIsActive = isUnitOpen && (prevNode.levelNumber == activeLevelIndex)
+                                                if (prevIsActive) (prevNode.xOffset * 0.22f).coerceIn((-10).dp, 10.dp)
+                                                else (prevNode.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+                                            } else safeXOffset
+
+                                            // Stepping Stone Connector Dots from previous node
+                                            if (index > 0) {
+                                                ConnectorSteppingStones(
+                                                    fromX = prevXOffset,
+                                                    toX = safeXOffset,
+                                                    isActive = isNodeUnlocked || isNodeCompleted,
+                                                    unitColor = unit.themeColor
+                                                )
+                                            }
+
+                                            Box(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.Center,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    // Companion Mascot sits on the opposite side if offset is positive
+                                                    if (isActiveTarget && safeXOffset > 0.dp) {
+                                                        PhoenixAnimatedMascotView(
+                                                            pose = PhoenixMascotPose.Walking,
+                                                            modifier = Modifier.size(72.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                    }
+
+                                                    LessonNodeButton(
+                                                        node = node,
+                                                        unit = unit,
+                                                        isUnlocked = isNodeUnlocked,
+                                                        isActiveTarget = isActiveTarget,
+                                                        isLockedSelected = isLockedSelected,
+                                                        xOffset = safeXOffset,
+                                                        onNodeClick = {
+                                                            if (isNodeUnlocked) {
+                                                                gameManager.setActiveLevel(node.levelNumber)
+                                                                selectedLockedNodeId = null
+                                                            } else {
+                                                                selectedLockedNodeId = node.id
+                                                            }
+                                                        },
+                                                        onStartClick = {
+                                                            if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
+                                                                replayReturnLevelIndex = activeLevelIndex
+                                                            }
+                                                            if (node.isBoss) {
+                                                                onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
+                                                            } else {
+                                                                onStartLesson(unit.id, node.levelNumber, 5, false)
+                                                            }
+                                                        }
                                                     )
+
+                                                    // Companion Mascot sits on right side if offset <= 0
+                                                    if (isActiveTarget && safeXOffset <= 0.dp) {
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        PhoenixAnimatedMascotView(
+                                                            pose = PhoenixMascotPose.Walking,
+                                                            modifier = Modifier.size(72.dp)
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
@@ -511,6 +548,13 @@ fun MainDashboardScreen(
                         LeaderboardsScreen(
                             completedLessons = completedLessonCount.size,
                             onStartLesson = { selectedTab = DashboardTab.LEARN },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    DashboardTab.SHOP -> {
+                        GemShopSheet(
+                            onDismiss = { selectedTab = DashboardTab.LEARN },
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -1267,6 +1311,40 @@ private fun HeartsInfoSheet(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
                 color = LocalDynamicThemeColors.current.textPrimary
+            )
+        }
+    }
+}
+
+// MARK: - Stepping Stone Connector Trail
+@Composable
+private fun ConnectorSteppingStones(
+    fromX: androidx.compose.ui.unit.Dp,
+    toX: androidx.compose.ui.unit.Dp,
+    isActive: Boolean,
+    unitColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    Column(
+        modifier = modifier.padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        for (dotIndex in 1..3) {
+            val progress = dotIndex / 4f
+            val dotX = fromX + (toX - fromX) * progress
+            val dotSize = if (isActive) 7.5.dp else 6.dp
+            Box(
+                modifier = Modifier
+                    .offset(x = dotX)
+                    .size(dotSize)
+                    .clip(CircleShape)
+                    .background(
+                        if (isActive) unitColor.copy(alpha = 0.85f)
+                        else if (isDark) Color.White.copy(alpha = 0.20f)
+                        else Color(0xFFC8D2E2)
+                    )
             )
         }
     }

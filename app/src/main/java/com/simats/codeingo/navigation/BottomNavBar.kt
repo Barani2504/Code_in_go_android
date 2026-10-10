@@ -5,26 +5,24 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,17 +38,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DashboardTab
-import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.CodeingoTheme
+import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixMotion
 import com.simats.codeingo.ui.theme.pressScale
 
 // ══════════════════════════════════════════════════════════════════
-// 📱 BottomNavBar — Floating Liquid Glass Docked Navigation Bar
-// Exact parity with iOS MainDashboardView TabView & Liquid Glass System
+// 📱 BottomNavBar — Frosted Docked 5-Tab Navigation Bar
+// Exact 1:1 Parity with iOS MainDashboardView.swift TabView
+// 1. Learn (house.fill)
+// 2. Visualizer (wrench.and.screwdriver.fill)
+// 3. Leaderboards (building.2.fill)
+// 4. Shop (bag.fill)
+// 5. Profile (person.fill)
 // ══════════════════════════════════════════════════════════════════
 
 @Composable
@@ -67,6 +72,7 @@ fun BottomNavBar(
         DashboardTab.LEARN,
         DashboardTab.VISUALIZER,
         DashboardTab.LEADERBOARDS,
+        DashboardTab.SHOP,
         DashboardTab.PROFILE
     )
 
@@ -74,12 +80,12 @@ fun BottomNavBar(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                if (isDark) Color(0xFF07_0D_17).copy(alpha = 0.96f)
-                else Color.White.copy(alpha = 0.96f)
+                if (isDark) Color(0xFF0D121F).copy(alpha = 0.95f)
+                else Color(0xFFFAFAFC).copy(alpha = 0.96f)
             )
             .navigationBarsPadding()
     ) {
-        // Top Hairline Specular Glass Stroke
+        // Specular Top Hairline Stroke matching iOS .overlay(Rectangle().frame(height: 0.5)...)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -87,12 +93,12 @@ fun BottomNavBar(
                 .background(
                     Brush.horizontalGradient(
                         if (isDark) listOf(
-                            Color.White.copy(alpha = 0.05f),
-                            AmberGold.copy(alpha = 0.35f),
-                            Color.White.copy(alpha = 0.05f)
+                            Color.White.copy(alpha = 0.04f),
+                            Color(0xFF1CB0F6).copy(alpha = 0.30f),
+                            Color.White.copy(alpha = 0.04f)
                         ) else listOf(
                             Color.Transparent,
-                            Color(0xFFD7_DE_EB),
+                            Color(0xFFD7DEEB),
                             Color.Transparent
                         )
                     )
@@ -103,7 +109,7 @@ fun BottomNavBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
+                .padding(horizontal = 6.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -112,13 +118,14 @@ fun BottomNavBar(
                 val interactionSource = remember { MutableInteractionSource() }
 
                 val iconScale by animateFloatAsState(
-                    targetValue = if (isSelected) 1.18f else 1.0f,
+                    targetValue = if (isSelected) 1.15f else 1.0f,
                     animationSpec = PhoenixMotion.BounceSpring,
                     label = "tabIconScale_${tab.name}"
                 )
 
                 val tabColor by animateColorAsState(
-                    targetValue = if (isSelected) AmberGold else (if (isDark) Color.White.copy(alpha = 0.50f) else Color(0xFF64_74_8B)),
+                    targetValue = if (isSelected) DuolingoBlue
+                    else (if (isDark) Color(0xFF94A3B8) else Color(0xFF738099)),
                     animationSpec = spring(),
                     label = "tabColor_${tab.name}"
                 )
@@ -127,6 +134,7 @@ fun BottomNavBar(
                     DashboardTab.LEARN -> Icons.Default.Home
                     DashboardTab.VISUALIZER -> Icons.Default.Build
                     DashboardTab.LEADERBOARDS -> Icons.Default.Leaderboard
+                    DashboardTab.SHOP -> Icons.Default.ShoppingBag
                     DashboardTab.PROFILE -> Icons.Default.Person
                     else -> Icons.Default.Home
                 }
@@ -134,10 +142,10 @@ fun BottomNavBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .pressScale(targetScale = 0.92f)
+                        .pressScale(targetScale = 0.93f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(
-                            if (isSelected) AmberGold.copy(alpha = if (isDark) 0.15f else 0.10f)
+                            if (isSelected) DuolingoBlue.copy(alpha = if (isDark) 0.16f else 0.12f)
                             else Color.Transparent
                         )
                         .clickable(
@@ -147,7 +155,7 @@ fun BottomNavBar(
                             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                             onTabSelected(tab)
                         }
-                        .padding(vertical = 6.dp),
+                        .padding(vertical = 5.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -156,23 +164,35 @@ fun BottomNavBar(
                     ) {
                         Icon(
                             imageVector = tabIcon,
-                            contentDescription = tab.name,
+                            contentDescription = tab.title,
                             tint = tabColor,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(23.dp)
                                 .scale(iconScale)
                         )
                         Text(
-                            text = tab.name,
+                            text = tab.title,
                             fontSize = 11.sp,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
                             color = tabColor,
-                            letterSpacing = 0.4.sp
+                            letterSpacing = 0.2.sp,
+                            maxLines = 1
                         )
                     }
                 }
             }
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun BottomNavBarPreview() {
+    CodeingoTheme {
+        BottomNavBar(
+            selectedTab = DashboardTab.LEARN,
+            onTabSelected = {}
+        )
     }
 }
