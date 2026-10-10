@@ -107,7 +107,7 @@ fun TopStatsHeader(
                         ),
                         CircleShape
                     )
-                    .clickable { onMenuClick() }
+                    .clickable { onMenuClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,12 +77,12 @@ fun GoogleAuthSheet(
     val savedAccounts by com.simats.codeingo.domain.AuthService.shared.savedGoogleAccounts.collectAsState()
 
     val displayAccounts = if (savedAccounts.isNotEmpty()) {
-        savedAccounts.map {
+        savedAccounts.map { acc ->
             GoogleAccountItem(
-                name = it.name,
-                email = it.email,
-                avatarInitial = it.avatarInitial,
-                avatarBgColor = when (it.colorIndex % 3) {
+                name = acc.name,
+                email = acc.email,
+                avatarInitial = acc.avatarInitial,
+                avatarBgColor = when (acc.colorIndex % 3) {
                     0 -> Color(0xFF4285F4)
                     1 -> Color(0xFF34A853)
                     else -> Color(0xFFEA4335)

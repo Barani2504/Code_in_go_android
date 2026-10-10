@@ -157,13 +157,13 @@ class AuthService private constructor() {
             syncGlobalAppState(user)
         } else {
             prefs?.edit()?.remove(KEY_USER_PROFILE)?.apply()
-            LocalizationManager.shared.updateLoginState(false)
+            LocalizationManager.shared.setLoggedIn(false)
         }
     }
 
     private fun syncGlobalAppState(user: UserAuthProfile) {
         LocalizationManager.shared.updateUserProfile(user.name, user.handle)
-        LocalizationManager.shared.updateLoginState(true)
+        LocalizationManager.shared.setLoggedIn(true, user.name, user.handle)
     }
 
     // ── Google Accounts Management ─────────────────────────────────────────────
