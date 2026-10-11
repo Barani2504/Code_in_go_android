@@ -161,152 +161,9 @@ fun LessonNodeButton(
     Box(
         modifier = modifier
             .offset(x = xOffset)
-            .padding(vertical = 4.dp),
+            .size(size + 20.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 1. ACTIVE UNLOCKED TARGET TOOLTIP (5 Questions • START)
-        AnimatedVisibility(
-            visible = isActiveTarget && !isLockedSelected,
-            enter = fadeIn() + scaleIn(initialScale = 0.85f),
-            exit = fadeOut() + scaleOut(targetScale = 0.85f),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-96).dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .offset(y = (-6).dp)
-                    .width(240.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(unit.themeColor, unit.themeDarkColor)
-                            )
-                        )
-                        .border(1.2.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
-                        .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = unit.themeColor.copy(alpha = 0.4f))
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = node.title,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = if (node.levelNumber <= 2) "🥚" else "🔥", fontSize = 11.sp)
-                        Text(
-                            text = "5 Questions • +${unit.unitNumber * 5 + 5} XP • +1 Ember",
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White.copy(alpha = 0.95f)
-                        )
-                    }
-
-                    // START Action 3D Button inside Tooltip
-                    AppButton(
-                        title = if (isBoss) "BOSS BATTLE ⚔️" else "START • 5 QUESTIONS",
-                        style = if (isBoss) AppButtonStyle.DANGER_CRIMSON else AppButtonStyle.PRIMARY_AMBER,
-                        onClick = onStartClick,
-                        height = 38.dp,
-                        fontSize = 12.5.sp,
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 38.dp)
-                    )
-                }
-
-                // Downward Pointer Tip Triangle
-                Canvas(modifier = Modifier.size(width = 14.dp, height = 7.dp)) {
-                    val path = Path().apply {
-                        moveTo(0f, 0f)
-                        lineTo(drawContext.size.width / 2f, drawContext.size.height)
-                        lineTo(drawContext.size.width, 0f)
-                        close()
-                    }
-                    drawPath(path, unit.themeDarkColor)
-                }
-            }
-        }
-
-        // 2. LOCKED LEVEL POPOVER TOOLTIP
-        AnimatedVisibility(
-            visible = isLockedSelected,
-            enter = fadeIn() + scaleIn(initialScale = 0.85f),
-            exit = fadeOut() + scaleOut(targetScale = 0.85f),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-96).dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .offset(y = (-6).dp)
-                    .width(185.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .liquidGlassCard(cornerRadius = 16.dp)
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = node.title,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = dynamicColors.textPrimary,
-                        maxLines = 2
-                    )
-
-                    Text(
-                        text = "Complete previous levels to unlock!",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = dynamicColors.textSecondary
-                    )
-
-                    // 3D Pushable Disabled LOCKED Button
-                    AppButton(
-                        title = "🔒 LOCKED",
-                        style = AppButtonStyle.DISABLED,
-                        onClick = {},
-                        isEnabled = false,
-                        modifier = Modifier.fillMaxWidth().height(34.dp)
-                    )
-                }
-
-                // Downward Pointer Tip
-                Canvas(modifier = Modifier.size(width = 14.dp, height = 7.dp)) {
-                    val path = Path().apply {
-                        moveTo(0f, 0f)
-                        lineTo(drawContext.size.width / 2f, drawContext.size.height)
-                        lineTo(drawContext.size.width, 0f)
-                        close()
-                    }
-                    drawPath(path, dynamicColors.cardBackground)
-                }
-            }
-        }
-
-        // 3. Central 3D Pushable Node Button with Target Ring
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.size(size + 20.dp)
-        ) {
             // Target Pulsing Aura Ring around Active Node
             if (isActiveTarget) {
                 Box(
@@ -390,7 +247,6 @@ fun LessonNodeButton(
                         },
                         modifier = Modifier.size(if (isBoss) 34.dp else 28.dp)
                     )
-                }
             }
         }
     }

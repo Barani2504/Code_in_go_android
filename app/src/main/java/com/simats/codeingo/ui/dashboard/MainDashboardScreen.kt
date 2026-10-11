@@ -11,7 +11,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,6 +71,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -93,6 +96,8 @@ import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.data.model.LessonNodeItem
 import com.simats.codeingo.data.model.UnitCharacterType
 import com.simats.codeingo.data.model.UnitModel
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.simats.codeingo.domain.GameManager
@@ -211,10 +216,10 @@ fun MainDashboardScreen(
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
     var activeWorldArena by remember { mutableStateOf<String?>(null) }
 
-    // Sequential Chapter Review & Replay Navigation State
     var reviewingPreviousUnitId by remember { mutableStateOf<Int?>(null) }
     var replayReturnLevelIndex by remember { mutableStateOf<Int?>(null) }
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
+    var selectedStageCardNode by remember { mutableStateOf<LessonNodeItem?>(null) }
 
     // Keep activeLevelIndex in sync whenever a stage is unlocked (mirrors iOS onComplete)
     LaunchedEffect(unlockedLevels) {
@@ -366,6 +371,14 @@ fun MainDashboardScreen(
             masterUnits.filter { unit ->
                 unit.id >= maxUnlockedChapter && unit.id <= minOf(maxUnlockedChapter + 1, masterUnits.size)
             }
+        }
+    }
+
+    // Sync selected stage action card with the currently active level
+    LaunchedEffect(activeLevelIndex, visibleUnits) {
+        val node = visibleUnits.flatMap { it.nodes }.firstOrNull { it.levelNumber == activeLevelIndex }
+        if (node != null) {
+            selectedStageCardNode = node
         }
     }
 
@@ -528,32 +541,29 @@ fun MainDashboardScreen(
                                             }
                                         }
 
-                                        // Level click / level transition flight: keyed ONLY on activeLevelIndex!
-                                        // This ensures clicking another level immediately starts the flight and is never cancelled by layout updates!
-                                        LaunchedEffect(activeLevelIndex) {
-                                            if (isUnitActive && hasInitialFlightPlayed && lastTrackedActiveLevel != activeLevelIndex) {
-                                                val target = nodeCirclePositions[activeLevelIndex]
-                                                val startPos = flightTargetPos ?: nodeCirclePositions[lastTrackedActiveLevel] ?: target ?: Offset.Zero
+                                        // Level click / level transition flight: keyed on BOTH activeLevelIndex AND target circle coordinates
+                                        LaunchedEffect(activeLevelIndex, nodeCirclePositions[activeLevelIndex]) {
+                                            val target = nodeCirclePositions[activeLevelIndex]
+                                            if (isUnitActive && hasInitialFlightPlayed && lastTrackedActiveLevel != activeLevelIndex && target != null && target != Offset.Zero) {
+                                                val startPos = flightTargetPos ?: nodeCirclePositions[lastTrackedActiveLevel] ?: target
                                                 val stepDiff = abs(activeLevelIndex - lastTrackedActiveLevel)
                                                 val flightDuration = if (stepDiff <= 1) 3000 else minOf(4200, 3000 + (stepDiff - 1) * 350)
 
+                                                flightStartPos = startPos
+                                                flightTargetPos = target
                                                 lastTrackedActiveLevel = activeLevelIndex
-                                                if (target != null && target != Offset.Zero) {
-                                                    flightStartPos = startPos
-                                                    flightTargetPos = target
-                                                    isFlying = true
-                                                    flightProgress.snapTo(0f)
-                                                    flightProgress.animateTo(
-                                                        targetValue = 1f,
-                                                        animationSpec = tween(durationMillis = flightDuration, easing = FastOutSlowInEasing)
-                                                    )
-                                                    isFlying = false
-                                                    landingSettle.snapTo(1f)
-                                                    landingSettle.animateTo(
-                                                        0f,
-                                                        animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)
-                                                    )
-                                                }
+                                                isFlying = true
+                                                flightProgress.snapTo(0f)
+                                                flightProgress.animateTo(
+                                                    targetValue = 1f,
+                                                    animationSpec = tween(durationMillis = flightDuration, easing = FastOutSlowInEasing)
+                                                )
+                                                isFlying = false
+                                                landingSettle.snapTo(1f)
+                                                landingSettle.animateTo(
+                                                    0f,
+                                                    animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)
+                                                )
                                             }
                                         }
 
@@ -613,8 +623,27 @@ fun MainDashboardScreen(
                                                                 }
                                                             },
                                                             onNodeClick = {
+                                                                selectedStageCardNode = node
                                                                 if (isNodeUnlocked) {
-                                                                    gameManager.setActiveLevel(node.levelNumber)
+                                                                    if (activeLevelIndex == node.levelNumber) {
+                                                                        // Tapping the currently perched level re-triggers a celebratory flight
+                                                                        val prevLevel = (node.levelNumber - 1).coerceAtLeast(1)
+                                                                        val prevPos = nodeCirclePositions[prevLevel] ?: nodeCirclePositions[node.levelNumber]
+                                                                        if (prevPos != null) {
+                                                                            flightStartPos = prevPos
+                                                                            flightTargetPos = nodeCirclePositions[node.levelNumber]
+                                                                            coroutineScope.launch {
+                                                                                isFlying = true
+                                                                                flightProgress.snapTo(0f)
+                                                                                flightProgress.animateTo(1f, tween(3000, easing = FastOutSlowInEasing))
+                                                                                isFlying = false
+                                                                                landingSettle.snapTo(1f)
+                                                                                landingSettle.animateTo(0f, spring(0.55f, 400f))
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        gameManager.setActiveLevel(node.levelNumber)
+                                                                    }
                                                                     selectedLockedNodeId = null
                                                                 } else {
                                                                     selectedLockedNodeId = node.id
@@ -670,9 +699,9 @@ fun MainDashboardScreen(
                                                     sin(p * 8f * Math.PI.toFloat()) * with(density) { 3.dp.toPx() }
                                                 } else 0f
 
-                                                // Total 2D coordinates on screen
-                                                val curX = start.x + dx * p + lateralSwingX
-                                                val curY = start.y + dy * p + lateralSwingY + altitudeArcY + wingbeatHeave
+                                                // Total 2D coordinates on screen (resting bird locks dead-center to targetOffset)
+                                                val curX = if (isFlying) (start.x + dx * p + lateralSwingX) else (targetOffset?.x ?: target.x)
+                                                val curY = if (isFlying) (start.y + dy * p + lateralSwingY + altitudeArcY + wingbeatHeave) else (targetOffset?.y ?: target.y)
 
                                                 // 5. Aerodynamic banking roll into the curve & turns
                                                 val bankTilt = if (isFlying) {
@@ -698,8 +727,8 @@ fun MainDashboardScreen(
                                                 val settleScaleY = 1.0f - settleProgress * 0.08f
                                                 val settleOffsetY = with(density) { settleProgress * 3.dp.toPx() }
 
-                                                // 9. Perch upon circle alignment
-                                                val perchOffsetPx = with(density) { 10.dp.toPx() }
+                                                // 9. Perch upon circle alignment (centered horizontally, resting on circle face)
+                                                val perchOffsetPx = with(density) { 6.dp.toPx() }
                                                 val posX = curX - mascotHalfPx
                                                 val posY = curY - mascotHalfPx - perchOffsetPx + settleOffsetY
 
@@ -803,6 +832,154 @@ fun MainDashboardScreen(
                                 onHeartsClick = { showHeartsSheet = true },
                                 onGemsClick = { showGemShopSheet = true }
                             )
+
+                            // Floating Non-Obstructing Stage Action Card (Docked cleanly above bottom nav bar)
+                            AnimatedVisibility(
+                                visible = selectedStageCardNode != null,
+                                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 12.dp, start = 16.dp, end = 16.dp)
+                            ) {
+                                selectedStageCardNode?.let { cardNode ->
+                                    val cardUnit = visibleUnits.firstOrNull { it.nodes.any { n -> n.id == cardNode.id } } ?: visibleUnits.firstOrNull()
+                                    val isCardNodeCompleted = completedLevelIndices.contains(cardNode.levelNumber)
+                                    val isCardNodeUnlocked = cardUnit != null && cardUnit.id <= maxUnlockedChapter && (unlockedLevels.contains(cardNode.levelNumber) || isCardNodeCompleted)
+                                    val isCardBoss = cardNode.isBoss
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .shadow(16.dp, RoundedCornerShape(22.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                                            .clip(RoundedCornerShape(22.dp))
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    if (isCardBoss) listOf(
+                                                        Color(0xFF2A0D11).copy(alpha = 0.95f),
+                                                        Color(0xFF170608).copy(alpha = 0.98f)
+                                                    ) else listOf(
+                                                        Color(0xFF131D33).copy(alpha = 0.95f),
+                                                        Color(0xFF090E1B).copy(alpha = 0.98f)
+                                                    )
+                                                )
+                                            )
+                                            .border(
+                                                width = 1.2.dp,
+                                                brush = Brush.horizontalGradient(
+                                                    if (isCardBoss) listOf(
+                                                        Color(0xFFFF3B30).copy(alpha = 0.7f),
+                                                        Color(0xFFFF7A00).copy(alpha = 0.7f)
+                                                    ) else listOf(
+                                                        (cardUnit?.themeColor ?: AmberGold).copy(alpha = 0.7f),
+                                                        Color.White.copy(alpha = 0.4f)
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(22.dp)
+                                            )
+                                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            // Top Header Row with Icon, Title, and Close Button
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.weight(1f),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(38.dp)
+                                                            .clip(CircleShape)
+                                                            .background(
+                                                                if (isCardBoss) Color(0xFFFF3B30).copy(alpha = 0.25f)
+                                                                else (cardUnit?.themeColor ?: AmberGold).copy(alpha = 0.25f)
+                                                            ),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Text(
+                                                            text = if (isCardBoss) "⚔️" else if (cardNode.levelNumber <= 2) "🥚" else "🔥",
+                                                            fontSize = 18.sp
+                                                        )
+                                                    }
+
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = cardNode.title,
+                                                            fontSize = 14.sp,
+                                                            fontWeight = FontWeight.Black,
+                                                            color = Color.White,
+                                                            maxLines = 1
+                                                        )
+                                                        Text(
+                                                            text = if (!isCardNodeUnlocked) "Complete previous levels to unlock!"
+                                                            else "5 Questions • +${(cardUnit?.unitNumber ?: 1) * 5 + 5} XP • +1 Ember",
+                                                            fontSize = 11.5.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = if (!isCardNodeUnlocked) Color(0xFFEF4444) else Color.White.copy(alpha = 0.8f)
+                                                        )
+                                                    }
+                                                }
+
+                                                // Dismiss Close Button
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(28.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color.White.copy(alpha = 0.12f))
+                                                        .clickable { selectedStageCardNode = null },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Close,
+                                                        contentDescription = "Close",
+                                                        tint = Color.White.copy(alpha = 0.85f),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            // Action Button
+                                            if (isCardNodeUnlocked) {
+                                                AppButton(
+                                                    title = if (isCardBoss) "BOSS BATTLE ⚔️" else "START • 5 QUESTIONS",
+                                                    style = if (isCardBoss) AppButtonStyle.DANGER_CRIMSON else AppButtonStyle.PRIMARY_AMBER,
+                                                    onClick = {
+                                                        if (cardNode.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
+                                                            replayReturnLevelIndex = activeLevelIndex
+                                                        }
+                                                        if (cardNode.isBoss) {
+                                                            onStartBoss(cardNode.bossSpec?.id ?: "boss_unit_${cardUnit?.id ?: 1}")
+                                                        } else {
+                                                            onStartLesson(cardUnit?.id ?: 1, cardNode.levelNumber, 5, false)
+                                                        }
+                                                    },
+                                                    height = 42.dp,
+                                                    fontSize = 13.sp,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                )
+                                            } else {
+                                                AppButton(
+                                                    title = "🔒 LOCKED",
+                                                    style = AppButtonStyle.DISABLED,
+                                                    onClick = {},
+                                                    isEnabled = false,
+                                                    height = 38.dp,
+                                                    fontSize = 12.5.sp,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
