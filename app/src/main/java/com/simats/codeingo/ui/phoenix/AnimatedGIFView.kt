@@ -31,8 +31,13 @@ fun AnimatedGIFView(
     val cleanName = resourceName.removeSuffix(".gif")
 
     val gifResId = when (cleanName) {
+        "phoenix_stage_1" -> R.raw.phoenix_stage_1
+        "phoenix_stage_2" -> R.raw.phoenix_stage_2
+        "phoenix_stage_3" -> R.raw.phoenix_stage_3
+        "phoenix_stage_4" -> R.raw.phoenix_stage_4
+        "phoenix_stage_5" -> R.raw.phoenix_stage_5
         "phoenix_flying" -> R.raw.phoenix_flying
-        else -> R.raw.phoenix_flying
+        else -> R.raw.phoenix_stage_1
     }
 
     val imageLoader = ImageLoader.Builder(context)

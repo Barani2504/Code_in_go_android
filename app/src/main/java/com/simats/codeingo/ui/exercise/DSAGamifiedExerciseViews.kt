@@ -84,7 +84,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 // =========================================================================
-// 1. DUOLINGO-STYLE MATCH PAIRS (Speed Match with 3D Tactile Push Pills)
+// 1. NEURAL SYNAPSE LINK (Match Pairs with Pointer Nodes & Sockets)
 // =========================================================================
 @Composable
 fun MatchPairsExerciseView(
@@ -110,27 +110,31 @@ fun MatchPairsExerciseView(
     }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        // Duolingo progress header
+        // Synapse HUD Header with connection progress
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = if (selectedLeft != null) "🔗 Tap match for '$selectedLeft':" else "Tap an item on left, then its match on right:",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (selectedLeft != null) AmberGold else DuolingoSubtext
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "⚡", fontSize = 14.sp)
+                Text(
+                    text = if (selectedLeft != null) "Connecting '$selectedLeft' →" else "Tap a Concept Node to connect:",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (selectedLeft != null) Color(0xFF1C_B0_F6) else DuolingoSubtext
+                )
+            }
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (matchedPairs.size == solution.size) PhoenixGreen.copy(alpha = 0.2f) else DuolingoInputBg)
+                    .border(1.dp, if (matchedPairs.size == solution.size) PhoenixGreen else DuolingoInputBorder, RoundedCornerShape(8.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "⚡ ${matchedPairs.size}/${solution.size}",
-                    fontSize = 12.sp,
+                    text = "${matchedPairs.size}/${solution.size} SYNAPSES",
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     color = if (matchedPairs.size == solution.size) PhoenixGreen else Color(0xFF1C_B0_F6)
                 )
@@ -142,7 +146,7 @@ fun MatchPairsExerciseView(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Left Column
+            // Left Column: Concept Terminals with outward socket (—●)
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -152,8 +156,9 @@ fun MatchPairsExerciseView(
                     val isSelected = selectedLeft == item
                     val isWrong = wrongPairLeft == item
 
-                    DuolingoTactileButton(
+                    SynapseNodeCard(
                         text = item,
+                        isLeft = true,
                         isSelected = isSelected,
                         isMatched = isMatched,
                         isWrong = isWrong,
@@ -171,7 +176,7 @@ fun MatchPairsExerciseView(
                 }
             }
 
-            // Right Column
+            // Right Column: Definition Ports with inward socket (●—)
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -180,15 +185,16 @@ fun MatchPairsExerciseView(
                     val isMatched = matchedPairs.containsValue(item)
                     val isWrong = wrongPairRight == item
 
-                    DuolingoTactileButton(
+                    SynapseNodeCard(
                         text = item,
+                        isLeft = false,
                         isMonospace = true,
                         isSelected = false,
                         isMatched = isMatched,
                         isWrong = isWrong,
                         isEnabled = !isMatched && !isChecked && selectedLeft != null,
                         onClick = {
-                            val currentLeft = selectedLeft ?: return@DuolingoTactileButton
+                            val currentLeft = selectedLeft ?: return@SynapseNodeCard
                             if (solution[currentLeft] == item) {
                                 matchedPairs[currentLeft] = item
                                 selectedLeft = null
@@ -212,7 +218,7 @@ fun MatchPairsExerciseView(
 }
 
 // =========================================================================
-// 2. PARSONS PUZZLE / ORDER STEPS (Tactile 3D Cards with Tap-to-Swap)
+// 2. ALGORITHMIC EXECUTION PIPELINE (Order Steps with 3D Flow Connectors)
 // =========================================================================
 @Composable
 fun OrderStepsExerciseView(
@@ -235,19 +241,24 @@ fun OrderStepsExerciseView(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = if (selectedStepIndex != null) "⚡ Tap any other step to swap!" else "Reorder into the correct sequence:",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (selectedStepIndex != null) AmberGold else DuolingoSubtext
-            )
-            if (selectedStepIndex != null) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "🔄", fontSize = 14.sp)
                 Text(
-                    text = "Tap selected to cancel",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = SubtextGray
+                    text = if (selectedStepIndex != null) "Select target step to swap with:" else "Reorder into algorithmic sequence:",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (selectedStepIndex != null) AmberGold else DuolingoSubtext
                 )
+            }
+            if (selectedStepIndex != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(AmberGold.copy(alpha = 0.2f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(text = "CANCEL", fontSize = 11.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                }
             }
         }
 
@@ -256,7 +267,7 @@ fun OrderStepsExerciseView(
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
                 val isSelectedForSwap = selectedStepIndex == index
-                val depth = 3.dp
+                val depth = 3.5.dp
 
                 val interactionSource = remember { MutableInteractionSource() }
                 val isPressed by interactionSource.collectIsPressedAsState()
@@ -270,7 +281,7 @@ fun OrderStepsExerciseView(
                     targetValue = when {
                         isChecked && isCorrectPosition -> PhoenixGreen.copy(alpha = 0.2f)
                         isChecked && !isCorrectPosition -> PhoenixCrimson.copy(alpha = 0.2f)
-                        isSelectedForSwap -> AmberGold.copy(alpha = 0.24f)
+                        isSelectedForSwap -> AmberGold.copy(alpha = 0.25f)
                         else -> DuolingoInputBg
                     },
                     label = "stepBg"
@@ -338,7 +349,7 @@ fun OrderStepsExerciseView(
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Sequence Number Badge
+                        // Pipeline Step Badge
                         Box(
                             modifier = Modifier
                                 .size(28.dp)
@@ -425,7 +436,7 @@ fun OrderStepsExerciseView(
 }
 
 // =========================================================================
-// 3. FILL IN CODE (Duolingo Sentence Builder with 3D Chips & Ghost Placeholders)
+// 3. CYBER-IDE HACKER TERMINAL (Fill Code with Gutter Lines & RAM Chips)
 // =========================================================================
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -442,17 +453,17 @@ fun FillCodeExerciseView(
     val activeToken = externalSelectedToken ?: selectedToken
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // macOS / Duolingo Code Window Container
+        // Hacker IDE Editor Window
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF111722))
+                .background(Color(0xFF0F1522))
                 .border(1.5.dp, DuolingoInputBorder, RoundedCornerShape(16.dp))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Header dots + filename
+            // IDE Window Header Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -470,88 +481,122 @@ fun FillCodeExerciseView(
                     fontWeight = FontWeight.Bold,
                     color = DuolingoSubtext
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(text = "PYTHON", fontSize = 10.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                }
             }
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Code Template with Duolingo-style slot
-            val parts = codeTemplate.split("[___]")
-            if (parts.size >= 2) {
-                Text(
-                    text = parts[0],
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White
-                )
+            // Code Canvas with Line Numbers Gutter
+            Row(modifier = Modifier.fillMaxWidth()) {
+                // Line Numbers Gutter
+                Column(
+                    modifier = Modifier.padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text("01", fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = Color.White.copy(alpha = 0.25f))
+                    Text("02", fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = Color.White.copy(alpha = 0.25f))
+                    Text("03", fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = Color.White.copy(alpha = 0.25f))
+                }
 
-                // Interactive Slot — tap to eject token back into the bank!
-                val slotBorderColor by animateColorAsState(
-                    targetValue = when {
-                        activeToken == null -> AmberGold
-                        isChecked && activeToken == correctToken -> PhoenixGreen
-                        isChecked && activeToken != correctToken -> PhoenixCrimson
-                        else -> Color(0xFF1C_B0_F6)
-                    }, label = "slotBorder"
-                )
-
+                // Vertical Gutter Separator
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            when {
-                                activeToken == null -> AmberGold.copy(alpha = 0.12f)
-                                isChecked && activeToken == correctToken -> PhoenixGreen.copy(alpha = 0.22f)
-                                isChecked && activeToken != correctToken -> PhoenixCrimson.copy(alpha = 0.22f)
-                                else -> Color(0xFF1C_B0_F6).copy(alpha = 0.2f)
-                            }
-                        )
-                        .border(1.8.dp, slotBorderColor, RoundedCornerShape(10.dp))
-                        .clickable(enabled = !isChecked && activeToken != null) {
-                            selectedToken = null
-                            onTokenSelected(null)
-                        }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        .width(1.dp)
+                        .height(68.dp)
+                        .background(Color.White.copy(alpha = 0.1f))
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Code snippet with glowing drop slot
+                val parts = codeTemplate.split("[___]")
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (parts.size >= 2) {
                         Text(
-                            text = activeToken ?: "[ ? TAP TOKEN BELOW ]",
+                            text = parts[0],
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Black,
+                            fontWeight = FontWeight.Medium,
                             fontFamily = FontFamily.Monospace,
-                            color = when {
+                            color = Color.White
+                        )
+
+                        // Interactive Drop Slot (clickable to eject token)
+                        val slotBorderColor by animateColorAsState(
+                            targetValue = when {
                                 activeToken == null -> AmberGold
                                 isChecked && activeToken == correctToken -> PhoenixGreen
                                 isChecked && activeToken != correctToken -> PhoenixCrimson
                                 else -> Color(0xFF1C_B0_F6)
-                            }
+                            }, label = "slotBorder"
                         )
-                        if (activeToken != null && !isChecked) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "✕", fontSize = 11.sp, color = SubtextGray)
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    when {
+                                        activeToken == null -> AmberGold.copy(alpha = 0.12f)
+                                        isChecked && activeToken == correctToken -> PhoenixGreen.copy(alpha = 0.22f)
+                                        isChecked && activeToken != correctToken -> PhoenixCrimson.copy(alpha = 0.22f)
+                                        else -> Color(0xFF1C_B0_F6).copy(alpha = 0.2f)
+                                    }
+                                )
+                                .border(1.8.dp, slotBorderColor, RoundedCornerShape(10.dp))
+                                .clickable(enabled = !isChecked && activeToken != null) {
+                                    selectedToken = null
+                                    onTokenSelected(null)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 7.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = activeToken ?: "[ ? TAP TOKEN BELOW ]",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = when {
+                                        activeToken == null -> AmberGold
+                                        isChecked && activeToken == correctToken -> PhoenixGreen
+                                        isChecked && activeToken != correctToken -> PhoenixCrimson
+                                        else -> Color(0xFF1C_B0_F6)
+                                    }
+                                )
+                                if (activeToken != null && !isChecked) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(text = "✕", fontSize = 11.sp, color = SubtextGray)
+                                }
+                            }
                         }
+
+                        Text(
+                            text = parts[1],
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.White
+                        )
+                    } else {
+                        Text(
+                            text = codeTemplate,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.White
+                        )
                     }
                 }
-
-                Text(
-                    text = parts[1],
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White
-                )
-            } else {
-                Text(
-                    text = codeTemplate,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White
-                )
             }
         }
 
-        // Duolingo Word Bank with 3D Chips & Ghost Footprints
+        // Memory RAM Chips Word Bank
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = "Select token to complete code:",
@@ -567,7 +612,7 @@ fun FillCodeExerciseView(
             ) {
                 wordBank.forEachIndexed { idx, token ->
                     val isSlotted = activeToken == token
-                    DuolingoChip(
+                    RamChip(
                         token = token,
                         isSlotted = isSlotted,
                         isEnabled = !isChecked,
@@ -585,9 +630,9 @@ fun FillCodeExerciseView(
 }
 
 // =========================================================================
-// 4. BIG-O COMPLEXITY DIAL (Tactile 3D Speed Tier Cards)
+// 4. TACHOMETER COMPLEXITY MATRIX (Visual Latency Speedometer Cards)
 // =========================================================================
-private data class ComplexityTier(val label: String, val name: String, val speedTag: String, val color: Color, val shadowColor: Color)
+private data class ComplexityTier(val label: String, val name: String, val speedTag: String, val gaugeRatio: Float, val color: Color, val shadowColor: Color)
 
 @Composable
 fun ComplexityDialExerciseView(
@@ -603,12 +648,12 @@ fun ComplexityDialExerciseView(
 
     val tiers = remember {
         listOf(
-            ComplexityTier("O(1)", "Constant", "⚡ Instant", PhoenixGreen, Color(0xFF1E_8E_3E)),
-            ComplexityTier("O(log n)", "Logarithmic", "🚀 Binary", DsaTeal, Color(0xFF00_9E_78)),
-            ComplexityTier("O(n)", "Linear", "🏃 Single Pass", Color(0xFF1C_B0_F6), Color(0xFF0F_8A_CC)),
-            ComplexityTier("O(n log n)", "Linearithmic", "⚖️ Merge Sort", DsaPurple, Color(0xFF7A_3B_CC)),
-            ComplexityTier("O(n²)", "Quadratic", "🐢 Nested", DuolingoOrange, Color(0xFFB5_3C_05)),
-            ComplexityTier("O(2ⁿ)", "Exponential", "💥 Recursive", PhoenixCrimson, Color(0xFFA5_14_06))
+            ComplexityTier("O(1)", "Constant", "⚡ Instant", 0.15f, PhoenixGreen, Color(0xFF1E_8E_3E)),
+            ComplexityTier("O(log n)", "Logarithmic", "🚀 Binary", 0.30f, DsaTeal, Color(0xFF00_9E_78)),
+            ComplexityTier("O(n)", "Linear", "🏃 Single Pass", 0.50f, Color(0xFF1C_B0_F6), Color(0xFF0F_8A_CC)),
+            ComplexityTier("O(n log n)", "Linearithmic", "⚖️ Merge Sort", 0.70f, DsaPurple, Color(0xFF7A_3B_CC)),
+            ComplexityTier("O(n²)", "Quadratic", "🐢 Nested", 0.85f, DuolingoOrange, Color(0xFFB5_3C_05)),
+            ComplexityTier("O(2ⁿ)", "Exponential", "💥 Recursive", 1.0f, PhoenixCrimson, Color(0xFFA5_14_06))
         )
     }
 
@@ -643,7 +688,7 @@ fun ComplexityDialExerciseView(
             }
         }
 
-        // 2-Column Grid of 3D tactile complexity cards
+        // 2-Column Grid of 3D Tachometer cards with latency gauge bars
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(text = "Select Worst-Case Time Complexity:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoSubtext)
 
@@ -657,7 +702,7 @@ fun ComplexityDialExerciseView(
                         if (item != null) {
                             val isSelected = activeComplexity == item.label
                             val isCorrect = item.label == correctComplexity
-                            val depth = 3.dp
+                            val depth = 3.5.dp
 
                             val interactionSource = remember { MutableInteractionSource() }
                             val isPressed by interactionSource.collectIsPressedAsState()
@@ -715,8 +760,8 @@ fun ComplexityDialExerciseView(
                                         .clip(shape)
                                         .background(cardShadow)
                                 )
-                                // Face
-                                Row(
+                                // Face with gauge bar
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .offset(y = currentOffset)
@@ -724,26 +769,48 @@ fun ComplexityDialExerciseView(
                                         .background(faceBg)
                                         .border(if (isSelected || (isChecked && isCorrect)) 2.dp else 1.2.dp, borderColor, shape)
                                         .padding(horizontal = 12.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(item.color))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = item.label,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Black,
-                                            fontFamily = FontFamily.Monospace,
-                                            color = LocalDynamicThemeColors.current.textPrimary
-                                        )
-                                        Text(text = item.speedTag, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = item.color)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(item.color))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = item.label,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Black,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = LocalDynamicThemeColors.current.textPrimary
+                                            )
+                                            Text(text = item.speedTag, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = item.color)
+                                        }
+                                        if (isChecked && (isSelected || isCorrect)) {
+                                            Icon(
+                                                imageVector = if (isCorrect) Icons.Default.CheckCircle else Icons.Default.Close,
+                                                contentDescription = null,
+                                                tint = if (isCorrect) PhoenixGreen else PhoenixCrimson,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
                                     }
-                                    if (isChecked && (isSelected || isCorrect)) {
-                                        Icon(
-                                            imageVector = if (isCorrect) Icons.Default.CheckCircle else Icons.Default.Close,
-                                            contentDescription = null,
-                                            tint = if (isCorrect) PhoenixGreen else PhoenixCrimson,
-                                            modifier = Modifier.size(16.dp)
+
+                                    // Visual Latency Gauge Bar
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(item.gaugeRatio)
+                                                .height(4.dp)
+                                                .clip(CircleShape)
+                                                .background(item.color)
                                         )
                                     }
                                 }
@@ -759,7 +826,7 @@ fun ComplexityDialExerciseView(
 }
 
 // =========================================================================
-// 5. TRUE / FALSE FACT SWIPE (Tinder Gestures + 3D Duolingo Decision Buttons)
+// 5. VERDICT ARENA (True/False Fact Check with Dual Portal Gates)
 // =========================================================================
 @Composable
 fun TrueFalseSwipeExerciseView(
@@ -778,14 +845,18 @@ fun TrueFalseSwipeExerciseView(
     val dragOffsetX = remember(statement) { Animatable(0f) }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // Drag hint banner
+        // Portal Hint Banner
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "FACT CHECK CHALLENGE", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DuolingoSubtext)
-            Text(text = "👈 Drag Left / Right 👉", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+            Text(text = "VERDICT ARENA", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DuolingoSubtext)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "🔴 SWIPE LEFT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = PhoenixCrimson)
+                Text(text = "•", fontSize = 10.sp, color = DuolingoSubtext)
+                Text(text = "SWIPE RIGHT 🟢", fontSize = 10.sp, fontWeight = FontWeight.Black, color = PhoenixGreen)
+            }
         }
 
         // Swipeable Fact Card with 3D Depth
@@ -882,7 +953,7 @@ fun TrueFalseSwipeExerciseView(
                             .padding(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = if (activeDecision) "SELECTED: TRUE ✅" else "SELECTED: FALSE ❌",
+                            text = if (activeDecision) "VERDICT: TRUE ✅" else "VERDICT: FALSE ❌",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
                             color = if (activeDecision) PhoenixGreen else PhoenixCrimson
@@ -892,13 +963,12 @@ fun TrueFalseSwipeExerciseView(
             }
         }
 
-        // Two 3D Tactile Push Buttons (TRUE / FALSE)
+        // Two 3D Tactile Arcade Decision Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // TRUE 3D Push Button
-            DuolingoDecisionButton(
+            ArcadePowerButton(
                 title = "TRUE",
                 iconText = "✅",
                 color = PhoenixGreen,
@@ -912,8 +982,7 @@ fun TrueFalseSwipeExerciseView(
                 modifier = Modifier.weight(1f)
             )
 
-            // FALSE 3D Push Button
-            DuolingoDecisionButton(
+            ArcadePowerButton(
                 title = "FALSE",
                 iconText = "❌",
                 color = PhoenixCrimson,
@@ -931,13 +1000,14 @@ fun TrueFalseSwipeExerciseView(
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// 🧩 SHARED DUOLINGO 3D TACTILE COMPONENT PRIMITIVES
+// 🧩 UNIQUE DSA GAMIFIED PRIMITIVE COMPONENTS
 // ═════════════════════════════════════════════════════════════════════════
 
-/** 3D tactile button for Match Pairs */
+/** Synapse Node Card with Outward / Inward LED Pins */
 @Composable
-private fun DuolingoTactileButton(
+private fun SynapseNodeCard(
     text: String,
+    isLeft: Boolean,
     isSelected: Boolean,
     isMatched: Boolean,
     isWrong: Boolean,
@@ -946,7 +1016,7 @@ private fun DuolingoTactileButton(
     modifier: Modifier = Modifier,
     isMonospace: Boolean = false
 ) {
-    val depth = 3.dp
+    val depth = 3.5.dp
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val currentOffset by animateDpAsState(
@@ -1000,7 +1070,7 @@ private fun DuolingoTactileButton(
                 .clip(shape)
                 .background(shadowColor)
         )
-        // Face Layer
+        // Face Layer with LED Pin Socket
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1011,6 +1081,17 @@ private fun DuolingoTactileButton(
                 .padding(horizontal = 12.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (!isLeft) {
+                // Inward Receiver Pin on right column items
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(if (isMatched) PhoenixGreen else borderColor)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             Text(
                 text = text,
                 fontSize = 13.sp,
@@ -1019,7 +1100,17 @@ private fun DuolingoTactileButton(
                 color = if (isMatched) PhoenixGreen else LocalDynamicThemeColors.current.textPrimary,
                 modifier = Modifier.weight(1f)
             )
-            if (isMatched) {
+
+            if (isLeft) {
+                // Outward Transmitter Pin on left column items
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(if (isMatched) PhoenixGreen else if (isSelected) Color(0xFF1C_B0_F6) else SubtextGray.copy(alpha = 0.4f))
+                )
+            } else if (isMatched) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Matched",
@@ -1031,25 +1122,25 @@ private fun DuolingoTactileButton(
     }
 }
 
-/** 3D word chip with ghost placeholder for Duolingo sentence builder */
+/** 3D RAM Data Chip with Ghost Footprint in the Bank */
 @Composable
-private fun DuolingoChip(
+private fun RamChip(
     token: String,
     isSlotted: Boolean,
     isEnabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val depth = 3.dp
+    val depth = 3.5.dp
     val shape = RoundedCornerShape(12.dp)
 
     if (isSlotted) {
-        // Recessed Ghost Placeholder remaining in the bank
+        // Recessed Ghost Footprint Placeholder in the bank
         Box(
             modifier = modifier
                 .clip(shape)
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.dp, Color.White.copy(alpha = 0.15f), shape)
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(1.dp, Color.White.copy(alpha = 0.12f), shape)
                 .padding(horizontal = 16.dp, vertical = 11.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -1062,7 +1153,7 @@ private fun DuolingoChip(
             )
         }
     } else {
-        // Active 3D Tactile Chip
+        // Active 3D RAM Data Chip
         val interactionSource = remember { MutableInteractionSource() }
         val isPressed by interactionSource.collectIsPressedAsState()
         val currentOffset by animateDpAsState(
@@ -1085,18 +1176,26 @@ private fun DuolingoChip(
                     .matchParentSize()
                     .offset(y = depth)
                     .clip(shape)
-                    .background(Color(0xFF0C_13_22))
+                    .background(Color(0xFF0A_10_1D))
             )
             // Face Layer
-            Box(
+            Row(
                 modifier = Modifier
                     .offset(y = currentOffset)
                     .clip(shape)
                     .background(DuolingoCardBg)
                     .border(1.2.dp, DuolingoInputBorder, shape)
                     .padding(horizontal = 16.dp, vertical = 11.dp),
-                contentAlignment = Alignment.Center
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Mini Chip LED Pin
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF1C_B0_F6))
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = token,
                     fontSize = 14.sp,
@@ -1109,9 +1208,9 @@ private fun DuolingoChip(
     }
 }
 
-/** 3D push decision button for True/False */
+/** 3D Arcade Power Switch Button for True/False */
 @Composable
-private fun DuolingoDecisionButton(
+private fun ArcadePowerButton(
     title: String,
     iconText: String,
     color: Color,
@@ -1121,14 +1220,14 @@ private fun DuolingoDecisionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val depth = 3.5.dp
+    val depth = 4.dp
     val shape = RoundedCornerShape(16.dp)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val currentOffset by animateDpAsState(
         targetValue = if ((isPressed && isEnabled) || isSelected) depth else 0.dp,
         animationSpec = PhoenixMotion.PressSpringDp,
-        label = "decisionOffset"
+        label = "arcadeOffset"
     )
 
     Box(

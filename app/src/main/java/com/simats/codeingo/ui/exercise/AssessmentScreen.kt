@@ -57,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -69,6 +70,7 @@ import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.ProgressBarAnimated
+import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
@@ -133,7 +135,7 @@ fun AssessmentScreen(
     var wrongAnswerCount by remember { mutableIntStateOf(0) }
     var timeRemaining   by remember { mutableIntStateOf(45) }
 
-    // Single-composable slide via Animatable — no dual-state bleed
+    // Single-composable slide via Animatable — prevents dual-state bleed
     val slideOffsetPx   = remember { Animatable(0f) }
     var isTransitioning by remember { mutableStateOf(false) }
 
@@ -236,7 +238,7 @@ fun AssessmentScreen(
         } else {
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
 
-                // ── Duolingo-Style Header Bar ─────────────────────────────────
+                // ── GAMIFIED ARENA HUD HEADER ────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -244,21 +246,31 @@ fun AssessmentScreen(
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, "Close", tint = SubtextGray, modifier = Modifier.size(24.dp))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Progress capsule
                     val progress = if (questions.isNotEmpty()) currentIndex.toFloat() / questions.size else 0f
                     ProgressBarAnimated(progress = progress, modifier = Modifier.weight(1f).height(16.dp))
-                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Spacer(modifier = Modifier.width(14.dp))
+
+                    // Heart Crystal Counter with dynamic red glow
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.shake(shakeTrigger = wrongAnswerCount.takeIf { it > 0 })
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .shake(shakeTrigger = wrongAnswerCount.takeIf { it > 0 })
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PhoenixCrimson.copy(alpha = 0.14f))
+                            .border(1.2.dp, PhoenixCrimson.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
-                        Icon(Icons.Default.Favorite, "Hearts", tint = DuolingoRed, modifier = Modifier.size(22.dp))
-                        Text("$heartsCount", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DuolingoRed)
+                        Icon(Icons.Default.Favorite, "Hearts", tint = PhoenixCrimson, modifier = Modifier.size(18.dp))
+                        Text("$heartsCount", fontSize = 15.sp, fontWeight = FontWeight.Black, color = PhoenixCrimson)
                     }
                 }
 
-                // ── Scrollable Content Area ──────────────────────────────────
+                // ── Scrollable Arena Content ─────────────────────────────────
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
@@ -268,20 +280,51 @@ fun AssessmentScreen(
                         .verticalScroll(scrollState)
                         .padding(horizontal = 20.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    // Question badge + title + hint button
+                    // Chapter / Stage Sub-Header + Cheat Code
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(CardBackground).padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) { Text("Q${currentIndex + 1}/${questions.size}", fontSize = 12.sp, fontWeight = FontWeight.Black, color = SubtextGray) }
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(CardBackground)
+                                .border(1.dp, DuolingoInputBorder, RoundedCornerShape(8.dp))
+                                .padding(horizontal = 9.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "Q${currentIndex + 1} OF ${questions.size}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = SubtextGray
+                            )
+                        }
+
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text(currentQuestion.typeTitle, fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+
+                        // Live Stage Badge
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(AmberGold.copy(alpha = 0.12f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "CH $unitId • STAGE $unitId",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = AmberGold
+                            )
+                        }
+
                         Spacer(modifier = Modifier.weight(1f))
+
                         if (currentQuestion.hint != null) {
                             Box(
-                                modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(DuolingoBlue)
-                                    .clickable { showHintDialog = true }.padding(horizontal = 10.dp, vertical = 6.dp)
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(DuolingoBlue)
+                                    .clickable { showHintDialog = true }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text("🎮", fontSize = 12.sp)
@@ -292,11 +335,11 @@ fun AssessmentScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Countdown timer indicator
+                    // Animated Countdown Timer Indicator
                     val timerColor by animateColorAsState(
-                        targetValue = when { timeRemaining <= 5 -> DuolingoRed; timeRemaining <= 10 -> AmberGold; else -> SubtextGray },
+                        targetValue = when { timeRemaining <= 5 -> PhoenixCrimson; timeRemaining <= 10 -> AmberGold; else -> SubtextGray },
                         animationSpec = tween(400), label = "timerColor"
                     )
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -306,19 +349,31 @@ fun AssessmentScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Mascot + Speech Bubble (Duolingo signature style)
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                    // ── LIVING PHOENIX COMPANION & DIALOGUE STAGE ─────────────
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Animated Phoenix GIF Avatar for the current chapter stage!
+                        val stageName = "phoenix_stage_${unitId.coerceIn(1, 5)}"
                         Box(
                             modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .background(DuolingoGreen.copy(alpha = 0.2f))
-                                .border(2.dp, DuolingoGreen, CircleShape),
+                                .size(64.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(PhoenixGreen.copy(alpha = 0.1f))
+                                .border(1.5.dp, PhoenixGreen.copy(alpha = 0.4f), RoundedCornerShape(18.dp)),
                             contentAlignment = Alignment.Center
-                        ) { Text("🦩", fontSize = 28.sp) }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        ) {
+                            AnimatedGIFView(
+                                resourceName = stageName,
+                                size = 56.dp
+                            )
+                        }
+
+                        // Cyber-Holographic Dialogue Card
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -328,20 +383,30 @@ fun AssessmentScreen(
                                 .padding(14.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(currentQuestion.promptSentence, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
-                                Text(currentQuestion.targetPrompt, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = AmberGold)
+                                Text(
+                                    text = currentQuestion.promptSentence,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = LocalDynamicThemeColors.current.textPrimary
+                                )
+                                Text(
+                                    text = currentQuestion.targetPrompt,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = AmberGold
+                                )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(22.dp))
 
                     // ── GAMIFIED EXERCISE RENDERER ───────────────────────────
                     val interactionEnabled = !isTransitioning
 
                     when (currentQuestion.gameType) {
 
-                        // ── Duolingo-Style 3D Tactile Push Option Tiles ──────
+                        // ── Holographic DSA Command Matrix ───────────────────
                         DSAExerciseType.MULTIPLE_CHOICE -> {
                             val badges = listOf("A", "B", "C", "D", "E", "F")
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -350,7 +415,7 @@ fun AssessmentScreen(
                                     val isCorrectOpt = index == currentQuestion.correctOptionIndex
                                     val badge = badges.getOrElse(index) { "${index + 1}" }
 
-                                    DuolingoOptionTile(
+                                    HolographicCommandTile(
                                         text = optionText,
                                         badgeText = badge,
                                         isSelected = isSelected,
@@ -415,7 +480,7 @@ fun AssessmentScreen(
                             val badges = listOf("A", "B", "C", "D")
                             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 currentQuestion.options.forEachIndexed { index, optionText ->
-                                    DuolingoOptionTile(
+                                    HolographicCommandTile(
                                         text = optionText,
                                         badgeText = badges.getOrElse(index) { "${index + 1}" },
                                         isSelected = selectedOptionIndex == index,
@@ -432,12 +497,12 @@ fun AssessmentScreen(
                     Spacer(modifier = Modifier.height(28.dp))
                 }
 
-                // ── Duolingo-Style Evaluation Drawer & Action Bar ─────────────
+                // ── DUOLINGO + RPG CELEBRATORY EVALUATION DRAWER ─────────────
                 val isCorrect = isAnswerCorrect
                 val bottomDrawerBg by animateColorAsState(
                     targetValue = when {
-                        isChecked && isCorrect  -> Color(0xFF132F1E)
-                        isChecked && !isCorrect -> Color(0xFF381519)
+                        isChecked && isCorrect  -> Color(0xFF132F1E) // Emerald Victory Glass
+                        isChecked && !isCorrect -> Color(0xFF381519) // Volcanic Crimson Glass
                         else                    -> CardBackground
                     }, animationSpec = tween(300), label = "bottomDrawerBg"
                 )
@@ -448,7 +513,7 @@ fun AssessmentScreen(
                         .background(bottomDrawerBg)
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
-                    // Duolingo Evaluation Banner (Slides up on check)
+                    // Evaluation Sheet Animation
                     AnimatedVisibility(
                         visible = isChecked,
                         enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(280)) + fadeIn(tween(200)),
@@ -462,7 +527,7 @@ fun AssessmentScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(46.dp)
+                                    .size(48.dp)
                                     .correctPop(trigger = isChecked && isCorrect)
                                     .clip(CircleShape)
                                     .background(if (isCorrect) PhoenixGreen else PhoenixCrimson),
@@ -480,18 +545,26 @@ fun AssessmentScreen(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (isCorrect) "Nicely done! ✨" else "Incorrect 🐣",
+                                    text = if (isCorrect) "BRILLIANT! ✨" else "NOT QUITE! 🐣",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Black,
                                     color = if (isCorrect) PhoenixGreen else PhoenixCrimson
                                 )
                                 if (!isCorrect && correctAnswerSummary.isNotEmpty()) {
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Spacer(modifier = Modifier.height(3.dp))
                                     Text(
                                         text = "Correct solution: $correctAnswerSummary",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White.copy(alpha = 0.9f)
+                                    )
+                                } else if (isCorrect) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "+15 XP EARNED • STREAK EXTENDED 🔥",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = PhoenixGreen.copy(alpha = 0.9f)
                                     )
                                 }
                             }
@@ -562,12 +635,12 @@ fun AssessmentScreen(
 }
 
 // ═════════════════════════════════════════════════════════════════════════
-// 🔘 DuolingoOptionTile — Authentic 3D Tactile Push Option Tile
-// Features: 3.5dp extruded bottom shadow, mechanical depress on tap,
+// 🔘 HolographicCommandTile — Isometric 3D DSA Matrix Option Card
+// Features: 4dp extruded bottom shadow, mechanical depress on tap,
 // electric blue selection state, and green/red answer evaluation.
 // ═════════════════════════════════════════════════════════════════════════
 @Composable
-private fun DuolingoOptionTile(
+private fun HolographicCommandTile(
     text: String,
     badgeText: String,
     isSelected: Boolean,
@@ -577,7 +650,7 @@ private fun DuolingoOptionTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val depth = 3.5.dp
+    val depth = 4.dp
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -604,7 +677,7 @@ private fun DuolingoOptionTile(
         isChecked && isSelected && !isCorrectOpt -> Color(0xFFB5_16_06)
         isChecked && isCorrectOpt -> Color(0xFF1A_AE_47)
         isSelected -> Color(0xFF0F_8A_CC)
-        else -> Color(0xFF0C_13_22)
+        else -> Color(0xFF0B_10_1D)
     }
 
     val faceColor by animateColorAsState(
@@ -633,6 +706,8 @@ private fun DuolingoOptionTile(
             else -> DuolingoSubtext
         }, label = "tileBadgeText"
     )
+
+    val isCodeSyntax = text.contains("()") || text.contains("O(") || text.contains("[]") || text.contains("->")
 
     Box(
         modifier = modifier
@@ -664,7 +739,7 @@ private fun DuolingoOptionTile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Letter Badge Pill
+            // Isometric Socket Badge
             Box(
                 modifier = Modifier
                     .size(34.dp)
@@ -686,10 +761,33 @@ private fun DuolingoOptionTile(
             Text(
                 text = text,
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = if (isCodeSyntax) FontWeight.Black else FontWeight.Bold,
+                fontFamily = if (isCodeSyntax) FontFamily.Monospace else FontFamily.Default,
                 color = LocalDynamicThemeColors.current.textPrimary,
                 modifier = Modifier.weight(1f)
             )
+
+            // Right Radio LED Socket Indicator
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .border(
+                        1.5.dp,
+                        if (isSelected || (isChecked && isCorrectOpt)) borderColor else SubtextGray.copy(alpha = 0.4f),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected || (isChecked && isCorrectOpt)) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(borderColor)
+                    )
+                }
+            }
         }
     }
 }
