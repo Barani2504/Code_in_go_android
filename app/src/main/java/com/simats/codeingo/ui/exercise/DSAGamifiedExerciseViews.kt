@@ -3,12 +3,15 @@ package com.simats.codeingo.ui.exercise
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -30,14 +33,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,15 +47,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.simats.codeingo.ui.theme.FeedbackManager
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -84,7 +93,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 // =========================================================================
-// 1. NEURAL SYNAPSE LINK (Match Pairs with Pointer Nodes & Sockets)
+// 1. NEURAL SYNAPSE LINK (Drag-to-Match Sentence Arena)
 // =========================================================================
 @Composable
 fun MatchPairsExerciseView(
@@ -95,10 +104,20 @@ fun MatchPairsExerciseView(
     onMatchedChanged: (Map<String, String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val feedback = remember { FeedbackManager(context) }
+    val coroutineScope = rememberCoroutineScope()
+
     var selectedLeft by remember(leftItems) { mutableStateOf<String?>(null) }
     val matchedPairs = remember(leftItems, rightItems) { mutableStateMapOf<String, String>() }
     var wrongPairLeft by remember(leftItems) { mutableStateOf<String?>(null) }
     var wrongPairRight by remember(rightItems) { mutableStateOf<String?>(null) }
+
+    var activeDraggingLeft by remember { mutableStateOf<String?>(null) }
+    var hoveredTargetRight by remember { mutableStateOf<String?>(null) }
+
+    val leftItemCentersInWindow = remember { mutableStateMapOf<String, Offset>() }
+    val rightBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
 
     LaunchedEffect(wrongPairLeft, wrongPairRight) {
         if (wrongPairLeft != null || wrongPairRight != null) {
@@ -109,108 +128,213 @@ fun MatchPairsExerciseView(
         }
     }
 
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        // Synapse HUD Header with connection progress
-        Row(
+    Box(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = "⚡", fontSize = 14.sp)
-                Text(
-                    text = if (selectedLeft != null) "Connecting '$selectedLeft' →" else "Tap a Concept Node to connect:",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (selectedLeft != null) Color(0xFF1C_B0_F6) else DuolingoSubtext
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (matchedPairs.size == solution.size) PhoenixGreen.copy(alpha = 0.2f) else DuolingoInputBg)
-                    .border(1.dp, if (matchedPairs.size == solution.size) PhoenixGreen else DuolingoInputBorder, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            // Synapse HUD Header with connection progress
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "${matchedPairs.size}/${solution.size} SYNAPSES",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    color = if (matchedPairs.size == solution.size) PhoenixGreen else Color(0xFF1C_B0_F6)
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Left Column: Concept Terminals with outward socket (—●)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                leftItems.forEachIndexed { idx, item ->
-                    val isMatched = matchedPairs.containsKey(item)
-                    val isSelected = selectedLeft == item
-                    val isWrong = wrongPairLeft == item
-
-                    SynapseNodeCard(
-                        text = item,
-                        isLeft = true,
-                        isSelected = isSelected,
-                        isMatched = isMatched,
-                        isWrong = isWrong,
-                        isEnabled = !isMatched && !isChecked,
-                        onClick = {
-                            selectedLeft = if (selectedLeft == item) null else item
-                            wrongPairLeft = null
-                            wrongPairRight = null
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(text = "⚡", fontSize = 14.sp)
+                    Text(
+                        text = when {
+                            activeDraggingLeft != null -> "Drag '$activeDraggingLeft' to its pair dock ➔"
+                            selectedLeft != null -> "Connecting '$selectedLeft' ➔ Tap or drag to target"
+                            else -> "Drag side A sentence to pair with side B:"
                         },
-                        modifier = Modifier
-                            .staggeredAppear(index = idx, baseDelayMs = 40)
-                            .shake(shakeTrigger = if (isWrong) wrongPairLeft else null)
-                            .correctPop(trigger = isMatched)
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (activeDraggingLeft != null || selectedLeft != null) Color(0xFF1C_B0_F6) else DuolingoSubtext
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (matchedPairs.size == solution.size) PhoenixGreen.copy(alpha = 0.2f) else DuolingoInputBg)
+                        .border(1.dp, if (matchedPairs.size == solution.size) PhoenixGreen else DuolingoInputBorder, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "${matchedPairs.size}/${solution.size} SYNAPSES",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = if (matchedPairs.size == solution.size) PhoenixGreen else Color(0xFF1C_B0_F6)
                     )
                 }
             }
 
-            // Right Column: Definition Ports with inward socket (●—)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                rightItems.forEachIndexed { idx, item ->
-                    val isMatched = matchedPairs.containsValue(item)
-                    val isWrong = wrongPairRight == item
+                // Left Column: Draggable Concept Terminals with outward socket (—●)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    leftItems.forEachIndexed { idx, item ->
+                        val isMatched = matchedPairs.containsKey(item)
+                        val isSelected = selectedLeft == item
+                        val isWrong = wrongPairLeft == item
+                        val isDragging = activeDraggingLeft == item
 
-                    SynapseNodeCard(
-                        text = item,
-                        isLeft = false,
-                        isMonospace = true,
-                        isSelected = false,
-                        isMatched = isMatched,
-                        isWrong = isWrong,
-                        isEnabled = !isMatched && !isChecked && selectedLeft != null,
-                        onClick = {
-                            val currentLeft = selectedLeft ?: return@SynapseNodeCard
-                            if (solution[currentLeft] == item) {
-                                matchedPairs[currentLeft] = item
-                                selectedLeft = null
-                                wrongPairLeft = null
-                                wrongPairRight = null
-                                onMatchedChanged(matchedPairs.toMap())
-                            } else {
-                                wrongPairLeft = currentLeft
-                                wrongPairRight = item
-                            }
-                        },
-                        modifier = Modifier
-                            .staggeredAppear(index = idx, baseDelayMs = 40)
-                            .shake(shakeTrigger = if (isWrong) wrongPairRight else null)
-                            .correctPop(trigger = isMatched)
-                    )
+                        val dragAnim = remember(item) { Animatable(Offset.Zero, Offset.VectorConverter) }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .zIndex(if (isDragging) 80f else 1f)
+                                .offset {
+                                    IntOffset(
+                                        dragAnim.value.x.roundToInt(),
+                                        dragAnim.value.y.roundToInt()
+                                    )
+                                }
+                                .onGloballyPositioned { coords ->
+                                    if (!isDragging) {
+                                        leftItemCentersInWindow[item] = coords.boundsInWindow().center
+                                    }
+                                }
+                                .pointerInput(item, isMatched, isChecked) {
+                                    if (!isMatched && !isChecked) {
+                                        detectDragGestures(
+                                            onDragStart = {
+                                                activeDraggingLeft = item
+                                                selectedLeft = item
+                                                feedback.tap()
+                                            },
+                                            onDrag = { change, dragAmount ->
+                                                change.consume()
+                                                coroutineScope.launch {
+                                                    val newOffset = dragAnim.value + dragAmount
+                                                    dragAnim.snapTo(newOffset)
+                                                    val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + newOffset
+                                                    val hovered = rightBoundsInWindow.entries.firstOrNull { it.value.contains(centerWindow) }?.key
+                                                    if (hovered != hoveredTargetRight) {
+                                                        hoveredTargetRight = hovered
+                                                        if (hovered != null) feedback.tap()
+                                                    }
+                                                }
+                                            },
+                                            onDragEnd = {
+                                                val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + dragAnim.value
+                                                val dropTarget = rightBoundsInWindow.entries.firstOrNull { it.value.contains(centerWindow) }?.key
+                                                val isTap = dragAnim.value.getDistance() < 12f
+
+                                                if (dropTarget != null && !matchedPairs.containsValue(dropTarget)) {
+                                                    if (solution[item] == dropTarget) {
+                                                        matchedPairs[item] = dropTarget
+                                                        selectedLeft = null
+                                                        wrongPairLeft = null
+                                                        wrongPairRight = null
+                                                        onMatchedChanged(matchedPairs.toMap())
+                                                        feedback.correct()
+                                                    } else {
+                                                        wrongPairLeft = item
+                                                        wrongPairRight = dropTarget
+                                                        feedback.wrong()
+                                                    }
+                                                } else if (isTap) {
+                                                    selectedLeft = if (selectedLeft == item) null else item
+                                                    wrongPairLeft = null
+                                                    wrongPairRight = null
+                                                }
+
+                                                hoveredTargetRight = null
+                                                activeDraggingLeft = null
+                                                coroutineScope.launch {
+                                                    dragAnim.animateTo(Offset.Zero, spring(dampingRatio = 0.65f, stiffness = 800f))
+                                                }
+                                            },
+                                            onDragCancel = {
+                                                hoveredTargetRight = null
+                                                activeDraggingLeft = null
+                                                coroutineScope.launch {
+                                                    dragAnim.animateTo(Offset.Zero, spring(dampingRatio = 0.65f, stiffness = 800f))
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                        ) {
+                            SynapseNodeCard(
+                                text = item,
+                                isLeft = true,
+                                isSelected = isSelected,
+                                isMatched = isMatched,
+                                isWrong = isWrong,
+                                isEnabled = !isMatched && !isChecked,
+                                isDragging = isDragging,
+                                onClick = {
+                                    selectedLeft = if (selectedLeft == item) null else item
+                                    wrongPairLeft = null
+                                    wrongPairRight = null
+                                },
+                                modifier = Modifier
+                                    .staggeredAppear(index = idx, baseDelayMs = 40)
+                                    .shake(shakeTrigger = if (isWrong) wrongPairLeft else null)
+                                    .correctPop(trigger = isMatched)
+                            )
+                        }
+                    }
+                }
+
+                // Right Column: Definition Ports with inward socket (●—)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rightItems.forEachIndexed { idx, item ->
+                        val isMatched = matchedPairs.containsValue(item)
+                        val isWrong = wrongPairRight == item
+                        val isHovered = hoveredTargetRight == item
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coords ->
+                                    rightBoundsInWindow[item] = coords.boundsInWindow()
+                                }
+                        ) {
+                            SynapseNodeCard(
+                                text = item,
+                                isLeft = false,
+                                isMonospace = true,
+                                isSelected = false,
+                                isMatched = isMatched,
+                                isWrong = isWrong,
+                                isHovered = isHovered,
+                                isEnabled = !isMatched && !isChecked && (selectedLeft != null || activeDraggingLeft != null),
+                                onClick = {
+                                    val currentLeft = selectedLeft ?: return@SynapseNodeCard
+                                    if (solution[currentLeft] == item) {
+                                        matchedPairs[currentLeft] = item
+                                        selectedLeft = null
+                                        wrongPairLeft = null
+                                        wrongPairRight = null
+                                        onMatchedChanged(matchedPairs.toMap())
+                                        feedback.correct()
+                                    } else {
+                                        wrongPairLeft = currentLeft
+                                        wrongPairRight = item
+                                        feedback.wrong()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .staggeredAppear(index = idx, baseDelayMs = 40)
+                                    .shake(shakeTrigger = if (isWrong) wrongPairRight else null)
+                                    .correctPop(trigger = isMatched)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -218,7 +342,7 @@ fun MatchPairsExerciseView(
 }
 
 // =========================================================================
-// 2. ALGORITHMIC EXECUTION PIPELINE (Order Steps with 3D Flow Connectors)
+// 2. ALGORITHMIC EXECUTION PIPELINE (Order Steps with Direct Drag-and-Drop)
 // =========================================================================
 @Composable
 fun OrderStepsExerciseView(
@@ -228,8 +352,15 @@ fun OrderStepsExerciseView(
     onStepsChanged: (List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val feedback = remember { FeedbackManager(context) }
+    val spacingPx = remember(density) { with(density) { 10.dp.toPx() } }
     var currentSteps by remember(initialSteps) { mutableStateOf(initialSteps) }
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffsetY by remember { mutableFloatStateOf(0f) }
     var selectedStepIndex by remember(initialSteps) { mutableStateOf<Int?>(null) }
+    var itemHeightPx by remember { mutableFloatStateOf(160f) }
 
     LaunchedEffect(currentSteps) {
         onStepsChanged(currentSteps)
@@ -244,62 +375,68 @@ fun OrderStepsExerciseView(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(text = "🔄", fontSize = 14.sp)
                 Text(
-                    text = if (selectedStepIndex != null) "Select target step to swap with:" else "Reorder into algorithmic sequence:",
+                    text = if (draggedIndex != null) "Dragging step into slot..." else "Drag cards to arrange execution flow:",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (selectedStepIndex != null) AmberGold else DuolingoSubtext
+                    color = if (draggedIndex != null) AmberGold else DuolingoSubtext
                 )
             }
-            if (selectedStepIndex != null) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(AmberGold.copy(alpha = 0.2f))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(text = "CANCEL", fontSize = 11.sp, fontWeight = FontWeight.Black, color = AmberGold)
-                }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(DuolingoInputBg)
+                    .border(1.dp, DuolingoInputBorder, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "DRAG TO REORDER",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    color = AmberGold
+                )
             }
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             currentSteps.forEachIndexed { index, step ->
+                val isBeingDragged = draggedIndex == index
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
                 val isSelectedForSwap = selectedStepIndex == index
-                val depth = 3.5.dp
+                val depth = if (isBeingDragged) 6.dp else 3.5.dp
 
-                val interactionSource = remember { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-                val currentOffset by animateDpAsState(
-                    targetValue = if (isPressed && !isChecked) depth else 0.dp,
-                    animationSpec = PhoenixMotion.PressSpringDp,
-                    label = "stepOffset"
-                )
-
-                val bgColor by animateColorAsState(
-                    targetValue = when {
-                        isChecked && isCorrectPosition -> PhoenixGreen.copy(alpha = 0.2f)
-                        isChecked && !isCorrectPosition -> PhoenixCrimson.copy(alpha = 0.2f)
-                        isSelectedForSwap -> AmberGold.copy(alpha = 0.25f)
-                        else -> DuolingoInputBg
-                    },
-                    label = "stepBg"
+                val dragScale by animateFloatAsState(
+                    targetValue = if (isBeingDragged) 1.03f else 1.0f,
+                    animationSpec = PhoenixMotion.SnappySpring,
+                    label = "orderDragScale"
                 )
 
                 val borderColor by animateColorAsState(
                     targetValue = when {
                         isChecked && isCorrectPosition -> PhoenixGreen
                         isChecked && !isCorrectPosition -> PhoenixCrimson
+                        isBeingDragged -> AmberGold
                         isSelectedForSwap -> AmberGold
                         else -> DuolingoInputBorder
                     },
                     label = "stepBorder"
                 )
 
+                val bgColor by animateColorAsState(
+                    targetValue = when {
+                        isChecked && isCorrectPosition -> PhoenixGreen.copy(alpha = 0.2f)
+                        isChecked && !isCorrectPosition -> PhoenixCrimson.copy(alpha = 0.2f)
+                        isBeingDragged -> AmberGold.copy(alpha = 0.22f)
+                        isSelectedForSwap -> AmberGold.copy(alpha = 0.25f)
+                        else -> DuolingoInputBg
+                    },
+                    label = "stepBg"
+                )
+
                 val shadowColor = when {
                     isChecked && isCorrectPosition -> Color(0xFF1A_AE_47)
                     isChecked && !isCorrectPosition -> Color(0xFFB5_16_06)
+                    isBeingDragged -> Color(0xFFCC_8C_00)
                     isSelectedForSwap -> Color(0xFFCC_8C_00)
                     else -> Color(0xFF0C_13_22)
                 }
@@ -307,28 +444,85 @@ fun OrderStepsExerciseView(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .staggeredAppear(index = index, baseDelayMs = 50)
-                        .correctPop(trigger = isChecked && isCorrectPosition)
-                        .shake(shakeTrigger = if (isChecked && !isCorrectPosition) index else null)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            enabled = !isChecked
-                        ) {
-                            val activeSelected = selectedStepIndex
-                            if (activeSelected == null) {
-                                selectedStepIndex = index
-                            } else if (activeSelected == index) {
-                                selectedStepIndex = null
-                            } else {
-                                val mutable = currentSteps.toMutableList()
-                                val temp = mutable[activeSelected]
-                                mutable[activeSelected] = mutable[index]
-                                mutable[index] = temp
-                                currentSteps = mutable
-                                selectedStepIndex = null
+                        .zIndex(if (isBeingDragged) 100f else 1f)
+                        .graphicsLayer {
+                            scaleX = dragScale
+                            scaleY = dragScale
+                        }
+                        .offset {
+                            IntOffset(0, if (isBeingDragged) dragOffsetY.roundToInt() else 0)
+                        }
+                        .onGloballyPositioned { coords ->
+                            val measuredH = coords.size.height.toFloat() + spacingPx
+                            if (measuredH > 50f) itemHeightPx = measuredH
+                        }
+                        .pointerInput(step, index, isChecked, currentSteps) {
+                            if (!isChecked) {
+                                detectDragGestures(
+                                    onDragStart = {
+                                        draggedIndex = index
+                                        feedback.tap()
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        dragOffsetY += dragAmount.y
+                                        val activeIdx = draggedIndex ?: return@detectDragGestures
+                                        val threshold = itemHeightPx * 0.5f
+
+                                        if (dragOffsetY > threshold && activeIdx < currentSteps.size - 1) {
+                                            // Swap down
+                                            val mutable = currentSteps.toMutableList()
+                                            val temp = mutable[activeIdx]
+                                            mutable[activeIdx] = mutable[activeIdx + 1]
+                                            mutable[activeIdx + 1] = temp
+                                            currentSteps = mutable
+                                            dragOffsetY -= itemHeightPx
+                                            draggedIndex = activeIdx + 1
+                                            feedback.tap()
+                                        } else if (dragOffsetY < -threshold && activeIdx > 0) {
+                                            // Swap up
+                                            val mutable = currentSteps.toMutableList()
+                                            val temp = mutable[activeIdx]
+                                            mutable[activeIdx] = mutable[activeIdx - 1]
+                                            mutable[activeIdx - 1] = temp
+                                            currentSteps = mutable
+                                            dragOffsetY += itemHeightPx
+                                            draggedIndex = activeIdx - 1
+                                            feedback.tap()
+                                        }
+                                    },
+                                    onDragEnd = {
+                                        val isTap = kotlin.math.abs(dragOffsetY) < 10f
+                                        draggedIndex = null
+                                        dragOffsetY = 0f
+                                        if (isTap) {
+                                            // Tap to select/swap fallback
+                                            val sel = selectedStepIndex
+                                            if (sel == null) {
+                                                selectedStepIndex = index
+                                            } else if (sel == index) {
+                                                selectedStepIndex = null
+                                            } else {
+                                                val mutable = currentSteps.toMutableList()
+                                                val temp = mutable[sel]
+                                                mutable[sel] = mutable[index]
+                                                mutable[index] = temp
+                                                currentSteps = mutable
+                                                selectedStepIndex = null
+                                            }
+                                        }
+                                        feedback.tap()
+                                        onStepsChanged(currentSteps)
+                                    },
+                                    onDragCancel = {
+                                        draggedIndex = null
+                                        dragOffsetY = 0f
+                                    }
+                                )
                             }
                         }
+                        .correctPop(trigger = isChecked && isCorrectPosition)
+                        .shake(shakeTrigger = if (isChecked && !isCorrectPosition) index else null)
                 ) {
                     // 3D Shadow layer
                     Box(
@@ -342,10 +536,9 @@ fun OrderStepsExerciseView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .offset(y = currentOffset)
                             .clip(shape)
                             .background(bgColor)
-                            .border(if (isSelectedForSwap || (isChecked && isCorrectPosition)) 2.dp else 1.2.dp, borderColor, shape)
+                            .border(if (isBeingDragged || isSelectedForSwap || (isChecked && isCorrectPosition)) 2.dp else 1.2.dp, borderColor, shape)
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -354,14 +547,14 @@ fun OrderStepsExerciseView(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelectedForSwap) AmberGold else AmberGold.copy(alpha = 0.15f)),
+                                .background(if (isBeingDragged || isSelectedForSwap) AmberGold else AmberGold.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "${index + 1}",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (isSelectedForSwap) Color.Black else AmberGold
+                                color = if (isBeingDragged || isSelectedForSwap) Color.Black else AmberGold
                             )
                         }
 
@@ -376,48 +569,31 @@ fun OrderStepsExerciseView(
                             modifier = Modifier.weight(1f)
                         )
 
-                        if (!isChecked) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
-                                    onClick = {
-                                        if (index > 0) {
-                                            val mutable = currentSteps.toMutableList()
-                                            val temp = mutable[index]
-                                            mutable[index] = mutable[index - 1]
-                                            mutable[index - 1] = temp
-                                            currentSteps = mutable
-                                            selectedStepIndex = null
-                                        }
-                                    },
-                                    enabled = index > 0,
-                                    modifier = Modifier.size(28.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowUp,
-                                        contentDescription = "Move Up",
-                                        tint = if (index > 0) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.25f)
-                                    )
-                                }
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                                IconButton(
-                                    onClick = {
-                                        if (index < currentSteps.size - 1) {
-                                            val mutable = currentSteps.toMutableList()
-                                            val temp = mutable[index]
-                                            mutable[index] = mutable[index + 1]
-                                            mutable[index + 1] = temp
-                                            currentSteps = mutable
-                                            selectedStepIndex = null
-                                        }
-                                    },
-                                    enabled = index < currentSteps.size - 1,
-                                    modifier = Modifier.size(28.dp)
+                        if (!isChecked) {
+                            // 3D Drag Grip Handle with tactile 6-dot matrix
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isBeingDragged) AmberGold.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.06f))
+                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown,
-                                        contentDescription = "Move Down",
-                                        tint = if (index < currentSteps.size - 1) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.25f)
-                                    )
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.5.dp)) {
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                    }
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.5.dp)) {
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                    }
                                 }
                             }
                         } else {
@@ -1003,7 +1179,7 @@ fun TrueFalseSwipeExerciseView(
 // 🧩 UNIQUE DSA GAMIFIED PRIMITIVE COMPONENTS
 // ═════════════════════════════════════════════════════════════════════════
 
-/** Synapse Node Card with Outward / Inward LED Pins */
+/** Synapse Node Card with Outward / Inward LED Pins & Drag/Dock States */
 @Composable
 private fun SynapseNodeCard(
     text: String,
@@ -1014,9 +1190,11 @@ private fun SynapseNodeCard(
     isEnabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isMonospace: Boolean = false
+    isMonospace: Boolean = false,
+    isHovered: Boolean = false,
+    isDragging: Boolean = false
 ) {
-    val depth = 3.5.dp
+    val depth = if (isDragging) 6.5.dp else 3.5.dp
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val currentOffset by animateDpAsState(
@@ -1027,11 +1205,22 @@ private fun SynapseNodeCard(
 
     val shape = RoundedCornerShape(14.dp)
 
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isDragging -> 1.05f
+            isHovered -> 1.03f
+            else -> 1.0f
+        },
+        animationSpec = PhoenixMotion.SnappySpring,
+        label = "synapseScale"
+    )
+
     val borderColor by animateColorAsState(
         targetValue = when {
             isMatched -> PhoenixGreen
             isWrong -> PhoenixCrimson
-            isSelected -> Color(0xFF1C_B0_F6)
+            isHovered -> Color(0xFF1C_B0_F6)
+            isDragging || isSelected -> Color(0xFF1C_B0_F6)
             else -> DuolingoInputBorder
         }, label = "matchBorder"
     )
@@ -1039,7 +1228,8 @@ private fun SynapseNodeCard(
     val shadowColor = when {
         isMatched -> Color(0xFF1A_AE_47)
         isWrong -> Color(0xFFB5_16_06)
-        isSelected -> Color(0xFF0F_8A_CC)
+        isHovered -> Color(0xFF0F_8A_CC)
+        isDragging || isSelected -> Color(0xFF0F_8A_CC)
         else -> Color(0xFF0C_13_22)
     }
 
@@ -1047,7 +1237,8 @@ private fun SynapseNodeCard(
         targetValue = when {
             isMatched -> PhoenixGreen.copy(alpha = 0.2f)
             isWrong -> PhoenixCrimson.copy(alpha = 0.22f)
-            isSelected -> Color(0xFF1C_B0_F6).copy(alpha = 0.28f)
+            isHovered -> Color(0xFF1C_B0_F6).copy(alpha = 0.28f)
+            isDragging || isSelected -> Color(0xFF1C_B0_F6).copy(alpha = 0.28f)
             else -> DuolingoInputBg
         }, label = "matchFace"
     )
@@ -1055,6 +1246,10 @@ private fun SynapseNodeCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -1077,17 +1272,38 @@ private fun SynapseNodeCard(
                 .offset(y = currentOffset)
                 .clip(shape)
                 .background(faceColor)
-                .border(if (isSelected || isMatched) 2.dp else 1.2.dp, borderColor, shape)
+                .border(if (isDragging || isHovered || isSelected || isMatched) 2.dp else 1.2.dp, borderColor, shape)
                 .padding(horizontal = 12.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (isLeft && !isMatched) {
+                // Tactile 6-dot drag handle on left items
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                        Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
+                    }
+                }
+            }
+
             if (!isLeft) {
                 // Inward Receiver Pin on right column items
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(9.dp)
                         .clip(CircleShape)
-                        .background(if (isMatched) PhoenixGreen else borderColor)
+                        .background(if (isMatched) PhoenixGreen else if (isHovered) Color(0xFF1C_B0_F6) else borderColor)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
@@ -1106,9 +1322,9 @@ private fun SynapseNodeCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(9.dp)
                         .clip(CircleShape)
-                        .background(if (isMatched) PhoenixGreen else if (isSelected) Color(0xFF1C_B0_F6) else SubtextGray.copy(alpha = 0.4f))
+                        .background(if (isMatched) PhoenixGreen else if (isDragging || isSelected) Color(0xFF1C_B0_F6) else SubtextGray.copy(alpha = 0.4f))
                 )
             } else if (isMatched) {
                 Icon(
@@ -1116,6 +1332,13 @@ private fun SynapseNodeCard(
                     contentDescription = "Matched",
                     tint = PhoenixGreen,
                     modifier = Modifier.size(16.dp)
+                )
+            } else if (isHovered) {
+                Text(
+                    text = "DOCK ⚡",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF1C_B0_F6)
                 )
             }
         }
