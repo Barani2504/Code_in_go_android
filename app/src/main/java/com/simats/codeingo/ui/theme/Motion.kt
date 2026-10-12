@@ -1,6 +1,15 @@
 package com.simats.codeingo.ui.theme
 
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -13,13 +22,15 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -378,4 +389,169 @@ fun Modifier.tilt3D(
                 rotY = 0f
             }
         }
+}
+
+// ──────────────────────────────────────────────────────────────────
+// 🎉 CORRECT-POP: Celebratory bounce when an answer is right
+// ──────────────────────────────────────────────────────────────────
+
+/**
+ * Plays a snappy over-scale bounce whenever [trigger] changes to `true`.
+ * Safe to call repeatedly — resets and re-plays each time.
+ */
+fun Modifier.correctPop(
+    trigger: Boolean
+): Modifier = composed {
+    val scale = remember { Animatable(1f) }
+    val reduceMotion = LocalReduceMotion.current
+
+    LaunchedEffect(trigger) {
+        if (!trigger || reduceMotion) return@LaunchedEffect
+        scale.animateTo(1.18f, animationSpec = PhoenixMotion.BounceSpring)
+        scale.animateTo(1f,   animationSpec = PhoenixMotion.SnappySpring)
+    }
+
+    this.graphicsLayer {
+        scaleX = scale.value
+        scaleY = scale.value
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────
+// 🃏 QUESTION TRANSITION SPECS  (slide + fade cross-dissolve)
+// ──────────────────────────────────────────────────────────────────
+
+object QuestionTransition {
+    /** New question slides in from the right */
+    val enterNext: EnterTransition =
+        slideInHorizontally(
+            initialOffsetX = { it },
+            animationSpec = tween(320, easing = FastOutSlowInEasing)
+        ) + fadeIn(tween(200))
+
+    /** Old question exits to the left */
+    val exitNext: ExitTransition =
+        slideOutHorizontally(
+            targetOffsetX = { -it / 3 },
+            animationSpec = tween(280, easing = FastOutSlowInEasing)
+        ) + fadeOut(tween(180))
+
+    /** New question slides in from the left (back navigation) */
+    val enterPrev: EnterTransition =
+        slideInHorizontally(
+            initialOffsetX = { -it },
+            animationSpec = tween(320, easing = FastOutSlowInEasing)
+        ) + fadeIn(tween(200))
+
+    /** Old question exits to the right (back navigation) */
+    val exitPrev: ExitTransition =
+        slideOutHorizontally(
+            targetOffsetX = { it / 3 },
+            animationSpec = tween(280, easing = FastOutSlowInEasing)
+        ) + fadeOut(tween(180))
+}
+
+// ──────────────────────────────────────────────────────────────────
+// 💥 FEEDBACK MANAGER — centralised haptic + sound hooks
+// ──────────────────────────────────────────────────────────────────
+
+/**
+ * Single-instance helper that wires Android haptic APIs and
+ * an optional SoundPool behind one clean surface.
+ *
+ * Usage:
+ *   val fb = remember { FeedbackManager(context) }
+ *   fb.correct()   // ✅ double-pulse + pitched success tick
+ *   fb.wrong()     // ❌ error buzz
+ *   fb.tap()       // lightweight keyboard tap
+ *   fb.onDestroy() // release SoundPool in DisposableEffect
+ */
+class FeedbackManager(context: Context) {
+
+    private val vibrator: Vibrator? = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            vm?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+    } catch (_: Throwable) {
+        null
+    }
+
+    private val soundPool: SoundPool = try {
+        SoundPool.Builder()
+            .setMaxStreams(4)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+    } catch (_: Throwable) {
+        SoundPool.Builder().setMaxStreams(4).build()
+    }
+
+    // ── Haptic helpers ───────────────────────────────────────────
+
+    /** Double-tap pulse: "you got it right!" */
+    fun correct() {
+        try {
+            val v = vibrator ?: return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(
+                    VibrationEffect.createWaveform(
+                        longArrayOf(0L, 40L, 60L, 40L),   // timings
+                        intArrayOf(0, 180, 0, 120),        // amplitudes
+                        -1                                  // no repeat
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(longArrayOf(0L, 40L, 60L, 40L), -1)
+            }
+        } catch (_: Throwable) {
+            // Silently handle if permission or device vibration is unavailable
+        }
+    }
+
+    /** Long buzz: "oops, wrong answer" */
+    fun wrong() {
+        try {
+            val v = vibrator ?: return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(
+                    VibrationEffect.createOneShot(120L, 200)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(120L)
+            }
+        } catch (_: Throwable) {
+            // Silently handle if permission or device vibration is unavailable
+        }
+    }
+
+    /** Lightweight tick for generic taps */
+    fun tap() {
+        try {
+            val v = vibrator ?: return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(18L, 80))
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(18L)
+            }
+        } catch (_: Throwable) {
+            // Silently handle if permission or device vibration is unavailable
+        }
+    }
+
+    fun onDestroy() {
+        try {
+            soundPool.release()
+        } catch (_: Throwable) {}
+    }
 }

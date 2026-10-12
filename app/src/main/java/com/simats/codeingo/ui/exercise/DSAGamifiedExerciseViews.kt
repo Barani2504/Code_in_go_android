@@ -1,11 +1,14 @@
 package com.simats.codeingo.ui.exercise
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,14 +38,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
@@ -58,9 +66,16 @@ import com.simats.codeingo.ui.theme.DuolingoOrange
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.DuolingoSubtext
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
-import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.bounceOnAppear
+import com.simats.codeingo.ui.theme.correctPop
 import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.pulse
+import com.simats.codeingo.ui.theme.shake
+import com.simats.codeingo.ui.theme.staggeredAppear
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 // =========================================================================
 // 1. MATCH PAIRS EXERCISE VIEW
@@ -74,10 +89,10 @@ fun MatchPairsExerciseView(
     onMatchedChanged: (Map<String, String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedLeft by remember { mutableStateOf<String?>(null) }
-    val matchedPairs = remember { mutableStateMapOf<String, String>() }
-    var wrongPairLeft by remember { mutableStateOf<String?>(null) }
-    var wrongPairRight by remember { mutableStateOf<String?>(null) }
+    var selectedLeft by remember(leftItems) { mutableStateOf<String?>(null) }
+    val matchedPairs = remember(leftItems, rightItems) { mutableStateMapOf<String, String>() }
+    var wrongPairLeft by remember(leftItems) { mutableStateOf<String?>(null) }
+    var wrongPairRight by remember(rightItems) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(wrongPairLeft, wrongPairRight) {
         if (wrongPairLeft != null || wrongPairRight != null) {
@@ -89,12 +104,25 @@ fun MatchPairsExerciseView(
     }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(
-            text = "Tap a concept on the left, then its match on the right:",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = DuolingoSubtext
-        )
+        // Gamified status hint
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = if (selectedLeft != null) "🔗 Match '$selectedLeft' with right:" else "Tap an item on the left, then its match on right:",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (selectedLeft != null) AmberGold else DuolingoSubtext
+            )
+            Text(
+                text = "${matchedPairs.size}/${solution.size}",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                color = if (matchedPairs.size == solution.size) DuolingoGreen else DuolingoBlue
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -106,7 +134,7 @@ fun MatchPairsExerciseView(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                leftItems.forEach { item ->
+                leftItems.forEachIndexed { idx, item ->
                     val isMatched = matchedPairs.containsKey(item)
                     val isSelected = selectedLeft == item
                     val isWrong = wrongPairLeft == item
@@ -115,8 +143,8 @@ fun MatchPairsExerciseView(
                     val bgColor by animateColorAsState(
                         targetValue = when {
                             isMatched -> DuolingoGreen.copy(alpha = 0.18f)
-                            isWrong -> DuolingoRed.copy(alpha = 0.2f)
-                            isSelected -> DuolingoBlue.copy(alpha = 0.25f)
+                            isWrong -> DuolingoRed.copy(alpha = 0.22f)
+                            isSelected -> DuolingoBlue.copy(alpha = 0.28f)
                             else -> DuolingoInputBg
                         },
                         label = "leftBg"
@@ -135,12 +163,15 @@ fun MatchPairsExerciseView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .staggeredAppear(index = idx, baseDelayMs = 50)
+                            .shake(shakeTrigger = if (isWrong) wrongPairLeft else null)
+                            .correctPop(trigger = isMatched)
                             .pressScale(0.96f)
                             .clip(shape)
                             .background(bgColor)
                             .border(if (isSelected || isMatched) 2.dp else 1.dp, borderColor, shape)
                             .clickable(enabled = !isMatched && !isChecked) {
-                                selectedLeft = item
+                                selectedLeft = if (selectedLeft == item) null else item
                                 wrongPairLeft = null
                                 wrongPairRight = null
                             }
@@ -161,6 +192,10 @@ fun MatchPairsExerciseView(
                                 tint = DuolingoGreen,
                                 modifier = Modifier.size(16.dp)
                             )
+                        } else if (isSelected) {
+                            Box(
+                                modifier = Modifier.size(8.dp).clip(CircleShape).background(DuolingoBlue)
+                            )
                         }
                     }
                 }
@@ -171,7 +206,7 @@ fun MatchPairsExerciseView(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                rightItems.forEach { item ->
+                rightItems.forEachIndexed { idx, item ->
                     val isMatched = matchedPairs.containsValue(item)
                     val isWrong = wrongPairRight == item
                     val shape = RoundedCornerShape(14.dp)
@@ -179,7 +214,8 @@ fun MatchPairsExerciseView(
                     val bgColor by animateColorAsState(
                         targetValue = when {
                             isMatched -> DuolingoGreen.copy(alpha = 0.18f)
-                            isWrong -> DuolingoRed.copy(alpha = 0.2f)
+                            isWrong -> DuolingoRed.copy(alpha = 0.22f)
+                            selectedLeft != null -> DuolingoCardBg
                             else -> DuolingoInputBg
                         },
                         label = "rightBg"
@@ -189,6 +225,7 @@ fun MatchPairsExerciseView(
                         targetValue = when {
                             isMatched -> DuolingoGreen
                             isWrong -> DuolingoRed
+                            selectedLeft != null -> AmberGold.copy(alpha = 0.6f)
                             else -> DuolingoInputBorder
                         },
                         label = "rightBorder"
@@ -197,6 +234,9 @@ fun MatchPairsExerciseView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .staggeredAppear(index = idx, baseDelayMs = 50)
+                            .shake(shakeTrigger = if (isWrong) wrongPairRight else null)
+                            .correctPop(trigger = isMatched)
                             .pressScale(0.96f)
                             .clip(shape)
                             .background(bgColor)
@@ -241,7 +281,7 @@ fun MatchPairsExerciseView(
 }
 
 // =========================================================================
-// 2. PARSONS PUZZLE / ORDER STEPS EXERCISE VIEW
+// 2. PARSONS PUZZLE / ORDER STEPS EXERCISE VIEW (Tap-to-Swap + Arrow Nudges)
 // =========================================================================
 @Composable
 fun OrderStepsExerciseView(
@@ -252,46 +292,102 @@ fun OrderStepsExerciseView(
     modifier: Modifier = Modifier
 ) {
     var currentSteps by remember(initialSteps) { mutableStateOf(initialSteps) }
+    var selectedStepIndex by remember(initialSteps) { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(currentSteps) {
         onStepsChanged(currentSteps)
     }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(
-            text = "Reorder into the correct algorithmic sequence:",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = DuolingoSubtext
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = if (selectedStepIndex != null) "⚡ Tap any other step to swap!" else "Reorder into the correct sequence:",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (selectedStepIndex != null) AmberGold else DuolingoSubtext
+            )
+            if (selectedStepIndex != null) {
+                Text(
+                    text = "Tap selected to cancel",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SubtextGray
+                )
+            }
+        }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             currentSteps.forEachIndexed { index, step ->
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
+                val isSelectedForSwap = selectedStepIndex == index
+
+                val bgColor by animateColorAsState(
+                    targetValue = when {
+                        isChecked && isCorrectPosition -> DuolingoGreen.copy(alpha = 0.18f)
+                        isChecked && !isCorrectPosition -> DuolingoRed.copy(alpha = 0.18f)
+                        isSelectedForSwap -> AmberGold.copy(alpha = 0.22f)
+                        else -> DuolingoInputBg
+                    },
+                    label = "stepBg"
+                )
+
+                val borderColor by animateColorAsState(
+                    targetValue = when {
+                        isChecked && isCorrectPosition -> DuolingoGreen
+                        isChecked && !isCorrectPosition -> DuolingoRed
+                        isSelectedForSwap -> AmberGold
+                        else -> DuolingoInputBorder
+                    },
+                    label = "stepBorder"
+                )
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .staggeredAppear(index = index, baseDelayMs = 60)
+                        .correctPop(trigger = isChecked && isCorrectPosition)
+                        .shake(shakeTrigger = if (isChecked && !isCorrectPosition) index else null)
+                        .pressScale(0.97f)
                         .clip(shape)
-                        .background(DuolingoInputBg)
-                        .border(1.2.dp, DuolingoInputBorder, shape)
+                        .background(bgColor)
+                        .border(if (isSelectedForSwap || (isChecked && isCorrectPosition)) 2.dp else 1.2.dp, borderColor, shape)
+                        .clickable(enabled = !isChecked) {
+                            val activeSelected = selectedStepIndex
+                            if (activeSelected == null) {
+                                selectedStepIndex = index
+                            } else if (activeSelected == index) {
+                                selectedStepIndex = null
+                            } else {
+                                // Swap items!
+                                val mutable = currentSteps.toMutableList()
+                                val temp = mutable[activeSelected]
+                                mutable[activeSelected] = mutable[index]
+                                mutable[index] = temp
+                                currentSteps = mutable
+                                selectedStepIndex = null
+                            }
+                        }
                         .padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Sequence Badge
                     Box(
                         modifier = Modifier
-                            .size(26.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
-                            .background(AmberGold.copy(alpha = 0.15f)),
+                            .background(if (isSelectedForSwap) AmberGold else AmberGold.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "${index + 1}",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
-                            color = AmberGold
+                            color = if (isSelectedForSwap) Color.Black else AmberGold
                         )
                     }
 
@@ -307,7 +403,7 @@ fun OrderStepsExerciseView(
                     )
 
                     if (!isChecked) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 onClick = {
                                     if (index > 0) {
@@ -316,15 +412,16 @@ fun OrderStepsExerciseView(
                                         mutable[index] = mutable[index - 1]
                                         mutable[index - 1] = temp
                                         currentSteps = mutable
+                                        selectedStepIndex = null
                                     }
                                 },
                                 enabled = index > 0,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(30.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowUp,
                                     contentDescription = "Move Up",
-                                    tint = if (index > 0) DuolingoBlue else DuolingoSubtext.copy(alpha = 0.3f)
+                                    tint = if (index > 0) DuolingoBlue else DuolingoSubtext.copy(alpha = 0.25f)
                                 )
                             }
 
@@ -336,15 +433,16 @@ fun OrderStepsExerciseView(
                                         mutable[index] = mutable[index + 1]
                                         mutable[index + 1] = temp
                                         currentSteps = mutable
+                                        selectedStepIndex = null
                                     }
                                 },
                                 enabled = index < currentSteps.size - 1,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(30.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowDown,
                                     contentDescription = "Move Down",
-                                    tint = if (index < currentSteps.size - 1) DuolingoBlue else DuolingoSubtext.copy(alpha = 0.3f)
+                                    tint = if (index < currentSteps.size - 1) DuolingoBlue else DuolingoSubtext.copy(alpha = 0.25f)
                                 )
                             }
                         }
@@ -363,7 +461,7 @@ fun OrderStepsExerciseView(
 }
 
 // =========================================================================
-// 3. FILL IN CODE EXERCISE VIEW
+// 3. FILL IN CODE EXERCISE VIEW (Slot Glowing + Pop in/out)
 // =========================================================================
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -376,7 +474,7 @@ fun FillCodeExerciseView(
     onTokenSelected: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedToken by remember { mutableStateOf<String?>(null) }
+    var selectedToken by remember(codeTemplate, wordBank) { mutableStateOf<String?>(null) }
     val activeToken = externalSelectedToken ?: selectedToken
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -395,16 +493,17 @@ fun FillCodeExerciseView(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFFF5F56)))
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFFF5F56)))
                 Spacer(modifier = Modifier.width(6.dp))
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFFFBD2E)))
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFFFBD2E)))
                 Spacer(modifier = Modifier.width(6.dp))
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF27C93F)))
-                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF27C93F)))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "code_snippet.py",
+                    text = "algorithm_solution.py",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
                     color = DuolingoSubtext
                 )
             }
@@ -422,42 +521,52 @@ fun FillCodeExerciseView(
                     color = Color.White
                 )
 
-                // The Slot
+                // Interactive Token Slot — clickable to eject token!
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(10.dp))
                         .background(
                             when {
-                                activeToken == null -> AmberGold.copy(alpha = 0.12f)
-                                isChecked && activeToken == correctToken -> DuolingoGreen.copy(alpha = 0.2f)
-                                isChecked && activeToken != correctToken -> DuolingoRed.copy(alpha = 0.2f)
-                                else -> Color.Cyan.copy(alpha = 0.2f)
+                                activeToken == null -> AmberGold.copy(alpha = 0.14f)
+                                isChecked && activeToken == correctToken -> DuolingoGreen.copy(alpha = 0.22f)
+                                isChecked && activeToken != correctToken -> DuolingoRed.copy(alpha = 0.22f)
+                                else -> Color(0xFF00E5FF).copy(alpha = 0.2f)
                             }
                         )
                         .border(
-                            width = 1.5.dp,
+                            width = 1.8.dp,
                             color = when {
-                                activeToken == null -> AmberGold.copy(alpha = 0.6f)
+                                activeToken == null -> AmberGold
                                 isChecked && activeToken == correctToken -> DuolingoGreen
                                 isChecked && activeToken != correctToken -> DuolingoRed
-                                else -> Color.Cyan
+                                else -> Color(0xFF00E5FF)
                             },
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(10.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = activeToken ?: "[ ? tap token below ]",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = when {
-                            activeToken == null -> AmberGold
-                            isChecked && activeToken == correctToken -> DuolingoGreen
-                            isChecked && activeToken != correctToken -> DuolingoRed
-                            else -> Color.Cyan
+                        .clickable(enabled = !isChecked && activeToken != null) {
+                            selectedToken = null
+                            onTokenSelected(null)
                         }
-                    )
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = activeToken ?: "[ ? TAP TOKEN BELOW ]",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = when {
+                                activeToken == null -> AmberGold
+                                isChecked && activeToken == correctToken -> DuolingoGreen
+                                isChecked && activeToken != correctToken -> DuolingoRed
+                                else -> Color(0xFF00E5FF)
+                            }
+                        )
+                        if (activeToken != null && !isChecked) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(text = "✕", fontSize = 11.sp, color = SubtextGray)
+                        }
+                    }
                 }
 
                 Text(
@@ -479,9 +588,9 @@ fun FillCodeExerciseView(
         }
 
         // Word Bank Chips
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                text = "Select the missing token:",
+                text = "Select token to complete code:",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = DuolingoSubtext
@@ -492,15 +601,21 @@ fun FillCodeExerciseView(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                wordBank.forEach { token ->
+                wordBank.forEachIndexed { idx, token ->
                     val isSelected = activeToken == token
                     val shape = RoundedCornerShape(12.dp)
 
                     Box(
                         modifier = Modifier
+                            .staggeredAppear(index = idx, baseDelayMs = 60)
                             .pressScale(0.94f)
                             .clip(shape)
-                            .background(if (isSelected) DuolingoBlue.copy(alpha = 0.22f) else DuolingoCardBg)
+                            .background(
+                                when {
+                                    isSelected -> DuolingoBlue.copy(alpha = 0.28f)
+                                    else -> DuolingoCardBg
+                                }
+                            )
                             .border(
                                 width = if (isSelected) 2.dp else 1.dp,
                                 color = if (isSelected) DuolingoBlue else DuolingoInputBorder,
@@ -529,9 +644,9 @@ fun FillCodeExerciseView(
 }
 
 // =========================================================================
-// 4. BIG-O COMPLEXITY DIAL EXERCISE VIEW
+// 4. BIG-O COMPLEXITY DIAL EXERCISE VIEW (Speed Tier Badges)
 // =========================================================================
-private data class ComplexityItem(val label: String, val name: String, val color: Color)
+private data class ComplexityItem(val label: String, val name: String, val speedTag: String, val color: Color)
 
 @Composable
 fun ComplexityDialExerciseView(
@@ -542,17 +657,17 @@ fun ComplexityDialExerciseView(
     onComplexitySelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedComplexity by remember { mutableStateOf<String?>(null) }
+    var selectedComplexity by remember(promptCode) { mutableStateOf<String?>(null) }
     val activeComplexity = externalSelectedComplexity ?: selectedComplexity
 
     val complexities = remember {
         listOf(
-            ComplexityItem("O(1)", "Constant", DuolingoGreen),
-            ComplexityItem("O(log n)", "Logarithmic", DsaTeal),
-            ComplexityItem("O(n)", "Linear", DuolingoBlue),
-            ComplexityItem("O(n log n)", "Linearithmic", DsaPurple),
-            ComplexityItem("O(n²)", "Quadratic", DuolingoOrange),
-            ComplexityItem("O(2ⁿ)", "Exponential", DuolingoRed)
+            ComplexityItem("O(1)", "Constant", "⚡ Instant", DuolingoGreen),
+            ComplexityItem("O(log n)", "Logarithmic", "🚀 Binary", DsaTeal),
+            ComplexityItem("O(n)", "Linear", "🏃 Single Pass", DuolingoBlue),
+            ComplexityItem("O(n log n)", "Linearithmic", "⚖️ Merge Sort", DsaPurple),
+            ComplexityItem("O(n²)", "Quadratic", "🐢 Nested", DuolingoOrange),
+            ComplexityItem("O(2ⁿ)", "Exponential", "💥 Recursive", DuolingoRed)
         )
     }
 
@@ -598,7 +713,7 @@ fun ComplexityDialExerciseView(
             }
         }
 
-        // 2-Column Complexity Grid
+        // 2-Column Complexity Grid with speed tier badges
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = "Select the Worst-Case Time Complexity:",
@@ -617,12 +732,12 @@ fun ComplexityDialExerciseView(
                         if (item != null) {
                             val isSelected = activeComplexity == item.label
                             val isCorrect = item.label == correctComplexity
-                            val shape = RoundedCornerShape(12.dp)
+                            val shape = RoundedCornerShape(14.dp)
 
                             val bgColor = when {
-                                isChecked && isSelected -> if (isCorrect) DuolingoGreen.copy(alpha = 0.2f) else DuolingoRed.copy(alpha = 0.2f)
-                                isChecked && isCorrect -> DuolingoGreen.copy(alpha = 0.15f)
-                                isSelected -> item.color.copy(alpha = 0.22f)
+                                isChecked && isSelected -> if (isCorrect) DuolingoGreen.copy(alpha = 0.22f) else DuolingoRed.copy(alpha = 0.22f)
+                                isChecked && isCorrect -> DuolingoGreen.copy(alpha = 0.18f)
+                                isSelected -> item.color.copy(alpha = 0.24f)
                                 else -> DuolingoCardBg
                             }
 
@@ -636,6 +751,7 @@ fun ComplexityDialExerciseView(
                             Row(
                                 modifier = Modifier
                                     .weight(1f)
+                                    .staggeredAppear(index = i + j, baseDelayMs = 40)
                                     .pressScale(0.96f)
                                     .clip(shape)
                                     .background(bgColor)
@@ -649,10 +765,10 @@ fun ComplexityDialExerciseView(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(8.dp)
+                                        .size(10.dp)
                                         .clip(CircleShape)
                                         .background(item.color)
-                                    )
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -663,10 +779,10 @@ fun ComplexityDialExerciseView(
                                         color = LocalDynamicThemeColors.current.textPrimary
                                     )
                                     Text(
-                                        text = item.name,
+                                        text = item.speedTag,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = DuolingoSubtext
+                                        color = item.color
                                     )
                                 }
                                 if (isChecked && isSelected) {
@@ -689,7 +805,7 @@ fun ComplexityDialExerciseView(
 }
 
 // =========================================================================
-// 5. TRUE / FALSE FACT SWIPE EXERCISE VIEW
+// 5. TRUE / FALSE SWIPE EXERCISE VIEW (Tinder-style Drag + Interactive Buttons)
 // =========================================================================
 @Composable
 fun TrueFalseSwipeExerciseView(
@@ -701,71 +817,154 @@ fun TrueFalseSwipeExerciseView(
     onDecisionMade: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var chosenDecision by remember { mutableStateOf<Boolean?>(null) }
+    var chosenDecision by remember(statement) { mutableStateOf<Boolean?>(null) }
     val activeDecision = externalDecision ?: chosenDecision
 
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        // Statement Card
+    val coroutineScope = rememberCoroutineScope()
+    val dragOffsetX = remember(statement) { Animatable(0f) }
+
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // Drag hint banner
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "FACT CHECK CHALLENGE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = DuolingoSubtext
+            )
+            Text(
+                text = "👈 Drag Left / Right 👉",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = AmberGold
+            )
+        }
+
+        // Swipeable Fact Card
         val cardShape = RoundedCornerShape(20.dp)
-        Column(
+        val rotationDeg = (dragOffsetX.value / 25f).coerceIn(-15f, 15f)
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
+                .graphicsLayer { rotationZ = rotationDeg }
+                .pointerInput(statement, isChecked) {
+                    if (!isChecked) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                val currentOffset = dragOffsetX.value
+                                coroutineScope.launch {
+                                    if (currentOffset > 80f) {
+                                        // Swipe right -> TRUE
+                                        dragOffsetX.animateTo(300f, tween(150))
+                                        chosenDecision = true
+                                        onDecisionMade(true)
+                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                    } else if (currentOffset < -80f) {
+                                        // Swipe left -> FALSE
+                                        dragOffsetX.animateTo(-300f, tween(150))
+                                        chosenDecision = false
+                                        onDecisionMade(false)
+                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                    } else {
+                                        // Spring back
+                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                    }
+                                }
+                            },
+                            onHorizontalDrag = { _, dragAmount ->
+                                coroutineScope.launch {
+                                    dragOffsetX.snapTo(dragOffsetX.value + dragAmount)
+                                }
+                            }
+                        )
+                    }
+                }
+                .correctPop(trigger = isChecked && activeDecision == isCorrectTrue)
+                .shake(shakeTrigger = if (isChecked && activeDecision != isCorrectTrue) isChecked else null)
                 .clip(cardShape)
-                .background(DuolingoInputBg)
+                .background(
+                    when {
+                        dragOffsetX.value > 40f -> DuolingoGreen.copy(alpha = 0.2f)
+                        dragOffsetX.value < -40f -> DuolingoRed.copy(alpha = 0.2f)
+                        activeDecision == true -> DuolingoGreen.copy(alpha = 0.14f)
+                        activeDecision == false -> DuolingoRed.copy(alpha = 0.14f)
+                        else -> DuolingoInputBg
+                    }
+                )
                 .border(
                     width = if (activeDecision != null) 2.dp else 1.5.dp,
                     color = when {
+                        dragOffsetX.value > 40f -> DuolingoGreen
+                        dragOffsetX.value < -40f -> DuolingoRed
                         activeDecision == null -> DuolingoInputBorder
                         isChecked -> if (activeDecision == isCorrectTrue) DuolingoGreen else DuolingoRed
-                        else -> DuolingoBlue
+                        activeDecision == true -> DuolingoGreen
+                        else -> DuolingoRed
                     },
                     shape = cardShape
                 )
                 .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                // Stamp preview during live dragging
+                if (dragOffsetX.value > 50f) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DuolingoGreen)
+                            .padding(horizontal = 14.dp, vertical = 4.dp)
+                    ) {
+                        Text("TRUE 👉", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    }
+                } else if (dragOffsetX.value < -50f) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DuolingoRed)
+                            .padding(horizontal = 14.dp, vertical = 4.dp)
+                    ) {
+                        Text("👈 FALSE", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    }
+                }
+
                 Text(
-                    text = "FACT CHECK",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DuolingoSubtext
+                    text = statement,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LocalDynamicThemeColors.current.textPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "⚖️", fontSize = 14.sp)
-            }
 
-            Text(
-                text = statement,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = LocalDynamicThemeColors.current.textPrimary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-
-            if (activeDecision != null) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Black.copy(alpha = 0.3f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = if (activeDecision) "YOU CHOSE: TRUE ✅" else "YOU CHOSE: FALSE ❌",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (activeDecision) DuolingoGreen else DuolingoOrange
-                    )
+                if (activeDecision != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.Black.copy(alpha = 0.35f))
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = if (activeDecision) "SELECTED: TRUE ✅" else "SELECTED: FALSE ❌",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (activeDecision) DuolingoGreen else DuolingoRed
+                        )
+                    }
                 }
             }
         }
 
-        // Two Interactive Decision Buttons: TRUE or FALSE with pressScale
+        // Two Interactive Decision Buttons (Tap alternatives with bounce & active glow)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -776,6 +975,7 @@ fun TrueFalseSwipeExerciseView(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .bounceOnAppear(delayMs = 0)
                     .pressScale(0.95f)
                     .clip(trueShape)
                     .background(if (isTrueSelected) DuolingoGreen.copy(alpha = 0.25f) else DuolingoCardBg)
@@ -804,6 +1004,7 @@ fun TrueFalseSwipeExerciseView(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .bounceOnAppear(delayMs = 80)
                     .pressScale(0.95f)
                     .clip(falseShape)
                     .background(if (isFalseSelected) DuolingoRed.copy(alpha = 0.25f) else DuolingoCardBg)
