@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,7 +115,11 @@ fun MatchPairsExerciseView(
     var wrongPairRight by remember(rightItems) { mutableStateOf<String?>(null) }
 
     var activeDraggingLeft by remember { mutableStateOf<String?>(null) }
+    var activeDragOffset by remember { mutableStateOf(Offset.Zero) }
     var hoveredTargetRight by remember { mutableStateOf<String?>(null) }
+
+    val settleAnim = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    var isSettling by remember { mutableStateOf(false) }
 
     val leftItemCentersInWindow = remember { mutableStateMapOf<String, Offset>() }
     val rightBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
@@ -186,20 +191,21 @@ fun MatchPairsExerciseView(
                         val isWrong = wrongPairLeft == item
                         val isDragging = activeDraggingLeft == item
 
-                        val dragAnim = remember(item) { Animatable(Offset.Zero, Offset.VectorConverter) }
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .zIndex(if (isDragging) 80f else 1f)
-                                .offset {
-                                    IntOffset(
-                                        dragAnim.value.x.roundToInt(),
-                                        dragAnim.value.y.roundToInt()
-                                    )
+                                .graphicsLayer {
+                                    if (isDragging) {
+                                        val offset = if (isSettling) settleAnim.value else activeDragOffset
+                                        translationX = offset.x
+                                        translationY = offset.y
+                                        scaleX = 1.05f
+                                        scaleY = 1.05f
+                                    }
                                 }
                                 .onGloballyPositioned { coords ->
-                                    if (!isDragging) {
+                                    if (!isDragging && !isSettling) {
                                         leftItemCentersInWindow[item] = coords.boundsInWindow().center
                                     }
                                 }
@@ -209,25 +215,23 @@ fun MatchPairsExerciseView(
                                             onDragStart = {
                                                 activeDraggingLeft = item
                                                 selectedLeft = item
+                                                activeDragOffset = Offset.Zero
                                                 feedback.tap()
                                             },
                                             onDrag = { change, dragAmount ->
                                                 change.consume()
-                                                coroutineScope.launch {
-                                                    val newOffset = dragAnim.value + dragAmount
-                                                    dragAnim.snapTo(newOffset)
-                                                    val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + newOffset
-                                                    val hovered = rightBoundsInWindow.entries.firstOrNull { it.value.contains(centerWindow) }?.key
-                                                    if (hovered != hoveredTargetRight) {
-                                                        hoveredTargetRight = hovered
-                                                        if (hovered != null) feedback.tap()
-                                                    }
+                                                activeDragOffset += dragAmount
+                                                val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + activeDragOffset
+                                                val hovered = rightBoundsInWindow.entries.firstOrNull { it.value.contains(centerWindow) }?.key
+                                                if (hovered != hoveredTargetRight) {
+                                                    hoveredTargetRight = hovered
+                                                    if (hovered != null) feedback.tap()
                                                 }
                                             },
                                             onDragEnd = {
-                                                val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + dragAnim.value
+                                                val centerWindow = (leftItemCentersInWindow[item] ?: Offset.Zero) + activeDragOffset
                                                 val dropTarget = rightBoundsInWindow.entries.firstOrNull { it.value.contains(centerWindow) }?.key
-                                                val isTap = dragAnim.value.getDistance() < 12f
+                                                val isTap = activeDragOffset.getDistance() < 12f
 
                                                 if (dropTarget != null && !matchedPairs.containsValue(dropTarget)) {
                                                     if (solution[item] == dropTarget) {
@@ -237,28 +241,69 @@ fun MatchPairsExerciseView(
                                                         wrongPairRight = null
                                                         onMatchedChanged(matchedPairs.toMap())
                                                         feedback.correct()
+                                                        activeDraggingLeft = null
+                                                        activeDragOffset = Offset.Zero
+                                                        hoveredTargetRight = null
                                                     } else {
                                                         wrongPairLeft = item
                                                         wrongPairRight = dropTarget
                                                         feedback.wrong()
+                                                        // Soft smooth glide back on mismatch
+                                                        coroutineScope.launch {
+                                                            isSettling = true
+                                                            settleAnim.snapTo(activeDragOffset)
+                                                            settleAnim.animateTo(
+                                                                Offset.Zero,
+                                                                spring(
+                                                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                                                    stiffness = Spring.StiffnessLow
+                                                                )
+                                                            )
+                                                            activeDragOffset = Offset.Zero
+                                                            isSettling = false
+                                                            activeDraggingLeft = null
+                                                            hoveredTargetRight = null
+                                                        }
                                                     }
                                                 } else if (isTap) {
                                                     selectedLeft = if (selectedLeft == item) null else item
-                                                    wrongPairLeft = null
-                                                    wrongPairRight = null
-                                                }
-
-                                                hoveredTargetRight = null
-                                                activeDraggingLeft = null
-                                                coroutineScope.launch {
-                                                    dragAnim.animateTo(Offset.Zero, spring(dampingRatio = 0.65f, stiffness = 800f))
+                                                    activeDraggingLeft = null
+                                                    activeDragOffset = Offset.Zero
+                                                    hoveredTargetRight = null
+                                                } else {
+                                                    // Soft smooth glide back on cancellation
+                                                    coroutineScope.launch {
+                                                        isSettling = true
+                                                        settleAnim.snapTo(activeDragOffset)
+                                                        settleAnim.animateTo(
+                                                            Offset.Zero,
+                                                            spring(
+                                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                                stiffness = Spring.StiffnessLow
+                                                            )
+                                                        )
+                                                        activeDragOffset = Offset.Zero
+                                                        isSettling = false
+                                                        activeDraggingLeft = null
+                                                        hoveredTargetRight = null
+                                                    }
                                                 }
                                             },
                                             onDragCancel = {
-                                                hoveredTargetRight = null
-                                                activeDraggingLeft = null
                                                 coroutineScope.launch {
-                                                    dragAnim.animateTo(Offset.Zero, spring(dampingRatio = 0.65f, stiffness = 800f))
+                                                    isSettling = true
+                                                    settleAnim.snapTo(activeDragOffset)
+                                                    settleAnim.animateTo(
+                                                        Offset.Zero,
+                                                        spring(
+                                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                                            stiffness = Spring.StiffnessLow
+                                                        )
+                                                    )
+                                                    activeDragOffset = Offset.Zero
+                                                    isSettling = false
+                                                    activeDraggingLeft = null
+                                                    hoveredTargetRight = null
                                                 }
                                             }
                                         )
@@ -342,7 +387,7 @@ fun MatchPairsExerciseView(
 }
 
 // =========================================================================
-// 2. ALGORITHMIC EXECUTION PIPELINE (Order Steps with Direct Drag-and-Drop)
+// 2. ALGORITHMIC EXECUTION PIPELINE (Order Steps with Predictive Slot Swapping)
 // =========================================================================
 @Composable
 fun OrderStepsExerciseView(
@@ -356,15 +401,18 @@ fun OrderStepsExerciseView(
     val density = LocalDensity.current
     val feedback = remember { FeedbackManager(context) }
     val spacingPx = remember(density) { with(density) { 10.dp.toPx() } }
+    val coroutineScope = rememberCoroutineScope()
+
     var currentSteps by remember(initialSteps) { mutableStateOf(initialSteps) }
-    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var draggedStep by remember { mutableStateOf<String?>(null) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
+    var dragStartIndex by remember { mutableIntStateOf(-1) }
+    var targetDropIndex by remember { mutableIntStateOf(-1) }
     var selectedStepIndex by remember(initialSteps) { mutableStateOf<Int?>(null) }
     var itemHeightPx by remember { mutableFloatStateOf(160f) }
 
-    LaunchedEffect(currentSteps) {
-        onStepsChanged(currentSteps)
-    }
+    val settleAnim = remember { Animatable(0f) }
+    var isSettling by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(
@@ -375,10 +423,10 @@ fun OrderStepsExerciseView(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(text = "🔄", fontSize = 14.sp)
                 Text(
-                    text = if (draggedIndex != null) "Dragging step into slot..." else "Drag cards to arrange execution flow:",
+                    text = if (draggedStep != null) "Sliding into slot ${targetDropIndex + 1}..." else "Drag cards to arrange execution flow:",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (draggedIndex != null) AmberGold else DuolingoSubtext
+                    color = if (draggedStep != null) AmberGold else DuolingoSubtext
                 )
             }
             Box(
@@ -399,15 +447,33 @@ fun OrderStepsExerciseView(
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             currentSteps.forEachIndexed { index, step ->
-                val isBeingDragged = draggedIndex == index
+                val isDraggedCard = draggedStep == step
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
                 val isSelectedForSwap = selectedStepIndex == index
-                val depth = if (isBeingDragged) 6.dp else 3.5.dp
+                val depth = if (isDraggedCard) 6.dp else 3.5.dp
+
+                // Calculate visual slot displacement for non-dragged items
+                val shiftSlots = when {
+                    isDraggedCard -> 0
+                    dragStartIndex == -1 -> 0
+                    dragStartIndex < targetDropIndex && index in (dragStartIndex + 1)..targetDropIndex -> -1
+                    dragStartIndex > targetDropIndex && index in targetDropIndex until dragStartIndex -> 1
+                    else -> 0
+                }
+
+                val animatedShiftY by animateFloatAsState(
+                    targetValue = shiftSlots * itemHeightPx,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    label = "stepShift_$index"
+                )
 
                 val dragScale by animateFloatAsState(
-                    targetValue = if (isBeingDragged) 1.03f else 1.0f,
-                    animationSpec = PhoenixMotion.SnappySpring,
+                    targetValue = if (isDraggedCard) 1.03f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
                     label = "orderDragScale"
                 )
 
@@ -415,7 +481,7 @@ fun OrderStepsExerciseView(
                     targetValue = when {
                         isChecked && isCorrectPosition -> PhoenixGreen
                         isChecked && !isCorrectPosition -> PhoenixCrimson
-                        isBeingDragged -> AmberGold
+                        isDraggedCard -> AmberGold
                         isSelectedForSwap -> AmberGold
                         else -> DuolingoInputBorder
                     },
@@ -426,7 +492,7 @@ fun OrderStepsExerciseView(
                     targetValue = when {
                         isChecked && isCorrectPosition -> PhoenixGreen.copy(alpha = 0.2f)
                         isChecked && !isCorrectPosition -> PhoenixCrimson.copy(alpha = 0.2f)
-                        isBeingDragged -> AmberGold.copy(alpha = 0.22f)
+                        isDraggedCard -> AmberGold.copy(alpha = 0.22f)
                         isSelectedForSwap -> AmberGold.copy(alpha = 0.25f)
                         else -> DuolingoInputBg
                     },
@@ -436,7 +502,7 @@ fun OrderStepsExerciseView(
                 val shadowColor = when {
                     isChecked && isCorrectPosition -> Color(0xFF1A_AE_47)
                     isChecked && !isCorrectPosition -> Color(0xFFB5_16_06)
-                    isBeingDragged -> Color(0xFFCC_8C_00)
+                    isDraggedCard -> Color(0xFFCC_8C_00)
                     isSelectedForSwap -> Color(0xFFCC_8C_00)
                     else -> Color(0xFF0C_13_22)
                 }
@@ -444,79 +510,134 @@ fun OrderStepsExerciseView(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .zIndex(if (isBeingDragged) 100f else 1f)
+                        .zIndex(if (isDraggedCard) 100f else 1f)
                         .graphicsLayer {
-                            scaleX = dragScale
-                            scaleY = dragScale
-                        }
-                        .offset {
-                            IntOffset(0, if (isBeingDragged) dragOffsetY.roundToInt() else 0)
+                            if (isDraggedCard) {
+                                translationY = if (isSettling) settleAnim.value else dragOffsetY
+                                scaleX = dragScale
+                                scaleY = dragScale
+                            } else {
+                                translationY = animatedShiftY
+                            }
                         }
                         .onGloballyPositioned { coords ->
                             val measuredH = coords.size.height.toFloat() + spacingPx
                             if (measuredH > 50f) itemHeightPx = measuredH
                         }
-                        .pointerInput(step, index, isChecked, currentSteps) {
+                        .pointerInput(step, isChecked) {
                             if (!isChecked) {
                                 detectDragGestures(
                                     onDragStart = {
-                                        draggedIndex = index
-                                        feedback.tap()
+                                        val startIdx = currentSteps.indexOf(step)
+                                        if (startIdx != -1) {
+                                            draggedStep = step
+                                            dragStartIndex = startIdx
+                                            targetDropIndex = startIdx
+                                            dragOffsetY = 0f
+                                            feedback.tap()
+                                        }
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
                                         dragOffsetY += dragAmount.y
-                                        val activeIdx = draggedIndex ?: return@detectDragGestures
-                                        val threshold = itemHeightPx * 0.5f
 
-                                        if (dragOffsetY > threshold && activeIdx < currentSteps.size - 1) {
-                                            // Swap down
-                                            val mutable = currentSteps.toMutableList()
-                                            val temp = mutable[activeIdx]
-                                            mutable[activeIdx] = mutable[activeIdx + 1]
-                                            mutable[activeIdx + 1] = temp
-                                            currentSteps = mutable
-                                            dragOffsetY -= itemHeightPx
-                                            draggedIndex = activeIdx + 1
-                                            feedback.tap()
-                                        } else if (dragOffsetY < -threshold && activeIdx > 0) {
-                                            // Swap up
-                                            val mutable = currentSteps.toMutableList()
-                                            val temp = mutable[activeIdx]
-                                            mutable[activeIdx] = mutable[activeIdx - 1]
-                                            mutable[activeIdx - 1] = temp
-                                            currentSteps = mutable
-                                            dragOffsetY += itemHeightPx
-                                            draggedIndex = activeIdx - 1
+                                        val effectiveH = itemHeightPx.coerceAtLeast(100f)
+                                        val rawOffsetSlots = (dragOffsetY / effectiveH).roundToInt()
+                                        val newTarget = (dragStartIndex + rawOffsetSlots).coerceIn(0, currentSteps.size - 1)
+
+                                        if (newTarget != targetDropIndex) {
+                                            targetDropIndex = newTarget
                                             feedback.tap()
                                         }
                                     },
                                     onDragEnd = {
                                         val isTap = kotlin.math.abs(dragOffsetY) < 10f
-                                        draggedIndex = null
-                                        dragOffsetY = 0f
-                                        if (isTap) {
-                                            // Tap to select/swap fallback
-                                            val sel = selectedStepIndex
-                                            if (sel == null) {
-                                                selectedStepIndex = index
-                                            } else if (sel == index) {
-                                                selectedStepIndex = null
-                                            } else {
+                                        val fromIdx = dragStartIndex
+                                        val toIdx = targetDropIndex
+
+                                        if (!isTap && fromIdx != -1 && toIdx != -1 && fromIdx != toIdx) {
+                                            // Soft glide into the target slot
+                                            val targetSettleY = (toIdx - fromIdx) * itemHeightPx
+                                            coroutineScope.launch {
+                                                isSettling = true
+                                                settleAnim.snapTo(dragOffsetY)
+                                                settleAnim.animateTo(
+                                                    targetSettleY,
+                                                    spring(
+                                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                                        stiffness = Spring.StiffnessLow
+                                                    )
+                                                )
+                                                // Reorder array cleanly without mid-drag hitching
                                                 val mutable = currentSteps.toMutableList()
-                                                val temp = mutable[sel]
-                                                mutable[sel] = mutable[index]
-                                                mutable[index] = temp
+                                                val item = mutable.removeAt(fromIdx)
+                                                mutable.add(toIdx, item)
                                                 currentSteps = mutable
-                                                selectedStepIndex = null
+                                                onStepsChanged(mutable)
+
+                                                draggedStep = null
+                                                dragStartIndex = -1
+                                                targetDropIndex = -1
+                                                dragOffsetY = 0f
+                                                isSettling = false
+                                            }
+                                        } else {
+                                            if (isTap) {
+                                                val currIdx = currentSteps.indexOf(step)
+                                                val sel = selectedStepIndex
+                                                if (sel == null) {
+                                                    selectedStepIndex = currIdx
+                                                } else if (sel == currIdx) {
+                                                    selectedStepIndex = null
+                                                } else {
+                                                    val mutable = currentSteps.toMutableList()
+                                                    val temp = mutable[sel]
+                                                    mutable[sel] = mutable[currIdx]
+                                                    mutable[currIdx] = temp
+                                                    currentSteps = mutable
+                                                    selectedStepIndex = null
+                                                    onStepsChanged(mutable)
+                                                }
+                                            }
+                                            // Soft spring return to origin
+                                            coroutineScope.launch {
+                                                if (kotlin.math.abs(dragOffsetY) > 5f) {
+                                                    isSettling = true
+                                                    settleAnim.snapTo(dragOffsetY)
+                                                    settleAnim.animateTo(
+                                                        0f,
+                                                        spring(
+                                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                                            stiffness = Spring.StiffnessLow
+                                                        )
+                                                    )
+                                                }
+                                                draggedStep = null
+                                                dragStartIndex = -1
+                                                targetDropIndex = -1
+                                                dragOffsetY = 0f
+                                                isSettling = false
                                             }
                                         }
                                         feedback.tap()
-                                        onStepsChanged(currentSteps)
                                     },
                                     onDragCancel = {
-                                        draggedIndex = null
-                                        dragOffsetY = 0f
+                                        coroutineScope.launch {
+                                            isSettling = true
+                                            settleAnim.snapTo(dragOffsetY)
+                                            settleAnim.animateTo(
+                                                0f,
+                                                spring(
+                                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                                    stiffness = Spring.StiffnessLow
+                                                )
+                                            )
+                                            draggedStep = null
+                                            dragStartIndex = -1
+                                            targetDropIndex = -1
+                                            dragOffsetY = 0f
+                                            isSettling = false
+                                        }
                                     }
                                 )
                             }
@@ -538,7 +659,7 @@ fun OrderStepsExerciseView(
                             .fillMaxWidth()
                             .clip(shape)
                             .background(bgColor)
-                            .border(if (isBeingDragged || isSelectedForSwap || (isChecked && isCorrectPosition)) 2.dp else 1.2.dp, borderColor, shape)
+                            .border(if (isDraggedCard || isSelectedForSwap || (isChecked && isCorrectPosition)) 2.dp else 1.2.dp, borderColor, shape)
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -547,14 +668,14 @@ fun OrderStepsExerciseView(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isBeingDragged || isSelectedForSwap) AmberGold else AmberGold.copy(alpha = 0.15f)),
+                                .background(if (isDraggedCard || isSelectedForSwap) AmberGold else AmberGold.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "${index + 1}",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (isBeingDragged || isSelectedForSwap) Color.Black else AmberGold
+                                color = if (isDraggedCard || isSelectedForSwap) Color.Black else AmberGold
                             )
                         }
 
@@ -576,7 +697,7 @@ fun OrderStepsExerciseView(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(if (isBeingDragged) AmberGold.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.06f))
+                                    .background(if (isDraggedCard) AmberGold.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.06f))
                                     .padding(horizontal = 8.dp, vertical = 6.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -585,14 +706,14 @@ fun OrderStepsExerciseView(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(2.5.dp)) {
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
                                     }
                                     Column(verticalArrangement = Arrangement.spacedBy(2.5.dp)) {
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
-                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isBeingDragged) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
+                                        Box(modifier = Modifier.size(3.5.dp).clip(CircleShape).background(if (isDraggedCard) AmberGold else DuolingoSubtext))
                                     }
                                 }
                             }
