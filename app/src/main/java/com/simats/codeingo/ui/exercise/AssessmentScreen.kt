@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,6 +13,8 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,8 +78,12 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoInputBg
 import com.simats.codeingo.ui.theme.DuolingoInputBorder
 import com.simats.codeingo.ui.theme.DuolingoRed
+import com.simats.codeingo.ui.theme.DuolingoSubtext
 import com.simats.codeingo.ui.theme.FeedbackManager
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.PhoenixCrimson
+import com.simats.codeingo.ui.theme.PhoenixGreen
+import com.simats.codeingo.ui.theme.PhoenixMotion
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.correctPop
 import com.simats.codeingo.ui.theme.pressScale
@@ -126,7 +133,7 @@ fun AssessmentScreen(
     var wrongAnswerCount by remember { mutableIntStateOf(0) }
     var timeRemaining   by remember { mutableIntStateOf(45) }
 
-    // Bug fix: single-composable slide via Animatable — no dual-state bleed
+    // Single-composable slide via Animatable — no dual-state bleed
     val slideOffsetPx   = remember { Animatable(0f) }
     var isTransitioning by remember { mutableStateOf(false) }
 
@@ -134,7 +141,7 @@ fun AssessmentScreen(
         scope.launch {
             isTransitioning = true
             val fullWidth = with(density) { 420.dp.toPx() }
-            slideOffsetPx.snapTo(fullWidth)          // place off-screen right
+            slideOffsetPx.snapTo(fullWidth)
             if (currentIndex + 1 < questions.size) currentIndex += 1 else { isFinished = true; return@launch }
             slideOffsetPx.animateTo(0f, animationSpec = tween(320, easing = FastOutSlowInEasing))
             isTransitioning = false
@@ -147,15 +154,15 @@ fun AssessmentScreen(
     }
 
     LaunchedEffect(currentIndex) {
-        timeRemaining     = 45
+        timeRemaining       = 45
         selectedOptionIndex = null
-        matchedPairs      = emptyMap()
-        orderedSteps      = currentQuestion.orderStepsInitial
-        selectedFillToken = null
-        selectedComplexity = null
-        selectedTrueFalse = null
-        isChecked         = false
-        isAnswerCorrect   = false
+        matchedPairs        = emptyMap()
+        orderedSteps        = currentQuestion.orderStepsInitial
+        selectedFillToken   = null
+        selectedComplexity  = null
+        selectedTrueFalse   = null
+        isChecked           = false
+        isAnswerCorrect     = false
     }
 
     LaunchedEffect(currentIndex, isChecked, isFinished) {
@@ -229,7 +236,7 @@ fun AssessmentScreen(
         } else {
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
 
-                // ── Top Bar ─────────────────────────────────────────────────
+                // ── Duolingo-Style Header Bar ─────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -239,19 +246,19 @@ fun AssessmentScreen(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     val progress = if (questions.isNotEmpty()) currentIndex.toFloat() / questions.size else 0f
-                    ProgressBarAnimated(progress = progress, modifier = Modifier.weight(1f).height(14.dp))
+                    ProgressBarAnimated(progress = progress, modifier = Modifier.weight(1f).height(16.dp))
                     Spacer(modifier = Modifier.width(16.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.shake(shakeTrigger = wrongAnswerCount.takeIf { it > 0 })
                     ) {
-                        Icon(Icons.Default.Favorite, "Hearts", tint = DuolingoRed, modifier = Modifier.size(20.dp))
-                        Text("$heartsCount", fontSize = 15.sp, fontWeight = FontWeight.Black, color = DuolingoRed)
+                        Icon(Icons.Default.Favorite, "Hearts", tint = DuolingoRed, modifier = Modifier.size(22.dp))
+                        Text("$heartsCount", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DuolingoRed)
                     }
                 }
 
-                // ── Scrollable content — slides as a SINGLE composable (no AnimatedContent bug) ──
+                // ── Scrollable Content Area ──────────────────────────────────
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
@@ -287,7 +294,7 @@ fun AssessmentScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Timer with animated colour + pulse
+                    // Countdown timer indicator
                     val timerColor by animateColorAsState(
                         targetValue = when { timeRemaining <= 5 -> DuolingoRed; timeRemaining <= 10 -> AmberGold; else -> SubtextGray },
                         animationSpec = tween(400), label = "timerColor"
@@ -301,17 +308,24 @@ fun AssessmentScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Owl chat bubble
+                    // Mascot + Speech Bubble (Duolingo signature style)
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                         Box(
-                            modifier = Modifier.size(50.dp).clip(CircleShape)
-                                .background(DuolingoGreen.copy(alpha = 0.2f)).border(1.5.dp, DuolingoGreen, CircleShape),
+                            modifier = Modifier
+                                .size(52.dp)
+                                .clip(CircleShape)
+                                .background(DuolingoGreen.copy(alpha = 0.2f))
+                                .border(2.dp, DuolingoGreen, CircleShape),
                             contentAlignment = Alignment.Center
-                        ) { Text("🦩", fontSize = 26.sp) }
+                        ) { Text("🦩", fontSize = 28.sp) }
                         Spacer(modifier = Modifier.width(12.dp))
                         Box(
-                            modifier = Modifier.weight(1f).clip(RoundedCornerShape(18.dp))
-                                .background(DuolingoInputBg).border(1.5.dp, DuolingoInputBorder, RoundedCornerShape(18.dp)).padding(14.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(DuolingoInputBg)
+                                .border(1.5.dp, DuolingoInputBorder, RoundedCornerShape(18.dp))
+                                .padding(14.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(currentQuestion.promptSentence, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
@@ -323,81 +337,35 @@ fun AssessmentScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // ── GAMIFIED EXERCISE RENDERER ───────────────────────────
-                    // isTransitioning blocks all interaction during the slide animation
                     val interactionEnabled = !isTransitioning
 
                     when (currentQuestion.gameType) {
 
-                        // ── A/B/C/D Badge tiles ──────────────────────────────
+                        // ── Duolingo-Style 3D Tactile Push Option Tiles ──────
                         DSAExerciseType.MULTIPLE_CHOICE -> {
                             val badges = listOf("A", "B", "C", "D", "E", "F")
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 currentQuestion.options.forEachIndexed { index, optionText ->
                                     val isSelected   = selectedOptionIndex == index
                                     val isCorrectOpt = index == currentQuestion.correctOptionIndex
                                     val badge = badges.getOrElse(index) { "${index + 1}" }
-                                    val shape = RoundedCornerShape(16.dp)
 
-                                    val bgColor by animateColorAsState(
-                                        targetValue = when {
-                                            isChecked && isSelected && isCorrectOpt  -> DuolingoGreen.copy(alpha = 0.22f)
-                                            isChecked && isSelected && !isCorrectOpt -> DuolingoRed.copy(alpha = 0.22f)
-                                            isChecked && isCorrectOpt                -> DuolingoGreen.copy(alpha = 0.18f)
-                                            isSelected                               -> DuolingoBlue.copy(alpha = 0.22f)
-                                            else                                     -> DuolingoCardBg
-                                        }, label = "optBg"
-                                    )
-                                    val borderColor by animateColorAsState(
-                                        targetValue = when {
-                                            isChecked && isSelected && isCorrectOpt  -> DuolingoGreen
-                                            isChecked && isSelected && !isCorrectOpt -> DuolingoRed
-                                            isChecked && isCorrectOpt                -> DuolingoGreen
-                                            isSelected                               -> DuolingoBlue
-                                            else                                     -> DuolingoInputBorder
-                                        }, label = "optBorder"
-                                    )
-                                    val badgeBg by animateColorAsState(
-                                        targetValue = when {
-                                            isChecked && isSelected && isCorrectOpt  -> DuolingoGreen
-                                            isChecked && isSelected && !isCorrectOpt -> DuolingoRed
-                                            isChecked && isCorrectOpt                -> DuolingoGreen
-                                            isSelected                               -> DuolingoBlue
-                                            else                                     -> SubtextGray.copy(alpha = 0.4f)
-                                        }, label = "badgeBg"
-                                    )
-
-                                    Row(
+                                    DuolingoOptionTile(
+                                        text = optionText,
+                                        badgeText = badge,
+                                        isSelected = isSelected,
+                                        isChecked = isChecked,
+                                        isCorrectOpt = isCorrectOpt,
+                                        isEnabled = !isChecked && interactionEnabled,
+                                        onClick = {
+                                            selectedOptionIndex = index
+                                            feedback.tap()
+                                        },
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .staggeredAppear(index = index, baseDelayMs = 60)
+                                            .staggeredAppear(index = index, baseDelayMs = 50)
                                             .correctPop(trigger = isChecked && isSelected && isCorrectOpt)
                                             .shake(shakeTrigger = if (isChecked && isSelected && !isCorrectOpt) index else null)
-                                            .pressScale(0.96f)
-                                            .clip(shape)
-                                            .background(bgColor)
-                                            .border(if (isSelected || (isChecked && isCorrectOpt)) 2.dp else 1.dp, borderColor, shape)
-                                            .clickable(enabled = !isChecked && interactionEnabled) {
-                                                selectedOptionIndex = index; feedback.tap()
-                                            }
-                                            .padding(horizontal = 14.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        // Animated letter badge
-                                        Box(
-                                            modifier = Modifier.size(32.dp).clip(CircleShape).background(badgeBg),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = if (isChecked && isSelected) (if (isCorrectOpt) "✓" else "✕") else badge,
-                                                fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White
-                                            )
-                                        }
-                                        Text(
-                                            text = optionText, fontSize = 15.sp, fontWeight = FontWeight.Bold,
-                                            color = LocalDynamicThemeColors.current.textPrimary, modifier = Modifier.weight(1f)
-                                        )
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -444,69 +412,110 @@ fun AssessmentScreen(
                         }
 
                         else -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            val badges = listOf("A", "B", "C", "D")
+                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                                 currentQuestion.options.forEachIndexed { index, optionText ->
-                                    val isSelected = selectedOptionIndex == index
-                                    val shape = RoundedCornerShape(14.dp)
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().clip(shape)
-                                            .background(if (isSelected) DuolingoBlue.copy(alpha = 0.22f) else DuolingoCardBg)
-                                            .border(if (isSelected) 2.dp else 1.dp, if (isSelected) DuolingoBlue else DuolingoInputBorder, shape)
-                                            .clickable(enabled = !isChecked && interactionEnabled) { selectedOptionIndex = index; feedback.tap() }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) { Text(optionText, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary) }
+                                    DuolingoOptionTile(
+                                        text = optionText,
+                                        badgeText = badges.getOrElse(index) { "${index + 1}" },
+                                        isSelected = selectedOptionIndex == index,
+                                        isChecked = isChecked,
+                                        isCorrectOpt = index == currentQuestion.correctOptionIndex,
+                                        isEnabled = !isChecked && interactionEnabled,
+                                        onClick = { selectedOptionIndex = index; feedback.tap() }
+                                    )
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                 }
 
-                // ── Bottom Feedback & Action Bar ─────────────────────────────
-                val barBgColor by animateColorAsState(
+                // ── Duolingo-Style Evaluation Drawer & Action Bar ─────────────
+                val isCorrect = isAnswerCorrect
+                val bottomDrawerBg by animateColorAsState(
                     targetValue = when {
-                        isChecked && isAnswerCorrect  -> DuolingoGreen.copy(alpha = 0.15f)
-                        isChecked && !isAnswerCorrect -> DuolingoRed.copy(alpha = 0.15f)
-                        else                          -> CardBackground
-                    }, animationSpec = tween(350), label = "barBg"
+                        isChecked && isCorrect  -> Color(0xFF132F1E)
+                        isChecked && !isCorrect -> Color(0xFF381519)
+                        else                    -> CardBackground
+                    }, animationSpec = tween(300), label = "bottomDrawerBg"
                 )
-                Column(modifier = Modifier.fillMaxWidth().background(barBgColor).padding(horizontal = 20.dp, vertical = 16.dp)) {
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(bottomDrawerBg)
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                ) {
+                    // Duolingo Evaluation Banner (Slides up on check)
                     AnimatedVisibility(
                         visible = isChecked,
-                        enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(300)) + fadeIn(tween(250)),
+                        enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(280)) + fadeIn(tween(200)),
                         exit  = slideOutVertically(targetOffsetY = { it }) + fadeOut(tween(150))
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp)
-                                .correctPop(trigger = isChecked && isAnswerCorrect),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(if (isAnswerCorrect) "🎯" else "💔", fontSize = 28.sp)
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(46.dp)
+                                    .correctPop(trigger = isChecked && isCorrect)
+                                    .clip(CircleShape)
+                                    .background(if (isCorrect) PhoenixGreen else PhoenixCrimson),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isCorrect) "✓" else "✕",
+                                    fontSize = 26.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(14.dp))
+
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    if (isAnswerCorrect) "AMAZING! CORRECT! ✨" else "NOT QUITE! 🐣",
-                                    fontSize = 17.sp, fontWeight = FontWeight.Black,
-                                    color = if (isAnswerCorrect) DuolingoGreen else DuolingoRed
+                                    text = if (isCorrect) "Nicely done! ✨" else "Incorrect 🐣",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = if (isCorrect) PhoenixGreen else PhoenixCrimson
                                 )
-                                if (!isAnswerCorrect && correctAnswerSummary.isNotEmpty()) {
-                                    Text("Correct answer: $correctAnswerSummary", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
+                                if (!isCorrect && correctAnswerSummary.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Correct solution: $correctAnswerSummary",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White.copy(alpha = 0.9f)
+                                    )
                                 }
                             }
                         }
                     }
 
+                    // Duolingo Dynamic 3D Action Button (Disabled Gray → Bright Green → Continue)
                     val canCheck = hasSelection || isChecked
+                    val buttonTitle = when {
+                        !isChecked -> "CHECK"
+                        isCorrect  -> "CONTINUE"
+                        else       -> "GOT IT"
+                    }
+                    val buttonStyle = when {
+                        !isChecked && !canCheck -> AppButtonStyle.DISABLED
+                        !isChecked && canCheck  -> AppButtonStyle.SUCCESS_GREEN
+                        isCorrect               -> AppButtonStyle.SUCCESS_GREEN
+                        else                    -> AppButtonStyle.DANGER_CRIMSON
+                    }
+
                     AppButton(
-                        title = if (!isChecked) "CHECK ANSWER" else "CONTINUE",
-                        style = when {
-                            !canCheck                     -> AppButtonStyle.DISABLED
-                            isChecked && !isAnswerCorrect -> AppButtonStyle.DANGER_CRIMSON
-                            else                          -> AppButtonStyle.SUCCESS_GREEN
-                        },
-                        isEnabled = canCheck && !isTransitioning,
+                        title = buttonTitle,
+                        style = buttonStyle,
+                        isEnabled = (canCheck || isChecked) && !isTransitioning,
                         onClick = {
                             if (!isChecked) {
                                 if (hasSelection) {
@@ -547,6 +556,139 @@ fun AssessmentScreen(
                 confirmButton = { TextButton(onClick = { showHintDialog = false }) { Text("GOT IT! ⚡️", fontWeight = FontWeight.Black, color = DuolingoBlue) } },
                 containerColor = DuolingoCardBg,
                 shape = RoundedCornerShape(18.dp)
+            )
+        }
+    }
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// 🔘 DuolingoOptionTile — Authentic 3D Tactile Push Option Tile
+// Features: 3.5dp extruded bottom shadow, mechanical depress on tap,
+// electric blue selection state, and green/red answer evaluation.
+// ═════════════════════════════════════════════════════════════════════════
+@Composable
+private fun DuolingoOptionTile(
+    text: String,
+    badgeText: String,
+    isSelected: Boolean,
+    isChecked: Boolean,
+    isCorrectOpt: Boolean,
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val depth = 3.5.dp
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val currentOffset by animateDpAsState(
+        targetValue = if (isPressed && isEnabled) depth else 0.dp,
+        animationSpec = PhoenixMotion.PressSpringDp,
+        label = "tileOffset"
+    )
+
+    val shape = RoundedCornerShape(16.dp)
+
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            isChecked && isSelected && isCorrectOpt -> PhoenixGreen
+            isChecked && isSelected && !isCorrectOpt -> PhoenixCrimson
+            isChecked && isCorrectOpt -> PhoenixGreen
+            isSelected -> Color(0xFF1C_B0_F6) // Duolingo Electric Blue
+            else -> DuolingoInputBorder
+        }, label = "tileBorder"
+    )
+
+    val shadowColor = when {
+        isChecked && isSelected && isCorrectOpt -> Color(0xFF1A_AE_47)
+        isChecked && isSelected && !isCorrectOpt -> Color(0xFFB5_16_06)
+        isChecked && isCorrectOpt -> Color(0xFF1A_AE_47)
+        isSelected -> Color(0xFF0F_8A_CC)
+        else -> Color(0xFF0C_13_22)
+    }
+
+    val faceColor by animateColorAsState(
+        targetValue = when {
+            isChecked && isSelected && isCorrectOpt -> PhoenixGreen.copy(alpha = 0.22f)
+            isChecked && isSelected && !isCorrectOpt -> PhoenixCrimson.copy(alpha = 0.22f)
+            isChecked && isCorrectOpt -> PhoenixGreen.copy(alpha = 0.18f)
+            isSelected -> Color(0xFF1C_B0_F6).copy(alpha = 0.22f)
+            else -> DuolingoCardBg
+        }, label = "tileFace"
+    )
+
+    val badgeBg by animateColorAsState(
+        targetValue = when {
+            isChecked && isSelected && isCorrectOpt -> PhoenixGreen
+            isChecked && isSelected && !isCorrectOpt -> PhoenixCrimson
+            isChecked && isCorrectOpt -> PhoenixGreen
+            isSelected -> Color(0xFF1C_B0_F6)
+            else -> Color.White.copy(alpha = 0.08f)
+        }, label = "tileBadgeBg"
+    )
+
+    val badgeTextColor by animateColorAsState(
+        targetValue = when {
+            isSelected || (isChecked && isCorrectOpt) -> Color.White
+            else -> DuolingoSubtext
+        }, label = "tileBadgeText"
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = isEnabled,
+                onClick = onClick
+            )
+    ) {
+        // 3D Bottom Shadow Bevel
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .offset(y = depth)
+                .clip(shape)
+                .background(shadowColor)
+        )
+        // Top Face Layer
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(y = currentOffset)
+                .clip(shape)
+                .background(faceColor)
+                .border(if (isSelected || (isChecked && isCorrectOpt)) 2.dp else 1.2.dp, borderColor, shape)
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Letter Badge Pill
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(badgeBg)
+                    .border(1.dp, borderColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isChecked && (isSelected || isCorrectOpt)) {
+                        if (isCorrectOpt) "✓" else "✕"
+                    } else badgeText,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = badgeTextColor
+                )
+            }
+
+            Text(
+                text = text,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary,
+                modifier = Modifier.weight(1f)
             )
         }
     }
