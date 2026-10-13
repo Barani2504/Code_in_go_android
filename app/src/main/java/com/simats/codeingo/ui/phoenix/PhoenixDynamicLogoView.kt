@@ -37,9 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import com.simats.codeingo.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -190,33 +192,19 @@ fun PhoenixMascotImage(
     size: Dp,
     modifier: Modifier = Modifier
 ) {
-    if (emotion.id == 0) {
-        AnimatedGIFView(
-            resourceName = "phoenix_flying",
-            size = size,
-            modifier = modifier
-        )
-    } else {
-        val context = LocalContext.current
-        val resName = "phoenix_emotion_${emotion.id}"
-        val resId = remember(emotion.id) {
-            context.resources.getIdentifier(resName, "drawable", context.packageName)
-        }
-
-        if (resId != 0) {
-            Image(
-                painter = painterResource(id = resId),
-                contentDescription = emotion.title,
-                modifier = modifier
-                    .size(size)
-                    .clip(CircleShape)
-            )
-        } else {
-            AnimatedGIFView(
-                resourceName = "phoenix_flying",
-                size = size,
-                modifier = modifier
-            )
-        }
+    val context = LocalContext.current
+    val resName = "phoenix_emotion_${emotion.id}"
+    val resId = remember(emotion.id) {
+        val foundId = context.resources.getIdentifier(resName, "drawable", context.packageName)
+        if (foundId != 0) foundId else R.drawable.phoenix_emotion_0
     }
+
+    Image(
+        painter = painterResource(id = resId),
+        contentDescription = emotion.title,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+    )
 }

@@ -56,7 +56,6 @@ import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
-import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotImage
 import com.simats.codeingo.ui.shop.CosmeticsCatalog
 import com.simats.codeingo.ui.shop.GemShopSheet
@@ -415,7 +414,10 @@ private fun UserHeaderCard(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        AnimatedGIFView(resourceName = "phoenix_flying", size = 66.dp)
+                        PhoenixMascotImage(
+                            emotion = currentEmotion,
+                            size = 66.dp
+                        )
                     }
                 }
 
@@ -1339,7 +1341,10 @@ private fun UnauthenticatedProfileBody(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    AnimatedGIFView(resourceName = "phoenix_flying", size = 72.dp)
+                    PhoenixMascotImage(
+                        emotion = currentEmotion,
+                        size = 72.dp
+                    )
                 }
             }
 

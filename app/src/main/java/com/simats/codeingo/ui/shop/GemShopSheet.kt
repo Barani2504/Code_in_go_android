@@ -621,58 +621,6 @@ fun GemShopSheet(
                                     size = 155.dp
                                 )
                             }
-
-                            // Layer 1: Headwear (Above head)
-                            if (activeHeadwear != "none_head") {
-                                CosmeticsCatalog.item(activeHeadwear)?.emoji?.let { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 44.sp,
-                                        modifier = Modifier
-                                            .offset(x = 2.dp, y = (-56 + birdHoverOffset).dp)
-                                    )
-                                }
-                            }
-
-                            // Layer 2: Outfit (Body)
-                            if (activeOutfit != "none_outfit") {
-                                CosmeticsCatalog.item(activeOutfit)?.emoji?.let { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 34.sp,
-                                        modifier = Modifier
-                                            .offset(x = 0.dp, y = (18 + birdHoverOffset).dp)
-                                    )
-                                }
-                            }
-
-                            // Layer 3: Accessory (Face/Eyes)
-                            if (activeAccessory != "none_acc") {
-                                CosmeticsCatalog.item(activeAccessory)?.emoji?.let { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 34.sp,
-                                        modifier = Modifier
-                                            .offset(x = 16.dp, y = (-8 + birdHoverOffset).dp)
-                                    )
-                                }
-                            }
-
-                            // Layer 4: Aura Emitters (Floating ambient effects)
-                            if (activeAuraId != "none_aura") {
-                                CosmeticsCatalog.item(activeAuraId)?.emoji?.let { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 22.sp,
-                                        modifier = Modifier.offset(x = (-60).dp, y = (-26 + birdHoverOffset).dp)
-                                    )
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 22.sp,
-                                        modifier = Modifier.offset(x = 58.dp, y = (22 + birdHoverOffset).dp)
-                                    )
-                                }
-                            }
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -712,7 +660,7 @@ fun GemShopSheet(
                             }
                         } else {
                             Text(
-                                text = "Your stylish Phoenix companion",
+                                text = "Your Phoenix companion",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = LocalDynamicThemeColors.current.textSecondary
