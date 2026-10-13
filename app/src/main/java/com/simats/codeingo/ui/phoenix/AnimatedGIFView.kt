@@ -71,16 +71,20 @@ fun AnimatedGIFView(
     val isFlyingNodes = cleanName == "phoenix_flying_nodes" ||
             cleanName.contains("fly_node") ||
             cleanName.contains("flying_between_nodes")
-    val isWaving = cleanName == "phoenix_waving" || cleanName.contains("wave")
+    val isWaving = cleanName == "phoenix_waving" || cleanName == "phoenix-waving" || cleanName.contains("wave")
     val isFlyingFlap = cleanName == "phoenix_flying"
 
-    // Check pre-compiled compile-time frame sequences
-    val frameResources = remember(cleanName) {
-        when {
-            isFlyingNodes -> NodeFlyFrames
-            isWaving -> WaveFrames
-            isFlyingFlap -> FlyFlapFrames
-            else -> null
+    // Check pre-compiled compile-time frame sequences (bypassed if explicit .gif is requested)
+    val frameResources = remember(cleanName, resourceName) {
+        if (resourceName.endsWith(".gif")) {
+            null
+        } else {
+            when {
+                isFlyingNodes -> NodeFlyFrames
+                isWaving -> WaveFrames
+                isFlyingFlap -> FlyFlapFrames
+                else -> null
+            }
         }
     }
 
@@ -113,7 +117,7 @@ fun AnimatedGIFView(
     // Fallback: Coil Animated GIF rendering from raw resources
     val gifResId = when (cleanName) {
         "phoenix_flying_nodes" -> R.raw.phoenix_flying_nodes
-        "phoenix_waving" -> R.raw.phoenix_waving
+        "phoenix_waving", "phoenix-waving" -> R.raw.phoenix_waving
         "phoenix_stage_1" -> R.raw.phoenix_stage_1
         "phoenix_stage_2" -> R.raw.phoenix_stage_2
         "phoenix_stage_3" -> R.raw.phoenix_stage_3
@@ -138,7 +142,7 @@ fun AnimatedGIFView(
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context)
             .data(gifResId)
-            .crossfade(true)
+            .crossfade(false)
             .build(),
         imageLoader = imageLoader
     )

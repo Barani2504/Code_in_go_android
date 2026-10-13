@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.phoenix
 
+import android.media.MediaPlayer
+import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -33,13 +35,20 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
 import com.simats.codeingo.R
 import com.simats.codeingo.ui.theme.AmberGold
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -102,8 +111,76 @@ fun PhoenixNodeJumpFlightView(
         label = "auraGlow"
     )
 
+    val context = LocalContext.current
+    var isWaving by remember { mutableStateOf(false) }
+    var waveToken by remember { mutableIntStateOf(0) }
+    var waveJob by remember { mutableStateOf<Job?>(null) }
+
+    val imageLoader = remember(context) {
+        ImageLoader.Builder(context)
+            .components {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
+
+    LaunchedEffect(Unit) {
+        try {
+            imageLoader.execute(
+                ImageRequest.Builder(context)
+                    .data(R.raw.phoenix_waving)
+                    .build()
+            )
+        } catch (_: Exception) {}
+    }
+
+    fun launchWavingAnimation() {
+        if (isFlying) return
+        waveJob?.cancel()
+        waveJob = coroutineScope.launch {
+            waveToken++
+            isWaving = true
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+            // Play friendly greeting audio
+            try {
+                val player = MediaPlayer.create(context, R.raw.phoenix_greeting)
+                if (player != null) {
+                    player.setVolume(0.85f, 0.85f)
+                    player.setOnCompletionListener { mp ->
+                        try { mp.release() } catch (_: Exception) {}
+                    }
+                    player.start()
+                }
+            } catch (_: Exception) {}
+
+            // Interactive tap scale bounce
+            launch {
+                tapBounce.animateTo(1.10f, spring(0.52f, 600f))
+                tapBounce.animateTo(1.0f, spring(0.62f, 400f))
+            }
+
+            // Play full 2.4s duration of phoenix-waving.gif
+            delay(2400L)
+
+            isWaving = false
+
+            // Gentle landing settle
+            launch {
+                landingSquashX.animateTo(1.04f, spring(0.5f, 500f))
+                landingSquashX.animateTo(1.0f, spring(0.6f, 400f))
+            }
+        }
+    }
+
     fun launchSlowFlightAlongTrack() {
         if (isFlying) return
+        waveJob?.cancel()
+        isWaving = false
         coroutineScope.launch {
             isFlying = true
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -114,11 +191,21 @@ fun PhoenixNodeJumpFlightView(
             landingSquashY.snapTo(1f)
             flightProgressAnim.snapTo(0f)
 
-            // Truly slow, graceful, cinematic flight from previous node down along the track (3.6s)
+            // Smooth aerodynamic flight duration scaled to distance
+            val flightDistance = kotlin.math.sqrt(
+                (flyFromOffset.x.value * flyFromOffset.x.value) + (flyFromOffset.y.value * flyFromOffset.y.value)
+            )
+            val duration = when {
+                flightDistance > 250f -> 3500
+                flightDistance > 100f -> 2700
+                flightDistance > 10f -> 2100
+                else -> 1400
+            }
+
             flightProgressAnim.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 3600,
+                    durationMillis = duration,
                     easing = CubicBezierEasing(0.42f, 0.0f, 0.58f, 1.0f)
                 )
             )
@@ -172,45 +259,39 @@ fun PhoenixNodeJumpFlightView(
     }
 
     val p = flightProgressAnim.value
+    val isAnyFlightActive = isFlying
 
-    // Computed Flight Offsets along the Track
-    val currentFlightOffsetX: Dp = if (!isFlying) 0.dp else {
+    // Computed Flight Offsets
+    val currentFlightOffsetX: Dp = if (isFlying) {
         val linearX = flyFromOffset.x.value * (1f - p)
-        val arcOffset = sin(p * PI.toFloat()) * (if (flyFromOffset.x.value > 0) -26f else 26f)
+        val arcOffset = sin(p * PI.toFloat()) * (if (flyFromOffset.x.value > 0) -24f else 24f)
         (linearX + arcOffset).dp
-    }
+    } else 0.dp
 
-    // Aerodynamic flight lift apex + subtle wingbeat heave during mid-air flaps
-    val wingbeatHeave = if (isFlying) {
-        val flapCycleP = p * 4f * PI.toFloat()
-        sin(flapCycleP) * 3.2f
-    } else 0f
-
-    val currentFlightOffsetY: Dp = if (!isFlying) hoverBob.dp else {
+    val currentFlightOffsetY: Dp = if (isFlying) {
         val linearY = flyFromOffset.y.value * (1f - p)
         val liftApex = -sin(p * PI.toFloat()) * 26f
+        val wingbeatHeave = sin(p * 4f * PI.toFloat()) * 3.2f
         (linearY + liftApex + wingbeatHeave).dp
-    }
+    } else hoverBob.dp
 
     // Aerodynamic banking tilt into turns
-    val flightBankAngle: Float = if (!isFlying) 0f else {
+    val flightBankAngle: Float = if (isFlying) {
         val directionMultiplier = if (flyFromOffset.x.value < 0) 13f else -13f
-        sin(p * PI.toFloat()) * directionMultiplier
-    }
+        val verticalMultiplier = if (flyFromOffset.y.value > 0) -1f else 1f
+        sin(p * PI.toFloat()) * directionMultiplier * verticalMultiplier
+    } else 0f
 
     // Dynamic camera swoop scale
     val flightDynamicScale: Float = if (isFlying) {
         1f + (sin(p * PI.toFloat()) * 0.16f)
-    } else {
-        tapBounce.value
-    }
+    } else tapBounce.value
 
     // Continuous, Silky Smooth 3D Avian Wing Flap Frame Sequence
     var flightFrameIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(isFlying) {
         if (isFlying) {
             flightFrameIndex = 0
-            // 48 frames across 3600ms = 75ms per frame (2 full 24-frame cycles, landing cleanly on frame 0)
             while (isActive && isFlying) {
                 delay(75L)
                 flightFrameIndex = (flightFrameIndex + 1) % NodeFlyFrames.size
@@ -220,7 +301,7 @@ fun PhoenixNodeJumpFlightView(
         }
     }
 
-    val currentFrameResId: Int = if (isFlying) {
+    val sittingOrFlyingResId: Int = if (isFlying) {
         NodeFlyFrames[flightFrameIndex]
     } else {
         NodeFlyFrames[0] // Firmly standing on its feet on the track!
@@ -234,12 +315,8 @@ fun PhoenixNodeJumpFlightView(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                // Tapping Phoenix launches the slow flight so user can experience it anytime!
-                coroutineScope.launch {
-                    tapBounce.animateTo(1.08f, spring(0.5f, 500f))
-                    tapBounce.animateTo(1.0f, spring(0.6f, 400f))
-                }
-                launchSlowFlightAlongTrack()
+                // Tapping Phoenix in main dashboard triggers the 3D waving gesture (phoenix_waving)!
+                launchWavingAnimation()
             },
         contentAlignment = Alignment.Center
     ) {
@@ -253,8 +330,8 @@ fun PhoenixNodeJumpFlightView(
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.matchParentSize()) {
-                val alpha1 = if (isFlying) 0.08f else 0.38f
-                val alpha2 = if (isFlying) 0.02f else 0.12f
+                val alpha1 = if (isAnyFlightActive) 0.08f else 0.38f
+                val alpha2 = if (isAnyFlightActive) 0.02f else 0.12f
                 val rad = size.width * 0.46f
                 drawOval(
                     brush = Brush.radialGradient(
@@ -300,20 +377,19 @@ fun PhoenixNodeJumpFlightView(
 
         // MARK: - 3. Soft Golden Radiant Ember Aura (Smooth Mathematical Radial Gradient, Zero Clipping Bounds)
         if (showTrailGlow) {
-            val glowDiameter = maxOf(width, height) * (if (isFlying) 1.55f else 1.25f)
+            val glowDiameter = maxOf(width, height) * (if (isAnyFlightActive) 1.55f else 1.25f)
             Canvas(
                 modifier = Modifier
                     .size(glowDiameter)
-                    .graphicsLayer { alpha = if (isFlying) 0.90f else 0.65f }
+                    .graphicsLayer { alpha = if (isAnyFlightActive) 0.90f else 0.65f }
             ) {
-                // Strictly kept within 0.44 of canvas diameter so it smoothly fades to 100% transparent well before edges!
                 val glowRadius = size.width * 0.44f
                 drawCircle(
                     brush = Brush.radialGradient(
                         colorStops = arrayOf(
-                            0.0f to AmberGold.copy(alpha = (if (isFlying) 0.34f else 0.20f) * auraGlow),
-                            0.35f to Color(0xFFFF9500).copy(alpha = (if (isFlying) 0.18f else 0.10f) * auraGlow),
-                            0.70f to Color(0xFFFF7A00).copy(alpha = (if (isFlying) 0.05f else 0.02f) * auraGlow),
+                            0.0f to AmberGold.copy(alpha = (if (isAnyFlightActive) 0.34f else 0.20f) * auraGlow),
+                            0.35f to Color(0xFFFF9500).copy(alpha = (if (isAnyFlightActive) 0.18f else 0.10f) * auraGlow),
+                            0.70f to Color(0xFFFF7A00).copy(alpha = (if (isAnyFlightActive) 0.05f else 0.02f) * auraGlow),
                             1.0f to Color.Transparent
                         ),
                         center = center,
@@ -325,46 +401,41 @@ fun PhoenixNodeJumpFlightView(
             }
         }
 
-        // MARK: - 4. Trailing Ember Sparks During Flight (Zero Box Blur Artifacts, Smooth Canvas Drawing)
-        if (isFlying) {
-            Canvas(modifier = Modifier.matchParentSize()) {
-                for (i in 0 until 6) {
-                    val sparkDelay = i * 0.10f
-                    val progressLag = maxOf(0f, p - sparkDelay)
-                    val sparkY = (flyFromOffset.y.toPx() * (1f - progressLag)) + (i * 12.dp.toPx())
-                    val sparkX = (flyFromOffset.x.toPx() * (1f - progressLag)) + (if (i % 2 == 0) 9.dp.toPx() else -9.dp.toPx())
-                    val sparkRad = maxOf(1.5.dp.toPx(), (4.5f - i * 0.5f).dp.toPx())
-                    val sparkAlpha = ((1f - sparkDelay) * 0.85f).coerceIn(0f, 1f)
-
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colorStops = arrayOf(
-                                0.0f to AmberGold.copy(alpha = sparkAlpha),
-                                0.7f to Color(0xFFFF9500).copy(alpha = sparkAlpha * 0.6f),
-                                1.0f to Color.Transparent
-                            ),
-                            center = Offset(center.x + sparkX, center.y + sparkY),
-                            radius = sparkRad * 1.5f
-                        ),
-                        radius = sparkRad * 1.5f,
-                        center = Offset(center.x + sparkX, center.y + sparkY)
-                    )
-                }
-            }
+        // MARK: - 4. Phoenix Mascot Artwork: 100% True Alpha, Zero Background
+        if (isWaving) {
+            // Live 3D Waving from phoenix-waving.gif (R.raw.phoenix_waving)
+            val wavingPainter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(context)
+                    .data(R.raw.phoenix_waving)
+                    .crossfade(false)
+                    .setParameter("wave_token", waveToken, memoryCacheKey = "phoenix_waving_$waveToken")
+                    .build(),
+                imageLoader = imageLoader
+            )
+            Image(
+                painter = wavingPainter,
+                contentDescription = "Phoenix Companion Waving",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(width, height)
+                    .graphicsLayer {
+                        scaleX = tapBounce.value * landingSquashX.value
+                        scaleY = tapBounce.value * landingSquashY.value
+                    }
+            )
+        } else {
+            Image(
+                painter = painterResource(id = sittingOrFlyingResId),
+                contentDescription = "Phoenix Companion",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(width, height)
+                    .graphicsLayer {
+                        rotationZ = flightBankAngle
+                        scaleX = flightDynamicScale * landingSquashX.value
+                        scaleY = flightDynamicScale * landingSquashY.value
+                    }
+            )
         }
-
-        // MARK: - 5. Phoenix Mascot Artwork: 100% True Alpha, Zero Background
-        Image(
-            painter = painterResource(id = currentFrameResId),
-            contentDescription = "Phoenix Companion",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .size(width, height)
-                .graphicsLayer {
-                    rotationZ = flightBankAngle
-                    scaleX = flightDynamicScale * landingSquashX.value
-                    scaleY = flightDynamicScale * landingSquashY.value
-                }
-        )
     }
 }

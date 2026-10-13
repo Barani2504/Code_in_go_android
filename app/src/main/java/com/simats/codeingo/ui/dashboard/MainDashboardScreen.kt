@@ -222,13 +222,14 @@ fun MainDashboardScreen(
     var replayReturnLevelIndex by remember { mutableStateOf<Int?>(null) }
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
     var selectedStageCardNode by remember { mutableStateOf<LessonNodeItem?>(null) }
+    var mascotCurrentLevel by remember { mutableIntStateOf(activeLevelIndex) }
+    var mascotFlightDepartureLevel by remember { mutableIntStateOf(activeLevelIndex) }
     var shouldFlyToActiveLevel by remember { mutableStateOf(false) }
 
-    var previousActiveLevel by remember { mutableIntStateOf(activeLevelIndex) }
     LaunchedEffect(activeLevelIndex) {
-        if (previousActiveLevel != activeLevelIndex) {
+        if (mascotCurrentLevel != activeLevelIndex) {
+            mascotFlightDepartureLevel = mascotCurrentLevel
             shouldFlyToActiveLevel = true
-            previousActiveLevel = activeLevelIndex
         }
     }
 
@@ -236,6 +237,7 @@ fun MainDashboardScreen(
     LaunchedEffect(unlockedLevels) {
         val maxUnlocked = unlockedLevels.maxOrNull() ?: 1
         if (maxUnlocked > activeLevelIndex && reviewingPreviousUnitId == null) {
+            mascotFlightDepartureLevel = mascotCurrentLevel
             gameManager.setActiveLevel(maxUnlocked)
             selectedLockedNodeId = null
             shouldFlyToActiveLevel = true
@@ -343,6 +345,23 @@ fun MainDashboardScreen(
                 worldTheme = "The Immortal Phoenix Kingdom"
             )
         )
+    }
+
+    fun getMascotPositionForLevel(level: Int): DpOffset {
+        val unit = masterUnits.firstOrNull { it.nodes.any { n -> n.levelNumber == level } } ?: masterUnits.first()
+        val nodeIndex = unit.nodes.indexOfFirst { it.levelNumber == level }.coerceAtLeast(0)
+        val node = unit.nodes.getOrNull(nodeIndex) ?: unit.nodes.first()
+
+        val safeX = (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+        val mascotX = if (safeX <= 0.dp) 82.dp else (-82).dp
+        val totalX = safeX + mascotX
+
+        val unitIndex = (unit.id - 1).coerceAtLeast(0)
+        // Each unit contains 5 nodes with 136dp interval between nodes + ~180dp banner and spacing
+        val unitBaseY = unitIndex * 724
+        val nodeY = (unitBaseY + (nodeIndex * 136)).dp
+
+        return DpOffset(totalX, nodeY)
     }
 
     fun finishReplayAndReturnToCurrentLevel(): Boolean {
@@ -544,11 +563,13 @@ fun MainDashboardScreen(
                                                         onNodeClick = {
                                                             selectedStageCardNode = node
                                                             if (isNodeUnlocked) {
-                                                                if (activeLevelIndex == node.levelNumber) {
+                                                                if (activeLevelIndex != node.levelNumber) {
+                                                                    mascotFlightDepartureLevel = mascotCurrentLevel
+                                                                    gameManager.setActiveLevel(node.levelNumber)
                                                                     shouldFlyToActiveLevel = true
                                                                 } else {
+                                                                    mascotFlightDepartureLevel = activeLevelIndex
                                                                     shouldFlyToActiveLevel = true
-                                                                    gameManager.setActiveLevel(node.levelNumber)
                                                                 }
                                                                 selectedLockedNodeId = null
                                                             } else {
@@ -570,9 +591,12 @@ fun MainDashboardScreen(
                                                     // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track
                                                     if (isActiveTarget) {
                                                         val mascotTargetX = if (safeXOffset <= 0.dp) 82.dp else (-82).dp
-                                                        val mascotPrevX = if (prevXOffset <= 0.dp) 82.dp else (-82).dp
-                                                        val deltaX = (prevXOffset + mascotPrevX) - (safeXOffset + mascotTargetX)
-                                                        val flyDelta = DpOffset(deltaX, (-210).dp)
+                                                        val departureLevel = if (mascotFlightDepartureLevel > 0) mascotFlightDepartureLevel else activeLevelIndex
+                                                        val startPos = getMascotPositionForLevel(departureLevel)
+                                                        val endPos = getMascotPositionForLevel(activeLevelIndex)
+                                                        val deltaX = startPos.x - endPos.x
+                                                        val deltaY = startPos.y - endPos.y
+                                                        val flyDelta = DpOffset(deltaX, deltaY)
 
                                                         PhoenixNodeJumpFlightView(
                                                             width = 104.dp,
@@ -582,6 +606,8 @@ fun MainDashboardScreen(
                                                             showTrailGlow = true,
                                                             onLandingComplete = {
                                                                 shouldFlyToActiveLevel = false
+                                                                mascotCurrentLevel = activeLevelIndex
+                                                                mascotFlightDepartureLevel = activeLevelIndex
                                                             },
                                                             modifier = Modifier.offset(x = mascotTargetX, y = 8.dp)
                                                         )
