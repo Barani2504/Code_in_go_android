@@ -376,11 +376,12 @@ fun PhoenixEggHatch3DView(
                                     )
                                 )
                         )
-                        // Actual Phoenix image — matches iOS RealisticPhoenixBirdFaceView
-                        androidx.compose.foundation.Image(
-                            painter = androidx.compose.ui.res.painterResource(id = com.simats.codeingo.R.drawable.phoenix_stage_2),
-                            contentDescription = "Phoenix Ascended",
-                            modifier = Modifier.size(110.dp)
+                        // Full Flying Phoenix Bird Mode — matches iOS PhoenixEggCompanionMascotView
+                        PhoenixNodeJumpFlightView(
+                            width = 85.dp,
+                            height = 98.dp,
+                            shouldFly = false,
+                            showTrailGlow = false
                         )
                     }
                 }

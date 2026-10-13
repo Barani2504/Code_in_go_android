@@ -6,12 +6,11 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,8 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -44,14 +41,7 @@ fun SmoothFlyingPhoenixView(
     size: Dp = 120.dp,
     speed: Double = 1.0
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val frames = remember(context) {
-        val list = (0..15).mapNotNull { i ->
-            val id = context.resources.getIdentifier("fly_$i", "drawable", context.packageName)
-            if (id != 0) id else null
-        }
-        if (list.isNotEmpty()) list else listOf(R.drawable.phoenix_stage_1)
-    }
+    val frames = FlyFlapFrames
 
     var currentFrameIndex by remember { mutableIntStateOf(0) }
 
@@ -113,23 +103,29 @@ fun SmoothFlyingPhoenixView(
         contentAlignment = Alignment.Center,
         modifier = modifier.size(size)
     ) {
-        // Soft radiant ambient thermal glow under the soaring bird
-        Box(
+        // Soft radiant ambient thermal glow under the soaring bird (Zero box boundary artifacts)
+        Canvas(
             modifier = Modifier
-                .size(size * 1.1f)
+                .size(size * 1.35f)
                 .scale(breathScaleX)
                 .offset(y = (hoverOffset * 0.5f).dp)
-                .blur(8.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            Color(0xFFFF9800).copy(alpha = 0.28f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
+        ) {
+            val glowRadius = this.size.minDimension * 0.44f
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colorStops = arrayOf(
+                        0.0f to Color(0xFFFF9800).copy(alpha = 0.28f),
+                        0.45f to Color(0xFFFF9800).copy(alpha = 0.12f),
+                        0.80f to Color(0xFFFF7A00).copy(alpha = 0.03f),
+                        1.0f to Color.Transparent
+                    ),
+                    center = center,
+                    radius = glowRadius
+                ),
+                radius = glowRadius,
+                center = center
+            )
+        }
 
         // Living aerodynamic 16-frame Phoenix
         Image(

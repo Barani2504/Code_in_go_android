@@ -141,8 +141,16 @@ fun PhoenixAnimatedMascotView(
                     modifier = Modifier.scale(1.08f)
                 )
             }
+            is PhoenixMascotPose.Welcoming -> {
+                AnimatedGIFView(
+                    resourceName = "phoenix_waving",
+                    size = size,
+                    speed = 1.0,
+                    modifier = Modifier.offset(y = breathY.dp)
+                )
+            }
             else -> {
-                // Welcoming / Default Pose — Smooth Animated Flying Phoenix GIF
+                // Default Pose — Smooth Animated Flying Phoenix GIF
                 SmoothFlyingPhoenixView(
                     size = size,
                     modifier = Modifier.offset(y = breathY.dp)

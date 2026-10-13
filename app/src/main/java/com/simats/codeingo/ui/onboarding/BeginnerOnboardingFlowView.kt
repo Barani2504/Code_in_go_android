@@ -71,6 +71,7 @@ import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.components.CandyCrushStarsView
 import com.simats.codeingo.ui.components.DuolingoSpeechBubbleView
+import com.simats.codeingo.ui.phoenix.Phoenix3DLiveWavingMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
@@ -303,12 +304,13 @@ private fun WelcomeStepView(onContinue: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
         DuolingoSpeechBubbleView(text = "Hi there! I'm Phoenix!")
-        Spacer(modifier = Modifier.height(24.dp))
-        PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
+        Spacer(modifier = Modifier.height(20.dp))
+        // 3D Live-Action Phoenix Mascot (100% Transparent Alpha, Zero Background, Ground Shadow & Voice)
+        Phoenix3DLiveWavingMascotView(size = 260.dp)
         Spacer(modifier = Modifier.weight(1f))
         AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
