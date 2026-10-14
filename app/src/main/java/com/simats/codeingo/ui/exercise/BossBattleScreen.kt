@@ -55,6 +55,9 @@ import com.simats.codeingo.data.repository.CourseRepository
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
+import com.simats.codeingo.ui.components.DynamicPillHUD
+import com.simats.codeingo.ui.components.DynamicPillController
+import com.simats.codeingo.ui.components.DynamicPillEvent
 import com.simats.codeingo.ui.components.ProgressBarAnimated
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -113,12 +116,19 @@ fun BossBattleScreen(
     var selectedOption by remember { mutableStateOf<Int?>(null) }
     var isAnswerChecked by remember { mutableStateOf(false) }
 
-    // Countdown Timer
+    // Countdown Timer & Dynamic Events
+    LaunchedEffect(Unit) {
+        DynamicPillController.post(DynamicPillEvent.BossIntro(boss.name))
+    }
+
     LaunchedEffect(isVictory, isDefeat) {
         if (!isVictory && !isDefeat) {
             while (timeRemaining > 0) {
                 delay(1000)
                 timeRemaining -= 1
+                if (timeRemaining == 10 || timeRemaining == 5) {
+                    DynamicPillController.post(DynamicPillEvent.TimerWarning(timeRemaining))
+                }
             }
             if (bossHp > 0 && !isVictory) {
                 isDefeat = true
@@ -146,6 +156,14 @@ fun BossBattleScreen(
                 )
             )
     ) {
+        // Cutout HUD
+        DynamicPillHUD(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(top = 4.dp)
+        )
+
         if (isVictory) {
             val unitId = remember(bossId) {
                 bossId.removePrefix("boss_unit_").toIntOrNull() ?: 1

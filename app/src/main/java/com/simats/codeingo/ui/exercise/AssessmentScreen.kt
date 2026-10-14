@@ -55,14 +55,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.DynamicPillHUD
+import com.simats.codeingo.ui.components.DynamicPillController
+import com.simats.codeingo.ui.components.DynamicPillEvent
+import com.simats.codeingo.ui.theme.BehindPhoenixGlow
+import com.simats.codeingo.ui.theme.ParticleBurstCanvas
+import com.simats.codeingo.ui.theme.ScreenEdgeLighting
+import com.simats.codeingo.ui.theme.TypewriterText
 import com.simats.codeingo.data.model.DSAExerciseType
 import com.simats.codeingo.data.repository.QuizQuestion
 import com.simats.codeingo.data.repository.QuizQuestionsData
@@ -135,6 +144,12 @@ fun AssessmentScreen(
     var wrongAnswerCount by remember { mutableIntStateOf(0) }
     var timeRemaining   by remember { mutableIntStateOf(45) }
 
+    // Game-feel reactive triggers
+    var edgeLightTrigger by remember { mutableIntStateOf(0) }
+    var edgeLightColor   by remember { mutableStateOf(PhoenixGreen) }
+    var particleTrigger  by remember { mutableIntStateOf(0) }
+    var currentCombo     by remember { mutableIntStateOf(0) }
+
     // Single-composable slide via Animatable — prevents dual-state bleed
     val slideOffsetPx   = remember { Animatable(0f) }
     var isTransitioning by remember { mutableStateOf(false) }
@@ -168,7 +183,14 @@ fun AssessmentScreen(
     }
 
     LaunchedEffect(currentIndex, isChecked, isFinished) {
-        while (!isChecked && !isFinished && timeRemaining > 0) { delay(1000); timeRemaining -= 1 }
+        while (!isChecked && !isFinished && timeRemaining > 0) {
+            delay(1000)
+            timeRemaining -= 1
+            if (timeRemaining == 10 || timeRemaining == 5) {
+                feedback.timerWarning()
+                DynamicPillController.post(DynamicPillEvent.TimerWarning(timeRemaining))
+            }
+        }
     }
 
     val hasSelection = when (currentQuestion.gameType) {
@@ -195,7 +217,26 @@ fun AssessmentScreen(
     val accuracyPercentage = if (questions.isNotEmpty()) ((correctCount.toFloat() / questions.size) * 100).toInt() else 100
     val totalXPEarned = (unitId * 10) + (starsEarned * 5)
 
+    LaunchedEffect(isFinished) {
+        if (isFinished) {
+            feedback.levelComplete()
+            DynamicPillController.post(DynamicPillEvent.LevelComplete(totalXPEarned))
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize().background(LocalDynamicThemeColors.current.background)) {
+        // Device-aware Edge Lighting & Confetti Particle Canvas
+        ScreenEdgeLighting(trigger = edgeLightTrigger, color = edgeLightColor)
+        ParticleBurstCanvas(trigger = particleTrigger, burstOrigin = Offset(540f, 750f), particleCount = 60)
+
+        // Dynamic Pill Notch HUD (Device-aware Cutout integration)
+        DynamicPillHUD(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(top = 4.dp)
+        )
+
         if (isFinished) {
             PhoenixEggHatch3DView(
                 unitId = unitId, levelNumber = levelNumber, totalLevelsInUnit = totalLevelsInUnit,
@@ -360,17 +401,27 @@ fun AssessmentScreen(
                         // Animated Phoenix GIF Avatar for the current chapter stage!
                         val stageName = "phoenix_stage_${unitId.coerceIn(1, 5)}"
                         Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(PhoenixGreen.copy(alpha = 0.1f))
-                                .border(1.5.dp, PhoenixGreen.copy(alpha = 0.4f), RoundedCornerShape(18.dp)),
+                            modifier = Modifier.size(64.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            AnimatedGIFView(
-                                resourceName = stageName,
-                                size = 56.dp
+                            // Behind-Phoenix Glow sits behind the mascot, never overlapping Phoenix pixels
+                            BehindPhoenixGlow(
+                                size = 64.dp,
+                                glowColor = if (isChecked && isAnswerCorrect) PhoenixGreen else AmberGold
                             )
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .background(PhoenixGreen.copy(alpha = 0.1f))
+                                    .border(1.5.dp, PhoenixGreen.copy(alpha = 0.4f), RoundedCornerShape(18.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AnimatedGIFView(
+                                    resourceName = stageName,
+                                    size = 56.dp
+                                )
+                            }
                         }
 
                         // Cyber-Holographic Dialogue Card
@@ -383,11 +434,13 @@ fun AssessmentScreen(
                                 .padding(14.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(
+                                TypewriterText(
                                     text = currentQuestion.promptSentence,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LocalDynamicThemeColors.current.textPrimary
+                                    textStyle = TextStyle(
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = LocalDynamicThemeColors.current.textPrimary
+                                    )
                                 )
                                 Text(
                                     text = currentQuestion.targetPrompt,
@@ -603,8 +656,26 @@ fun AssessmentScreen(
                                     }
                                     isAnswerCorrect = correct
                                     isChecked = true
-                                    if (correct) { correctCount += 1; feedback.correct() }
-                                    else { gameManager.loseHeart(); feedback.wrong(); wrongAnswerCount += 1 }
+                                    if (correct) {
+                                        correctCount += 1
+                                        currentCombo += 1
+                                        feedback.correct(currentCombo)
+                                        DynamicPillController.post(DynamicPillEvent.XP(15))
+                                        if (currentCombo >= 2) {
+                                            DynamicPillController.post(DynamicPillEvent.Combo(currentCombo))
+                                        }
+                                        edgeLightColor = PhoenixGreen
+                                        edgeLightTrigger++
+                                        particleTrigger++
+                                    } else {
+                                        currentCombo = 0
+                                        gameManager.loseHeart()
+                                        feedback.wrong()
+                                        wrongAnswerCount += 1
+                                        DynamicPillController.post(DynamicPillEvent.HeartLost)
+                                        edgeLightColor = PhoenixCrimson
+                                        edgeLightTrigger++
+                                    }
                                 }
                             } else {
                                 advanceQuestion()

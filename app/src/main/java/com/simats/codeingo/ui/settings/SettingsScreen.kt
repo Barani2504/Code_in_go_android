@@ -71,6 +71,10 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.theme.PhoenixDeepNavy
+import com.simats.codeingo.ui.theme.PhoenixLightBg
+import com.simats.codeingo.ui.theme.EffectTier
+import com.simats.codeingo.ui.theme.MotionController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -86,6 +90,7 @@ private val tabTitles = listOf("Preferences", "Notifications", "Courses", "Accou
 fun SettingsScreen(
     onDismiss: () -> Unit,
     onLogout: () -> Unit,
+    onOpenAnimationLab: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // ── Singletons ──────────────────────────────────────────────
@@ -111,11 +116,15 @@ fun SettingsScreen(
     val selectedLang by locManager.selectedLanguage.collectAsState()
     val streakDays by gameManager.streakDays.collectAsState()
 
+    // ── Motion & Feedback state ─────────────────────────────────
+    val effectTier by MotionController.effectTier.collectAsState()
+    val soundEffects by MotionController.soundEnabled.collectAsState()
+    val hapticsEnabled by MotionController.hapticsEnabled.collectAsState()
+
     // ── Tab state ────────────────────────────────────────────────
     var selectedTab by remember { mutableIntStateOf(0) }
 
     // ── Lesson Experience toggles ─────────────────────────────────
-    var soundEffects by remember { mutableStateOf(true) }
     var animations by remember { mutableStateOf(true) }
     var motivationalMessages by remember { mutableStateOf(true) }
     var listeningExercises by remember { mutableStateOf(true) }
@@ -280,8 +289,12 @@ fun SettingsScreen(
                         onThemeChange = { themeManager.setTheme(it) },
                         isAutoEmotion = isAutoEmotion,
                         onAutoEmotionChange = { emotionManager.setAutoEmotionEnabled(it) },
+                        effectTier = effectTier,
+                        onEffectTierChange = { MotionController.setEffectTier(it) },
                         soundEffects = soundEffects,
-                        onSoundEffectsChange = { soundEffects = it },
+                        onSoundEffectsChange = { MotionController.setSoundEnabled(it) },
+                        hapticsEnabled = hapticsEnabled,
+                        onHapticsEnabledChange = { MotionController.setHapticsEnabled(it) },
                         animations = animations,
                         onAnimationsChange = { animations = it },
                         motivationalMessages = motivationalMessages,
@@ -292,6 +305,7 @@ fun SettingsScreen(
                         onAddDay = { gameManager.completeLessonAndExtendStreak() },
                         onResetStreak = { gameManager.debugResetStreak() },
                         onOpenForgotPassword = { showForgotPasswordSheet = true },
+                        onOpenAnimationLab = onOpenAnimationLab,
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
@@ -400,8 +414,12 @@ private fun PreferencesTab(
     onThemeChange: (AppTheme) -> Unit,
     isAutoEmotion: Boolean,
     onAutoEmotionChange: (Boolean) -> Unit,
+    effectTier: EffectTier,
+    onEffectTierChange: (EffectTier) -> Unit,
     soundEffects: Boolean,
     onSoundEffectsChange: (Boolean) -> Unit,
+    hapticsEnabled: Boolean,
+    onHapticsEnabledChange: (Boolean) -> Unit,
     animations: Boolean,
     onAnimationsChange: (Boolean) -> Unit,
     motivationalMessages: Boolean,
@@ -412,6 +430,7 @@ private fun PreferencesTab(
     onAddDay: () -> Unit,
     onResetStreak: () -> Unit,
     onOpenForgotPassword: () -> Unit,
+    onOpenAnimationLab: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -429,6 +448,128 @@ private fun PreferencesTab(
         cardBg = cardBg,
         cardBorder = cardBorder
     )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Motion & Visual Effects
+    SectionHeader("Motion & Visual Effects", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "Effect Tier",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = textPrimary
+            )
+            Text(
+                when (effectTier) {
+                    EffectTier.FULL -> "Full: Springs, 60-particle bursts, edge glow & shakes"
+                    EffectTier.REDUCED -> "Reduced: Fades & gentle scales only (no particles/shakes)"
+                    EffectTier.OFF -> "Off: Zero animations, instant transitions"
+                },
+                fontSize = 12.sp,
+                color = AmberGold,
+                modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (isDark) PhoenixDeepNavy else PhoenixLightBg)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                EffectTier.values().forEach { tier ->
+                    val isSelected = effectTier == tier
+                    val tierBg by animateColorAsState(
+                        targetValue = if (isSelected) AmberGold else Color.Transparent,
+                        label = "tierBg"
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(tierBg)
+                            .clickable { onEffectTierChange(tier) }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = tier.name.lowercase().replaceFirstChar { it.uppercase() },
+                            fontSize = 13.sp,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                            color = if (isSelected) Color(0xFF1A_0F_00) else textSecondary
+                        )
+                    }
+                }
+            }
+
+            Text(
+                "Phoenix mascot GIF plays at native speed across all tiers.",
+                fontSize = 11.sp,
+                color = textSecondary.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        SettingsDivider(cardBorder)
+
+        ToggleRow(
+            title = "Haptic Feedback",
+            subtitle = "Tactile clicks, pops, and error rumbles",
+            checked = hapticsEnabled,
+            onCheckedChange = onHapticsEnabledChange,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary
+        )
+
+        SettingsDivider(cardBorder)
+
+        ToggleRow(
+            title = "Sound Effects",
+            subtitle = "Audio cues for answers and milestones",
+            checked = soundEffects,
+            onCheckedChange = onSoundEffectsChange,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary
+        )
+
+        SettingsDivider(cardBorder)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenAnimationLab() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🔬", fontSize = 18.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Animation Lab",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    "Test particles, HUD pill, haptics & tiers",
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
+            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -485,8 +626,6 @@ private fun PreferencesTab(
     SectionHeader("Lesson Experience", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
     SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
-        ToggleRow(title = "Sound Effects", checked = soundEffects, onCheckedChange = onSoundEffectsChange, textPrimary = textPrimary, textSecondary = textSecondary)
-        SettingsDivider(cardBorder)
         ToggleRow(title = "Animations", checked = animations, onCheckedChange = onAnimationsChange, textPrimary = textPrimary, textSecondary = textSecondary)
         SettingsDivider(cardBorder)
         ToggleRow(title = "Motivational Messages", checked = motivationalMessages, onCheckedChange = onMotivationalChange, textPrimary = textPrimary, textSecondary = textSecondary)

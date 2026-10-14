@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -99,6 +100,7 @@ import com.simats.codeingo.data.model.UnitCharacterType
 import com.simats.codeingo.data.model.UnitModel
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
+import com.simats.codeingo.ui.components.DynamicPillHUD
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.simats.codeingo.domain.GameManager
@@ -652,6 +654,14 @@ fun MainDashboardScreen(
                                 onXpClick = { selectedTab = DashboardTab.VISUALIZER },
                                 onHeartsClick = { showHeartsSheet = true },
                                 onGemsClick = { showGemShopSheet = true }
+                            )
+
+                            // Dynamic Pill Notch HUD (Device-aware Cutout HUD)
+                            DynamicPillHUD(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .statusBarsPadding()
+                                    .padding(top = 2.dp)
                             )
 
                             // Floating Non-Obstructing Stage Action Card (Docked cleanly above bottom nav bar)

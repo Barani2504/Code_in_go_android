@@ -183,7 +183,13 @@ fun CodeingoTheme(
         }
     }
 
-    CompositionLocalProvider(LocalDynamicThemeColors provides dynamicColors) {
+    val effectTier by MotionController.effectTier.collectAsState()
+
+    CompositionLocalProvider(
+        LocalDynamicThemeColors provides dynamicColors,
+        LocalEffectTier provides effectTier,
+        LocalReduceMotion provides (effectTier != EffectTier.FULL)
+    ) {
         MaterialTheme(
             colorScheme = if (isDark) PhoenixDarkColorScheme else PhoenixLightColorScheme,
             typography  = AppTypography,
