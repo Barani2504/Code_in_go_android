@@ -442,9 +442,13 @@ private fun StackTowerEnvironmentView(isBoss: Boolean) {
     )
 }
 
+// 🔑 Key Keepers Spire Levels Content (Asymmetric Cryptography)
+// ══════════════════════════════════════════════════════════════════
 @Composable
 private fun StackLevel1Content(onComplete: () -> Unit) {
-    val stack = remember { mutableStateListOf<Int>() }
+    var selectedAnswer by remember { mutableStateOf<Int?>(null) }
+    // Compute 3^3 mod 7 = 27 mod 7 = 6
+    val options = listOf(4, 5, 6, 1)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Box(
@@ -456,7 +460,7 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "🔑 The Key Keepers Spire: Key blocks stack securely in the key vault, accessible by key index!",
+                text = "🔑 Modular Exponentiation: What is 3³ mod 7? (Calculate: 27 mod 7)",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -464,226 +468,146 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
             )
         }
 
-        // Vertical Tower Box
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(180.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.5.dp, Color(0xFFFF9500).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                .padding(bottom = 8.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                stack.reversed().forEachIndexed { revIdx, v ->
-                    val isTop = revIdx == 0
-                    Box(
-                        modifier = Modifier
-                            .size(110.dp, 36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (isTop) Color(0xFFFF9500) else Color(0xFFB35900))
-                            .border(1.dp, LocalDynamicThemeColors.current.textSecondary, RoundedCornerShape(10.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = if (isTop) "$v (TOP)" else "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                    }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == 6
+                val isSelected = selectedAnswer == opt
+                Box(
+                    modifier = Modifier
+                        .size(64.dp, 56.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF331A05))
+                        .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedAnswer = opt
+                            if (isCorrect) onComplete()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
-        }
-
-        if (stack.size < 3) {
-            Duolingo3DButton(
-                title = "⬇️ DEPOSIT KEY (${(stack.size + 1) * 10})",
-                style = Duolingo3DButtonStyle.AMBER,
-                onClick = {
-                    stack.add((stack.size + 1) * 10)
-                    if (stack.size == 3) {
-                        onComplete()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(0.7f)
-            )
         }
     }
 }
 
 @Composable
 private fun StackLevel2Content(onComplete: () -> Unit) {
-    val stack = remember { mutableStateListOf(10, 20) }
-    var pushedCount by remember { mutableIntStateOf(0) }
+    var isNegotiated by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Deposit securely adds a new key block to the cryptographic vault.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Diffie-Hellman Key Agreement: Alice & Bob compute g^(ab) mod p", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(180.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(16.dp))
-                .padding(bottom = 8.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                stack.reversed().forEachIndexed { idx, v ->
-                    Box(
-                        modifier = Modifier
-                            .size(110.dp, 36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (idx == 0) Color(0xFFFF9500) else Color(0xFFB35900)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                    }
-                }
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(70.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFF9500)), contentAlignment = Alignment.Center) {
+                Text(text = "A = g^a", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+            }
+            Text(text = "⇄", fontSize = 20.sp, color = AmberGold)
+            Box(modifier = Modifier.size(70.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFB35900)), contentAlignment = Alignment.Center) {
+                Text(text = "B = g^b", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
             }
         }
 
-        Duolingo3DButton(
-            title = "⬇️ PUSH(99)",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                stack.add(99)
-                pushedCount++
-                onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.7f)
-        )
+        if (!isNegotiated) {
+            Duolingo3DButton(
+                title = "✨ COMPUTE SHARED SECRET",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    isNegotiated = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
+        }
     }
 }
 
 @Composable
 private fun StackLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
-    val stack = remember { mutableStateListOf(10, 20, 30, 40) }
+    var selectedPhi by remember { mutableStateOf<Int?>(null) }
+    // p = 5, q = 11 -> n = 55, phi(n) = (5-1)*(11-1) = 40
+    val options = listOf(55, 40, 50, 44)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "POP removes the topmost element (40).", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "RSA Euler's Totient: For primes p=5 and q=11, what is φ(n) = (p-1)(q-1)?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(180.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(16.dp))
-                .padding(bottom = 8.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                stack.reversed().forEachIndexed { idx, v ->
-                    Box(
-                        modifier = Modifier
-                            .size(110.dp, 36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (idx == 0) DuolingoRed else Color(0xFFB35900)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                    }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == 40
+                val isSelected = selectedPhi == opt
+                Box(
+                    modifier = Modifier
+                        .size(64.dp, 56.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF331A05))
+                        .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedPhi = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
             }
         }
-
-        Duolingo3DButton(
-            title = "⬆️ POP()",
-            style = Duolingo3DButtonStyle.WHITE,
-            onClick = {
-                if (stack.isNotEmpty()) {
-                    stack.removeAt(stack.size - 1)
-                    onComplete()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(0.7f)
-        )
     }
 }
 
 @Composable
 private fun StackLevel4Content(onComplete: () -> Unit) {
-    val stack = remember { listOf(15, 25, 35) }
-    var peekedValue by remember { mutableStateOf<Int?>(null) }
+    var isPublished by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PEEK inspects the TOP element without removing it!", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Public Key Distribution: Publish (e, n) to the world; keep private key (d, n) secret!", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(150.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(16.dp))
-                .padding(bottom = 8.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                stack.reversed().forEachIndexed { idx, v ->
-                    val isPeeked = idx == 0 && peekedValue != null
-                    Box(
-                        modifier = Modifier
-                            .size(110.dp, 36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (isPeeked) Color.Cyan else Color(0xFFB35900)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$v", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isPeeked) Color.Black else Color.White)
-                    }
-                }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.size(110.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF00CD9C)), contentAlignment = Alignment.Center) {
+                Text(text = "PUBLIC (e, n)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
+            }
+            Box(modifier = Modifier.size(110.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFB35900)), contentAlignment = Alignment.Center) {
+                Text(text = "PRIVATE (d, n)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
             }
         }
 
-        if (peekedValue == null) {
+        if (!isPublished) {
             Duolingo3DButton(
-                title = "👁️ PEEK()",
-                style = Duolingo3DButtonStyle.BLUE,
+                title = "🌐 DISTRIBUTE PUBLIC KEY",
+                style = Duolingo3DButtonStyle.AMBER,
                 onClick = {
-                    peekedValue = 35
+                    isPublished = true
                     onComplete()
                 },
-                modifier = Modifier.fillMaxWidth(0.7f)
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
-        } else {
-            Text(text = "Current vault key is $peekedValue (Key count = ${stack.size})", fontSize = 13.sp, color = Color.Cyan, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
 private fun StackLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
-    var answered by remember { mutableStateOf(false) }
+    var isSigned by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(
-            text = "🔮 We pushed: [1] then [2] then [3].\nWhich element will POP() return?",
-            fontSize = 15.sp,
-            color = LocalDynamicThemeColors.current.textPrimary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(text = "Digital Signature: Sign message digest with private key d: s = m^d mod n", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            listOf(1, 2, 3).forEach { opt ->
-                Box(
-                    modifier = Modifier
-                        .size(64.dp, 54.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF221307))
-                        .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(14.dp))
-                        .clickable(enabled = !answered) {
-                            if (opt == 3) {
-                                answered = true
-                                onComplete()
-                            } else {
-                                onDeductHeart()
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "$opt", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                }
-            }
+        Box(
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF331A05)).padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = if (isSigned) "VALID SIGNATURE: 0x9F4C2E" else "RAW DIGEST: 0x1A2B3C", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isSigned) DuolingoGreen else AmberGold, fontFamily = FontFamily.Monospace)
+        }
+
+        if (!isSigned) {
+            Duolingo3DButton(
+                title = "✍️ SIGN WITH PRIVATE KEY",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    isSigned = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
         }
     }
 }
@@ -691,103 +615,54 @@ private fun StackLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 @Composable
 private fun StackLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
-    val requiredOps = listOf("PUSH", "PUSH", "POP")
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ Execute the sequence: PUSH ➔ PUSH ➔ POP", fontSize = 14.sp, color = AmberGold, fontWeight = FontWeight.Bold)
+        Text(text = "⚡ Modular Exponentiation Sprint: Rapid squaring (${step}/3)", fontSize = 14.sp, color = Color(0xFFFF9500), fontWeight = FontWeight.Bold)
 
-        Text(text = "Step ${step + 1} of 3: Need ${requiredOps.getOrNull(step) ?: "DONE"}", fontSize = 13.sp, color = LocalDynamicThemeColors.current.textPrimary)
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Duolingo3DButton(
-                title = "⬇️ PUSH",
-                style = Duolingo3DButtonStyle.AMBER,
-                onClick = {
-                    if (requiredOps.getOrNull(step) == "PUSH") {
-                        step++
-                        if (step == 3) onComplete()
-                    } else {
-                        onDeductHeart()
-                    }
-                },
-                modifier = Modifier.width(130.dp)
-            )
-
-            Duolingo3DButton(
-                title = "⬆️ POP",
-                style = Duolingo3DButtonStyle.WHITE,
-                onClick = {
-                    if (requiredOps.getOrNull(step) == "POP") {
-                        step++
-                        if (step == 3) onComplete()
-                    } else {
-                        onDeductHeart()
-                    }
-                },
-                modifier = Modifier.width(130.dp)
-            )
-        }
+        Duolingo3DButton(
+            title = "👉 SQUARE & MULTIPLY (${step}/3)",
+            style = Duolingo3DButtonStyle.AMBER,
+            onClick = {
+                step++
+                if (step == 3) onComplete()
+            },
+            modifier = Modifier.fillMaxWidth(0.8f)
+        )
     }
 }
 
 @Composable
 private fun StackBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
-    val tower = remember { mutableStateListOf(50, 40, 30, 20) }
     var bossHP by remember { mutableIntStateOf(100) }
-
-    LaunchedEffect(Unit) {
-        while (bossHP > 0 && tower.size < 6) {
-            delay(1500)
-            tower.add(Random.nextInt(60, 99))
-            if (tower.size >= 6) {
-                onDeductHeart()
-                tower.clear()
-                tower.addAll(listOf(50, 40, 30))
-            }
-        }
-    }
+    val qubits = remember { mutableStateListOf(50, 40, 30) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(text = "👾 THE QUANTUM CRYPTANALYST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
-        // Height warning
-        Text(text = "Key Vault Load: ${tower.size}/6 (Don't let qubits overflow!)", fontSize = 12.sp, color = if (tower.size >= 5) DuolingoRed else AmberGold)
+        Text(text = "Qubit Entanglement: ${qubits.size}/6 (Don't let qubits overflow!)", fontSize = 12.sp, color = AmberGold)
 
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(160.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.5.dp, if (tower.size >= 5) DuolingoRed else Color(0xFFFF9500), RoundedCornerShape(16.dp))
-                .padding(bottom = 6.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                tower.reversed().forEach { v ->
-                    Box(
-                        modifier = Modifier
-                            .size(110.dp, 22.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFFFF5252)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$v", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                    }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            qubits.forEach { q ->
+                Box(
+                    modifier = Modifier
+                        .size(54.dp, 36.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFFF9500)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "$q", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
                 }
             }
         }
 
         Duolingo3DButton(
-            title = "⬆️ QUICK POP TO STABILIZE!",
+            title = "🛡️ SYNTHESIZE QUANTUM-RESISTANT KEY!",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
-                if (tower.isNotEmpty()) {
-                    tower.removeAt(tower.size - 1)
-                    bossHP = maxOf(0, bossHP - 20)
-                    if (bossHP <= 0) {
-                        onDefeatBoss()
-                    }
+                bossHP = maxOf(0, bossHP - 25)
+                if (qubits.isNotEmpty()) qubits.removeAt(qubits.size - 1)
+                if (bossHP <= 0) {
+                    onDefeatBoss()
                 }
             },
             modifier = Modifier.fillMaxWidth(0.85f)

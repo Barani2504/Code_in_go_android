@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import com.simats.codeingo.ui.theme.AmberGold
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -367,18 +369,18 @@ fun BinaryTreeForestArenaScreen(
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 🌲 Forest Levels Content
+// 🛡️ Cyber Bastion Levels Content (Network Security Protocols)
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun TreeLevel1Content(onComplete: () -> Unit) {
-    var selectedRoot by remember { mutableStateOf(false) }
+    var handshakeCompleted by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0D2E1F)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "👑 Tap the ROOT node at the top of the canopy!",
+                text = "🛡️ TLS 1.3 1-RTT Handshake: Speculative (EC)DHE KeyShare is sent directly in ClientHello, reducing connection latency to 1 round-trip!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -386,37 +388,56 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
             )
         }
 
-        // Tree structure: Root (50) with left (30) and right (70)
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            // Root
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(if (selectedRoot) DuolingoGreen else Color(0xFF10B981))
-                    .border(2.dp, Color.White, CircleShape)
-                    .clickable {
-                        selectedRoot = true
-                        onComplete()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "50", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(100.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF10B981)), contentAlignment = Alignment.Center) {
+                Text(text = "CLIENT", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
             }
-
-            // Branches
-            Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
-                Text(text = "↙", fontSize = 20.sp, color = Color(0xFF10B981))
-                Text(text = "↘", fontSize = 20.sp, color = Color(0xFF10B981))
+            Text(text = if (handshakeCompleted) "════ 1-RTT ════➔" else "- - - 1-RTT - - - ➔", fontSize = 11.sp, color = if (handshakeCompleted) DuolingoGreen else AmberGold)
+            Box(modifier = Modifier.size(100.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
+                Text(text = "SERVER", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
             }
+        }
 
-            // Children
-            Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
-                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
-                    Text(text = "30", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
-                }
-                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
-                    Text(text = "70", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
+        if (!handshakeCompleted) {
+            Duolingo3DButton(
+                title = "⚡ SEND CLIENTHELLO + KEYSHARE",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    handshakeCompleted = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TreeLevel2Content(onComplete: () -> Unit) {
+    var selectedSuite by remember { mutableStateOf<String?>(null) }
+    val suites = listOf("TLS_AES_256_GCM_SHA384", "TLS_RSA_WITH_RC4_128_MD5", "TLS_DES_CBC_SHA")
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Text(text = "Cipher Suite Negotiation: Which modern AEAD cipher suite is approved in TLS 1.3?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth(0.9f)) {
+            suites.forEach { suite ->
+                val isCorrect = suite.contains("AES_256_GCM")
+                val isSelected = selectedSuite == suite
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .border(1.dp, Color(0xFF10B981), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedSuite = suite
+                            if (isCorrect) onComplete()
+                        }
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = suite, fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -424,54 +445,29 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun TreeLevel2Content(onComplete: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Parent & Child: Node 50 is parent to Left (30) & Right (70).", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-
-        Duolingo3DButton(
-            title = "UNDERSTOOD ➔",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = onComplete,
-            modifier = Modifier.fillMaxWidth(0.7f)
-        )
-    }
-}
-
-@Composable
 private fun TreeLevel3Content(onComplete: () -> Unit) {
-    var leavesTapped by remember { mutableIntStateOf(0) }
+    var isTunnelActive by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "🍃 Tap both LEAVES (nodes with zero children) ($leavesTapped/2):", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "IPsec ESP Tunnel Mode: Encapsulates entire IP packet with SPI, Sequence Number, and ICV auth tag.", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(30.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(54.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981))
-                    .clickable {
-                        leavesTapped++
-                        if (leavesTapped >= 2) onComplete()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "10 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-            }
+        Box(
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = if (isTunnelActive) "ESP TUNNEL ENCRYPTED ✓" else "[NEW IP HEADER | ESP | INNER IP | DATA]", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = if (isTunnelActive) DuolingoGreen else AmberGold, fontFamily = FontFamily.Monospace)
+        }
 
-            Box(
-                modifier = Modifier
-                    .size(54.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981))
-                    .clickable {
-                        leavesTapped++
-                        if (leavesTapped >= 2) onComplete()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "90 🍃", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-            }
+        if (!isTunnelActive) {
+            Duolingo3DButton(
+                title = "🔒 ESTABLISH IPSEC ESP TUNNEL",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    isTunnelActive = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
         }
     }
 }
@@ -479,22 +475,23 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel4Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚖️ Firewall Inspection Rule: Ports < 1024 are Privileged.\nWhich packet destination port routes to standard HTTPS traffic?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "Stateful Firewall Inspection: Standard HTTPS encrypted traffic operates on which TCP destination port?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            listOf(25, 75).forEach { opt ->
+            listOf(80, 443, 21, 23).forEach { port ->
+                val isCorrect = port == 443
                 Box(
                     modifier = Modifier
-                        .size(70.dp, 50.dp)
+                        .size(68.dp, 50.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF0C3824))
                         .border(1.5.dp, Color(0xFF10B981), RoundedCornerShape(14.dp))
                         .clickable {
-                            if (opt == 25) onComplete()
+                            if (isCorrect) onComplete()
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "$port", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -503,28 +500,46 @@ private fun TreeLevel4Content(onComplete: () -> Unit) {
 
 @Composable
 private fun TreeLevel5Content(onComplete: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "🌱 Insert 40 into the BST:", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
-        Text(text = "Root is 50. Since 40 < 50, go left to node 30. Since 40 > 30, place at right of 30.", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+    var isChainValidated by remember { mutableStateOf(false) }
 
-        Duolingo3DButton(
-            title = "INSERT 40 AT 30.RIGHT",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = onComplete,
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Text(text = "X.509 PKI Chain of Trust: Root CA ➔ Intermediate CA ➔ Leaf Server Cert", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+
+        Box(
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = if (isChainValidated) "CERTIFICATE CHAIN VALIDATED ✓" else "ROOT CA SIGNATURE VERIFIED", fontSize = 12.sp, fontWeight = FontWeight.Black, color = if (isChainValidated) DuolingoGreen else AmberGold)
+        }
+
+        if (!isChainValidated) {
+            Duolingo3DButton(
+                title = "📜 VERIFY CERTIFICATE CHAIN",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    isChainValidated = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
+        }
     }
 }
 
 @Composable
 private fun TreeLevel6Content(onComplete: () -> Unit) {
+    var step by remember { mutableIntStateOf(0) }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "📜 In-Order Traversal:\nVisiting [Left ➔ Root ➔ Right] produces: 10, 20, 30, 40, 50!", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "⚡ DDoS Defense Sprint: Filter spoofed SYN flood packets (${step}/3)", fontSize = 14.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
 
         Duolingo3DButton(
-            title = "EXECUTE IN-ORDER TRAVERSAL",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = onComplete,
+            title = "🛡️ APPLY SYN COOKIE FILTER (${step}/3)",
+            style = Duolingo3DButtonStyle.AMBER,
+            onClick = {
+                step++
+                if (step == 3) onComplete()
+            },
             modifier = Modifier.fillMaxWidth(0.85f)
         )
     }
@@ -537,8 +552,10 @@ private fun TreeBossBattleContent(onDefeatBoss: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Text(text = "👾 THE CYBER TITAN BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
+        Text(text = "Your packet firewalls will crumble before my distributed botnet!", fontSize = 12.sp, color = AmberGold)
+
         Duolingo3DButton(
-            title = "🌲 RESTORE CANOPY BALANCE!",
+            title = "🏰 DEPLOY FIREWALL DEFENSE POLICY!",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
                 bossHP = maxOf(0, bossHP - 35)

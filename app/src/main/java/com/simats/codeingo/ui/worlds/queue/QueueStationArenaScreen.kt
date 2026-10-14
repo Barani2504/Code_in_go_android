@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import com.simats.codeingo.ui.theme.AmberGold
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -368,18 +370,18 @@ fun QueueStationArenaScreen(
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 🚆 Levels Content
+// 🛡️ Integrity Realm Levels Content (Hashes & Digital Signatures)
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun QueueLevel1Content(onComplete: () -> Unit) {
-    val line = remember { mutableStateListOf("🧑 Alice", "👱 Bob", "🧔 Charlie") }
+    val chunks = remember { mutableStateListOf("Chunk 0", "Chunk 1", "Chunk 2") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261036)).border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🛡️ Hash Stream Pipeline: Message chunks process through the compression engine sequentially!",
+                text = "🛡️ SHA-256 Compression: Process 512-bit message blocks through 64 rounds to produce an irreversible 256-bit digest.",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -387,22 +389,21 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
             )
         }
 
-        // Horizontal Queue Track
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            line.forEachIndexed { idx, name ->
+            chunks.forEachIndexed { idx, name ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Box(
                         modifier = Modifier
-                            .size(76.dp, 56.dp)
+                            .size(80.dp, 56.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (idx == 0) Color(0xFFB946FA) else Color(0xFF4A1A6D))
                             .border(1.dp, LocalDynamicThemeColors.current.placeholder, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
+                        Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
                     }
                     Text(
-                        text = if (idx == 0) "FRONT 🚪" else if (idx == line.size - 1) "REAR ➡️" else "[$idx]",
+                        text = if (idx == 0) "ACTIVE ⚙️" else "[$idx]",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         color = if (idx == 0) Color(0xFFB946FA) else SubtextGray
@@ -415,9 +416,9 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
             title = "🛡️ COMPRESS CHUNK (Process Hash)",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
-                if (line.isNotEmpty()) {
-                    line.removeAt(0)
-                    if (line.size == 1) onComplete()
+                if (chunks.isNotEmpty()) {
+                    chunks.removeAt(0)
+                    if (chunks.size == 1) onComplete()
                 }
             },
             modifier = Modifier.fillMaxWidth(0.85f)
@@ -427,139 +428,119 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
 
 @Composable
 private fun QueueLevel2Content(onComplete: () -> Unit) {
-    val line = remember { mutableStateListOf("🧑 Alice") }
+    var flipped by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Digest pipeline absorbs new 512-bit message blocks into the schedule.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Avalanche Effect: 1-bit input change flips ~50% of hash digest bits!", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            line.forEachIndexed { idx, name ->
-                Box(
-                    modifier = Modifier
-                        .size(76.dp, 50.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFB946FA)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = name, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.size(130.dp, 60.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF3B1556)).padding(8.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "H('cat')", fontSize = 12.sp, color = AmberGold)
+                    Text(text = "0x77AF...3E", fontSize = 11.sp, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
+            }
+
+            Box(modifier = Modifier.size(130.dp, 60.dp).clip(RoundedCornerShape(10.dp)).background(if (flipped) DuolingoGreen.copy(alpha = 0.2f) else Color(0xFF3B1556)).padding(8.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "H('dat')", fontSize = 12.sp, color = AmberGold)
+                    Text(text = if (flipped) "0x2C4B...9F" else "???", fontSize = 11.sp, color = if (flipped) DuolingoGreen else Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
         }
 
-        Duolingo3DButton(
-            title = "➡️ ABSORB BLOCK (\"Chunk D\")",
-            style = Duolingo3DButtonStyle.AMBER,
-            onClick = {
-                line.add("👨 Dave")
-                onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.75f)
-        )
+        if (!flipped) {
+            Duolingo3DButton(
+                title = "💥 FLIP 1 BIT & OBSERVE AVALANCHE",
+                style = Duolingo3DButtonStyle.AMBER,
+                onClick = {
+                    flipped = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
+        }
     }
 }
 
 @Composable
 private fun QueueLevel3Content(onComplete: () -> Unit) {
-    val line = remember { mutableStateListOf("🧑 1st", "👱 2nd", "🧔 3rd") }
+    var step by remember { mutableIntStateOf(0) }
+    val phases = listOf("Absorb 64 bytes", "Permute State f", "Squeeze 32 bytes")
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Squeeze phase outputs the final 256-bit digest block.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "SHA-3 Keccak Sponge Construction: Absorbing & Squeezing", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
+        Box(
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF4A1A6D)).padding(14.dp),
+            contentAlignment = Alignment.Center
         ) {
-            line.forEachIndexed { idx, name ->
-                Box(
-                    modifier = Modifier
-                        .size(70.dp, 50.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (idx == 0) DuolingoRed else Color(0xFF4A1A6D)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                }
-            }
+            Text(text = phases[step.coerceIn(0, 2)], fontSize = 15.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
         }
 
         Duolingo3DButton(
-            title = "🛡️ SQUEEZE DIGEST()",
-            style = Duolingo3DButtonStyle.WHITE,
+            title = if (step < 2) "🌊 SPONGE STEP (${step + 1}/3)" else "SPONGE COMPLETE ✓",
+            style = Duolingo3DButtonStyle.GREEN,
             onClick = {
-                if (line.isNotEmpty()) {
-                    line.removeAt(0)
-                    onComplete()
-                }
+                step++
+                if (step >= 3) onComplete()
             },
-            modifier = Modifier.fillMaxWidth(0.7f)
+            modifier = Modifier.fillMaxWidth(0.8f)
         )
     }
 }
 
 @Composable
 private fun QueueLevel4Content(onComplete: () -> Unit) {
-    var isPeeked by remember { mutableStateOf(false) }
+    var isVerified by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PEEK checks the FRONT passenger without dispatching them.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Merkle Tree Root Validation: H(Root) = H(H(A) ∥ H(B))", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Box(
-            modifier = Modifier
-                .size(100.dp, 60.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(if (isPeeked) Color.Cyan else Color(0xFFB946FA)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "🧑 VIP Guest", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isPeeked) Color.Black else Color.White)
+        Box(modifier = Modifier.size(160.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(if (isVerified) DuolingoGreen else Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
+            Text(text = if (isVerified) "ROOT VALIDATED ✓" else "ROOT: H(A+B)", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
         }
 
-        Duolingo3DButton(
-            title = "👁️ PEEK FRONT",
-            style = Duolingo3DButtonStyle.BLUE,
-            onClick = {
-                isPeeked = true
-                onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.7f)
-        )
+        if (!isVerified) {
+            Duolingo3DButton(
+                title = "🌿 VERIFY MERKLE ROOT",
+                style = Duolingo3DButtonStyle.GREEN,
+                onClick = {
+                    isVerified = true
+                    onComplete()
+                },
+                modifier = Modifier.fillMaxWidth(0.75f)
+            )
+        }
     }
 }
 
 @Composable
 private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
-    var answered by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    // 2^(n/2) for n=256 -> 2^128
+    val options = listOf("2^256", "2^128", "2^64", "2^16")
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(
-            text = "🔮 Chunk arrival order: [Chunk A, Chunk B, Chunk C].\nWhich block compresses first?",
-            fontSize = 15.sp,
-            color = LocalDynamicThemeColors.current.textPrimary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+        Text(text = "Birthday Paradox Bound: To find a hash collision in a 256-bit hash function, approximately how many trials are needed?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            listOf("A", "B", "C").forEach { opt ->
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == "2^128"
+                val isSelected = selectedOption == opt
                 Box(
                     modifier = Modifier
-                        .size(64.dp, 54.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF261036))
-                        .border(1.5.dp, Color(0xFFB946FA), RoundedCornerShape(14.dp))
-                        .clickable(enabled = !answered) {
-                            if (opt == "A") {
-                                answered = true
-                                onComplete()
-                            } else {
-                                onDeductHeart()
-                            }
+                        .size(68.dp, 50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF3B1556))
+                        .border(1.5.dp, Color(0xFFB946FA), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedOption = opt
+                            if (isCorrect) onComplete()
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = opt, fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = opt, fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -571,11 +552,11 @@ private fun QueueLevel6Content(onComplete: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ Ticket Rush: Dispatch 2 passengers!", fontSize = 14.sp, color = Color(0xFFB946FA), fontWeight = FontWeight.Bold)
+        Text(text = "HMAC Keyed Authentication Sprint: H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ M))", fontSize = 13.sp, color = Color(0xFFB946FA), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Duolingo3DButton(
-            title = "🛡️ VALIDATE CHUNK DIGEST (${step}/2)",
-            style = Duolingo3DButtonStyle.GREEN,
+            title = "👉 NESTED HASH PASS (${step}/2)",
+            style = Duolingo3DButtonStyle.AMBER,
             onClick = {
                 step++
                 if (step == 2) onComplete()
@@ -587,30 +568,18 @@ private fun QueueLevel6Content(onComplete: () -> Unit) {
 
 @Composable
 private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
-    val platform = remember { mutableStateListOf(1, 2, 3) }
+    val hashes = remember { mutableStateListOf("0x7F2A", "0x89C1", "0x33B4") }
     var bossHP by remember { mutableIntStateOf(100) }
-
-    LaunchedEffect(Unit) {
-        while (bossHP > 0 && platform.size < 6) {
-            delay(1600)
-            platform.add(Random.nextInt(4, 99))
-            if (platform.size >= 6) {
-                onDeductHeart()
-                platform.clear()
-                platform.addAll(listOf(1, 2, 3))
-            }
-        }
-    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(text = "👾 THE COLLISION BEAST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
-        Text(text = "Congestion: ${platform.size}/6 (Gridlock limit!)", fontSize = 12.sp, color = if (platform.size >= 5) DuolingoRed else Color(0xFFB946FA))
+        Text(text = "Active Collisions: ${hashes.size}/6 (Verify before collision storm!)", fontSize = 12.sp, color = Color(0xFFB946FA))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            platform.forEach { _ ->
-                Box(modifier = Modifier.size(36.dp, 44.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
-                    Text(text = "👤", fontSize = 16.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            hashes.forEach { h ->
+                Box(modifier = Modifier.size(64.dp, 40.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
+                    Text(text = h, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -619,8 +588,8 @@ private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
             title = "🛡️ RAPID INTEGRITY VERIFICATION!",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
-                if (platform.isNotEmpty()) {
-                    platform.removeAt(0)
+                if (hashes.isNotEmpty()) {
+                    hashes.removeAt(0)
                     bossHP = maxOf(0, bossHP - 25)
                     if (bossHP <= 0) onDefeatBoss()
                 }

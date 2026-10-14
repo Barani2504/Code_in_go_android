@@ -572,11 +572,11 @@ private fun DailyReviewTab(
 
     val drillQuestions = remember {
         listOf(
-            Triple("What is the time complexity of pushing to a dynamic array amortized?", listOf("O(1)", "O(n)", "O(log n)", "O(n²)"), 0),
-            Triple("Which data structure operates on LIFO (Last-In-First-Out)?", listOf("Queue", "Stack", "Heap", "Tree"), 1),
-            Triple("What algorithm is ideal for shortest paths on unweighted graphs?", listOf("DFS", "Dijkstra", "BFS", "Bellman-Ford"), 2),
-            Triple("What is the balance factor constraint in an AVL Tree?", listOf("{-1, 0, +1}", "{0, 1, 2}", "{-2, +2}", "Any integer"), 0),
-            Triple("In a Hash Map, how is average lookup complexity maintained at O(1)?", listOf("Sorting keys", "Uniform hash distribution", "Binary search", "Dynamic resizing"), 1)
+            Triple("In a Caesar Cipher with shift key K = 3, what does letter 'A' encrypt to?", listOf("D", "C", "B", "E"), 0),
+            Triple("Which AES transformation provides non-linear substitution confusion in GF(2^8)?", listOf("SubBytes", "ShiftRows", "MixColumns", "AddRoundKey"), 0),
+            Triple("What mathematical hardness underpins the Diffie-Hellman key agreement?", listOf("Discrete Logarithm Problem", "Prime Factorization", "Quadratic Sieve", "Lattice Reduction"), 0),
+            Triple("What is the output digest length of the SHA-256 cryptographic hash function?", listOf("256 bits (32 bytes)", "128 bits (16 bytes)", "512 bits (64 bytes)", "64 bits (8 bytes)"), 0),
+            Triple("In TLS 1.3, how many round trips (RTT) are required to negotiate symmetric session keys?", listOf("1-RTT", "2-RTT", "3-RTT", "4-RTT"), 0)
         )
     }
 
@@ -774,55 +774,54 @@ private fun InterviewPrepTab(
     val problems = remember {
         listOf(
             InterviewProblem(
-                title = "Two Sum (Hash Map)",
-                complexity = "O(n) time • O(n) space",
-                difficulty = "Easy",
-                diffColor = DuolingoGreen,
-                approach = "Use a hash map to store complements (target - num). Check in O(1) time if complement exists in single pass.",
-                sampleCode = "def twoSum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []"
-            ),
-            InterviewProblem(
-                title = "Reverse Linked List (Pointers)",
+                title = "Caesar & Frequency Cryptanalysis",
                 complexity = "O(n) time • O(1) space",
                 difficulty = "Easy",
                 diffColor = DuolingoGreen,
-                approach = "Iterate through list keeping track of prev and curr pointers. Reverse curr.next = prev in each step.",
-                sampleCode = "def reverseList(head):\n    prev = None\n    curr = head\n    while curr:\n        nxt = curr.next\n        curr.next = prev\n        prev = curr\n        curr = nxt\n    return prev"
+                approach = "Count ciphertext letter frequencies. Map the most frequent letter to English 'E' to derive the modular shift key K.",
+                sampleCode = "def breakCaesar(ciphertext):\n    counts = {c: 0 for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'}\n    for ch in ciphertext.upper():\n        if ch in counts: counts[ch] += 1\n    top = max(counts, key=counts.get)\n    key = (ord(top) - ord('E')) % 26\n    return ''.join(chr((ord(c) - 65 - key) % 26 + 65) if c.isalpha() else c for c in ciphertext.upper())"
             ),
             InterviewProblem(
-                title = "Valid Parentheses (Stack)",
-                complexity = "O(n) time • O(n) space",
+                title = "Diffie-Hellman Key Agreement (DLP)",
+                complexity = "O(log exp) time • O(1) space",
                 difficulty = "Easy",
                 diffColor = DuolingoGreen,
-                approach = "Push opening brackets to stack. For closing brackets, pop and ensure matching pair.",
-                sampleCode = "def isValid(s):\n    stack = []\n    mapping = {')': '(', '}': '{', ']': '['}\n    for char in s:\n        if char in mapping:\n            top = stack.pop() if stack else '#'\n            if mapping[char] != top: return False\n        else:\n            stack.append(char)\n    return not stack"
+                approach = "Compute modular exponentiation: Alice sends A = g^a mod p; Bob sends B = g^b mod p. Both compute s = B^a mod p = A^b mod p.",
+                sampleCode = "def diffieHellman(g, p, a_priv, b_priv):\n    A_pub = pow(g, a_priv, p)\n    B_pub = pow(g, b_priv, p)\n    alice_secret = pow(B_pub, a_priv, p)\n    bob_secret = pow(A_pub, b_priv, p)\n    assert alice_secret == bob_secret\n    return alice_secret"
             ),
             InterviewProblem(
-                title = "Binary Tree Level Order (Queue)",
-                complexity = "O(n) time • O(n) space",
+                title = "AES SubBytes State Matrix (S-Box)",
+                complexity = "O(1) time • O(1) space",
                 difficulty = "Medium",
                 diffColor = AmberGold,
-                approach = "Perform BFS using a queue. Pop nodes level by level and append children for next level.",
-                sampleCode = "from collections import deque\ndef levelOrder(root):\n    if not root: return []\n    res, q = [], deque([root])\n    while q:\n        level = []\n        for _ in range(len(q)):\n            node = q.popleft()\n            level.append(node.val)\n            if node.left: q.append(node.left)\n            if node.right: q.append(node.right)\n        res.append(level)\n    return res"
+                approach = "Substitute each 8-bit byte of the 4x4 state matrix through the non-linear multiplicative inverse S-Box in GF(2^8).",
+                sampleCode = "def subBytes(state, sbox):\n    # Transform 4x4 byte state matrix\n    return [[sbox[state[r][c]] for c in range(4)] for r in range(4)]"
             ),
             InterviewProblem(
-                title = "Course Schedule (Topological Graph)",
-                complexity = "O(V + E) time • O(V + E) space",
+                title = "HMAC Nested Authentication (SHA-256)",
+                complexity = "O(m) time • O(1) space",
                 difficulty = "Medium",
                 diffColor = AmberGold,
-                approach = "Build adjacency graph and in-degree array. Push 0 in-degree nodes to queue (Kahn's Algorithm).",
-                sampleCode = "from collections import deque\ndef canFinish(numCourses, prerequisites):\n    adj = [[] for _ in range(numCourses)]\n    indegree = [0] * numCourses\n    for dest, src in prerequisites:\n        adj[src].append(dest)\n        indegree[dest] += 1\n    q = deque([i for i in range(numCourses) if indegree[i] == 0])\n    visited = 0\n    while q:\n        node = q.popleft()\n        visited += 1\n        for neighbor in adj[node]:\n            indegree[neighbor] -= 1\n            if indegree[neighbor] == 0: q.append(neighbor)\n    return visited == numCourses"
+                approach = "Apply inner and outer key pads: HMAC(K, m) = H((K ^ opad) || H((K ^ ipad) || m)) to resist length-extension attacks.",
+                sampleCode = "import hashlib\ndef hmac_sha256(key: bytes, msg: bytes) -> bytes:\n    block_size = 64\n    if len(key) > block_size: key = hashlib.sha256(key).digest()\n    key = key.ljust(block_size, b'\\x00')\n    o_pad = bytes(x ^ 0x5c for x in key)\n    i_pad = bytes(x ^ 0x36 for x in key)\n    inner = hashlib.sha256(i_pad + msg).digest()\n    return hashlib.sha256(o_pad + inner).digest()"
             ),
             InterviewProblem(
-                title = "LRU Cache (Doubly Linked + Map)",
-                complexity = "O(1) get & put • O(capacity) space",
+                title = "RSA Key Generation & Totient φ(n)",
+                complexity = "O(log³ n) time • O(1) space",
+                difficulty = "Medium",
+                diffColor = AmberGold,
+                approach = "Compute modulus n = p * q, Euler's totient phi = (p - 1)*(q - 1), public exponent e = 65537, and private key d = pow(e, -1, phi).",
+                sampleCode = "def generateRSA(p: int, q: int, e: int = 65537):\n    n = p * q\n    phi = (p - 1) * (q - 1)\n    d = pow(e, -1, phi)\n    return (e, n), (d, n)  # (public_key, private_key)"
+            ),
+            InterviewProblem(
+                title = "Merkle Tree Inclusion Proof (Audit Path)",
+                complexity = "O(log n) time • O(1) space",
                 difficulty = "Hard",
                 diffColor = DsaRed,
-                approach = "Combine a hash map with a doubly linked list for O(1) eviction of least recently used node.",
-                sampleCode = "class Node:\n    def __init__(self, k, v):\n        self.k, self.v = k, v\n        self.prev = self.next = None\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.cap = capacity\n        self.map = {}\n        self.head, self.tail = Node(0,0), Node(0,0)\n        self.head.next = self.tail\n        self.tail.prev = self.head"
+                approach = "Verify cryptographic membership proof by hashing sibling pairs upwards to match the expected Merkle root.",
+                sampleCode = "import hashlib\ndef verifyMerkleProof(leaf: bytes, proof: list, root: bytes) -> bool:\n    curr = leaf\n    for sibling, is_left in proof:\n        if is_left:\n            curr = hashlib.sha256(sibling + curr).digest()\n        else:\n            curr = hashlib.sha256(curr + sibling).digest()\n    return curr == root"
             )
-        )
-    }
+        )    }
 
     LazyColumn(
         modifier = Modifier
@@ -896,10 +895,10 @@ private fun WorldPracticeBanners(
     ) {
         item {
             PracticeBannerCard(
-                tag = "3D SORTING ARENA",
+                tag = "3D CIPHER SANCTUM",
                 tagColor = AmberGold,
-                title = "👑 Array Kingdom",
-                subtitle = "Bubble Sort Challenge",
+                title = "🏛️ Cipher Sanctum",
+                subtitle = "Caesar & Sphinx Duel",
                 emotionRes = R.drawable.phoenix_emotion_4,
                 gradientColors = listOf(AmberGold, Color(0xFFFA8000)),
                 onClick = { onOpenArrayKingdom?.invoke() }
@@ -907,32 +906,10 @@ private fun WorldPracticeBanners(
         }
         item {
             PracticeBannerCard(
-                tag = "3D LIFO TOWER",
-                tagColor = DsaBlue,
-                title = "🗼 Stack Tower",
-                subtitle = "Tower Collapse",
-                emotionRes = R.drawable.phoenix_emotion_28,
-                gradientColors = listOf(Color(0xFF00E5FF), DsaBlue),
-                onClick = { onOpenStackTower?.invoke() }
-            )
-        }
-        item {
-            PracticeBannerCard(
-                tag = "3D FIFO STATION",
-                tagColor = DuolingoGreen,
-                title = "🚋 Queue Station",
-                subtitle = "Station Chaos",
-                emotionRes = R.drawable.phoenix_emotion_25,
-                gradientColors = listOf(DuolingoGreen, Color(0xFF00897B)),
-                onClick = { onOpenQueueStation?.invoke() }
-            )
-        }
-        item {
-            PracticeBannerCard(
-                tag = "3D POINTER ROAD",
+                tag = "3D S-BOX CITADEL",
                 tagColor = DsaPurple,
-                title = "🛣️ Linked List Road",
-                subtitle = "Broken Road",
+                title = "🧱 S-Box Citadel",
+                subtitle = "AES Matrix & Block Overlord",
                 emotionRes = R.drawable.phoenix_emotion_4,
                 gradientColors = listOf(DsaPurple, Color(0xFF6200EA)),
                 onClick = { onOpenLinkedListRoad?.invoke() }
@@ -940,10 +917,32 @@ private fun WorldPracticeBanners(
         }
         item {
             PracticeBannerCard(
-                tag = "3D TREE FOREST",
+                tag = "3D KEY KEEPERS SPIRE",
+                tagColor = DsaBlue,
+                title = "🔑 Key Keepers Spire",
+                subtitle = "Diffie-Hellman & Quantum Duel",
+                emotionRes = R.drawable.phoenix_emotion_28,
+                gradientColors = listOf(Color(0xFF00E5FF), DsaBlue),
+                onClick = { onOpenStackTower?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D INTEGRITY REALM",
+                tagColor = DuolingoGreen,
+                title = "🛡️ Integrity Realm",
+                subtitle = "SHA-256 & Collision Beast",
+                emotionRes = R.drawable.phoenix_emotion_25,
+                gradientColors = listOf(DuolingoGreen, Color(0xFF00897B)),
+                onClick = { onOpenQueueStation?.invoke() }
+            )
+        }
+        item {
+            PracticeBannerCard(
+                tag = "3D CYBER BASTION",
                 tagColor = Color(0xFF00CD9C),
-                title = "🌲 Binary Tree Forest",
-                subtitle = "Lost Forest",
+                title = "🏰 Cyber Bastion",
+                subtitle = "TLS 1.3 & Cyber Titan",
                 emotionRes = R.drawable.phoenix_emotion_13,
                 gradientColors = listOf(Color(0xFF00CD9C), Color(0xFF7B1FA2)),
                 onClick = { onOpenBinaryTreeForest?.invoke() }

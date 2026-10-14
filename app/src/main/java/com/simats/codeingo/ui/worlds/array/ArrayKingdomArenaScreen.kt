@@ -497,20 +497,20 @@ private fun ArenaBottomBar(
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 🧩 Level 1: What is an Array?
+// 🧩 Level 1: Caesar Shift Ring (C = (P + K) mod 26)
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayLevel1Content(onComplete: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
-    var selectedQuizOption by remember { mutableStateOf<Int?>(null) }
-    val blocks = remember { mutableStateListOf<Int>() }
+    var selectedQuizOption by remember { mutableStateOf<String?>(null) }
+    val shiftedPairs = remember { mutableStateListOf<Pair<Char, Char>>() }
 
     LaunchedEffect(step) {
-        blocks.clear()
+        shiftedPairs.clear()
         when (step) {
-            1 -> blocks.addAll(listOf(10))
-            2 -> blocks.addAll(listOf(10, 20))
-            3 -> blocks.addAll(listOf(10, 20, 30))
+            1 -> shiftedPairs.addAll(listOf('A' to 'D'))
+            2 -> shiftedPairs.addAll(listOf('A' to 'D', 'B' to 'E'))
+            3 -> shiftedPairs.addAll(listOf('A' to 'D', 'B' to 'E', 'C' to 'F'))
         }
     }
 
@@ -530,9 +530,9 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
         ) {
             Text(
                 text = if (step < 3) {
-                    "🏛️ Welcome to the Cipher Sanctum! Classical ciphers encrypt messages by mapping letters to numeric registers [0, 1, 2...] modulo 26."
+                    "🏛️ Welcome to the Cipher Sanctum! Classical ciphers encrypt messages by mapping letters along a modular alphabet ring: C = (P + K) mod 26."
                 } else {
-                    "🎯 Which value is placed at index 1?"
+                    "🎯 In Caesar cipher with shift key K = 3, what does plaintext letter 'A' encrypt to?"
                 },
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -543,25 +543,25 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
             )
         }
 
-        // Visual 3D Blocks Platform
+        // Visual Shift Ring Cards
         Row(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.height(130.dp)
         ) {
-            if (blocks.isEmpty()) {
+            if (shiftedPairs.isEmpty()) {
                 Box(
                     modifier = Modifier
-                        .size(160.dp, 60.dp)
+                        .size(180.dp, 60.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.05f))
                         .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Cipher Register []", color = SubtextGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Modular Ring K=3", color = SubtextGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             } else {
-                blocks.forEachIndexed { index, value ->
+                shiftedPairs.forEachIndexed { index, pair ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(
                             modifier = Modifier
@@ -576,11 +576,11 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                                 .shadow(8.dp, spotColor = AmberGold),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "$value", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                            Text(text = "${pair.first}➔${pair.second}", fontSize = 16.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                         }
 
                         Text(
-                            text = "index $index",
+                            text = "Shift +3",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = AmberGold
@@ -593,15 +593,15 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
         // Action controls
         if (step < 3) {
             Duolingo3DButton(
-                title = if (step == 0) "➕ Encode First Symbol [10]" else "➕ Append Next Symbol",
+                title = if (step == 0) "➕ Encrypt First Symbol [A➔D]" else "➕ Shift Next Symbol",
                 style = Duolingo3DButtonStyle.GREEN,
                 onClick = { step++ },
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                listOf(10, 20, 30).forEach { opt ->
-                    val isCorrect = opt == 20
+                listOf("B", "C", "D", "E").forEach { opt ->
+                    val isCorrect = opt == "D"
                     val isSelected = selectedQuizOption == opt
                     Box(
                         modifier = Modifier
@@ -623,7 +623,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                        Text(text = opt, fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 }
             }
@@ -632,14 +632,14 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 🎯 Level 2: Index Hunt
+// 🎯 Level 2: Modular Offset Cryptanalysis
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
-    val items = remember { listOf(42, 88, 15, 99, 23) }
-    var targetIndex by remember { mutableIntStateOf(2) }
+    val cipherLetters = remember { listOf('K', 'L', 'M', 'N', 'O') }
+    var targetPlainChar by remember { mutableStateOf('H') }
     var correctCount by remember { mutableIntStateOf(0) }
-    var message by remember { mutableStateOf("Tap the element at index $targetIndex!") }
+    var message by remember { mutableStateOf("Plaintext 'H' shifted by K=3 gives which ciphertext letter?") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -651,15 +651,16 @@ private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
                 .background(Color(0xFF0F1A2E))
-                .border(1.dp, DuolingoBlue.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
             Text(
-                text = "🎯 INDEX HUNT (${correctCount}/3): $message",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black,
-                color = DuolingoBlue,
+                text = "🎯 MODULAR CIPHER HUNT (${correctCount}/3): $message",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center,
+                lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -668,276 +669,34 @@ private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
-            items.forEachIndexed { idx, valNum ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(58.dp, 60.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF14243C))
-                            .border(1.5.dp, DuolingoBlue.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
-                            .clickable {
-                                if (idx == targetIndex) {
-                                    correctCount++
-                                    if (correctCount >= 3) {
-                                        onComplete()
-                                    } else {
-                                        targetIndex = (0 until items.size).filter { it != targetIndex }.random()
-                                        message = "Correct! Now tap element at index $targetIndex!"
-                                    }
+            cipherLetters.forEachIndexed { idx, ch ->
+                Box(
+                    modifier = Modifier
+                        .size(58.dp, 64.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF14223A))
+                        .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                        .clickable {
+                            val expectedChar = ((targetPlainChar - 'A' + 3) % 26 + 'A'.code).toChar()
+                            if (ch == expectedChar) {
+                                correctCount++
+                                if (correctCount >= 3) {
+                                    onComplete()
                                 } else {
-                                    onDeductHeart()
-                                    message = "Wrong! Index $idx has value $valNum. Try index $targetIndex."
+                                    targetPlainChar = if (correctCount == 1) 'I' else 'J'
+                                    message = "Correct! Now what does '$targetPlainChar' encrypt to with K=3?"
                                 }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$valNum", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                    }
-
-                    Text(text = "[$idx]", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                }
-            }
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 🔍 Level 3: Treasure Search (Linear Search Step-by-Step)
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun ArrayLevel3Content(onComplete: () -> Unit) {
-    val items = remember { listOf(12, 45, 78, 34, 91, 56) }
-    val targetVal = 34
-    var scanIndex by remember { mutableIntStateOf(0) }
-    var found by remember { mutableStateOf(false) }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = if (!found) "🔍 Searching for Treasure: $targetVal. Inspecting index $scanIndex..." else "🎉 Treasure $targetVal FOUND at index $scanIndex!",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black,
-                color = if (found) DuolingoGreen else AmberGold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            items.forEachIndexed { idx, v ->
-                val isScanning = idx == scanIndex
-                val isMatch = v == targetVal && found
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp, 56.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                when {
-                                    isMatch -> DuolingoGreen
-                                    isScanning -> AmberGold
-                                    idx < scanIndex -> Color(0xFF1B2433)
-                                    else -> Color(0xFF101724)
-                                }
-                            )
-                            .border(1.5.dp, if (isScanning) Color.White else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "$v", fontSize = 16.sp, fontWeight = FontWeight.Black, color = if (isScanning && !isMatch) Color.Black else Color.White)
-                    }
-
-                    Text(text = if (isScanning) "👆 i=$idx" else "[$idx]", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (isScanning) AmberGold else SubtextGray)
-                }
-            }
-        }
-
-        if (!found) {
-            Duolingo3DButton(
-                title = "👉 Check Next Box (O(n) Step)",
-                style = Duolingo3DButtonStyle.AMBER,
-                onClick = {
-                    if (items[scanIndex] == targetVal) {
-                        found = true
-                        onComplete()
-                    } else if (scanIndex < items.size - 1) {
-                        scanIndex++
-                        if (items[scanIndex] == targetVal) {
-                            found = true
-                            onComplete()
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 🔄 Level 4: Bubble Sort Intro
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun ArrayLevel4Content(onComplete: () -> Unit) {
-    val items = remember { mutableStateListOf(50, 20, 40, 10, 30) }
-    var currentPair by remember { mutableIntStateOf(0) }
-    var isSorted by remember { mutableStateOf(false) }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = if (!isSorted) "🔄 Bubble Sort: Compare adjacent pairs. If left > right, swap them!" else "✨ Pass completed! The largest value bubbled to the end!",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = LocalDynamicThemeColors.current.textPrimary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            items.forEachIndexed { idx, v ->
-                val isComparing = idx == currentPair || idx == currentPair + 1
-                Box(
-                    modifier = Modifier
-                        .size(56.dp, 60.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (isComparing) AmberGold else Color(0xFF14243C))
-                        .border(1.5.dp, if (isComparing) Color.White else Color.Transparent, RoundedCornerShape(14.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "$v", fontSize = 18.sp, fontWeight = FontWeight.Black, color = if (isComparing) Color.Black else Color.White)
-                }
-            }
-        }
-
-        if (!isSorted) {
-            Duolingo3DButton(
-                title = "⚡ Compare & Step",
-                style = Duolingo3DButtonStyle.GREEN,
-                onClick = {
-                    if (currentPair < items.size - 1) {
-                        if (items[currentPair] > items[currentPair + 1]) {
-                            val temp = items[currentPair]
-                            items[currentPair] = items[currentPair + 1]
-                            items[currentPair + 1] = temp
-                        }
-                        if (currentPair == items.size - 2) {
-                            isSorted = true
-                            onComplete()
-                        } else {
-                            currentPair++
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(0.75f)
-            )
-        }
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 👆 Level 5: Control the Sort
-// ══════════════════════════════════════════════════════════════════
-@Composable
-private fun ArrayLevel5Content(onComplete: () -> Unit) {
-    val items = remember { mutableStateListOf(30, 10, 50, 20, 40) }
-    var selectedIndex by remember { mutableStateOf<Int?>(null) }
-    var swapsDone by remember { mutableIntStateOf(0) }
-
-    val sortedList = remember { items.sorted() }
-    val isFullySorted = items.toList() == sortedList
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
-                .border(1.dp, DuolingoGreen.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = if (isFullySorted) "🏆 ARRAY ORDER RESTORED! ($swapsDone swaps)" else "👆 Tap two adjacent elements to swap and sort in ascending order.",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isFullySorted) DuolingoGreen else Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            items.forEachIndexed { idx, v ->
-                val isSelected = selectedIndex == idx
-                Box(
-                    modifier = Modifier
-                        .size(56.dp, 60.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            when {
-                                isFullySorted -> DuolingoGreen
-                                isSelected -> AmberGold
-                                else -> Color(0xFF14243C)
-                            }
-                        )
-                        .border(1.5.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(14.dp))
-                        .clickable(enabled = !isFullySorted) {
-                            if (selectedIndex == null) {
-                                selectedIndex = idx
                             } else {
-                                val first = selectedIndex!!
-                                if (kotlin.math.abs(first - idx) == 1) {
-                                    val temp = items[first]
-                                    items[first] = items[idx]
-                                    items[idx] = temp
-                                    swapsDone++
-                                    if (items.toList() == sortedList) {
-                                        onComplete()
-                                    }
-                                }
-                                selectedIndex = null
+                                onDeductHeart()
+                                message = "Incorrect! Shift along alphabet modulo 26."
                             }
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$v", fontSize = 18.sp, fontWeight = FontWeight.Black, color = if (isSelected) Color.Black else Color.White)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "$ch", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                        Text(text = "idx $idx", fontSize = 10.sp, color = SubtextGray)
+                    }
                 }
             }
         }
@@ -945,29 +704,222 @@ private fun ArrayLevel5Content(onComplete: () -> Unit) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ⏱️ Level 6: Speed Challenge
+// 🔍 Level 3: Frequency Analysis Hunt
+// ══════════════════════════════════════════════════════════════════
+@Composable
+private fun ArrayLevel3Content(onComplete: () -> Unit) {
+    val candidateLetters = remember { listOf('Z' to "0.07%", 'Q' to "0.10%", 'E' to "12.7%", 'X' to "0.15%", 'J' to "0.15%") }
+    var selectedLetter by remember { mutableStateOf<Char?>(null) }
+    var solved by remember { mutableStateOf(false) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFF0F1A2E))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                text = if (!solved) "🔍 Frequency Analysis: Which English letter has the highest natural frequency (~12.7%) making monoalphabetic substitution ciphers breakable?" else "🎉 Correct! Letter 'E' (~12.7%) and 'T' (~9.1%) enable single-character frequency attacks!",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary,
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            candidateLetters.forEach { (ch, freq) ->
+                val isSelected = selectedLetter == ch
+                val isTarget = ch == 'E'
+                Box(
+                    modifier = Modifier
+                        .size(62.dp, 70.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (isSelected && isTarget) DuolingoGreen else Color(0xFF14223A))
+                        .border(1.5.dp, if (isSelected && isTarget) Color.White else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                        .clickable {
+                            selectedLetter = ch
+                            if (isTarget) {
+                                solved = true
+                                onComplete()
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "$ch", fontSize = 22.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                        Text(text = freq, fontSize = 10.sp, color = AmberGold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 🔄 Level 4: Vigenère Repeated Keystream Alignment
+// ══════════════════════════════════════════════════════════════════
+@Composable
+private fun ArrayLevel4Content(onComplete: () -> Unit) {
+    var step by remember { mutableIntStateOf(0) }
+    val plaintextWord = "SANCTUM"
+    val secretKey = "KEYKEYK"
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFF0F1A2E))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "🔄 Vigenère Alignment: The secret keyword repeats across the plaintext stream to defeat single-character frequency analysis.",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            plaintextWord.forEachIndexed { i, pChar ->
+                val kChar = secretKey[i]
+                val isAligned = i <= step
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isAligned) AmberGold.copy(alpha = 0.2f) else Color(0xFF142032))
+                        .border(1.dp, if (isAligned) AmberGold else Color.Transparent, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                ) {
+                    Text(text = "$pChar", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "↓", fontSize = 10.sp, color = AmberGold)
+                    Text(text = if (isAligned) "$kChar" else "?", fontSize = 14.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                }
+            }
+        }
+
+        Duolingo3DButton(
+            title = if (step < plaintextWord.length - 1) "ALIGN NEXT KEY SYMBOL (${step + 1}/${plaintextWord.length})" else "KEYSTREAM ALIGNED! ✓",
+            style = Duolingo3DButtonStyle.GREEN,
+            onClick = {
+                if (step < plaintextWord.length - 1) {
+                    step++
+                } else {
+                    onComplete()
+                }
+            },
+            modifier = Modifier.fillMaxWidth(0.85f)
+        )
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 👆 Level 5: Transposition Grids
+// ══════════════════════════════════════════════════════════════════
+@Composable
+private fun ArrayLevel5Content(onComplete: () -> Unit) {
+    val blocks = remember { mutableStateListOf("CIPH", "ER T", "EXT ", "DONE") }
+    var selectedIdx by remember { mutableStateOf<Int?>(null) }
+    val correctOrder = listOf("CIPH", "ER T", "EXT ", "DONE")
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFF0F1A2E))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "👆 Columnar Transposition: Reorder the scrambled columns to recover the secret plaintext.",
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = LocalDynamicThemeColors.current.textPrimary,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            blocks.forEachIndexed { i, block ->
+                val isSelected = selectedIdx == i
+                Box(
+                    modifier = Modifier
+                        .size(68.dp, 60.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (isSelected) AmberGold else Color(0xFF14243C))
+                        .border(1.5.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                        .clickable {
+                            if (selectedIdx == null) {
+                                selectedIdx = i
+                            } else {
+                                val first = selectedIdx!!
+                                val temp = blocks[first]
+                                blocks[first] = blocks[i]
+                                blocks[i] = temp
+                                selectedIdx = null
+                                if (blocks.toList() == correctOrder) {
+                                    onComplete()
+                                }
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = block, fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isSelected) Color.Black else Color.White)
+                }
+            }
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ⏱️ Level 6: Cryptanalysis Sprint
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
-    val items = remember { mutableStateListOf(40, 10, 30, 20) }
     var secondsLeft by remember { mutableIntStateOf(20) }
-    var isSuccess by remember { mutableStateOf(false) }
+    var solvedCount by remember { mutableIntStateOf(0) }
+    var currentProblem by remember { mutableStateOf("Shift 'K' by -3:" to 'H') }
 
-    LaunchedEffect(isSuccess) {
-        if (!isSuccess) {
-            while (secondsLeft > 0) {
-                delay(1000)
-                secondsLeft--
-            }
-            if (secondsLeft == 0 && !isSuccess) {
-                onDeductHeart()
-            }
+    LaunchedEffect(Unit) {
+        while (secondsLeft > 0 && solvedCount < 3) {
+            kotlinx.coroutines.delay(1000)
+            secondsLeft--
+        }
+        if (secondsLeft == 0 && solvedCount < 3) {
+            onDeductHeart()
         }
     }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Box(
@@ -977,57 +929,61 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                 .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "⏱️ $secondsLeft SECONDS REMAINING",
+                text = "⏱️ $secondsLeft SECONDS REMAINING (${solvedCount}/3)",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
                 color = Color.Black
             )
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF0F1A2E))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            items.forEachIndexed { idx, v ->
+            Text(text = currentProblem.first, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            listOf('G', 'H', 'I', 'J').forEach { opt ->
                 Box(
                     modifier = Modifier
-                        .size(60.dp, 64.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSuccess) DuolingoGreen else Color(0xFF14243C))
-                        .border(1.5.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-                        .clickable(enabled = !isSuccess) {
-                            if (idx < items.size - 1 && items[idx] > items[idx + 1]) {
-                                val t = items[idx]
-                                items[idx] = items[idx + 1]
-                                items[idx + 1] = t
-                                if (items.toList() == items.sorted()) {
-                                    isSuccess = true
+                        .size(60.dp, 56.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF14243C))
+                        .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                        .clickable {
+                            if (opt == currentProblem.second) {
+                                solvedCount++
+                                if (solvedCount >= 3) {
                                     onComplete()
+                                } else {
+                                    currentProblem = if (solvedCount == 1) "Shift 'D' by -3:" to 'A' else "Shift 'O' by -3:" to 'L'
                                 }
+                            } else {
+                                onDeductHeart()
                             }
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$v", fontSize = 20.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "$opt", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color.White)
                 }
             }
         }
-
-        Text(
-            text = "Tap any inverted pair to swap quickly!",
-            fontSize = 12.sp,
-            color = SubtextGray
-        )
     }
 }
 
 // ══════════════════════════════════════════════════════════════════
-// 🔥 Boss Battle: The Chaos Array
+// 🦅 Boss Battle: The Sphinx of Shadows
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
-    val chaosBlocks = remember { mutableStateListOf(90, 30, 80, 10, 60) }
+    val cipherRunes = remember { mutableStateListOf('S', 'P', 'H', 'I', 'N', 'X') }
     var selectedIdx by remember { mutableStateOf<Int?>(null) }
 
     Column(
@@ -1068,16 +1024,16 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
             Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
         }
 
-        // Chaos Blocks
+        // Cipher Runes
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
-            chaosBlocks.forEachIndexed { i, v ->
+            cipherRunes.forEachIndexed { i, ch ->
                 val isSelected = selectedIdx == i
                 Box(
                     modifier = Modifier
-                        .size(54.dp, 58.dp)
+                        .size(52.dp, 56.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(if (isSelected) AmberGold else Color(0xFF2E1010))
                         .border(1.5.dp, if (isSelected) Color.White else DuolingoRed.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
@@ -1086,31 +1042,26 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                                 selectedIdx = i
                             } else {
                                 val first = selectedIdx!!
-                                if (kotlin.math.abs(first - i) == 1) {
-                                    val temp = chaosBlocks[first]
-                                    chaosBlocks[first] = chaosBlocks[i]
-                                    chaosBlocks[i] = temp
-                                    bossHP = maxOf(0, bossHP - 25)
-                                    if (bossHP <= 0 || chaosBlocks.toList() == chaosBlocks.sorted()) {
-                                        onDefeatBoss()
-                                    }
-                                } else {
-                                    onDeductHeart()
+                                val temp = cipherRunes[first]
+                                cipherRunes[first] = cipherRunes[i]
+                                cipherRunes[i] = temp
+                                bossHP = maxOf(0, bossHP - 25)
+                                if (bossHP <= 0) {
+                                    onDefeatBoss()
                                 }
                                 selectedIdx = null
                             }
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "$v", fontSize = 18.sp, fontWeight = FontWeight.Black, color = if (isSelected) Color.Black else Color.White)
+                    Text(text = "$ch", fontSize = 18.sp, fontWeight = FontWeight.Black, color = if (isSelected) Color.Black else Color.White)
                 }
             }
         }
 
-        Text(text = "\"You cannot order my chaos!\"", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+        Text(text = "None can breach the Cipher Sanctum without the master key!", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AmberGold)
     }
 }
-
 // ══════════════════════════════════════════════════════════════════
 // 🏆 Victory Overlays & Bottom Sheets
 // ══════════════════════════════════════════════════════════════════
