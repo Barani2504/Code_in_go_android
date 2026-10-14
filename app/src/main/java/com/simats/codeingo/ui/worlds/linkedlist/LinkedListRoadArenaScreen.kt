@@ -245,7 +245,7 @@ fun LinkedListRoadArenaScreen(
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🔗 Pointer Chain Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "🧱 S-Box Citadel Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -291,10 +291,10 @@ fun LinkedListRoadArenaScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(text = "🔗 POINTERS LINKED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
+                    Text(text = "🧱 S-BOX ROUND SECURED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
-                        title = "NEXT ROAD ➔",
+                        title = "NEXT STAGE ➔",
                         style = Duolingo3DButtonStyle.GREEN,
                         onClick = {
                             showVictoryModal = false
@@ -314,10 +314,10 @@ fun LinkedListRoadArenaScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(text = "👑 POINTER BRIDGE RESTORED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-                    Text(text = "You reconnected the severed pointer bridge and mastered Linked Lists!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+                    Text(text = "👑 S-BOX CITADEL LIBERATED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
+                    Text(text = "You mastered AES SubBytes, Feistel round swaps, and vanquished the Block Overlord in the S-Box Citadel!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
                     Duolingo3DButton(
-                        title = "COMPLETE ROAD",
+                        title = "COMPLETE CITADEL",
                         style = Duolingo3DButtonStyle.GREEN,
                         onClick = {
                             showBossVictoryModal = false
@@ -332,9 +332,9 @@ fun LinkedListRoadArenaScreen(
         if (showTheoryCodex) {
             ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "🔗 Linked List Codex (Pointers)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
+                    Text(text = "🧱 S-Box Citadel Codex (Symmetric Block Ciphers)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     Text(
-                        text = "A Linked List consists of separate Node objects allocated dynamically in heap memory. Each node has:\n1. data (value)\n2. next (memory pointer to the next node)\n\nAdvantages:\n- Dynamic resizing without memory relocation.\n- O(1) insertion/deletion at HEAD.\n\nDisadvantages:\n- O(n) access time (cannot index directly like array[i]).",
+                        text = "Symmetric Block Ciphers encrypt fixed-size data blocks (such as 64-bit in DES and 128-bit in AES) using identical keys for encryption and decryption.\n\nCore Transformations:\n1. SubBytes: Non-linear byte substitution using the AES S-Box in GF(2^8) providing confusion.\n2. ShiftRows & MixColumns: Byte permutation and Galois Field polynomial multiplication providing diffusion.\n3. AddRoundKey: XORing the state matrix with the round subkey.\n\nFeistel Networks (DES) divide plaintext into Left and Right 32-bit halves, applying round function F: L_{i+1} = R_i, R_{i+1} = L_i ⊕ F(R_i, K_i).",
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
@@ -346,16 +346,16 @@ fun LinkedListRoadArenaScreen(
         if (showHintSheet) {
             ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "💡 Road Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
+                    Text(text = "💡 Citadel Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFEF4444))
                     Text(
                         text = when (currentLevel) {
-                            LinkedListRoadLevel.LEVEL_1 -> "A node has two parts: the data payload and the next reference pointer."
-                            LinkedListRoadLevel.LEVEL_2 -> "Follow each pointer from HEAD until you reach null!"
-                            LinkedListRoadLevel.LEVEL_3 -> "Link node A to node B by setting A.next = B."
-                            LinkedListRoadLevel.LEVEL_4 -> "To insert in between, connect new.next to right, then left.next to new!"
-                            LinkedListRoadLevel.LEVEL_5 -> "To delete, point around the node: prev.next = curr.next."
-                            LinkedListRoadLevel.LEVEL_6 -> "Jump along the pointers to reach the destination."
-                            LinkedListRoadLevel.BOSS_BATTLE -> "Tap the broken pointer to bridge the gap and defeat the boss!"
+                                            LinkedListRoadLevel.LEVEL_1 -> "The non-linear S-Box replaces each input byte to resist linear cryptanalysis."
+                LinkedListRoadLevel.LEVEL_2 -> "ShiftRows cyclically shifts row 1 by 1 byte, row 2 by 2 bytes, and row 3 by 3 bytes."
+                LinkedListRoadLevel.LEVEL_3 -> "MixColumns mixes column bytes using matrix multiplication in GF(2^8) to achieve diffusion."
+                LinkedListRoadLevel.LEVEL_4 -> "AddRoundKey combines each byte of the state with a subkey using bitwise XOR."
+                LinkedListRoadLevel.LEVEL_5 -> "Feistel swaps: Left half becomes next Right, while Right half XORed with F becomes next Left."
+                LinkedListRoadLevel.LEVEL_6 -> "A single bit change cascades into widespread diffusion: the avalanche effect!"
+                LinkedListRoadLevel.BOSS_BATTLE -> "Overcome the non-linear substitution locks to bring down the Block Overlord!"
                         },
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
@@ -376,7 +376,7 @@ private fun LLLevel1Content(onComplete: () -> Unit) {
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF2B0E14)).border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🔗 Meet the Node: A memory container with [ DATA | NEXT POINTER ➔ ].",
+                text = "🧱 Meet the State Matrix: 16 bytes arranged in a 4x4 grid undergoing round transformations.",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -464,7 +464,7 @@ private fun LLLevel3Content(onComplete: () -> Unit) {
     var isLinked by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Build the Chain: Connect Node [A] to Node [B]", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Build Round Chain: Link Feistel Round [A] to Round [B]", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFEF4444)), contentAlignment = Alignment.Center) {
@@ -497,7 +497,7 @@ private fun LLLevel4Content(onComplete: () -> Unit) {
     var isInserted by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Insert Node [15] between [10] and [20].", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Insert Subkey [K2] between [K1] and [K3].", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(text = "[10]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
@@ -511,7 +511,7 @@ private fun LLLevel4Content(onComplete: () -> Unit) {
 
         if (!isInserted) {
             Duolingo3DButton(
-                title = "➕ INSERT NODE [15]",
+                title = "➕ INSERT SUBKEY [K2]",
                 style = Duolingo3DButtonStyle.GREEN,
                 onClick = {
                     isInserted = true
@@ -528,7 +528,7 @@ private fun LLLevel5Content(onComplete: () -> Unit) {
     var isDeleted by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Delete Node [20]: Bypass with 10.next = 30.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Bypass Weak Key [K_weak]: Align round keys K1 -> K3.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(text = "[10]", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
@@ -559,10 +559,10 @@ private fun LLLevel6Content(onComplete: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ Pointer Sprint: Advance pointer 3 times!", fontSize = 14.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
+        Text(text = "⚡ Feistel Sprint: Advance 3 rounds through S-Boxes!", fontSize = 14.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
 
         Duolingo3DButton(
-            title = "👉 JUMP POINTER (${step}/3)",
+            title = "👉 ADVANCE ROUND (${step}/3)",
             style = Duolingo3DButtonStyle.AMBER,
             onClick = {
                 step++
@@ -579,16 +579,16 @@ private fun LLBossBattleContent(onDefeatBoss: () -> Unit) {
     var bridgeBroken by remember { mutableStateOf(true) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "👾 THE BROKEN CHAIN BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Text(text = "👾 THE BLOCK OVERLORD BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
         Text(
-            text = if (bridgeBroken) "⚠️ SEVERED POINTER DETECTED! Reconnect it!" else "✨ Bridge intact! Dealing critical damage!",
+            text = if (bridgeBroken) "⚠️ S-BOX DESYNCHRONIZATION! Realign round keys!" else "✨ Matrix aligned! Dealing critical damage!",
             fontSize = 13.sp,
             color = if (bridgeBroken) DuolingoRed else DuolingoGreen
         )
 
         Duolingo3DButton(
-            title = "🔗 RECONNECT POINTER!",
+            title = "🧱 REALIGN ROUND KEYS!",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
                 bossHP = maxOf(0, bossHP - 35)

@@ -33,13 +33,13 @@ enum class ArrayKingdomLevel(
     val xpReward: Int,
     val coinReward: Int
 ) {
-    LEVEL_1(1, "What is an Array?", "Positions, Elements & 0-Based Indices", "📦", 10, 3),
-    LEVEL_2(2, "Index Hunt", "Tap blocks at target indices", "🎯", 10, 3),
-    LEVEL_3(3, "Treasure Search", "Linear search step-by-step", "🔍", 12, 4),
-    LEVEL_4(4, "Bubble Sort Intro", "Watch larger values bubble to the right", "🔄", 12, 4),
-    LEVEL_5(5, "Control the Sort", "Select adjacent pairs & swap", "👆", 14, 5),
-    LEVEL_6(6, "Speed Challenge", "Sort before the 20s timer expires!", "⏱️", 15, 5),
-    BOSS_BATTLE(7, "The Chaos Array", "Defeat the Glitch Boss with Bubble Sort!", "🔥", 25, 15);
+    LEVEL_1(1, "Caesar Shift Ring", "Alphabet ring & modulo 26 shifts", "🏛️", 10, 3),
+    LEVEL_2(2, "Modular Offset Hunt", "Match plaintext to shifted ciphertext", "🎯", 10, 3),
+    LEVEL_3(3, "Frequency Analysis", "Identify high-frequency English vowels", "🔍", 12, 4),
+    LEVEL_4(4, "Polyalphabetic Stream", "Align Vigenere repeated keystream", "🔄", 12, 4),
+    LEVEL_5(5, "Transposition Grids", "Reorder columnar rail fence blocks", "👆", 14, 5),
+    LEVEL_6(6, "Cryptanalysis Sprint", "Crack the substitution cipher before 20s!", "⏱️", 15, 5),
+    BOSS_BATTLE(7, "The Sphinx of Shadows", "Crack the ancient cipher to unlock the sanctum!", "🦅", 25, 15);
 
     companion object {
         fun fromId(id: Int): ArrayKingdomLevel = entries.find { it.id == id } ?: LEVEL_1
@@ -59,12 +59,12 @@ enum class KingdomGameSpeed(val multiplier: Double, val label: String) {
 }
 
 data class KingdomBoss(
-    val name: String = "THE CHAOS ARRAY",
+    val name: String = "THE SPHINX OF SHADOWS",
     val maxHP: Int = 100,
     val currentHP: Int = 100,
     val isAttacking: Boolean = false,
     val isDamaged: Boolean = false,
-    val dialogue: String = "You cannot order my chaos!"
+    val dialogue: String = "None can breach the Cipher Sanctum without the master key!"
 ) {
     val hpFraction: Float
         get() = (currentHP.toFloat() / maxHP.toFloat()).coerceIn(0f, 1f)

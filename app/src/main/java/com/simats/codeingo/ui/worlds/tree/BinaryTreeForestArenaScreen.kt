@@ -245,7 +245,7 @@ fun BinaryTreeForestArenaScreen(
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🌲 Binary Tree Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "🛡️ Cyber Bastion Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -315,9 +315,9 @@ fun BinaryTreeForestArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "👑 ANCIENT ENT BALANCED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-                    Text(text = "You restored balance to the Binary Tree Forest and mastered BSTs!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+                    Text(text = "You defended network boundaries, validated TLS 1.3 sessions, and defeated the Cyber Titan in the Cyber Bastion!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
                     Duolingo3DButton(
-                        title = "COMPLETE FOREST",
+                        title = "COMPLETE BASTION",
                         style = Duolingo3DButtonStyle.GREEN,
                         onClick = {
                             showBossVictoryModal = false
@@ -332,9 +332,9 @@ fun BinaryTreeForestArenaScreen(
         if (showTheoryCodex) {
             ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "🌲 Binary Tree Codex", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
+                    Text(text = "🛡️ Cyber Bastion Codex (Network Security & Protocols)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
                     Text(
-                        text = "A Binary Tree is a hierarchical structure where each node has at most two children (left & right).\n\nBinary Search Tree (BST) Invariant:\n- Left subtree values < Root value\n- Right subtree values > Root value\n\nSearch / Insert in a balanced BST takes O(log n) time. In-order traversal (Left ➔ Root ➔ Right) yields elements in strictly sorted order!",
+                        text = "Network Security Protocols safeguard distributed data in transit against eavesdropping, tampering, and spoofing attacks.\n\nCore Pillars:\n1. TLS 1.3: Fast 1-RTT handshake negotiating ephemeral (EC)DHE keys, eliminating outdated insecure ciphers, and enforcing forward secrecy.\n2. IPsec ESP: Encapsulating Security Payload providing origin authentication, payload confidentiality, and anti-replay protection at Layer 3.\n3. Stateful Firewalls: Inspect TCP connection states (SYN, ESTABLISHED) and enforce access-control rules to block unauthorized packet ingress.",
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
@@ -346,16 +346,16 @@ fun BinaryTreeForestArenaScreen(
         if (showHintSheet) {
             ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "💡 Forest Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
+                    Text(text = "💡 Bastion Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF10B981))
                     Text(
                         text = when (currentLevel) {
-                            BinaryTreeForestLevel.LEVEL_1 -> "The ROOT is the very top node from which all branches descend."
-                            BinaryTreeForestLevel.LEVEL_2 -> "Children branch off downward into left and right subtrees."
-                            BinaryTreeForestLevel.LEVEL_3 -> "Leaves are nodes at the bottom that have no children!"
-                            BinaryTreeForestLevel.LEVEL_4 -> "BST rule: smaller goes left, larger goes right."
-                            BinaryTreeForestLevel.LEVEL_5 -> "Compare 25 to 50 (go left), then to 30 (place left)."
-                            BinaryTreeForestLevel.LEVEL_6 -> "In-order traversal always produces sorted ascending values."
-                            BinaryTreeForestLevel.BOSS_BATTLE -> "Restore tree balance to defeat the Overgrown Ent!"
+                                            BinaryTreeForestLevel.LEVEL_1 -> "TLS 1.3 sends key shares inside the initial ClientHello, completing encryption setup in just 1-RTT."
+                BinaryTreeForestLevel.LEVEL_2 -> "Modern AEAD cipher suites (like AES-GCM and ChaCha20-Poly1305) provide both encryption and authentication."
+                BinaryTreeForestLevel.LEVEL_3 -> "IPsec ESP encrypts inner IP packet payloads and guards against replay attacks using sequence numbers."
+                BinaryTreeForestLevel.LEVEL_4 -> "Stateful packet inspection tracks 3-way TCP handshakes to permit valid returning traffic."
+                BinaryTreeForestLevel.LEVEL_5 -> "X.509 validation walks up the public key infrastructure (PKI) hierarchy until reaching a trusted Root CA."
+                BinaryTreeForestLevel.LEVEL_6 -> "Speed is vital! Filter malicious spoofed packets before server buffer queues overflow."
+                BinaryTreeForestLevel.BOSS_BATTLE -> "Coordinate defense protocols and firewall rules to neutralize the Cyber Titan!"
                         },
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
@@ -479,7 +479,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit) {
 @Composable
 private fun TreeLevel4Content(onComplete: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚖️ BST Rule: Left < Root < Right.\nFor root 50, which value belongs in the left subtree?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "⚖️ Firewall Inspection Rule: Ports < 1024 are Privileged.\nWhich packet destination port routes to standard HTTPS traffic?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             listOf(25, 75).forEach { opt ->
@@ -535,7 +535,7 @@ private fun TreeBossBattleContent(onDefeatBoss: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "👾 THE OVERGROWN ENT BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Text(text = "👾 THE CYBER TITAN BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
         Duolingo3DButton(
             title = "🌲 RESTORE CANOPY BALANCE!",

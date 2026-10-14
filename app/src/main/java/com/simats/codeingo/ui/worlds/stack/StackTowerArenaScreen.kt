@@ -275,7 +275,7 @@ fun StackTowerArenaScreen(
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🥞 LIFO Spire Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "🔑 Key Keepers Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -331,10 +331,10 @@ fun StackTowerArenaScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(text = "🥞 TOWER ELEVATED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
+                    Text(text = "🔑 SPIRE KEY SYNTHESIZED!", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
                     Text(text = currentLevel.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary)
                     Duolingo3DButton(
-                        title = "ASCEND NEXT SPIRE ➔",
+                        title = "ASCEND NEXT CHAMBER ➔",
                         style = Duolingo3DButtonStyle.AMBER,
                         onClick = {
                             showVictoryModal = false
@@ -364,10 +364,10 @@ fun StackTowerArenaScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(text = "👑 SPIRE SAVED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-                    Text(text = "You mastered LIFO Push, Pop & Peek, stabilizing the Solar Tower!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+                    Text(text = "👑 KEY KEEPERS SPIRE SECURED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
+                    Text(text = "You mastered Diffie-Hellman, RSA prime generation, and vanquished the Quantum Cryptanalyst in the Key Keepers Spire!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
                     Duolingo3DButton(
-                        title = "COMPLETE TOWER",
+                        title = "COMPLETE SPIRE",
                         style = Duolingo3DButtonStyle.GREEN,
                         onClick = {
                             showBossVictoryModal = false
@@ -385,9 +385,9 @@ fun StackTowerArenaScreen(
                 containerColor = DarkBackground
             ) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "🥞 Stack Tower Codex (LIFO)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
+                    Text(text = "🔑 Key Keepers Codex (Asymmetric Cryptography)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
                     Text(
-                        text = "A Stack is a Last-In, First-Out (LIFO) structure where elements are added and removed only from the top. All operations:\n- PUSH(item): O(1) time\n- POP(): O(1) time\n- PEEK(): O(1) time\n\nStacks power function call stacks, undo/redo mechanisms, syntax bracket validation, and DFS traversals.",
+                        text = "Asymmetric Cryptography relies on mathematically hard, one-way trapdoor functions that allow secure communication without pre-shared keys.\n\nKey Concepts:\n1. Diffie-Hellman: Parties negotiate shared secret g^(ab) mod p over insecure channels via the Discrete Logarithm Problem.\n2. RSA: Relies on the hardness of factoring large semiprimes n = p * q. Keys satisfy e * d ≡ 1 (mod φ(n)).\n3. Digital Signatures: A sender signs hash m with private key d (s = m^d mod n); anyone verifies with public key e (m = s^e mod n).",
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
@@ -405,13 +405,13 @@ fun StackTowerArenaScreen(
                     Text(text = "💡 Spire Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF9500))
                     Text(
                         text = when (currentLevel) {
-                            StackTowerLevel.LEVEL_1 -> "Stacks only allow access at the very top. Think of a stack of golden plates!"
-                            StackTowerLevel.LEVEL_2 -> "PUSH drops a new block onto the top of the tower."
-                            StackTowerLevel.LEVEL_3 -> "POP removes whatever block is currently at the TOP."
-                            StackTowerLevel.LEVEL_4 -> "PEEK looks at the top element without removing it."
-                            StackTowerLevel.LEVEL_5 -> "The LAST element pushed is always the FIRST element popped!"
-                            StackTowerLevel.LEVEL_6 -> "Watch the command sequence closely and execute quickly."
-                            StackTowerLevel.BOSS_BATTLE -> "Spam POP to get rid of incoming unstable blocks before height hits 6!"
+                                            StackTowerLevel.LEVEL_1 -> "Modular exponentiation wraps powers around modulo p to prevent reverse computation."
+                StackTowerLevel.LEVEL_2 -> "Alice sends g^a mod p; Bob sends g^b mod p. Both independently reach g^(ab) mod p!"
+                StackTowerLevel.LEVEL_3 -> "Primes p and q must remain strictly private; only modulus n and public exponent e are revealed."
+                StackTowerLevel.LEVEL_4 -> "The public key encrypts messages; only the corresponding private key d can invert and decrypt."
+                StackTowerLevel.LEVEL_5 -> "Digital signatures provide non-repudiation and proof of authenticity using private key operations."
+                StackTowerLevel.LEVEL_6 -> "Speed is crucial! Compute the modular inverses before quantum factorization catches up."
+                StackTowerLevel.BOSS_BATTLE -> "Generate cryptographic key pairs rapidly to counter the Quantum Cryptanalyst's Shor attacks!"
                         },
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
@@ -456,7 +456,7 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "🥞 The Stack Tower: Elements stack vertically. The TOP pointer points to the most recently added item!",
+                text = "🔑 The Key Keepers Spire: Key blocks stack securely in the key vault, accessible by key index!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -494,7 +494,7 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
 
         if (stack.size < 3) {
             Duolingo3DButton(
-                title = "⬇️ PUSH Item (${(stack.size + 1) * 10})",
+                title = "⬇️ DEPOSIT KEY (${(stack.size + 1) * 10})",
                 style = Duolingo3DButtonStyle.AMBER,
                 onClick = {
                     stack.add((stack.size + 1) * 10)
@@ -514,7 +514,7 @@ private fun StackLevel2Content(onComplete: () -> Unit) {
     var pushedCount by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "PUSH drops a new block onto the top of the stack.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Deposit securely adds a new key block to the cryptographic vault.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Box(
             modifier = Modifier
@@ -645,7 +645,7 @@ private fun StackLevel4Content(onComplete: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(0.7f)
             )
         } else {
-            Text(text = "Top item is $peekedValue (Stack size unchanged = ${stack.size})", fontSize = 13.sp, color = Color.Cyan, fontWeight = FontWeight.Bold)
+            Text(text = "Current vault key is $peekedValue (Key count = ${stack.size})", fontSize = 13.sp, color = Color.Cyan, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -748,10 +748,10 @@ private fun StackBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = "👾 TOWER OVERFLOW BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Text(text = "👾 THE QUANTUM CRYPTANALYST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
         // Height warning
-        Text(text = "Tower Height: ${tower.size}/6 (Don't let it overflow!)", fontSize = 12.sp, color = if (tower.size >= 5) DuolingoRed else AmberGold)
+        Text(text = "Key Vault Load: ${tower.size}/6 (Don't let qubits overflow!)", fontSize = 12.sp, color = if (tower.size >= 5) DuolingoRed else AmberGold)
 
         Box(
             modifier = Modifier

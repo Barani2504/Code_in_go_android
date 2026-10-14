@@ -246,7 +246,7 @@ fun QueueStationArenaScreen(
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(text = "🎫 FIFO Station Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+                    Text(text = "🛡️ Integrity Realm Codex", fontSize = 12.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -316,9 +316,9 @@ fun QueueStationArenaScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(text = "👑 GRIDLOCK BROKEN!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-                    Text(text = "You cleared the rail platform and mastered FIFO Queues!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+                    Text(text = "You mastered SHA-256 digests, HMAC authentication, and banished the Collision Beast in the Integrity Realm!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
                     Duolingo3DButton(
-                        title = "COMPLETE STATION",
+                        title = "COMPLETE REALM",
                         style = Duolingo3DButtonStyle.GREEN,
                         onClick = {
                             showBossVictoryModal = false
@@ -333,9 +333,9 @@ fun QueueStationArenaScreen(
         if (showTheoryCodex) {
             ModalBottomSheet(onDismissRequest = { showTheoryCodex = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "🎫 Queue Station Codex (FIFO)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
+                    Text(text = "🛡️ Integrity Realm Codex (Cryptographic Hashes & HMAC)", fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
                     Text(
-                        text = "A Queue is a First-In, First-Out (FIFO) data structure. Like boarding a train, the first person to arrive at the FRONT is the first to leave, and new arrivals join at the REAR.\n\nKey Operations:\n- ENQUEUE(item): Adds to REAR in O(1)\n- DEQUEUE(): Removes from FRONT in O(1)\n- PEEK(): Inspects FRONT in O(1)\n\nQueues are essential for Breadth-First Search (BFS), asynchronous job processing, and printer spools.",
+                        text = "Cryptographic Hash Functions map arbitrary-length data to fixed-size bit strings (such as 256 bits in SHA-256) with mathematical guarantees.\n\nThree Critical Properties:\n1. Preimage Resistance: Computationally infeasible to find message m given hash H(m).\n2. Second Preimage Resistance: Hard to find m2 ≠ m1 such that H(m1) = H(m2).\n3. Collision Resistance: Infeasible to find any pair (m1, m2) with H(m1) = H(m2).\n\nHMAC (Hash-based Message Authentication Code) utilizes nested keys with inner and outer padding (ipad/opad) to defend against length extension attacks.",
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
                         lineHeight = 18.sp
@@ -347,16 +347,16 @@ fun QueueStationArenaScreen(
         if (showHintSheet) {
             ModalBottomSheet(onDismissRequest = { showHintSheet = false }, containerColor = DarkBackground) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(text = "💡 Station Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
+                    Text(text = "💡 Realm Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFB946FA))
                     Text(
                         text = when (currentLevel) {
-                            QueueStationLevel.LEVEL_1 -> "The FRONT person boards first! The REAR person arrived most recently."
-                            QueueStationLevel.LEVEL_2 -> "ENQUEUE always adds to the REAR of the line."
-                            QueueStationLevel.LEVEL_3 -> "DEQUEUE always takes from the FRONT of the line."
-                            QueueStationLevel.LEVEL_4 -> "PEEK views the FRONT without removing anyone."
-                            QueueStationLevel.LEVEL_5 -> "Whoever arrived first leaves first (FIFO)!"
-                            QueueStationLevel.LEVEL_6 -> "Enqueue and Dequeue in order to fulfill the passenger boardings."
-                            QueueStationLevel.BOSS_BATTLE -> "Spam DEQUEUE to release passengers before the platform overfills!"
+                                            QueueStationLevel.LEVEL_1 -> "One-way hash functions are easy to compute forward, but practically impossible to invert."
+                QueueStationLevel.LEVEL_2 -> "Even a single bit difference in input scrambles roughly half the output digest bits (avalanche effect)!"
+                QueueStationLevel.LEVEL_3 -> "The Keccak sponge state absorbs message blocks and squeezes out pseudo-random hash output."
+                QueueStationLevel.LEVEL_4 -> "Merkle trees combine leaf hashes into a single root hash, validating tamper-proof integrity."
+                QueueStationLevel.LEVEL_5 -> "The Birthday Paradox shows collisions occur around 2^(n/2) trials rather than 2^n!"
+                QueueStationLevel.LEVEL_6 -> "HMAC nests inner and outer hashes with secret keys to authenticate message integrity."
+                QueueStationLevel.BOSS_BATTLE -> "Verify hash blocks rapidly to defeat the Collision Beast before it produces a collision!"
                         },
                         fontSize = 13.sp,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
@@ -379,7 +379,7 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261036)).border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🎫 Station Queue: Passengers wait in line. FRONT leaves first, new arrivals join REAR!",
+                text = "🛡️ Hash Stream Pipeline: Message chunks process through the compression engine sequentially!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
@@ -412,7 +412,7 @@ private fun QueueLevel1Content(onComplete: () -> Unit) {
         }
 
         Duolingo3DButton(
-            title = "🚪 DEQUEUE FRONT (Board Train)",
+            title = "🛡️ COMPRESS CHUNK (Process Hash)",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
                 if (line.isNotEmpty()) {
@@ -430,7 +430,7 @@ private fun QueueLevel2Content(onComplete: () -> Unit) {
     val line = remember { mutableStateListOf("🧑 Alice") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "ENQUEUE adds new arrivals exclusively to the REAR.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Digest pipeline absorbs new 512-bit message blocks into the schedule.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -450,7 +450,7 @@ private fun QueueLevel2Content(onComplete: () -> Unit) {
         }
 
         Duolingo3DButton(
-            title = "➡️ ENQUEUE(\"Dave\")",
+            title = "➡️ ABSORB BLOCK (\"Chunk D\")",
             style = Duolingo3DButtonStyle.AMBER,
             onClick = {
                 line.add("👨 Dave")
@@ -466,7 +466,7 @@ private fun QueueLevel3Content(onComplete: () -> Unit) {
     val line = remember { mutableStateListOf("🧑 1st", "👱 2nd", "🧔 3rd") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "DEQUEUE dispatches the FRONT passenger.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+        Text(text = "Squeeze phase outputs the final 256-bit digest block.", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -486,7 +486,7 @@ private fun QueueLevel3Content(onComplete: () -> Unit) {
         }
 
         Duolingo3DButton(
-            title = "🚪 DEQUEUE()",
+            title = "🛡️ SQUEEZE DIGEST()",
             style = Duolingo3DButtonStyle.WHITE,
             onClick = {
                 if (line.isNotEmpty()) {
@@ -534,7 +534,7 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Text(
-            text = "🔮 Arrival order: [A, B, C].\nWho will DEQUEUE first?",
+            text = "🔮 Chunk arrival order: [Chunk A, Chunk B, Chunk C].\nWhich block compresses first?",
             fontSize = 15.sp,
             color = LocalDynamicThemeColors.current.textPrimary,
             fontWeight = FontWeight.Bold,
@@ -574,7 +574,7 @@ private fun QueueLevel6Content(onComplete: () -> Unit) {
         Text(text = "⚡ Ticket Rush: Dispatch 2 passengers!", fontSize = 14.sp, color = Color(0xFFB946FA), fontWeight = FontWeight.Bold)
 
         Duolingo3DButton(
-            title = "🚪 DEQUEUE PASSENGER (${step}/2)",
+            title = "🛡️ VALIDATE CHUNK DIGEST (${step}/2)",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
                 step++
@@ -603,7 +603,7 @@ private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = "👾 GRIDLOCK EXPRESS BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Text(text = "👾 THE COLLISION BEAST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
 
         Text(text = "Congestion: ${platform.size}/6 (Gridlock limit!)", fontSize = 12.sp, color = if (platform.size >= 5) DuolingoRed else Color(0xFFB946FA))
 
@@ -616,7 +616,7 @@ private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
         }
 
         Duolingo3DButton(
-            title = "🚪 RAPID DEQUEUE DISPATCH!",
+            title = "🛡️ RAPID INTEGRITY VERIFICATION!",
             style = Duolingo3DButtonStyle.GREEN,
             onClick = {
                 if (platform.isNotEmpty()) {

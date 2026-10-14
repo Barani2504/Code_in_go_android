@@ -460,7 +460,7 @@ private fun ArenaBottomBar(
             ) {
                 Text(text = "📖", fontSize = 14.sp)
                 Text(
-                    text = "Kingdom Lore & Big-O",
+                    text = "Sanctum Lore & Security Bound",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
                     color = LocalDynamicThemeColors.current.textPrimary
@@ -530,7 +530,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
         ) {
             Text(
                 text = if (step < 3) {
-                    "🏰 Welcome to the Sorting Arena! An Array stores items in continuous side-by-side memory boxes with zero-based indices [0, 1, 2...]."
+                    "🏛️ Welcome to the Cipher Sanctum! Classical ciphers encrypt messages by mapping letters to numeric registers [0, 1, 2...] modulo 26."
                 } else {
                     "🎯 Which value is placed at index 1?"
                 },
@@ -558,7 +558,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
                         .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Empty Array []", color = SubtextGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Cipher Register []", color = SubtextGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             } else {
                 blocks.forEachIndexed { index, value ->
@@ -593,7 +593,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
         // Action controls
         if (step < 3) {
             Duolingo3DButton(
-                title = if (step == 0) "➕ Insert First Element [10]" else "➕ Append Next Element",
+                title = if (step == 0) "➕ Encode First Symbol [10]" else "➕ Append Next Symbol",
                 style = Duolingo3DButtonStyle.GREEN,
                 onClick = { step++ },
                 modifier = Modifier.fillMaxWidth(0.8f)
@@ -1042,7 +1042,7 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "👾 THE CHAOS ARRAY (BOSS)",
+                text = "🦅 THE SPHINX OF SHADOWS (BOSS)",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Black,
                 color = DuolingoRed,
@@ -1173,7 +1173,7 @@ private fun ArenaBossVictoryOverlay(onDismiss: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "👑 BOSS VANQUISHED!", fontSize = 22.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
-            Text(text = "You mastered contiguous memory and conquered Array Kingdom!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
+            Text(text = "You mastered modular shifts, frequency cryptanalysis, and vanquished the Sphinx of Shadows in the Cipher Sanctum!", fontSize = 13.sp, color = SubtextGray, textAlign = TextAlign.Center)
 
             Duolingo3DButton(
                 title = "CLAIM VICTORY",
@@ -1194,9 +1194,9 @@ private fun ArrayKingdomCodexSheet(onClose: () -> Unit) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(text = "📖 Array Kingdom Codex", fontSize = 20.sp, fontWeight = FontWeight.Black, color = AmberGold)
+        Text(text = "📖 Cipher Sanctum Codex", fontSize = 20.sp, fontWeight = FontWeight.Black, color = AmberGold)
         Text(
-            text = "An Array stores elements in contiguous memory slots. Accessing an element by index takes O(1) time because the memory address is calculated as: Base_Address + (Index * Element_Size).\n\nSearching takes O(n) because each box must be inspected linearly. Sorting with Bubble Sort repeatedly swaps adjacent inverted pairs until the array is fully sorted, which takes O(n²) comparisons in the worst case.",
+            text = "Classical Ciphers form the bedrock of historical secret communication. In a Caesar Cipher, each letter in the plaintext is shifted by a fixed key K along the modular alphabet ring: C = (P + K) mod 26.\n\nWhile monoalphabetic ciphers resist naive eavesdropping, they are trivial to break via Frequency Analysis because single letter frequency distributions (such as 'E', 'T', 'A' in English) are preserved. Polyalphabetic ciphers like Vigenère use a repeating keyword to flatten single-character frequency spikes.",
             fontSize = 13.sp,
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
             lineHeight = 18.sp
@@ -1215,13 +1215,13 @@ private fun ArrayKingdomHintSheet(currentLevel: ArrayKingdomLevel, onClose: () -
         Text(text = "💡 Level Hint: ${currentLevel.title}", fontSize = 18.sp, fontWeight = FontWeight.Black, color = AmberGold)
         Text(
             text = when (currentLevel) {
-                ArrayKingdomLevel.LEVEL_1 -> "Arrays start at index 0. The second element is always at index 1!"
-                ArrayKingdomLevel.LEVEL_2 -> "Count starting from 0 from left to right."
-                ArrayKingdomLevel.LEVEL_3 -> "Linear search checks each element one after another from left to right."
-                ArrayKingdomLevel.LEVEL_4 -> "Bubble sort pushes the largest unsorted element to the end in each pass."
-                ArrayKingdomLevel.LEVEL_5 -> "Select two elements right next to each other to swap them."
-                ArrayKingdomLevel.LEVEL_6 -> "Speed is key! Find any number that is bigger than the number to its right and swap."
-                ArrayKingdomLevel.BOSS_BATTLE -> "Restore order to deal damage to the Chaos Boss!"
+                ArrayKingdomLevel.LEVEL_1 -> "In Caesar cipher mod 26, shifting letter P by key K gives C = (P + K) mod 26."
+                ArrayKingdomLevel.LEVEL_2 -> "Match the shifted letters along the modular ring to compute the ciphertext offset."
+                ArrayKingdomLevel.LEVEL_3 -> "Frequency analysis isolates high-frequency vowels and common consonants like E, T, and A."
+                ArrayKingdomLevel.LEVEL_4 -> "Align the repeating key characters against plaintext letters to scramble letter frequencies."
+                ArrayKingdomLevel.LEVEL_5 -> "Reorder transposition grid rows and columns to reconstruct the original plaintext stream."
+                ArrayKingdomLevel.LEVEL_6 -> "Speed is critical! Perform rapid substitution cryptanalysis before the timer elapses."
+                ArrayKingdomLevel.BOSS_BATTLE -> "Solve the modular cipher locks to deal devastating damage to the Sphinx of Shadows!"
             },
             fontSize = 13.sp,
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f),
