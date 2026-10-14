@@ -73,6 +73,9 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.liquidGlassCard
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.tilt3D
+import androidx.compose.ui.platform.LocalContext
+import com.simats.codeingo.ui.theme.FeedbackManager
+import com.simats.codeingo.data.repository.QuizQuestionsData
 import kotlinx.coroutines.delay
 
 @Composable
@@ -103,13 +106,49 @@ fun BossBattleScreen(
     var isVictory by remember { mutableStateOf(false) }
     var isDefeat by remember { mutableStateOf(false) }
 
-    // Boss Battle Questions
-    val questions = remember {
-        listOf(
-            Triple("What is the worst-case retrieval time in an unorganized heap?", listOf("O(1)", "O(log n)", "O(n)", "O(n²)"), 2),
-            Triple("Which sorting algorithm achieves O(n log n) guaranteed worst-case?", listOf("Bubble Sort", "Merge Sort", "Insertion Sort", "Selection Sort"), 1),
-            Triple("What data structure powers Dijkstra's shortest path algorithm efficiently?", listOf("Stack", "Min-Heap", "Queue", "Array"), 1)
-        )
+    val context = LocalContext.current
+    val feedback = remember { FeedbackManager(context) }
+    val unitId = remember(bossId) {
+        bossId.removePrefix("boss_unit_").toIntOrNull() ?: 1
+    }
+
+    // Boss Battle Questions loaded dynamically from CNS curriculum
+    val questions = remember(bossId, unitId) {
+        val quizQuestions = QuizQuestionsData.getQuestionsForUnit(unitId, unitId * 5)
+        val derived = quizQuestions.filter { it.options.isNotEmpty() }.map {
+            Triple(it.promptSentence, it.options, it.correctOptionIndex)
+        }
+        if (derived.isNotEmpty()) {
+            derived
+        } else {
+            when (unitId) {
+                1 -> listOf(
+                    Triple("⚔️ Which cipher maps each letter to another letter by shifting along the alphabet ring?", listOf("Caesar Cipher", "RSA", "SHA-256", "AES"), 0),
+                    Triple("⚔️ How many possible shifts exist in a standard English Caesar cipher?", listOf("26", "128", "256", "64"), 0),
+                    Triple("⚔️ What technique easily breaks monoalphabetic substitution ciphers?", listOf("Frequency Analysis", "Quantum Search", "Differential Cryptanalysis", "Birthday Attack"), 0)
+                )
+                2 -> listOf(
+                    Triple("⚔️ What is the standard block size of the Advanced Encryption Standard (AES)?", listOf("128 bits", "64 bits", "256 bits", "512 bits"), 0),
+                    Triple("⚔️ Which AES block mode provides both confidentiality and authentication?", listOf("GCM", "ECB", "CBC", "CFB"), 0),
+                    Triple("⚔️ What major vulnerability plagues ECB mode?", listOf("Pattern leakage across identical plaintext blocks", "Weak key scheduling", "Padding oracle side-channels", "Key collisions"), 0)
+                )
+                3 -> listOf(
+                    Triple("⚔️ What trapdoor mathematical problem forms the foundation of RSA encryption?", listOf("Prime Factorization", "Discrete Logarithm", "Knapsack Problem", "Shortest Vector"), 0),
+                    Triple("⚔️ In asymmetric cryptography, which key is kept strictly confidential?", listOf("Private Key", "Public Key", "Certificate Authority Root", "Modulus"), 0),
+                    Triple("⚔️ What curve is used in Bitcoin and Ethereum for elliptic curve cryptography?", listOf("secp256k1", "Curve25519", "NIST P-256", "Ed448"), 0)
+                )
+                4 -> listOf(
+                    Triple("⚔️ What property ensures it is infeasible to find ANY two distinct inputs with the same hash?", listOf("Collision Resistance", "Pre-image Resistance", "Second Pre-image Resistance", "Avalanche Effect"), 0),
+                    Triple("⚔️ What is the output digest size of SHA-256?", listOf("256 bits", "128 bits", "512 bits", "64 bytes"), 0),
+                    Triple("⚔️ Why are HMACs preferred over simple Hash(Key || Message)?", listOf("Prevents Length Extension Attacks", "Doubles execution speed", "Reduces key size to 16 bits", "Eliminates salt requirement"), 0)
+                )
+                else -> listOf(
+                    Triple("⚔️ How many round trips does a TLS 1.3 standard handshake require?", listOf("1-RTT", "2-RTT", "3-RTT", "0-RTT only"), 0),
+                    Triple("⚔️ Which IPsec protocol provides both payload encryption and authentication?", listOf("ESP (Encapsulating Security Payload)", "AH (Authentication Header)", "IKEv2", "L2TP"), 0),
+                    Triple("⚔️ What core philosophy drives Zero Trust network security?", listOf("Never Trust, Always Verify", "Trust but Verify", "Perimeter Defense Only", "Implicit Intranet Trust"), 0)
+                )
+            }
+        }
     }
 
     var questionIdx by remember { mutableIntStateOf(0) }
@@ -404,9 +443,12 @@ fun BossBattleScreen(
                                 val curQ = questions[questionIdx % questions.size]
                                 if (selectedOption == curQ.third) {
                                     // Hit boss for 35 HP
+                                    feedback.correct()
+                                    DynamicPillController.post(DynamicPillEvent.XP(15))
                                     val newHp = maxOf(0, bossHp - 35)
                                     bossHp = newHp
                                     if (newHp <= 0) {
+                                        DynamicPillController.post(DynamicPillEvent.Streak(1))
                                         isVictory = true
                                     } else {
                                         questionIdx += 1
@@ -414,7 +456,9 @@ fun BossBattleScreen(
                                     }
                                 } else {
                                     // Learner loses a heart
+                                    feedback.wrong()
                                     learnerHearts -= 1
+                                    DynamicPillController.post(DynamicPillEvent.HeartLost)
                                     if (learnerHearts <= 0) {
                                         isDefeat = true
                                     } else {

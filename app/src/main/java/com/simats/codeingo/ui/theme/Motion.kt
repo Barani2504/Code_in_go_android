@@ -285,8 +285,10 @@ fun Modifier.shake(
  */
 fun Modifier.pulse(
     scaleRange: ClosedFloatingPointRange<Float> = 0.97f..1.03f,
-    durationMs: Int = 1200
+    durationMs: Int = 1200,
+    enabled: Boolean = true
 ): Modifier = composed {
+    if (!enabled) return@composed this
     val tier = LocalEffectTier.current
     if (tier == EffectTier.OFF) return@composed this
 

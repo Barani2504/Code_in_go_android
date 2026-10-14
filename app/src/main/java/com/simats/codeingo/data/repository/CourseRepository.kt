@@ -15,11 +15,11 @@ object CourseRepository {
         DSACourseUnit(
             id = "unit_01_foundations",
             index = 1,
-            title = "Unit 1: Foundations",
+            title = "Unit 1: Classical Ciphers & Foundations",
             difficulty = DSADifficulty.GREEN,
-            worldTheme = "The Hatchery Warehouse",
-            worldEmoji = "🥚",
-            worldMetaphor = "The Phoenix organizes a chaotic warehouse of celestial eggs",
+            worldTheme = "The Cipher Sanctum",
+            worldEmoji = "🔐",
+            worldMetaphor = "The Phoenix decodes scrambled cryptograms using shift keys and transposition matrices",
             lessons = listOf(
                 DSACourseLesson(
                     id = "u1_l1_what_is_ds",
@@ -103,14 +103,14 @@ object CourseRepository {
             ),
             boss = DSABossSpec(
                 id = "boss_unit_01",
-                name = "The Great Jumble",
-                title = "Chaos Golem of the Warehouse",
-                worldTheme = "The Hatchery Warehouse",
-                avatarEmoji = "🥚👹",
+                name = "The Cipher Breaker",
+                title = "Cryptanalysis Chaos Golem",
+                worldTheme = "The Cipher Sanctum",
+                avatarEmoji = "🔐👹",
                 bossHp = 100,
                 timeLimitSeconds = 60,
-                quote = "All your eggs will crack in my bottomless O(n) mire!",
-                defeatQuote = "No! Your tidy O(1) structures have brought order to my chaos!",
+                quote = "All your classical ciphers will shatter under my frequency analysis!",
+                defeatQuote = "Impossible! Your layered substitution and transposition defied all cryptanalysis!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 3
             ),
@@ -118,75 +118,75 @@ object CourseRepository {
             isUnlocked = true
         ),
 
-        // UNIT 2: Arrays
+        // UNIT 2: Symmetric Encryption
         DSACourseUnit(
             id = "unit_02_arrays",
             index = 2,
-            title = "Unit 2: Arrays",
+            title = "Unit 2: Symmetric Encryption & Block Ciphers",
             difficulty = DSADifficulty.GREEN,
-            worldTheme = "Locker Row Avenue",
-            worldEmoji = "🗄️",
-            worldMetaphor = "Consecutive lockers along an infinite high-school corridor",
+            worldTheme = "The Block Fortress",
+            worldEmoji = "🏰",
+            worldMetaphor = "The Phoenix aligns 128-bit state matrices and passes blocks through 16-round Feistel gates",
             lessons = listOf(
                 DSACourseLesson(
                     id = "u2_l1_array_basics",
-                    title = "Array Basics & Address Math",
-                    signatureActivity = "Locker Row & Address Calculator",
-                    signatureDescription = "Calculate base + index * size with interactive sliders; trigger the out-of-bounds buzzer!",
-                    concepts = listOf("contiguous_memory", "zero_indexed", "address_formula"),
+                    title = "DES & Feistel Networks",
+                    signatureActivity = "Feistel Split & XOR",
+                    signatureDescription = "Split 64-bit blocks into L and R halves; apply round function F and key mixing across 16 rounds.",
+                    concepts = listOf("feistel_network", "des_16_rounds", "confusion_diffusion"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u2_l2_traversal",
-                    title = "Conveyor Sweep Traversal",
-                    signatureActivity = "Conveyor Sweep",
-                    signatureDescription = "Drag the i pointer forward, backward, and with step skips.",
-                    concepts = listOf("iteration", "boundary_conditions", "step_size"),
+                    title = "AES Architecture & State Matrix",
+                    signatureActivity = "4x4 State Matrix Transformation",
+                    signatureDescription = "Execute SubBytes S-Box lookup, ShiftRows cycloid shift, and MixColumns Galois field matrix multiplication.",
+                    concepts = listOf("rijndael_sbox", "shift_rows", "mix_columns", "galois_fields"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u2_l3_insertion",
-                    title = "Shift Party (Insertion)",
-                    signatureActivity = "Shift Party",
-                    signatureDescription = "Slide elements right one by one; live counter shows total element shifts.",
-                    concepts = listOf("array_insertion", "element_shifting", "worst_case_o_n"),
+                    title = "Block Cipher Modes: ECB vs CBC",
+                    signatureActivity = "Ciphertext Chaining Track",
+                    signatureDescription = "Chain blocks using random Initialization Vectors (IV) to destroy plaintext repetition patterns.",
+                    concepts = listOf("ecb_pattern_leak", "cbc_chaining", "initialization_vectors"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u2_l4_deletion",
-                    title = "Close the Gap (Deletion)",
-                    signatureActivity = "Close the Gap",
-                    signatureDescription = "Remove an element and shift remaining items left to prevent ghost-slot memory bugs.",
-                    concepts = listOf("array_deletion", "left_shift", "size_decrement"),
+                    title = "Counter Mode & Stream Encryption",
+                    signatureActivity = "CTR Stream Generator",
+                    signatureDescription = "Encrypt continuous incrementing nonce counters to enable random-access parallel decryption.",
+                    concepts = listOf("ctr_mode", "parallel_encryption", "stream_cipher"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u2_l5_binary_search",
-                    title = "Hi-Lo Master (Binary Search)",
-                    signatureActivity = "Hi-Lo Master",
-                    signatureDescription = "Race linear search vs binary search with low/mid/high pins.",
-                    concepts = listOf("binary_search", "divide_and_conquer", "sorted_prerequisite"),
+                    title = "Authenticated Encryption (AES-GCM)",
+                    signatureActivity = "Galois Field Authenticator",
+                    signatureDescription = "Compute GHASH authentication tags alongside CTR encryption to defeat chosen-ciphertext tampering.",
+                    concepts = listOf("aead", "gcm_ghash", "integrity_tag"),
                     xpReward = 25
                 ),
                 DSACourseLesson(
                     id = "u2_l6_2d_arrays",
-                    title = "2D Arrays & Battleship Grid",
-                    signatureActivity = "Battleship Grid",
-                    signatureDescription = "Tap [row][col]; toggle row-major vs column-major order; solve spiral paths.",
-                    concepts = listOf("matrix_indexing", "row_major", "spiral_traversal"),
+                    title = "Key Scheduling & Exhaustive Search",
+                    signatureActivity = "Key Expansion Matrix",
+                    signatureDescription = "Derive round subkeys with Rijndael key expansion and evaluate brute force security over 128/256 bits.",
+                    concepts = listOf("key_schedule", "rcon_constants", "brute_force_keyspace"),
                     xpReward = 25
                 )
             ),
             boss = DSABossSpec(
                 id = "boss_unit_02",
-                name = "The Locker Thief",
-                title = "Phantom of the Corridor",
-                worldTheme = "Locker Row Avenue",
-                avatarEmoji = "🦹‍♂️🗝️",
+                name = "The Block Overlord",
+                title = "Master of Feistel & S-Boxes",
+                worldTheme = "The Block Fortress",
+                avatarEmoji = "🏰🛡️",
                 bossHp = 120,
                 timeLimitSeconds = 60,
-                quote = "I've locked and shifted all the lockers! You'll never compute the right address in time!",
-                defeatQuote = "Curse your O(1) direct address calculations! The chick breaks free!",
+                quote = "My 16-round Feistel network and Galois field S-Boxes will scatter your plaintext into unrecognizable noise!",
+                defeatQuote = "Your round-key scheduling and differential cryptanalysis broke through my cipher shields! The Phoenix ascends!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 5
             ),
@@ -194,67 +194,67 @@ object CourseRepository {
             isUnlocked = true
         ),
 
-        // UNIT 3: Strings
+        // UNIT 3: Asymmetric Cryptography
         DSACourseUnit(
             id = "unit_03_strings",
             index = 3,
-            title = "Unit 3: Strings",
+            title = "Unit 3: Asymmetric Cryptography & Trapdoors",
             difficulty = DSADifficulty.GREEN,
-            worldTheme = "The Scroll Scriptorium",
-            worldEmoji = "📜",
-            worldMetaphor = "Inscribing runes on enchanted parchment scrolls",
+            worldTheme = "The Asymmetric Spire",
+            worldEmoji = "🔑",
+            worldMetaphor = "The Phoenix traverses one-way modular trapdoors and climbs elliptic curve generator points",
             lessons = listOf(
                 DSACourseLesson(
                     id = "u3_l1_basics",
-                    title = "String Basics & Immutability",
-                    signatureActivity = "Immutability Demo",
-                    signatureDescription = "Try to edit an inscribed letter tile; watch the spell force a whole new copy.",
-                    concepts = listOf("char_array", "immutability", "unicode_ascii"),
+                    title = "Modular Math & Euler's Totient",
+                    signatureActivity = "Modular Clock Ring",
+                    signatureDescription = "Wrap large exponents around modular clock rings using Euler's Totient φ(n) = (p-1)(q-1).",
+                    concepts = listOf("modular_arithmetic", "eulers_totient", "fermats_little_theorem"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u3_l2_traversal",
-                    title = "Highlighter Sweep",
-                    signatureActivity = "Highlighter",
-                    signatureDescription = "Sweep pointers across runes to tally vowels, consonants, and tokens.",
-                    concepts = listOf("string_iteration", "frequency_counting"),
+                    title = "Diffie-Hellman Key Exchange",
+                    signatureActivity = "Color Mixing & Shared Secret",
+                    signatureDescription = "Exchange public components g^a and g^b to compute shared secret g^(ab) mod p over hostile channels.",
+                    concepts = listOf("diffie_hellman", "discrete_logarithm", "shared_secret"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u3_l3_word_forge",
-                    title = "Word Forge Manipulation",
-                    signatureActivity = "Word Forge",
-                    signatureDescription = "Drag slice, concat, reverse, replace, split, and join runestones.",
-                    concepts = listOf("substring", "concatenation", "string_builder"),
+                    title = "RSA Public Key Encryption",
+                    signatureActivity = "Prime Factor Trapdoor Forge",
+                    signatureDescription = "Multiply huge primes p and q to forge public exponent e and private decryption trapdoor d.",
+                    concepts = listOf("rsa_trapdoor", "prime_factorization", "extended_euclidean"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u3_l4_palindrome",
-                    title = "Mirror Chamber (Palindrome)",
-                    signatureActivity = "Mirror Chamber",
-                    signatureDescription = "Two pointer mirrors converge from left and right boundaries; spot mismatches.",
-                    concepts = listOf("two_pointers", "palindrome_verification", "case_insensitivity"),
+                    title = "Elliptic Curve Cryptography",
+                    signatureActivity = "Point Doubling & Addition Graph",
+                    signatureDescription = "Trace tangent lines on curve y² = x³ + ax + b to execute fast scalar point multiplication Q = d * G.",
+                    concepts = listOf("elliptic_curves", "secp256k1", "ecdlp"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u3_l5_anagrams",
-                    title = "Letter Sieve (Anagrams)",
-                    signatureActivity = "Letter Sieve",
-                    signatureDescription = "Drop letters into 26 frequency bins; compare bar charts vs sorting strings.",
-                    concepts = listOf("frequency_array", "anagram_detection", "hash_bucketing"),
+                    title = "Post-Quantum Cryptography",
+                    signatureActivity = "Lattice Vector Sieve",
+                    signatureDescription = "Traverse high-dimensional lattices (ML-KEM / Kyber) immune to Shor's quantum factorization.",
+                    concepts = listOf("post_quantum", "shors_algorithm", "lattice_cryptography"),
                     xpReward = 25
                 )
             ),
             boss = DSABossSpec(
                 id = "boss_unit_03",
-                name = "The Scrambled Scroll",
-                title = "Sphinx of the Scriptorium",
-                worldTheme = "The Scroll Scriptorium",
-                avatarEmoji = "📜🌀",
+                name = "The Quantum Cryptanalyst",
+                title = "Shor's Algorithm Spectre",
+                worldTheme = "The Asymmetric Spire",
+                avatarEmoji = "🔑⚡",
                 bossHp = 130,
                 timeLimitSeconds = 60,
-                quote = "My palindromes are inverted, my anagrams entangled! Restore my scrolls or be sealed in ink!",
-                defeatQuote = "Your two-pointer precision has unscrambled the ancient runes! The Phoenix takes flight!",
+                quote = "I wield Shor's quantum factorization! All your prime trapdoors and discrete logs will collapse!",
+                defeatQuote = "Impossible! Your post-quantum lattice defenses and elliptic curve point multipliers held strong! The Phoenix takes flight!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 6
             ),
@@ -262,67 +262,67 @@ object CourseRepository {
             isUnlocked = true
         ),
 
-        // UNIT 4: Linked Lists
+        // UNIT 4: Hashes & Signatures
         DSACourseUnit(
             id = "unit_04_linked_lists",
             index = 4,
-            title = "Unit 4: Linked Lists",
+            title = "Unit 4: Cryptographic Hashes & Signatures",
             difficulty = DSADifficulty.YELLOW,
-            worldTheme = "Chain Canyon",
-            worldEmoji = "⛓️",
-            worldMetaphor = "Enchanted railway train cars linked by magnetic couplers across deep chasms",
+            worldTheme = "The Signature Bastion",
+            worldEmoji = "🛡️",
+            worldMetaphor = "The Phoenix seals message digests into Merkle trees and verifies X.509 certificate chains",
             lessons = listOf(
                 DSACourseLesson(
                     id = "u4_l1_singly",
-                    title = "Train Builder (Singly Linked)",
-                    signatureActivity = "Train Builder",
-                    signatureDescription = "Couple train cars together; each car holds cargo (data) and a pointer to the next.",
-                    concepts = listOf("node_structure", "head_pointer", "null_terminator"),
+                    title = "Hash Functions & Pre-image Resistance",
+                    signatureActivity = "Digest Avalanche Sieve",
+                    signatureDescription = "Flip a single plaintext bit and observe a 50% cascade avalanche across the 256-bit digest.",
+                    concepts = listOf("avalanche_effect", "preimage_resistance", "collision_resistance"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u4_l2_pointer_surgery",
-                    title = "Pointer Surgery & Rewire Order",
-                    signatureActivity = "Rewire Order Puzzle",
-                    signatureDescription = "Rewire head, middle, and tail pointers in exact order without losing reference.",
-                    concepts = listOf("lost_reference_hazard", "pointer_assignment_order", "insertion"),
+                    title = "SHA-2 vs SHA-3 Sponge Functions",
+                    signatureActivity = "Sponge Absorb & Squeeze",
+                    signatureDescription = "Absorb message blocks into 1600-bit Keccak state and squeeze output bytes to thwart length-extension attacks.",
+                    concepts = listOf("merkle_damgard", "sponge_construction", "keccak_permutation"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u4_l3_deletion",
-                    title = "Node Uncoupling & Garbage Collection",
-                    signatureActivity = "Unhook the Car",
-                    signatureDescription = "Bypass target node; watch the unhooked orphan car dissolve into dust.",
-                    concepts = listOf("deletion_by_value", "memory_freeing", "head_deletion_edge_case"),
+                    title = "Message Authentication (HMAC)",
+                    signatureActivity = "Inner & Outer Pad Mixer",
+                    signatureDescription = "Combine shared keys with ipad (0x36) and opad (0x5c) to forge tamper-proof message tags.",
+                    concepts = listOf("hmac", "inner_outer_pads", "message_integrity"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u4_l4_reversal",
-                    title = "Three-Pointer Dance (Reversal)",
-                    signatureActivity = "Three-Pointer Dance",
-                    signatureDescription = "Step prev, curr, and next through the chain; flip arrow directions.",
-                    concepts = listOf("in_place_reversal", "three_pointers", "o_1_space"),
+                    title = "Digital Signatures & Non-Repudiation",
+                    signatureActivity = "ECDSA Signing & Verification",
+                    signatureDescription = "Sign hashed digests with private keys and verify with public keys to guarantee non-repudiation.",
+                    concepts = listOf("digital_signatures", "ecdsa", "non_repudiation"),
                     xpReward = 30
                 ),
                 DSACourseLesson(
                     id = "u4_l5_doubly_circular",
-                    title = "Doubly & Circular Lists (Carousel)",
-                    signatureActivity = "Carousel & Tortoise-Hare",
-                    signatureDescription = "Link tail back to head; race slow and fast pointers to detect infinite loops.",
-                    concepts = listOf("doubly_linked", "circular_reference", "floyd_cycle_finding"),
+                    title = "PKI & X.509 Trust Chains",
+                    signatureActivity = "Certificate Authority Chain",
+                    signatureDescription = "Validate leaf certificates through intermediate CAs up to trusted root trust anchors with OCSP verification.",
+                    concepts = listOf("x509_certificates", "pki_trust_chain", "ocsp_revocation"),
                     xpReward = 30
                 )
             ),
             boss = DSABossSpec(
                 id = "boss_unit_04",
-                name = "The Runaway Train",
-                title = "Derailer of the Canyon",
-                worldTheme = "Chain Canyon",
-                avatarEmoji = "🚂💥",
+                name = "The Collision Beast",
+                title = "Twin Pre-image Chimera",
+                worldTheme = "The Signature Bastion",
+                avatarEmoji = "🛡️👹",
                 bossHp = 150,
                 timeLimitSeconds = 70,
-                quote = "The bridge is severed! Rewire the couplers before the runaway express plunges into the abyss!",
-                defeatQuote = "Magnificent pointer surgery! The runaway train is secured and glides across the valley!",
+                quote = "The Birthday Paradox will birth a twin hash! I shall forge your certificates and break your HMACs!",
+                defeatQuote = "Unbreakable collision resistance! Your sponge constructions and PKI roots stand immaculate!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 8
             ),
@@ -330,59 +330,59 @@ object CourseRepository {
             isUnlocked = true
         ),
 
-        // UNIT 5: Stack
+        // UNIT 5: Network Security
         DSACourseUnit(
             id = "unit_05_stack",
             index = 5,
-            title = "Unit 5: Stack",
+            title = "Unit 5: Network Security & Firewalls",
             difficulty = DSADifficulty.YELLOW,
-            worldTheme = "Pancake Tower Diner",
-            worldEmoji = "🥞",
-            worldMetaphor = "Pancakes stacking up high on a griddle where only the top pancake is accessible",
+            worldTheme = "The Firewall Citadel",
+            worldEmoji = "🌐",
+            worldMetaphor = "The Phoenix navigates the 1-RTT TLS handshake and erects stateful packet inspection perimeters",
             lessons = listOf(
                 DSACourseLesson(
                     id = "u5_l1_basics",
-                    title = "Stack Basics & LIFO",
-                    signatureActivity = "Pancake Stacker",
-                    signatureDescription = "Tap PUSH to drop pancakes and POP to serve the top one.",
-                    concepts = listOf("lifo", "push_pop_peek", "top_pointer"),
+                    title = "TLS 1.3 Transport Security",
+                    signatureActivity = "1-RTT Handshake Sequence",
+                    signatureDescription = "Send speculative Diffie-Hellman key shares in ClientHello to establish encrypted sessions in 1 round-trip.",
+                    concepts = listOf("tls_1_3", "one_rtt_handshake", "forward_secrecy"),
                     xpReward = 15
                 ),
                 DSACourseLesson(
                     id = "u5_l2_implementations",
-                    title = "Array vs Linked List Stack",
-                    signatureActivity = "Memory Model Compare",
-                    signatureDescription = "Inspect top index pointer in array vs prepending to a linked list.",
-                    concepts = listOf("array_backed_stack", "linked_list_stack", "capacity_overflow"),
+                    title = "IPsec & Secure VPN Tunnels",
+                    signatureActivity = "Tunnel Mode Encapsulation",
+                    signatureDescription = "Encapsulate entire IP packets inside Encapsulating Security Payload (ESP) headers for site-to-site VPNs.",
+                    concepts = listOf("ipsec", "esp_tunnel_mode", "security_associations"),
                     xpReward = 20
                 ),
                 DSACourseLesson(
                     id = "u5_l3_bracket_bouncer",
-                    title = "Parentheses Matching",
-                    signatureActivity = "Bracket Bouncer",
-                    signatureDescription = "A stream of (), {}, and [] arrives; push openers and pop closers.",
-                    concepts = listOf("balanced_brackets", "mismatch_detection", "empty_stack_check"),
+                    title = "Stateful Firewalls & Zero Trust",
+                    signatureActivity = "Connection State Table Filter",
+                    signatureDescription = "Track TCP SYN, ESTABLISHED, and FIN states; apply microsegmentation and continuous least-privilege checks.",
+                    concepts = listOf("stateful_inspection", "zero_trust", "packet_filtering"),
                     xpReward = 25
                 ),
                 DSACourseLesson(
                     id = "u5_l4_expression_eval",
-                    title = "Railway Yard & Postfix Calc",
-                    signatureActivity = "Railway Yard (Shunting Yard)",
-                    signatureDescription = "Infix to postfix with switching tracks; compute postfix results on a griddle calculator.",
-                    concepts = listOf("shunting_yard", "operator_precedence", "postfix_evaluation"),
+                    title = "SYN Floods, DNSSEC & Defenses",
+                    signatureActivity = "SYN Cookie & DNSSEC Verifier",
+                    signatureDescription = "Mitigate denial of service via cryptographic SYN cookies and validate RRSIG DNS trust chains.",
+                    concepts = listOf("syn_cookies", "dnssec_chains", "mitm_mitigation"),
                     xpReward = 30
                 )
             ),
             boss = DSABossSpec(
                 id = "boss_unit_05",
-                name = "Diner Rush",
-                title = "Chef Chaos of the Diner",
-                worldTheme = "Pancake Tower Diner",
-                avatarEmoji = "👨‍🍳🥞",
+                name = "The Cyber Titan",
+                title = "Zero-Day Infiltration Matrix",
+                worldTheme = "The Firewall Citadel",
+                avatarEmoji = "🌐⚡",
                 bossHp = 160,
                 timeLimitSeconds = 60,
-                quote = "Orders are piling up high! One wrong POP and the whole stack topples over the counter!",
-                defeatQuote = "Every order served in flawless LIFO order! The Phoenix endures the storm trial!",
+                quote = "A massive SYN flood and rogue DNS spoofing will overwhelm your gateway buffers!",
+                defeatQuote = "SYN cookies deployed, IPsec tunnels secured! The global network is defended and secure!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 9
             ),

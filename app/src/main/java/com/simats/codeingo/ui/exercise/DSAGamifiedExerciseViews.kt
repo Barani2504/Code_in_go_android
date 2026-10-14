@@ -451,7 +451,7 @@ fun OrderStepsExerciseView(
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
                 val isSelectedForSwap = selectedStepIndex == index
-                val depth = if (isDraggedCard) 6.dp else 3.5.dp
+                val depth = if (isDraggedCard) 14.dp else 3.5.dp
 
                 // Calculate visual slot displacement for non-dragged items
                 val shiftSlots = when {
@@ -472,7 +472,7 @@ fun OrderStepsExerciseView(
                 )
 
                 val dragScale by animateFloatAsState(
-                    targetValue = if (isDraggedCard) 1.03f else 1.0f,
+                    targetValue = if (isDraggedCard) 1.04f else 1.0f,
                     animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
                     label = "orderDragScale"
                 )
@@ -746,6 +746,8 @@ fun FillCodeExerciseView(
     onTokenSelected: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val feedback = remember { FeedbackManager(context) }
     var selectedToken by remember(codeTemplate, wordBank) { mutableStateOf<String?>(null) }
     val activeToken = externalSelectedToken ?: selectedToken
 
@@ -837,6 +839,9 @@ fun FillCodeExerciseView(
 
                         Box(
                             modifier = Modifier
+                                .pulse(enabled = activeToken == null && !isChecked, scaleRange = 0.98f..1.02f)
+                                .correctPop(trigger = activeToken != null)
+                                .shake(shakeTrigger = if (isChecked && activeToken != correctToken) isChecked else null)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
                                     when {
@@ -848,6 +853,7 @@ fun FillCodeExerciseView(
                                 )
                                 .border(1.8.dp, slotBorderColor, RoundedCornerShape(10.dp))
                                 .clickable(enabled = !isChecked && activeToken != null) {
+                                    feedback.tap()
                                     selectedToken = null
                                     onTokenSelected(null)
                                 }
@@ -914,6 +920,7 @@ fun FillCodeExerciseView(
                         isSlotted = isSlotted,
                         isEnabled = !isChecked,
                         onClick = {
+                            feedback.tap()
                             val next = if (isSlotted) null else token
                             selectedToken = next
                             onTokenSelected(next)
@@ -1135,6 +1142,8 @@ fun TrueFalseSwipeExerciseView(
     onDecisionMade: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val feedback = remember { FeedbackManager(context) }
     var chosenDecision by remember(statement) { mutableStateOf<Boolean?>(null) }
     val activeDecision = externalDecision ?: chosenDecision
 
@@ -1172,11 +1181,13 @@ fun TrueFalseSwipeExerciseView(
                                 val currentOffset = dragOffsetX.value
                                 coroutineScope.launch {
                                     if (currentOffset > 80f) {
+                                        feedback.tap()
                                         dragOffsetX.animateTo(300f, tween(150))
                                         chosenDecision = true
                                         onDecisionMade(true)
                                         dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
                                     } else if (currentOffset < -80f) {
+                                        feedback.tap()
                                         dragOffsetX.animateTo(-300f, tween(150))
                                         chosenDecision = false
                                         onDecisionMade(false)
@@ -1273,6 +1284,7 @@ fun TrueFalseSwipeExerciseView(
                 isSelected = activeDecision == true,
                 isEnabled = !isChecked,
                 onClick = {
+                    feedback.tap()
                     chosenDecision = true
                     onDecisionMade(true)
                 },
@@ -1287,6 +1299,7 @@ fun TrueFalseSwipeExerciseView(
                 isSelected = activeDecision == false,
                 isEnabled = !isChecked,
                 onClick = {
+                    feedback.tap()
                     chosenDecision = false
                     onDecisionMade(false)
                 },
@@ -1336,6 +1349,12 @@ private fun SynapseNodeCard(
         label = "synapseScale"
     )
 
+    val alpha by animateFloatAsState(
+        targetValue = if (isMatched) 0.65f else 1.0f,
+        animationSpec = tween(350),
+        label = "synapseAlpha"
+    )
+
     val borderColor by animateColorAsState(
         targetValue = when {
             isMatched -> PhoenixGreen
@@ -1370,6 +1389,7 @@ private fun SynapseNodeCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                this.alpha = alpha
             }
             .clickable(
                 interactionSource = interactionSource,

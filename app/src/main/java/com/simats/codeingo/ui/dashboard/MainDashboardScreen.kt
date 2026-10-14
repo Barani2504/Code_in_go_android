@@ -273,78 +273,78 @@ fun MainDashboardScreen(
         listOf(
             UnitModel(
                 id = 1, sectionNumber = 1, unitNumber = 1,
-                titleKey = "unit_1_title", titleDefault = "🔥 Chapter 1: Array — The Primordial Ember Highway",
+                titleKey = "unit_1_title", titleDefault = "🔥 Chapter 1: Classical Ciphers — The Cipher Sanctum",
                 themeColor = Color(0xFFFF6E0F),
                 themeDarkColor = Color(0xFFC84105),
                 nodes = listOf(
-                    LessonNodeItem(1, 1, "square.grid", 0.dp, "Stage 1: Meet the Array"),
-                    LessonNodeItem(2, 2, "magnifyingglass", (-45).dp, "Stage 2: Find the Element"),
-                    LessonNodeItem(3, 3, "arrow.right", 45.dp, "Stage 3: Build the Array"),
-                    LessonNodeItem(4, 4, "gauge", (-20).dp, "Stage 4: Array Challenge"),
-                    LessonNodeItem(5, 5, "flame", 0.dp, "Stage 5: Boss: The Highway Race", isBoss = true)
+                    LessonNodeItem(1, 1, "lock", 0.dp, "Stage 1: Meet the Shift Cipher"),
+                    LessonNodeItem(2, 2, "key", (-45).dp, "Stage 2: Substitution Ciphers"),
+                    LessonNodeItem(3, 3, "arrow.triangle.swap", 45.dp, "Stage 3: Transposition Ciphers"),
+                    LessonNodeItem(4, 4, "chart.bar", (-20).dp, "Stage 4: Frequency Cryptanalysis"),
+                    LessonNodeItem(5, 5, "flame", 0.dp, "Stage 5: Boss: The Cipher Breaker", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Primordial Ember Highway"
+                worldTheme = "The Cipher Sanctum"
             ),
             UnitModel(
                 id = 2, sectionNumber = 2, unitNumber = 2,
-                titleKey = "unit_2_title", titleDefault = "🔗 Chapter 2: Linked List — The Hatchling's Quest",
+                titleKey = "unit_2_title", titleDefault = "🏰 Chapter 2: Symmetric Encryption — The Block Fortress",
                 themeColor = Color(0xFFF02D4B),
                 themeDarkColor = Color(0xFFB41432),
                 nodes = listOf(
-                    LessonNodeItem(6, 6, "link", 0.dp, "Stage 1: Meet the Nodes"),
-                    LessonNodeItem(7, 7, "arrow.right", 45.dp, "Stage 2: Follow the Chain"),
-                    LessonNodeItem(8, 8, "puzzlepiece", (-45).dp, "Stage 3: Build the Chain"),
-                    LessonNodeItem(9, 9, "plus", 20.dp, "Stage 4: Insert a Node"),
-                    LessonNodeItem(10, 10, "flame", 0.dp, "Stage 5: Boss: The Broken Chain", isBoss = true)
+                    LessonNodeItem(6, 6, "shield", 0.dp, "Stage 1: DES & Feistel Networks"),
+                    LessonNodeItem(7, 7, "square.grid.3x3", 45.dp, "Stage 2: AES Architecture"),
+                    LessonNodeItem(8, 8, "link", (-45).dp, "Stage 3: Block Cipher Modes (CBC/CTR)"),
+                    LessonNodeItem(9, 9, "checkmark.shield", 20.dp, "Stage 4: Authenticated Encryption (GCM)"),
+                    LessonNodeItem(10, 10, "flame", 0.dp, "Stage 5: Boss: The Block Overlord", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Hatchling's Quest"
+                worldTheme = "The Block Fortress"
             ),
             UnitModel(
                 id = 3, sectionNumber = 3, unitNumber = 3,
-                titleKey = "unit_3_title", titleDefault = "🥞 Chapter 3: Stack — The Solar Ascent Tower",
+                titleKey = "unit_3_title", titleDefault = "🔑 Chapter 3: Asymmetric Cryptography — The Asymmetric Spire",
                 themeColor = Color(0xFFFFA500),
                 themeDarkColor = Color(0xFFD26E00),
                 nodes = listOf(
-                    LessonNodeItem(11, 11, "stack", 0.dp, "Stage 1: Stack Basics (LIFO)"),
-                    LessonNodeItem(12, 12, "arrow.down", (-45).dp, "Stage 2: Push to Top"),
-                    LessonNodeItem(13, 13, "arrow.up", 45.dp, "Stage 3: Pop from Top"),
-                    LessonNodeItem(14, 14, "parentheses", (-20).dp, "Stage 4: Stack Sequences"),
-                    LessonNodeItem(15, 15, "flame", 0.dp, "Stage 5: Boss: Escape the Tower", isBoss = true)
+                    LessonNodeItem(11, 11, "number", 0.dp, "Stage 1: Modular Math & Euler's Totient"),
+                    LessonNodeItem(12, 12, "arrow.triangle.2.circlepath", (-45).dp, "Stage 2: Diffie-Hellman Key Exchange"),
+                    LessonNodeItem(13, 13, "key.horizontal", 45.dp, "Stage 3: RSA Public-Key Encryption"),
+                    LessonNodeItem(14, 14, "waveform.path", (-20).dp, "Stage 4: Elliptic Curve Cryptography"),
+                    LessonNodeItem(15, 15, "flame", 0.dp, "Stage 5: Boss: The Quantum Cryptanalyst", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Solar Ascent Tower"
+                worldTheme = "The Asymmetric Spire"
             ),
             UnitModel(
                 id = 4, sectionNumber = 4, unitNumber = 4,
-                titleKey = "unit_4_title", titleDefault = "🎫 Chapter 4: Queue — The Astral Rebirth Line",
+                titleKey = "unit_4_title", titleDefault = "🛡️ Chapter 4: Hashes & Signatures — The Signature Bastion",
                 themeColor = Color(0xFFB946FA),
                 themeDarkColor = Color(0xFF8228BE),
                 nodes = listOf(
-                    LessonNodeItem(16, 16, "person.3", 0.dp, "Stage 1: Understand FIFO"),
-                    LessonNodeItem(17, 17, "arrow.left", 45.dp, "Stage 2: Enqueue to Rear"),
-                    LessonNodeItem(18, 18, "arrow.right", (-45).dp, "Stage 3: Dequeue from Front"),
-                    LessonNodeItem(19, 19, "clock", 20.dp, "Stage 4: Queue Interleaving"),
-                    LessonNodeItem(20, 20, "flame", 0.dp, "Stage 5: Boss: Ticket Rush", isBoss = true)
+                    LessonNodeItem(16, 16, "fingerprint", 0.dp, "Stage 1: Cryptographic Hash Functions"),
+                    LessonNodeItem(17, 17, "arrow.down.doc", 45.dp, "Stage 2: SHA-2 & SHA-3 Families"),
+                    LessonNodeItem(18, 18, "lock.badge.clock", (-45).dp, "Stage 3: Message Authentication Codes (HMAC)"),
+                    LessonNodeItem(19, 19, "doc.plaintext", 20.dp, "Stage 4: Digital Signatures & PKI"),
+                    LessonNodeItem(20, 20, "flame", 0.dp, "Stage 5: Boss: The Collision Beast", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Astral Rebirth Line"
+                worldTheme = "The Signature Bastion"
             ),
             UnitModel(
                 id = 5, sectionNumber = 5, unitNumber = 5,
-                titleKey = "unit_5_title", titleDefault = "👑 Chapter 5: Tree — The Immortal Phoenix Kingdom",
+                titleKey = "unit_5_title", titleDefault = "🌐 Chapter 5: Network Security — The Firewall Citadel",
                 themeColor = Color(0xFFFF4623),
                 themeDarkColor = Color(0xFFC31E0A),
                 nodes = listOf(
-                    LessonNodeItem(21, 21, "crown", 0.dp, "Stage 1: Find the Root"),
-                    LessonNodeItem(22, 22, "leaf", (-45).dp, "Stage 2: Parent and Child"),
-                    LessonNodeItem(23, 23, "wind", 45.dp, "Stage 3: Find the Leaves"),
-                    LessonNodeItem(24, 24, "branch", (-20).dp, "Stage 4: Tree Traversals"),
-                    LessonNodeItem(25, 25, "flame", 0.dp, "Stage 5: Boss: Save the Kingdom", isBoss = true)
+                    LessonNodeItem(21, 21, "network", 0.dp, "Stage 1: TLS 1.3 Handshake"),
+                    LessonNodeItem(22, 22, "lock.shield", (-45).dp, "Stage 2: IPsec & Secure VPNs"),
+                    LessonNodeItem(23, 23, "flame.fill", 45.dp, "Stage 3: Firewalls & Zero Trust"),
+                    LessonNodeItem(24, 24, "exclamationmark.shield", (-20).dp, "Stage 4: Network Attacks & Defenses"),
+                    LessonNodeItem(25, 25, "flame", 0.dp, "Stage 5: Boss: The Cyber Titan", isBoss = true)
                 ),
                 characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Immortal Phoenix Kingdom"
+                worldTheme = "The Firewall Citadel"
             )
         )
     }
