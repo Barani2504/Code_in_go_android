@@ -678,6 +678,8 @@ fun MainDashboardScreen(
                                     val isCardNodeCompleted = completedLevelIndices.contains(cardNode.levelNumber)
                                     val isCardNodeUnlocked = cardUnit != null && cardUnit.id <= maxUnlockedChapter && (unlockedLevels.contains(cardNode.levelNumber) || isCardNodeCompleted)
                                     val isCardBoss = cardNode.isBoss
+                                    val dynamicColors = LocalDynamicThemeColors.current
+                                    val isDark = dynamicColors.isDark
 
                                     Box(
                                         modifier = Modifier
@@ -686,13 +688,23 @@ fun MainDashboardScreen(
                                             .clip(RoundedCornerShape(22.dp))
                                             .background(
                                                 Brush.verticalGradient(
-                                                    if (isCardBoss) listOf(
-                                                        Color(0xFF2A0D11).copy(alpha = 0.95f),
-                                                        Color(0xFF170608).copy(alpha = 0.98f)
-                                                    ) else listOf(
-                                                        Color(0xFF131D33).copy(alpha = 0.95f),
-                                                        Color(0xFF090E1B).copy(alpha = 0.98f)
-                                                    )
+                                                    if (isDark) {
+                                                        if (isCardBoss) listOf(
+                                                            Color(0xFF2A0D11).copy(alpha = 0.95f),
+                                                            Color(0xFF170608).copy(alpha = 0.98f)
+                                                        ) else listOf(
+                                                            Color(0xFF131D33).copy(alpha = 0.95f),
+                                                            Color(0xFF090E1B).copy(alpha = 0.98f)
+                                                        )
+                                                    } else {
+                                                        if (isCardBoss) listOf(
+                                                            Color(0xFFFFF1F2).copy(alpha = 0.98f),
+                                                            Color(0xFFFFE4E6).copy(alpha = 0.98f)
+                                                        ) else listOf(
+                                                            Color.White.copy(alpha = 0.98f),
+                                                            Color(0xFFF1F5F9).copy(alpha = 0.98f)
+                                                        )
+                                                    }
                                                 )
                                             )
                                             .border(
@@ -746,7 +758,7 @@ fun MainDashboardScreen(
                                                             text = cardNode.title,
                                                             fontSize = 14.sp,
                                                             fontWeight = FontWeight.Black,
-                                                            color = Color.White,
+                                                            color = if (isDark) Color.White else dynamicColors.textPrimary,
                                                             maxLines = 1
                                                         )
                                                         Text(
@@ -754,7 +766,7 @@ fun MainDashboardScreen(
                                                             else "5 Questions • +${(cardUnit?.unitNumber ?: 1) * 5 + 5} XP • +1 Ember",
                                                             fontSize = 11.5.sp,
                                                             fontWeight = FontWeight.Bold,
-                                                            color = if (!isCardNodeUnlocked) Color(0xFFEF4444) else Color.White.copy(alpha = 0.8f)
+                                                            color = if (!isCardNodeUnlocked) Color(0xFFEF4444) else (if (isDark) Color.White.copy(alpha = 0.8f) else dynamicColors.textSecondary)
                                                         )
                                                     }
                                                 }
@@ -764,14 +776,14 @@ fun MainDashboardScreen(
                                                     modifier = Modifier
                                                         .size(28.dp)
                                                         .clip(CircleShape)
-                                                        .background(Color.White.copy(alpha = 0.12f))
+                                                        .background(if (isDark) Color.White.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.08f))
                                                         .clickable { selectedStageCardNode = null },
                                                     contentAlignment = Alignment.Center
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Default.Close,
                                                         contentDescription = "Close",
-                                                        tint = Color.White.copy(alpha = 0.85f),
+                                                        tint = if (isDark) Color.White.copy(alpha = 0.85f) else dynamicColors.textPrimary,
                                                         modifier = Modifier.size(16.dp)
                                                     )
                                                 }

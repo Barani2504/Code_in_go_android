@@ -113,7 +113,7 @@ fun OnboardingScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0F0E17))
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         // Deep obsidian background with drifting embers & nebulae
         PhoenixAtmosphericBackgroundView()
@@ -131,7 +131,7 @@ fun OnboardingScreen(
                 onOpenLogin = onLoginClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0F0D1C).copy(alpha = 0.95f))
+                    .background(LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.95f))
             )
 
             // Main Content: Swipeable Hero & Features Carousel (Duolingo-style)
@@ -213,7 +213,7 @@ fun OnboardingScreen(
             ModalBottomSheet(
                 onDismissRequest = { showLanguageSheet = false },
                 sheetState = sheetState,
-                containerColor = Color(0xFF0F0E17)
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 val currentLangCode by localizationManager.selectedLanguageCode.collectAsState()
                 LanguagePickerSheet(

@@ -239,6 +239,8 @@ fun ArrayKingdomArenaScreen(
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayArenaEnvironmentView(isBoss: Boolean) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
     val infiniteTransition = rememberInfiniteTransition(label = "arenaGlow")
     val glowScale by infiniteTransition.animateFloat(
         initialValue = 0.95f,
@@ -256,9 +258,11 @@ private fun ArrayArenaEnvironmentView(isBoss: Boolean) {
             .background(
                 Brush.verticalGradient(
                     colors = if (isBoss) {
-                        listOf(Color(0xFF2C0A0A), Color(0xFF140505), Color(0xFF090202))
+                        if (LocalDynamicThemeColors.current.isDark) listOf(Color(0xFF2C0A0A), Color(0xFF140505), Color(0xFF090202))
+                        else listOf(Color(0xFFFFF1F2), Color(0xFFFFE4E6), Color(0xFFFECDD3))
                     } else {
-                        listOf(Color(0xFF1F1604), Color(0xFF0F1422), Color(0xFF070A12))
+                        if (LocalDynamicThemeColors.current.isDark) listOf(Color(0xFF1F1604), Color(0xFF0F1422), Color(0xFF070A12))
+                        else listOf(Color(0xFFFFFBEB), Color(0xFFF8FAFC), Color(0xFFEDF2F7))
                     }
                 )
             )
@@ -449,7 +453,7 @@ private fun ArenaBottomBar(
             modifier = Modifier
                 .pressScale()
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF141E30))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141E30) else LocalDynamicThemeColors.current.inputBackground)
                 .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                 .clickable { onOpenCodex() }
                 .padding(horizontal = 14.dp, vertical = 10.dp)
@@ -474,7 +478,7 @@ private fun ArenaBottomBar(
                     .pressScale()
                     .size(38.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF141E30))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141E30) else LocalDynamicThemeColors.current.inputBackground)
                     .clickable { onReplay() },
                 contentAlignment = Alignment.Center
             ) {
@@ -524,7 +528,7 @@ private fun ArrayLevel1Content(onComplete: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
@@ -650,7 +654,7 @@ private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
@@ -674,7 +678,7 @@ private fun ArrayLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                     modifier = Modifier
                         .size(58.dp, 64.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF14223A))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF14223A) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                         .clickable {
                             val expectedChar = ((targetPlainChar - 'A' + 3) % 26 + 'A'.code).toChar()
@@ -721,7 +725,7 @@ private fun ArrayLevel3Content(onComplete: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
@@ -746,7 +750,7 @@ private fun ArrayLevel3Content(onComplete: () -> Unit) {
                     modifier = Modifier
                         .size(62.dp, 70.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected && isTarget) DuolingoGreen else Color(0xFF14223A))
+                        .background(if (isSelected && isTarget) DuolingoGreen else if (LocalDynamicThemeColors.current.isDark) Color(0xFF14223A) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, if (isSelected && isTarget) Color.White else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
                         .clickable {
                             selectedLetter = ch
@@ -785,7 +789,7 @@ private fun ArrayLevel4Content(onComplete: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
@@ -809,7 +813,7 @@ private fun ArrayLevel4Content(onComplete: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isAligned) AmberGold.copy(alpha = 0.2f) else Color(0xFF142032))
+                        .background(if (isAligned) AmberGold.copy(alpha = 0.2f) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF142032) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, if (isAligned) AmberGold else Color.Transparent, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
@@ -853,7 +857,7 @@ private fun ArrayLevel5Content(onComplete: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
                 .padding(16.dp)
         ) {
@@ -873,7 +877,7 @@ private fun ArrayLevel5Content(onComplete: () -> Unit) {
                     modifier = Modifier
                         .size(68.dp, 60.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold else Color(0xFF14243C))
+                        .background(if (isSelected) AmberGold else if (LocalDynamicThemeColors.current.isDark) Color(0xFF14243C) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                         .clickable {
                             if (selectedIdx == null) {
@@ -940,7 +944,7 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF0F1A2E))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1A2E) else LocalDynamicThemeColors.current.cardBackground)
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                 .padding(16.dp),
             contentAlignment = Alignment.Center
@@ -954,7 +958,7 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                     modifier = Modifier
                         .size(60.dp, 56.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF14243C))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF14243C) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                         .clickable {
                             if (opt == currentProblem.second) {
@@ -1082,7 +1086,7 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                                 .background(
                                     if (isSelected) {
                                         if (isCorrect) DuolingoGreen else DuolingoRed
-                                    } else Color(0xFF14243C)
+                                    } else if (LocalDynamicThemeColors.current.isDark) Color(0xFF14243C) else LocalDynamicThemeColors.current.inputBackground
                                 )
                                 .border(1.5.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                                 .clickable {

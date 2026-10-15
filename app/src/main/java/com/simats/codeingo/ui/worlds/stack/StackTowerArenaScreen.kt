@@ -215,7 +215,7 @@ fun StackTowerArenaScreen(
                                 when {
                                     isSelected && lvl == StackTowerLevel.BOSS_BATTLE -> DuolingoRed
                                     isSelected -> Color(0xFFFF9500)
-                                    isUnlocked -> Color(0xFF1E1710)
+                                    isUnlocked -> if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
@@ -270,7 +270,7 @@ fun StackTowerArenaScreen(
                     modifier = Modifier
                         .pressScale()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF1E1710))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
@@ -284,7 +284,7 @@ fun StackTowerArenaScreen(
                             .pressScale()
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF1E1710))
+                            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                             .clickable {
                                 val current = currentLevel
                                 currentLevel = StackTowerLevel.LEVEL_1
@@ -325,7 +325,7 @@ fun StackTowerArenaScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF1A1208))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1A1208) else LocalDynamicThemeColors.current.cardBackground)
                         .border(2.dp, Color(0xFFFF9500), RoundedCornerShape(24.dp))
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -358,7 +358,7 @@ fun StackTowerArenaScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF1A1208))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1A1208) else LocalDynamicThemeColors.current.cardBackground)
                         .border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp))
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -435,7 +435,7 @@ private fun StackTowerEnvironmentView(isBoss: Boolean) {
                     colors = if (isBoss) {
                         listOf(Color(0xFF280B04), Color(0xFF140602), Color(0xFF0A0201))
                     } else {
-                        listOf(Color(0xFF2B1603), Color(0xFF140A02), Color(0xFF0A0501))
+                        listOf(Color(0xFF2B1603), if (LocalDynamicThemeColors.current.isDark) Color(0xFF140A02) else LocalDynamicThemeColors.current.inputBackground, Color(0xFF0A0501))
                     }
                 )
             )
@@ -469,7 +469,7 @@ private fun StackLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                     modifier = Modifier
                         .size(64.dp, 56.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedAnswer = opt
@@ -517,7 +517,7 @@ private fun StackLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                     modifier = Modifier
                         .size(64.dp, 50.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedK = opt
@@ -588,7 +588,7 @@ private fun StackLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         .fillMaxWidth()
                         .height(48.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFFFF9500), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedAnswer = opt
@@ -693,7 +693,7 @@ private fun StackBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                         val isSelected = selectedAnswer == opt
                         Box(
                             modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E1710) else LocalDynamicThemeColors.current.inputBackground)
                                 .border(1.dp, if (isSelected) Color.White else Color(0xFFFF9500).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                                 .clickable {
                                     selectedAnswer = opt

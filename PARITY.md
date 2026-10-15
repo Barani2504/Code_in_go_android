@@ -208,3 +208,28 @@ All 10 Cryptography and DSA visualizer topics and surrounding host containers ad
   - ECC Point Addition canvas dynamically adapts coordinate axes, grid ticks, and tangent chord lines between subtle dark (`Color.Black.copy(0.12f)`) and light strokes (`Color.White.copy(0.18f)`).
   - Language implementation code cards feature language chips and complexity tags that adapt between `dynamicColors.inputBackground` and themed amber borders.
   - Quick topic switcher carousels and deep-dive header metrics adapt background tints and borders dynamically.
+
+---
+
+## 8. Application-Wide Theme Adaptation & Enhanced Typography System
+
+1. **Full Light Mode & Dark Mode System:**
+   - **5 Battle Arenas (`ArrayKingdom`, `LinkedListRoad`, `StackTower`, `QueueStation`, `BinaryTreeForest`):**
+     - Dark Mode: Immersive cosmic gradients (Crimson Obsidian, Blood Quartz, Molten Amber, Void Violet, Deep Emerald).
+     - Light Mode: Elegant ambient realm gradients (Soft Rose Amber, Soft Blush Crimson, Warm Cream Amber, Soft Lavender, Soft Mint).
+     - Adaptive question dialogs, shift rings, puzzle matrices, code slots, and interactive cells bind dynamically to `cardBackground` (`#FFFFFF` in light mode), `inputBackground` (`#ECEFF5` in light mode), and `textPrimary` (`#121826` in light mode).
+   - **Dashboard & Navigation:**
+     - Level node detail popup cards feature theme-adaptive gradient envelopes, close buttons, action tags, and high-contrast text.
+     - `BottomNavBar` floating glass capsule and `TopStatsHeader` status bar adapt specular highlights and drop shadows.
+   - **Onboarding & Auth:**
+     - `ProfileCreationScreen` and `OnboardingScreen` containers, guide bubbles, age selector chips, and bottom sheets adapt dynamically.
+
+2. **Enhanced Typography System (`Type.kt`):**
+   - **Bundled Font Resources (`res/font/`):**
+     - `outfit.ttf`: Modern, geometric, hyper-legible tech typeface for headlines, metrics, code commentary, and body copy.
+     - `nunito.ttf`: Rounded geometric sans-serif typeface matching Apple's `.system(..., design: .rounded)` standard for gamified learning.
+   - **Micro-Tuned Typography Scales:**
+     - Proportional letter spacing (`-0.5.sp` to `+0.3.sp`) and optimized line heights (`15.sp` to `38.sp`) across all 15 Material 3 typography tokens (`displayLarge` through `labelSmall`).
+   - **Universal Font Inheritance (`Theme.kt`):**
+     - Global `LocalTextStyle` provides `AppFontFamily` (`Outfit`) and `dynamicColors.textPrimary` across all unstyled composables with zero text drift or invisible white-on-white artifacts.
+

@@ -385,7 +385,7 @@ private fun LLLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF2B0E14)).border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground).border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
                 text = "🧱 SubBytes Transformation: In the AES S-Box lookup table, input byte 0x53 maps to its multiplicative inverse in GF(2^8) followed by affine mapping. Select the output byte!",
@@ -408,7 +408,7 @@ private fun LLLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
                     modifier = Modifier
                         .size(68.dp, 56.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0A0E))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0A0E) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, Color(0xFFEF4444), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedByte = byteStr
@@ -446,7 +446,7 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
 
         // 4x4 Grid preview
         Column(
-            modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFF2B0E14)).padding(10.dp),
+            modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground).padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             matrixRows.forEachIndexed { r, row ->
@@ -455,7 +455,7 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
                     row.forEach { cell ->
                         Box(
                             modifier = Modifier.size(52.dp, 36.dp).clip(RoundedCornerShape(6.dp))
-                                .background(if (isCurrentShift) Color(0xFFEF4444).copy(alpha = 0.4f) else Color(0xFF1E0A0E))
+                                .background(if (isCurrentShift) Color(0xFFEF4444).copy(alpha = 0.4f) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0A0E) else LocalDynamicThemeColors.current.inputBackground)
                                 .border(1.dp, if (isCurrentShift) Color(0xFFEF4444) else Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -467,7 +467,7 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
         }
 
         Box(
-            modifier = Modifier.fillMaxWidth(0.9f).clip(RoundedCornerShape(10.dp)).background(Color(0xFF330F16)).padding(10.dp),
+            modifier = Modifier.fillMaxWidth(0.9f).clip(RoundedCornerShape(10.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF330F16) else LocalDynamicThemeColors.current.inputBackground).padding(10.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(text = rowShifts[step.coerceIn(0, 3)], fontSize = 13.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
@@ -495,7 +495,7 @@ private fun LLLevel3Content(onComplete: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "c(x) MATRIX", fontSize = 10.sp, color = AmberGold)
-                Box(modifier = Modifier.size(70.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFF2B0E14)), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(70.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground), contentAlignment = Alignment.Center) {
                     Text(text = "[ 02 03 ]\n[ 01 01 ]", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
@@ -513,7 +513,7 @@ private fun LLLevel3Content(onComplete: () -> Unit) {
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "DIFFUSED", fontSize = 10.sp, color = DuolingoGreen)
-                Box(modifier = Modifier.size(54.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(if (isDiffused) DuolingoGreen else Color(0xFF330F16)), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(54.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(if (isDiffused) DuolingoGreen else if (LocalDynamicThemeColors.current.isDark) Color(0xFF330F16) else LocalDynamicThemeColors.current.inputBackground), contentAlignment = Alignment.Center) {
                     Text(text = if (isDiffused) "04\n66\n81\nE5" else "??\n??\n??\n??", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
@@ -555,7 +555,7 @@ private fun LLLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
                     modifier = Modifier
                         .size(68.dp, 50.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF2B0E14))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground)
                         .border(1.5.dp, Color(0xFFEF4444), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedOption = opt
@@ -582,7 +582,7 @@ private fun LLLevel5Content(onComplete: () -> Unit) {
                 Text(text = if (isSwapped) "R[i]" else "L[i]", fontWeight = FontWeight.Black, color = Color.White)
             }
             Text(text = "⇄", fontSize = 24.sp, color = AmberGold)
-            Box(modifier = Modifier.size(70.dp, 48.dp).clip(RoundedCornerShape(10.dp)).background(if (isSwapped) AmberGold else Color(0xFF330F16)), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(70.dp, 48.dp).clip(RoundedCornerShape(10.dp)).background(if (isSwapped) AmberGold else if (LocalDynamicThemeColors.current.isDark) Color(0xFF330F16) else LocalDynamicThemeColors.current.inputBackground), contentAlignment = Alignment.Center) {
                 Text(text = if (isSwapped) "L[i]⊕F" else "R[i]", fontWeight = FontWeight.Black, color = Color.White)
             }
         }
@@ -618,7 +618,7 @@ private fun LLLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
                         .weight(1f)
                         .height(50.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF2B0E14))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground)
                         .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedRound = opt
@@ -658,7 +658,7 @@ private fun LLBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> U
         Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
 
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF2B0E14)).border(1.5.dp, Color(0xFFEF4444).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF2B0E14) else LocalDynamicThemeColors.current.cardBackground).border(1.5.dp, Color(0xFFEF4444).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -675,7 +675,7 @@ private fun LLBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> U
                         val isSelected = selectedAnswer == opt
                         Box(
                             modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0A0E))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0A0E) else LocalDynamicThemeColors.current.inputBackground)
                                 .border(1.dp, if (isSelected) Color.White else Color(0xFFEF4444).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                                 .clickable {
                                     selectedAnswer = opt

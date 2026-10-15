@@ -290,7 +290,7 @@ fun QueueStationArenaScreen(
         if (showVictoryModal) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)), contentAlignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(Color(0xFF1E0E2B)).border(2.dp, Color(0xFFB946FA), RoundedCornerShape(24.dp)).padding(24.dp),
+                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0E2B) else LocalDynamicThemeColors.current.cardBackground).border(2.dp, Color(0xFFB946FA), RoundedCornerShape(24.dp)).padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -313,7 +313,7 @@ fun QueueStationArenaScreen(
         if (showBossVictoryModal) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)), contentAlignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(Color(0xFF1E0E2B)).border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp)).padding(24.dp),
+                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0E2B) else LocalDynamicThemeColors.current.cardBackground).border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp)).padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -405,7 +405,7 @@ private fun QueueLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         .fillMaxWidth()
                         .height(48.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0E28) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFFB946FA), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedOption = opt
@@ -581,7 +581,7 @@ private fun QueueLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         .fillMaxWidth()
                         .height(48.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0E28) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFFB946FA), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedAnswer = opt
@@ -639,7 +639,7 @@ private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
                         val isSelected = selectedAnswer == opt
                         Box(
                             modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF1E0E28) else LocalDynamicThemeColors.current.inputBackground)
                                 .border(1.dp, if (isSelected) Color.White else Color(0xFFB946FA).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                                 .clickable {
                                     selectedAnswer = opt

@@ -142,7 +142,7 @@ fun ProfileCreationScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0A0914))
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -280,7 +280,7 @@ fun ProfileCreationScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0F0E17).copy(alpha = 0.95f))
+                    .background(LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.95f))
                     .padding(horizontal = 24.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -340,7 +340,7 @@ fun ProfileCreationScreen(
             ModalBottomSheet(
                 onDismissRequest = { showGoogleAuthSheet = false },
                 sheetState = bottomSheetState,
-                containerColor = Color(0xFF0F0E17)
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 GoogleAuthSheet(
                     onSelectAccount = { accName, accEmail ->
@@ -400,7 +400,7 @@ private fun AgeStepView(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF141F36))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground)
                         .border(1.5.dp, AmberGold.copy(alpha = 0.40f), CircleShape)
                 ) {
                     Text(text = emotionEmoji, fontSize = 22.sp)
@@ -411,7 +411,7 @@ private fun AgeStepView(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF141F36).copy(alpha = 0.90f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.90f))
                     .border(1.dp, AmberGold.copy(alpha = 0.30f), RoundedCornerShape(14.dp))
                     .padding(12.dp)
             ) {
@@ -467,7 +467,7 @@ private fun AgeStepView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF141F36).copy(alpha = 0.85f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.85f))
                     .border(
                         if (isAgeFocused) 2.dp else 1.2.dp,
                         if (isAgeFocused) AmberGold else if (ageText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.14f),
@@ -544,7 +544,7 @@ private fun AgeStepView(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isSelected) AmberGold.copy(alpha = 0.25f) else Color(0xFF141F36).copy(alpha = 0.70f))
+                            .background(if (isSelected) AmberGold.copy(alpha = 0.25f) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.70f))
                             .border(1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
                             .clickable { onAgeChange(preset) }
                             .padding(horizontal = 14.dp, vertical = 8.dp)
@@ -617,7 +617,7 @@ private fun GoalStepView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF141F36).copy(alpha = if (isSelected) 0.95f else 0.75f))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = if (isSelected) 0.95f else 0.75f))
                         .border(
                             if (isSelected) 2.dp else 1.dp,
                             if (isSelected) AmberGold else Color.White.copy(alpha = 0.08f),
@@ -779,7 +779,7 @@ private fun CredentialsStepView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF141F36).copy(alpha = 0.85f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.85f))
                     .border(
                         if (isNameFocused) 2.dp else 1.2.dp,
                         if (isNameFocused) AmberGold else if (nameText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
@@ -839,7 +839,7 @@ private fun CredentialsStepView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF141F36).copy(alpha = 0.85f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.85f))
                     .border(
                         if (isEmailFocused) 2.dp else 1.2.dp,
                         if (isEmailFocused) AmberGold else if (emailText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
@@ -900,7 +900,7 @@ private fun CredentialsStepView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF141F36).copy(alpha = 0.85f))
+                    .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.85f))
                     .border(
                         if (isPasswordFocused) 2.dp else 1.2.dp,
                         if (isPasswordFocused) AmberGold else if (passwordText.isNotEmpty()) AmberGold.copy(alpha = 0.6f) else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f),
@@ -1099,7 +1099,7 @@ private fun CelebrationStepView(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF141F36).copy(alpha = 0.90f))
+                .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF141F36) else LocalDynamicThemeColors.current.cardBackground.copy(alpha = 0.90f))
                 .border(1.5.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,

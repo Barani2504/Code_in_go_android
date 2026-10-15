@@ -195,7 +195,13 @@ fun CodeingoTheme(
             typography  = AppTypography,
             shapes      = AppShapes,
         ) {
-            CompositionLocalProvider(LocalContentColor provides dynamicColors.textPrimary) {
+            CompositionLocalProvider(
+                LocalContentColor provides dynamicColors.textPrimary,
+                androidx.compose.material3.LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = AppFontFamily,
+                    color = dynamicColors.textPrimary
+                )
+            ) {
                 content()
             }
         }

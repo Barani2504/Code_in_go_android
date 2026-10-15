@@ -192,7 +192,7 @@ fun BinaryTreeForestArenaScreen(
                                 when {
                                     isSelected && lvl == BinaryTreeForestLevel.BOSS_BATTLE -> DuolingoRed
                                     isSelected -> Color(0xFF10B981)
-                                    isUnlocked -> Color(0xFF0C2B1D)
+                                    isUnlocked -> if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1D) else LocalDynamicThemeColors.current.inputBackground
                                     else -> Color.Black.copy(alpha = 0.35f)
                                 }
                             )
@@ -242,7 +242,7 @@ fun BinaryTreeForestArenaScreen(
                     modifier = Modifier
                         .pressScale()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF0C2B1D))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1D) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .clickable { showTheoryCodex = true }
                         .padding(horizontal = 14.dp, vertical = 10.dp)
@@ -256,7 +256,7 @@ fun BinaryTreeForestArenaScreen(
                             .pressScale()
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF0C2B1D))
+                            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1D) else LocalDynamicThemeColors.current.inputBackground)
                             .clickable {
                                 val current = currentLevel
                                 currentLevel = BinaryTreeForestLevel.LEVEL_1
@@ -289,7 +289,7 @@ fun BinaryTreeForestArenaScreen(
         if (showVictoryModal) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)), contentAlignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(Color(0xFF0A2417)).border(2.dp, Color(0xFF10B981), RoundedCornerShape(24.dp)).padding(24.dp),
+                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0A2417) else LocalDynamicThemeColors.current.cardBackground).border(2.dp, Color(0xFF10B981), RoundedCornerShape(24.dp)).padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -312,7 +312,7 @@ fun BinaryTreeForestArenaScreen(
         if (showBossVictoryModal) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)), contentAlignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(Color(0xFF0A2417)).border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp)).padding(24.dp),
+                    modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(24.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0A2417) else LocalDynamicThemeColors.current.cardBackground).border(2.dp, DuolingoGreen, RoundedCornerShape(24.dp)).padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -380,7 +380,7 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp), modifier = Modifier.fillMaxWidth()) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1C) else LocalDynamicThemeColors.current.cardBackground).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
                 text = "🌐 TLS 1.3 1-RTT Handshake: Client initiates connection with modern AEAD ciphers and ephemeral ECDH KeyShare.",
@@ -388,7 +388,7 @@ private fun TreeLevel1Content(onComplete: () -> Unit) {
             )
         }
 
-        Box(modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(14.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground).padding(14.dp), contentAlignment = Alignment.Center) {
             Text(text = steps[step.coerceIn(0, 2)], fontSize = 13.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
         }
 
@@ -411,7 +411,7 @@ private fun TreeLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp), modifier = Modifier.fillMaxWidth()) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1C) else LocalDynamicThemeColors.current.cardBackground).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
                 text = "🔒 Cipher Suite Negotiation: Which of the following is a valid, secure TLS 1.3 AEAD cipher suite?",
@@ -428,7 +428,7 @@ private fun TreeLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
                         .fillMaxWidth()
                         .height(48.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedCipher = opt
@@ -451,7 +451,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1C) else LocalDynamicThemeColors.current.cardBackground).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
         ) {
             Text(
                 text = "IPsec ESP (Encapsulating Security Payload): Which field in the ESP header provides anti-replay protection?",
@@ -461,7 +461,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
 
         // ESP Packet Layout
         Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("New IP" to Color(0xFF0C3824), "SPI & Seq#" to AmberGold, "Encrypted Payload" to Color(0xFF10B981), "Padding" to Color(0xFF0C3824), "ICV Auth Tag" to Color(0xFF00CD9C)).forEach { (label, col) ->
+            listOf("New IP" to if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground, "SPI & Seq#" to AmberGold, "Encrypted Payload" to Color(0xFF10B981), "Padding" to if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground, "ICV Auth Tag" to Color(0xFF00CD9C)).forEach { (label, col) ->
                 Box(modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(col.copy(alpha = 0.25f)).border(1.dp, col, RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 6.dp)) {
                     Text(text = label, fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White)
                 }
@@ -477,7 +477,7 @@ private fun TreeLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
                         .fillMaxWidth()
                         .height(44.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedField = opt
@@ -505,7 +505,7 @@ private fun TreeLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
                     modifier = Modifier
                         .size(68.dp, 50.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF0C3824))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.5.dp, Color(0xFF10B981), RoundedCornerShape(14.dp))
                         .clickable {
                             if (isCorrect) onComplete() else onDeductHeart()
@@ -527,7 +527,7 @@ private fun TreeLevel5Content(onComplete: () -> Unit) {
         Text(text = "X.509 PKI Chain of Trust: Root CA ➔ Intermediate CA ➔ Leaf Server Cert", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Box(
-            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(12.dp),
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground).padding(12.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(text = if (isChainValidated) "CERTIFICATE CHAIN VALIDATED ✓" else "ROOT CA SIGNATURE VERIFIED", fontSize = 12.sp, fontWeight = FontWeight.Black, color = if (isChainValidated) DuolingoGreen else AmberGold)
@@ -559,7 +559,7 @@ private fun TreeLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1C) else LocalDynamicThemeColors.current.cardBackground).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
         ) {
             Text(
                 text = "⚡ DDoS Defense Sprint: How do SYN Cookies mitigate SYN flood memory exhaustion without allocating socket buffer until ACK?",
@@ -576,7 +576,7 @@ private fun TreeLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit)
                         .fillMaxWidth()
                         .height(46.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground)
                         .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
                         .clickable {
                             selectedAnswer = opt
@@ -617,7 +617,7 @@ private fun TreeBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () ->
         Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
 
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF0C2B1C)).border(1.5.dp, Color(0xFF10B981).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C2B1C) else LocalDynamicThemeColors.current.cardBackground).border(1.5.dp, Color(0xFF10B981).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -634,7 +634,7 @@ private fun TreeBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () ->
                         val isSelected = selectedAnswer == opt
                         Box(
                             modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else if (LocalDynamicThemeColors.current.isDark) Color(0xFF0C3824) else LocalDynamicThemeColors.current.inputBackground)
                                 .border(1.dp, if (isSelected) Color.White else Color(0xFF10B981).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                                 .clickable {
                                     selectedAnswer = opt
