@@ -220,12 +220,12 @@ fun QueueStationArenaScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (currentLevel) {
-                    QueueStationLevel.LEVEL_1 -> QueueLevel1Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_1) })
-                    QueueStationLevel.LEVEL_2 -> QueueLevel2Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_2) })
+                    QueueStationLevel.LEVEL_1 -> QueueLevel1Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_1) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    QueueStationLevel.LEVEL_2 -> QueueLevel2Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_2) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     QueueStationLevel.LEVEL_3 -> QueueLevel3Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_3) })
-                    QueueStationLevel.LEVEL_4 -> QueueLevel4Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_4) })
+                    QueueStationLevel.LEVEL_4 -> QueueLevel4Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_4) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     QueueStationLevel.LEVEL_5 -> QueueLevel5Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_5) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
-                    QueueStationLevel.LEVEL_6 -> QueueLevel6Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_6) })
+                    QueueStationLevel.LEVEL_6 -> QueueLevel6Content(onComplete = { handleLevelCompleted(QueueStationLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     QueueStationLevel.BOSS_BATTLE -> QueueBossBattleContent(onDefeatBoss = { handleLevelCompleted(QueueStationLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                 }
             }
@@ -372,80 +372,69 @@ fun QueueStationArenaScreen(
 // ══════════════════════════════════════════════════════════════════
 // 🛡️ Integrity Realm Levels Content (Hashes & Digital Signatures)
 // ══════════════════════════════════════════════════════════════════
+// Level Content Composables
+// ══════════════════════════════════════════════════════════════════
 @Composable
-private fun QueueLevel1Content(onComplete: () -> Unit) {
-    val chunks = remember { mutableStateListOf("Chunk 0", "Chunk 1", "Chunk 2") }
+private fun QueueLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    val options = listOf("512 bits (64 bytes)", "256 bits (32 bytes)", "1024 bits", "128 bits")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261036)).border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF2B1238)).border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🛡️ SHA-256 Compression: Process 512-bit message blocks through 64 rounds to produce an irreversible 256-bit digest.",
-                fontSize = 14.sp,
+                text = "🛡️ SHA-256 Merkle-Damgård Chunking: Input messages are padded with '1', zero bits, and 64-bit length. What is the standard block size processed by the compression function?",
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            chunks.forEachIndexed { idx, name ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp, 56.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (idx == 0) Color(0xFFB946FA) else Color(0xFF4A1A6D))
-                            .border(1.dp, LocalDynamicThemeColors.current.placeholder, RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, fontFamily = FontFamily.Monospace)
-                    }
-                    Text(
-                        text = if (idx == 0) "ACTIVE ⚙️" else "[$idx]",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (idx == 0) Color(0xFFB946FA) else SubtextGray
-                    )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt == "512 bits (64 bytes)"
+                val isSelected = selectedOption == opt
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                        .border(1.dp, Color(0xFFB946FA), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedOption = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = opt, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }
-
-        Duolingo3DButton(
-            title = "🛡️ COMPRESS CHUNK (Process Hash)",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                if (chunks.isNotEmpty()) {
-                    chunks.removeAt(0)
-                    if (chunks.size == 1) onComplete()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
     }
 }
 
 @Composable
-private fun QueueLevel2Content(onComplete: () -> Unit) {
+private fun QueueLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
     var flipped by remember { mutableStateOf(false) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Avalanche Effect: 1-bit input change flips ~50% of hash digest bits!", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text(text = "⚡ Strict Avalanche Criterion: Flipping a single bit in input cascades through compression rounds", fontSize = 13.5.sp, color = Color(0xFFB946FA), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.size(130.dp, 60.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF3B1556)).padding(8.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "H('cat')", fontSize = 12.sp, color = AmberGold)
-                    Text(text = "0x77AF...3E", fontSize = 11.sp, color = Color.White, fontFamily = FontFamily.Monospace)
-                }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(110.dp, 44.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFF4A1A6D)), contentAlignment = Alignment.Center) {
+                Text(text = if (flipped) "M = 'cat!'" else "M = 'cat'", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
             }
-
-            Box(modifier = Modifier.size(130.dp, 60.dp).clip(RoundedCornerShape(10.dp)).background(if (flipped) DuolingoGreen.copy(alpha = 0.2f) else Color(0xFF3B1556)).padding(8.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "H('dat')", fontSize = 12.sp, color = AmberGold)
-                    Text(text = if (flipped) "0x2C4B...9F" else "???", fontSize = 11.sp, color = if (flipped) DuolingoGreen else Color.White, fontFamily = FontFamily.Monospace)
-                }
+            Text(text = "➔", fontSize = 20.sp, color = AmberGold)
+            Box(modifier = Modifier.size(140.dp, 44.dp).clip(RoundedCornerShape(8.dp)).background(if (flipped) DuolingoGreen else Color(0xFF2B1238)), contentAlignment = Alignment.Center) {
+                Text(text = if (flipped) "H = 7f83b165..." else "H = 77af778b...", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
             }
         }
 
@@ -466,16 +455,37 @@ private fun QueueLevel2Content(onComplete: () -> Unit) {
 @Composable
 private fun QueueLevel3Content(onComplete: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
-    val phases = listOf("Absorb 64 bytes", "Permute State f", "Squeeze 32 bytes")
+    val phases = listOf("1. Absorb: XOR 1088-bit rate r into state", "2. Permute: Apply Keccak-f[1600] 24 rounds", "3. Squeeze: Extract 256-bit hash digest")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "SHA-3 Keccak Sponge Construction: Absorbing & Squeezing", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(text = "SHA-3 Keccak Sponge Construction (5×5 Lane State)", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+
+        // 5x5 Keccak State Matrix preview
+        Column(
+            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFF2B1238)).padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            repeat(5) { r ->
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    repeat(5) { c ->
+                        val isRate = (r * 5 + c) < 17
+                        Box(
+                            modifier = Modifier.size(34.dp, 24.dp).clip(RoundedCornerShape(4.dp))
+                                .background(if (isRate) Color(0xFFB946FA).copy(alpha = 0.4f) else AmberGold.copy(alpha = 0.4f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = if (isRate) "r" else "c", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
 
         Box(
-            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF4A1A6D)).padding(14.dp),
+            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(10.dp)).background(Color(0xFF4A1A6D)).padding(10.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = phases[step.coerceIn(0, 2)], fontSize = 15.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
+            Text(text = phases[step.coerceIn(0, 2)], fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
         }
 
         Duolingo3DButton(
@@ -491,14 +501,14 @@ private fun QueueLevel3Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun QueueLevel4Content(onComplete: () -> Unit) {
+private fun QueueLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
     var isVerified by remember { mutableStateOf(false) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text(text = "Merkle Tree Root Validation: H(Root) = H(H(A) ∥ H(B))", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Box(modifier = Modifier.size(160.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(if (isVerified) DuolingoGreen else Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
-            Text(text = if (isVerified) "ROOT VALIDATED ✓" else "ROOT: H(A+B)", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+        Box(modifier = Modifier.size(180.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(if (isVerified) DuolingoGreen else Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
+            Text(text = if (isVerified) "ROOT VALIDATED ✓" else "ROOT: H(H(A) ∥ H(B))", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
         }
 
         if (!isVerified) {
@@ -521,7 +531,7 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
     // 2^(n/2) for n=256 -> 2^128
     val options = listOf("2^256", "2^128", "2^64", "2^16")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text(text = "Birthday Paradox Bound: To find a hash collision in a 256-bit hash function, approximately how many trials are needed?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -536,7 +546,7 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
                         .border(1.5.dp, Color(0xFFB946FA), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedOption = opt
-                            if (isCorrect) onComplete()
+                            if (isCorrect) onComplete() else onDeductHeart()
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -548,53 +558,113 @@ private fun QueueLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 }
 
 @Composable
-private fun QueueLevel6Content(onComplete: () -> Unit) {
-    var step by remember { mutableIntStateOf(0) }
+private fun QueueLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    val options = listOf("Prevent length extension attacks", "Speed up hashing", "Compress to 128 bits", "Encrypt the payload")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "HMAC Keyed Authentication Sprint: H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ M))", fontSize = 13.sp, color = Color(0xFFB946FA), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF2B1238)).border(1.dp, Color(0xFFB946FA).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+        ) {
+            Text(
+                text = "HMAC Construction: Why does HMAC use two nested hashing passes with ipad (0x36) and opad (0x5C) instead of plain H(K || M)?",
+                fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
+            )
+        }
 
-        Duolingo3DButton(
-            title = "👉 NESTED HASH PASS (${step}/2)",
-            style = Duolingo3DButtonStyle.AMBER,
-            onClick = {
-                step++
-                if (step == 2) onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt == "Prevent length extension attacks"
+                val isSelected = selectedAnswer == opt
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                        .border(1.dp, Color(0xFFB946FA), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedAnswer = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = opt, fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun QueueBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
-    val hashes = remember { mutableStateListOf("0x7F2A", "0x89C1", "0x33B4") }
     var bossHP by remember { mutableIntStateOf(100) }
+    var currentPhase by remember { mutableIntStateOf(1) }
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var feedback by remember { mutableStateOf("The Collision Beast attacks cryptographic digest integrity! Fortify hash defenses!") }
+
+    val phaseData = when (currentPhase) {
+        1 -> Triple("Birthday Paradox: Finding a collision in a 128-bit hash function requires how many hash computations?", "2^64", listOf("2^64", "2^128", "2^32", "2^256"))
+        2 -> Triple("Security Bounds: Which security property requires FEWER trials to violate mathematically?", "Collision Resistance (2^(n/2))", listOf("Collision Resistance (2^(n/2))", "Pre-image Resistance (2^n)", "Second Pre-image (2^n)", "Both identical"))
+        else -> Triple("Length Extension: Which hash family is naturally vulnerable to length extension attacks if not using HMAC?", "Merkle-Damgård (SHA-256)", listOf("Merkle-Damgård (SHA-256)", "Keccak Sponge (SHA-3)", "BLAKE3", "Ascon AEAD"))
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = "👾 THE COLLISION BEAST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "👾 THE COLLISION BEAST", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+            Text(text = "PHASE $currentPhase / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+        }
 
-        Text(text = "Active Collisions: ${hashes.size}/6 (Verify before collision storm!)", fontSize = 12.sp, color = Color(0xFFB946FA))
+        Box(modifier = Modifier.fillMaxWidth(0.85f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))) {
+            Box(modifier = Modifier.fillMaxWidth(bossHP / 100f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(DuolingoRed))
+        }
+        Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            hashes.forEach { h ->
-                Box(modifier = Modifier.size(64.dp, 40.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFB946FA)), contentAlignment = Alignment.Center) {
-                    Text(text = h, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
-                }
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF2B1238)).border(1.5.dp, Color(0xFFB946FA).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = phaseData.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+                Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
             }
         }
 
-        Duolingo3DButton(
-            title = "🛡️ RAPID INTEGRITY VERIFICATION!",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                if (hashes.isNotEmpty()) {
-                    hashes.removeAt(0)
-                    bossHP = maxOf(0, bossHP - 25)
-                    if (bossHP <= 0) onDefeatBoss()
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            phaseData.third.chunked(2).forEach { rowOptions ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    rowOptions.forEach { opt ->
+                        val isCorrect = opt == phaseData.second
+                        val isSelected = selectedAnswer == opt
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0E28))
+                                .border(1.dp, if (isSelected) Color.White else Color(0xFFB946FA).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .clickable {
+                                    selectedAnswer = opt
+                                    if (isCorrect) {
+                                        val newHP = maxOf(0, bossHP - 35)
+                                        bossHP = newHP
+                                        if (newHP <= 0 || currentPhase >= 3) {
+                                            onDefeatBoss()
+                                        } else {
+                                            currentPhase++
+                                            selectedAnswer = null
+                                            feedback = "💥 Collision prevented! Digest integrity holds!"
+                                        }
+                                    } else {
+                                        onDeductHeart()
+                                        feedback = "❌ Collision storm hit! Check your cryptographic hash theorems."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = opt, fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = Color.White, textAlign = TextAlign.Center)
+                        }
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+            }
+        }
     }
 }

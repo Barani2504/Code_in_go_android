@@ -247,10 +247,10 @@ fun StackTowerArenaScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (currentLevel) {
-                    StackTowerLevel.LEVEL_1 -> StackLevel1Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_1) })
-                    StackTowerLevel.LEVEL_2 -> StackLevel2Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_2) })
+                    StackTowerLevel.LEVEL_1 -> StackLevel1Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_1) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    StackTowerLevel.LEVEL_2 -> StackLevel2Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_2) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     StackTowerLevel.LEVEL_3 -> StackLevel3Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_3) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
-                    StackTowerLevel.LEVEL_4 -> StackLevel4Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_4) })
+                    StackTowerLevel.LEVEL_4 -> StackLevel4Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_4) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     StackTowerLevel.LEVEL_5 -> StackLevel5Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_5) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     StackTowerLevel.LEVEL_6 -> StackLevel6Content(onComplete = { handleLevelCompleted(StackTowerLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     StackTowerLevel.BOSS_BATTLE -> StackBossBattleContent(onDefeatBoss = { handleLevelCompleted(StackTowerLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
@@ -444,27 +444,20 @@ private fun StackTowerEnvironmentView(isBoss: Boolean) {
 
 // 🔑 Key Keepers Spire Levels Content (Asymmetric Cryptography)
 // ══════════════════════════════════════════════════════════════════
+// Level Content Composables
+// ══════════════════════════════════════════════════════════════════
 @Composable
-private fun StackLevel1Content(onComplete: () -> Unit) {
+private fun StackLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
     var selectedAnswer by remember { mutableStateOf<Int?>(null) }
-    // Compute 3^3 mod 7 = 27 mod 7 = 6
-    val options = listOf(4, 5, 6, 1)
+    val options = listOf(6, 1, 3, 2)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF221307))
-                .border(1.dp, Color(0xFFFF9500).copy(alpha = 0.4f), RoundedCornerShape(18.dp))
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261805)).border(1.dp, Color(0xFFFF9500).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🔑 Modular Exponentiation: What is 3³ mod 7? (Calculate: 27 mod 7)",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = LocalDynamicThemeColors.current.textPrimary,
-                textAlign = TextAlign.Center
+                text = "🔑 Modular Exponentiation: In asymmetric key math, compute 3^3 mod 7 = 27 mod 7. Select the correct remainder!",
+                fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
             )
         }
 
@@ -476,11 +469,11 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
                     modifier = Modifier
                         .size(64.dp, 56.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF331A05))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
                         .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedAnswer = opt
-                            if (isCorrect) onComplete()
+                            if (isCorrect) onComplete() else onDeductHeart()
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -492,32 +485,49 @@ private fun StackLevel1Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun StackLevel2Content(onComplete: () -> Unit) {
-    var isNegotiated by remember { mutableStateOf(false) }
+private fun StackLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedK by remember { mutableStateOf<Int?>(null) }
+    val options = listOf(2, 8, 19, 7)
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Diffie-Hellman Key Agreement: Alice & Bob compute g^(ab) mod p", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(70.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFF9500)), contentAlignment = Alignment.Center) {
-                Text(text = "A = g^a", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
-            }
-            Text(text = "⇄", fontSize = 20.sp, color = AmberGold)
-            Box(modifier = Modifier.size(70.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFB35900)), contentAlignment = Alignment.Center) {
-                Text(text = "B = g^b", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261805)).border(1.dp, Color(0xFFFF9500).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Diffie-Hellman: Prime p=23, Base g=5", fontSize = 13.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                Text(text = "Alice (a=6) sends A=8. Bob (b=15) sends B=19.\nAlice computes K = B^a mod p = 19^6 mod 23. What is K?", fontSize = 12.sp, color = Color.White, textAlign = TextAlign.Center)
             }
         }
 
-        if (!isNegotiated) {
-            Duolingo3DButton(
-                title = "✨ COMPUTE SHARED SECRET",
-                style = Duolingo3DButtonStyle.GREEN,
-                onClick = {
-                    isNegotiated = true
-                    onComplete()
-                },
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(70.dp, 48.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFF9500)), contentAlignment = Alignment.Center) {
+                Text(text = "A = 8", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+            }
+            Text(text = "⇄", fontSize = 20.sp, color = AmberGold)
+            Box(modifier = Modifier.size(70.dp, 48.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFB35900)), contentAlignment = Alignment.Center) {
+                Text(text = "B = 19", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == 2
+                val isSelected = selectedK == opt
+                Box(
+                    modifier = Modifier
+                        .size(64.dp, 50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                        .border(1.5.dp, Color(0xFFFF9500), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedK = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "$opt", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
+            }
         }
     }
 }
@@ -555,31 +565,41 @@ private fun StackLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 }
 
 @Composable
-private fun StackLevel4Content(onComplete: () -> Unit) {
-    var isPublished by remember { mutableStateOf(false) }
+private fun StackLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    val options = listOf("Private key exponent d", "Public exponent e", "Modulus n", "Public KeyShare g^a")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Public Key Distribution: Publish (e, n) to the world; keep private key (d, n) secret!", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.size(110.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF00CD9C)), contentAlignment = Alignment.Center) {
-                Text(text = "PUBLIC (e, n)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
-            }
-            Box(modifier = Modifier.size(110.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFB35900)), contentAlignment = Alignment.Center) {
-                Text(text = "PRIVATE (d, n)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
-            }
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF261805)).border(1.dp, Color(0xFFFF9500).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+        ) {
+            Text(
+                text = "Public Key Distribution: Which parameter must be kept strictly CONFIDENTIAL and NEVER published?",
+                fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
+            )
         }
 
-        if (!isPublished) {
-            Duolingo3DButton(
-                title = "🌐 DISTRIBUTE PUBLIC KEY",
-                style = Duolingo3DButtonStyle.AMBER,
-                onClick = {
-                    isPublished = true
-                    onComplete()
-                },
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt == "Private key exponent d"
+                val isSelected = selectedAnswer == opt
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                        .border(1.dp, Color(0xFFFF9500), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedAnswer = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = opt, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
         }
     }
 }
@@ -595,7 +615,7 @@ private fun StackLevel5Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
             modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF331A05)).padding(12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = if (isSigned) "VALID SIGNATURE: 0x9F4C2E" else "RAW DIGEST: 0x1A2B3C", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isSigned) DuolingoGreen else AmberGold, fontFamily = FontFamily.Monospace)
+            Text(text = if (isSigned) "VALID SIGNATURE: 0x9F4C2E ✓" else "RAW DIGEST: 0x1A2B3C", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (isSigned) DuolingoGreen else AmberGold, fontFamily = FontFamily.Monospace)
         }
 
         if (!isSigned) {
@@ -617,7 +637,7 @@ private fun StackLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
     var step by remember { mutableIntStateOf(0) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ Modular Exponentiation Sprint: Rapid squaring (${step}/3)", fontSize = 14.sp, color = Color(0xFFFF9500), fontWeight = FontWeight.Bold)
+        Text(text = "⚡ Modular Exponentiation Sprint: Binary Square-and-Multiply (${step}/3)", fontSize = 14.sp, color = Color(0xFFFF9500), fontWeight = FontWeight.Bold)
 
         Duolingo3DButton(
             title = "👉 SQUARE & MULTIPLY (${step}/3)",
@@ -634,38 +654,71 @@ private fun StackLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 @Composable
 private fun StackBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
-    val qubits = remember { mutableStateListOf(50, 40, 30) }
+    var currentPhase by remember { mutableIntStateOf(1) }
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var feedback by remember { mutableStateOf("The Quantum Cryptanalyst prepares Shor's algorithm! Deploy quantum-safe defenses!") }
+
+    val phaseData = when (currentPhase) {
+        1 -> Triple("Shor's Factorization: Which widely deployed cipher is broken in polynomial time by Shor's algorithm?", "RSA-2048", listOf("RSA-2048", "AES-256", "SHA-256", "ChaCha20"))
+        2 -> Triple("Shor's Discrete Log: Which key agreement protocol is broken by quantum computers?", "ECDH (Curve25519)", listOf("ECDH (Curve25519)", "AES-GCM", "HMAC-SHA256", "Argon2id"))
+        else -> Triple("Post-Quantum Cryptography: Which NIST standardized lattice-based KEM provides Shor resistance?", "ML-KEM (Kyber)", listOf("ML-KEM (Kyber)", "RSA-4096", "Diffie-Hellman", "ECC-P384"))
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(text = "👾 THE QUANTUM CRYPTANALYST! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "👾 THE QUANTUM CRYPTANALYST", fontSize = 15.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+            Text(text = "PHASE $currentPhase / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+        }
 
-        Text(text = "Qubit Entanglement: ${qubits.size}/6 (Don't let qubits overflow!)", fontSize = 12.sp, color = AmberGold)
+        Box(modifier = Modifier.fillMaxWidth(0.85f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))) {
+            Box(modifier = Modifier.fillMaxWidth(bossHP / 100f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(DuolingoRed))
+        }
+        Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            qubits.forEach { q ->
-                Box(
-                    modifier = Modifier
-                        .size(54.dp, 36.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFFF9500)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "$q", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
-                }
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF261805)).border(1.5.dp, Color(0xFFFF9500).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = phaseData.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+                Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
             }
         }
 
-        Duolingo3DButton(
-            title = "🛡️ SYNTHESIZE QUANTUM-RESISTANT KEY!",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                bossHP = maxOf(0, bossHP - 25)
-                if (qubits.isNotEmpty()) qubits.removeAt(qubits.size - 1)
-                if (bossHP <= 0) {
-                    onDefeatBoss()
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            phaseData.third.chunked(2).forEach { rowOptions ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    rowOptions.forEach { opt ->
+                        val isCorrect = opt == phaseData.second
+                        val isSelected = selectedAnswer == opt
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E1710))
+                                .border(1.dp, if (isSelected) Color.White else Color(0xFFFF9500).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .clickable {
+                                    selectedAnswer = opt
+                                    if (isCorrect) {
+                                        val newHP = maxOf(0, bossHP - 35)
+                                        bossHP = newHP
+                                        if (newHP <= 0 || currentPhase >= 3) {
+                                            onDefeatBoss()
+                                        } else {
+                                            currentPhase++
+                                            selectedAnswer = null
+                                            feedback = "💥 Quantum qubits decohered! Next quantum attack phase!"
+                                        }
+                                    } else {
+                                        onDeductHeart()
+                                        feedback = "❌ Quantum attack breached your defenses! Classical asymmetric ciphers are vulnerable."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = opt, fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                        }
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+            }
+        }
     }
 }

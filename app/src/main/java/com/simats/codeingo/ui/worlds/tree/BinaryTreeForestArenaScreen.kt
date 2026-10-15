@@ -220,12 +220,12 @@ fun BinaryTreeForestArenaScreen(
             ) {
                 when (currentLevel) {
                     BinaryTreeForestLevel.LEVEL_1 -> TreeLevel1Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_1) })
-                    BinaryTreeForestLevel.LEVEL_2 -> TreeLevel2Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_2) })
-                    BinaryTreeForestLevel.LEVEL_3 -> TreeLevel3Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_3) })
-                    BinaryTreeForestLevel.LEVEL_4 -> TreeLevel4Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_4) })
+                    BinaryTreeForestLevel.LEVEL_2 -> TreeLevel2Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_2) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    BinaryTreeForestLevel.LEVEL_3 -> TreeLevel3Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_3) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    BinaryTreeForestLevel.LEVEL_4 -> TreeLevel4Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_4) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     BinaryTreeForestLevel.LEVEL_5 -> TreeLevel5Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_5) })
-                    BinaryTreeForestLevel.LEVEL_6 -> TreeLevel6Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_6) })
-                    BinaryTreeForestLevel.BOSS_BATTLE -> TreeBossBattleContent(onDefeatBoss = { handleLevelCompleted(BinaryTreeForestLevel.BOSS_BATTLE) })
+                    BinaryTreeForestLevel.LEVEL_6 -> TreeLevel6Content(onComplete = { handleLevelCompleted(BinaryTreeForestLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    BinaryTreeForestLevel.BOSS_BATTLE -> TreeBossBattleContent(onDefeatBoss = { handleLevelCompleted(BinaryTreeForestLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                 }
             }
 
@@ -371,73 +371,73 @@ fun BinaryTreeForestArenaScreen(
 // ══════════════════════════════════════════════════════════════════
 // 🛡️ Cyber Bastion Levels Content (Network Security Protocols)
 // ══════════════════════════════════════════════════════════════════
+// Level Content Composables
+// ══════════════════════════════════════════════════════════════════
 @Composable
 private fun TreeLevel1Content(onComplete: () -> Unit) {
-    var handshakeCompleted by remember { mutableStateOf(false) }
+    var step by remember { mutableIntStateOf(0) }
+    val steps = listOf("ClientHello: Propose TLS 1.3 ciphers", "KeyShare: Send Ephemeral ECDH Share", "ServerHello: Handshake Keys Derived!")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp), modifier = Modifier.fillMaxWidth()) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0D2E1F)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🛡️ TLS 1.3 1-RTT Handshake: Speculative (EC)DHE KeyShare is sent directly in ClientHello, reducing connection latency to 1 round-trip!",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = LocalDynamicThemeColors.current.textPrimary,
-                textAlign = TextAlign.Center
+                text = "🌐 TLS 1.3 1-RTT Handshake: Client initiates connection with modern AEAD ciphers and ephemeral ECDH KeyShare.",
+                fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(100.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF10B981)), contentAlignment = Alignment.Center) {
-                Text(text = "CLIENT", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.Black)
-            }
-            Text(text = if (handshakeCompleted) "════ 1-RTT ════➔" else "- - - 1-RTT - - - ➔", fontSize = 11.sp, color = if (handshakeCompleted) DuolingoGreen else AmberGold)
-            Box(modifier = Modifier.size(100.dp, 50.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF0C3824)), contentAlignment = Alignment.Center) {
-                Text(text = "SERVER", fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
-            }
+        Box(modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(14.dp), contentAlignment = Alignment.Center) {
+            Text(text = steps[step.coerceIn(0, 2)], fontSize = 13.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
         }
 
-        if (!handshakeCompleted) {
-            Duolingo3DButton(
-                title = "⚡ SEND CLIENTHELLO + KEYSHARE",
-                style = Duolingo3DButtonStyle.GREEN,
-                onClick = {
-                    handshakeCompleted = true
-                    onComplete()
-                },
-                modifier = Modifier.fillMaxWidth(0.85f)
-            )
-        }
+        Duolingo3DButton(
+            title = if (step < 2) "🚀 NEXT PACKET (${step + 1}/3)" else "HANDSHAKE KEYS ESTABLISHED ✓",
+            style = Duolingo3DButtonStyle.GREEN,
+            onClick = {
+                step++
+                if (step >= 3) onComplete()
+            },
+            modifier = Modifier.fillMaxWidth(0.85f)
+        )
     }
 }
 
 @Composable
-private fun TreeLevel2Content(onComplete: () -> Unit) {
-    var selectedSuite by remember { mutableStateOf<String?>(null) }
-    val suites = listOf("TLS_AES_256_GCM_SHA384", "TLS_RSA_WITH_RC4_128_MD5", "TLS_DES_CBC_SHA")
+private fun TreeLevel2Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    val options = listOf("TLS_AES_256_GCM_SHA384", "TLS_RSA_WITH_RC4_128_MD5", "TLS_RSA_WITH_3DES_EDE_CBC_SHA", "SSL_NULL_WITH_NULL_NULL")
+    var selectedCipher by remember { mutableStateOf<String?>(null) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Cipher Suite Negotiation: Which modern AEAD cipher suite is approved in TLS 1.3?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp), modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
+        ) {
+            Text(
+                text = "🔒 Cipher Suite Negotiation: Which of the following is a valid, secure TLS 1.3 AEAD cipher suite?",
+                fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
+            )
+        }
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth(0.9f)) {
-            suites.forEach { suite ->
-                val isCorrect = suite.contains("AES_256_GCM")
-                val isSelected = selectedSuite == suite
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt == "TLS_AES_256_GCM_SHA384"
+                val isSelected = selectedCipher == opt
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
-                        .border(1.dp, Color(0xFF10B981), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
                         .clickable {
-                            selectedSuite = suite
-                            if (isCorrect) onComplete()
+                            selectedCipher = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
                         }
-                        .padding(12.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(text = suite, fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                    Text(text = opt, fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -445,37 +445,58 @@ private fun TreeLevel2Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun TreeLevel3Content(onComplete: () -> Unit) {
-    var isTunnelActive by remember { mutableStateOf(false) }
+private fun TreeLevel3Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedField by remember { mutableStateOf<String?>(null) }
+    val options = listOf("Sequence Number", "Security Parameters Index (SPI)", "Next Header", "Padding")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "IPsec ESP Tunnel Mode: Encapsulates entire IP packet with SPI, Sequence Number, and ICV auth tag.", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
-            modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(12.dp),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
         ) {
-            Text(text = if (isTunnelActive) "ESP TUNNEL ENCRYPTED ✓" else "[NEW IP HEADER | ESP | INNER IP | DATA]", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = if (isTunnelActive) DuolingoGreen else AmberGold, fontFamily = FontFamily.Monospace)
+            Text(
+                text = "IPsec ESP (Encapsulating Security Payload): Which field in the ESP header provides anti-replay protection?",
+                fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
+            )
         }
 
-        if (!isTunnelActive) {
-            Duolingo3DButton(
-                title = "🔒 ESTABLISH IPSEC ESP TUNNEL",
-                style = Duolingo3DButtonStyle.GREEN,
-                onClick = {
-                    isTunnelActive = true
-                    onComplete()
-                },
-                modifier = Modifier.fillMaxWidth(0.85f)
-            )
+        // ESP Packet Layout
+        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            listOf("New IP" to Color(0xFF0C3824), "SPI & Seq#" to AmberGold, "Encrypted Payload" to Color(0xFF10B981), "Padding" to Color(0xFF0C3824), "ICV Auth Tag" to Color(0xFF00CD9C)).forEach { (label, col) ->
+                Box(modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(col.copy(alpha = 0.25f)).border(1.dp, col, RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 6.dp)) {
+                    Text(text = label, fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White)
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt == "Sequence Number"
+                val isSelected = selectedField == opt
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedField = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = opt, fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun TreeLevel4Content(onComplete: () -> Unit) {
+private fun TreeLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "Stateful Firewall Inspection: Standard HTTPS encrypted traffic operates on which TCP destination port?", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "Stateful Firewall Inspection: Standard HTTPS encrypted traffic operates on which TCP destination port?", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             listOf(80, 443, 21, 23).forEach { port ->
@@ -487,7 +508,7 @@ private fun TreeLevel4Content(onComplete: () -> Unit) {
                         .background(Color(0xFF0C3824))
                         .border(1.5.dp, Color(0xFF10B981), RoundedCornerShape(14.dp))
                         .clickable {
-                            if (isCorrect) onComplete()
+                            if (isCorrect) onComplete() else onDeductHeart()
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -503,7 +524,7 @@ private fun TreeLevel5Content(onComplete: () -> Unit) {
     var isChainValidated by remember { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "X.509 PKI Chain of Trust: Root CA ➔ Intermediate CA ➔ Leaf Server Cert", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(text = "X.509 PKI Chain of Trust: Root CA ➔ Intermediate CA ➔ Leaf Server Cert", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Box(
             modifier = Modifier.fillMaxWidth(0.85f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF0C3824)).padding(12.dp),
@@ -527,41 +548,118 @@ private fun TreeLevel5Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun TreeLevel6Content(onComplete: () -> Unit) {
-    var step by remember { mutableIntStateOf(0) }
+private fun TreeLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    val options = listOf(
+        "Encode TCP connection state into Initial Sequence Number (ISN)",
+        "Block all port 443 incoming traffic",
+        "Keep half-open sockets open indefinitely",
+        "Drop 50% of packets randomly"
+    )
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ DDoS Defense Sprint: Filter spoofed SYN flood packets (${step}/3)", fontSize = 14.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF0C2B1C)).border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(14.dp)
+        ) {
+            Text(
+                text = "⚡ DDoS Defense Sprint: How do SYN Cookies mitigate SYN flood memory exhaustion without allocating socket buffer until ACK?",
+                fontSize = 13.sp, fontWeight = FontWeight.Bold, color = LocalDynamicThemeColors.current.textPrimary, textAlign = TextAlign.Center
+            )
+        }
 
-        Duolingo3DButton(
-            title = "🛡️ APPLY SYN COOKIE FILTER (${step}/3)",
-            style = Duolingo3DButtonStyle.AMBER,
-            onClick = {
-                step++
-                if (step == 3) onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+            options.forEach { opt ->
+                val isCorrect = opt.startsWith("Encode TCP connection state")
+                val isSelected = selectedAnswer == opt
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                        .border(1.dp, Color(0xFF10B981), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedAnswer = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        }
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(text = opt, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun TreeBossBattleContent(onDefeatBoss: () -> Unit) {
+private fun TreeBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
+    var currentPhase by remember { mutableIntStateOf(1) }
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var feedback by remember { mutableStateOf("The Cyber Titan launches multi-vector network assaults! Defend the Cyber Bastion!") }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "👾 THE CYBER TITAN BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+    val phaseData = when (currentPhase) {
+        1 -> Triple("SYN Flood: Inbound half-open connection backlog saturated! Deploy countermeasure!", "Deploy SYN Cookies (Stateless Handshake)", listOf("Deploy SYN Cookies (Stateless Handshake)", "Disable Ingress Firewall", "Accept all half-open sockets", "Send ICMP Redirect"))
+        2 -> Triple("MITM Rogue Certificate: Compromised intermediate CA detected in path! Deploy defense!", "Enforce Certificate Transparency & OCSP", listOf("Enforce Certificate Transparency & OCSP", "Accept Self-Signed Certificate", "Disable TLS Verification", "Downgrade to HTTP"))
+        else -> Triple("Data Exfiltration: Attacker probes open ports on perimeter! Deploy network policy!", "Stateful Deep Packet Inspection (DPI)", listOf("Stateful Deep Packet Inspection (DPI)", "Allow Any Any Traffic", "Disable WAF Rules", "Forward all traffic to DMZ"))
+    }
 
-        Text(text = "Your packet firewalls will crumble before my distributed botnet!", fontSize = 12.sp, color = AmberGold)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "👾 THE CYBER TITAN", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+            Text(text = "PHASE $currentPhase / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+        }
 
-        Duolingo3DButton(
-            title = "🏰 DEPLOY FIREWALL DEFENSE POLICY!",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                bossHP = maxOf(0, bossHP - 35)
-                if (bossHP <= 0) onDefeatBoss()
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+        Box(modifier = Modifier.fillMaxWidth(0.85f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))) {
+            Box(modifier = Modifier.fillMaxWidth(bossHP / 100f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(DuolingoRed))
+        }
+        Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF0C2B1C)).border(1.5.dp, Color(0xFF10B981).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = phaseData.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+                Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            phaseData.third.chunked(2).forEach { rowOptions ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    rowOptions.forEach { opt ->
+                        val isCorrect = opt == phaseData.second
+                        val isSelected = selectedAnswer == opt
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF0C3824))
+                                .border(1.dp, if (isSelected) Color.White else Color(0xFF10B981).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .clickable {
+                                    selectedAnswer = opt
+                                    if (isCorrect) {
+                                        val newHP = maxOf(0, bossHP - 35)
+                                        bossHP = newHP
+                                        if (newHP <= 0 || currentPhase >= 3) {
+                                            onDefeatBoss()
+                                        } else {
+                                            currentPhase++
+                                            selectedAnswer = null
+                                            feedback = "💥 Attack neutralized! The Cyber Titan switches exploit vectors!"
+                                        }
+                                    } else {
+                                        onDeductHeart()
+                                        feedback = "❌ Network breached! Deploy standard cyber security countermeasures."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = opt, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, textAlign = TextAlign.Center)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

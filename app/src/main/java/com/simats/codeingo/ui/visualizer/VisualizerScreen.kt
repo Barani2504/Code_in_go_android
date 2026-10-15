@@ -1221,7 +1221,7 @@ private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(DarkBackground.copy(alpha = 0.6f))
+                    .background(LocalDynamicThemeColors.current.inputBackground)
                     .border(1.dp, InputBorder, RoundedCornerShape(10.dp))
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
@@ -1237,7 +1237,7 @@ private fun DSATopicDeepDiveHeaderCard(type: DSAVisualizerType) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(DarkBackground.copy(alpha = 0.6f))
+                    .background(LocalDynamicThemeColors.current.inputBackground)
                     .border(1.dp, InputBorder, RoundedCornerShape(10.dp))
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {

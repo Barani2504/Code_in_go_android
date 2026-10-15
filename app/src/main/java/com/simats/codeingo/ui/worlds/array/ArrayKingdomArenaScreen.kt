@@ -840,7 +840,7 @@ private fun ArrayLevel4Content(onComplete: () -> Unit) {
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun ArrayLevel5Content(onComplete: () -> Unit) {
-    val blocks = remember { mutableStateListOf("CIPH", "ER T", "EXT ", "DONE") }
+    val blocks = remember { mutableStateListOf("EXT ", "CIPH", "DONE", "ER T") }
     var selectedIdx by remember { mutableStateOf<Int?>(null) }
     val correctOrder = listOf("CIPH", "ER T", "EXT ", "DONE")
 
@@ -983,12 +983,19 @@ private fun ArrayLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit
 @Composable
 private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
-    val cipherRunes = remember { mutableStateListOf('S', 'P', 'H', 'I', 'N', 'X') }
-    var selectedIdx by remember { mutableStateOf<Int?>(null) }
+    var currentPhase by remember { mutableIntStateOf(1) } // 1: "PHDVWHU"->MASTER, 2: "VHFUHW"->SECRET, 3: "VKDGRZ"->SHADOW
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var feedbackMessage by remember { mutableStateOf("The Sphinx challenges you: Decrypt Caesar shift K=3 to shatter the shadow ward!") }
+
+    val phaseData = when (currentPhase) {
+        1 -> Triple("PHDVWHU", "MASTER", listOf("MASTER", "MISTER", "MONSTER", "MATRIX"))
+        2 -> Triple("VHFUHW", "SECRET", listOf("SECRET", "SECURE", "SILENT", "SHADOW"))
+        else -> Triple("VKDGRZ", "SHADOW", listOf("SHADOW", "SIGNAL", "SPHINX", "SYSTEM"))
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         // Boss Status Bar
@@ -997,18 +1004,26 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
             verticalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "🦅 THE SPHINX OF SHADOWS (BOSS)",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = DuolingoRed,
-                letterSpacing = 1.sp
-            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "🦅 THE SPHINX OF SHADOWS",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    color = DuolingoRed,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "PHASE $currentPhase / 3",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black,
+                    color = AmberGold
+                )
+            }
 
             // Boss HP Bar
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth()
                     .height(14.dp)
                     .clip(RoundedCornerShape(7.dp))
                     .background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))
@@ -1024,42 +1039,83 @@ private fun ArrayBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -
             Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
         }
 
-        // Cipher Runes
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
+        // Cipher Riddle Box
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF2E1010))
+                .border(1.5.dp, DuolingoRed.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                .padding(14.dp),
+            contentAlignment = Alignment.Center
         ) {
-            cipherRunes.forEachIndexed { i, ch ->
-                val isSelected = selectedIdx == i
-                Box(
-                    modifier = Modifier
-                        .size(52.dp, 56.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold else Color(0xFF2E1010))
-                        .border(1.5.dp, if (isSelected) Color.White else DuolingoRed.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
-                        .clickable {
-                            if (selectedIdx == null) {
-                                selectedIdx = i
-                            } else {
-                                val first = selectedIdx!!
-                                val temp = cipherRunes[first]
-                                cipherRunes[first] = cipherRunes[i]
-                                cipherRunes[i] = temp
-                                bossHP = maxOf(0, bossHP - 25)
-                                if (bossHP <= 0) {
-                                    onDefeatBoss()
-                                }
-                                selectedIdx = null
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "$ch", fontSize = 18.sp, fontWeight = FontWeight.Black, color = if (isSelected) Color.Black else Color.White)
-                }
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "RUNE CIPHERTEXT: [ ${phaseData.first} ] (K = 3)",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = AmberGold,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 2.sp
+                )
+                Text(
+                    text = feedbackMessage,
+                    fontSize = 12.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
-        Text(text = "None can breach the Cipher Sanctum without the master key!", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+        // Decryption Answer Choices
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            phaseData.third.chunked(2).forEach { rowOptions ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    rowOptions.forEach { option ->
+                        val isCorrect = option == phaseData.second
+                        val isSelected = selectedAnswer == option
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) {
+                                        if (isCorrect) DuolingoGreen else DuolingoRed
+                                    } else Color(0xFF14243C)
+                                )
+                                .border(1.5.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    selectedAnswer = option
+                                    if (isCorrect) {
+                                        val newHP = maxOf(0, bossHP - 35)
+                                        bossHP = newHP
+                                        if (newHP <= 0 || currentPhase >= 3) {
+                                            onDefeatBoss()
+                                        } else {
+                                            currentPhase++
+                                            selectedAnswer = null
+                                            feedbackMessage = "💥 Critical strike! The Sphinx conjures a new ward!"
+                                        }
+                                    } else {
+                                        onDeductHeart()
+                                        feedbackMessage = "❌ The Sphinx counterattacks! Shift modularly backwards: P = (C - 3) mod 26."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = option,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 // ══════════════════════════════════════════════════════════════════

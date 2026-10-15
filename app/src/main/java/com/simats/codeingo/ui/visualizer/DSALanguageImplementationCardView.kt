@@ -62,6 +62,8 @@ fun DSALanguageImplementationCardView(
     modifier: Modifier = Modifier,
     initialLanguage: String = "Python"
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
     val context = LocalContext.current
     var activeLanguage by remember(initialLanguage) { mutableStateOf(initialLanguage) }
     var isExpanded by remember { mutableStateOf(true) }
@@ -99,8 +101,8 @@ fun DSALanguageImplementationCardView(
         modifier = modifier
             .fillMaxWidth()
             .clip(cardShape)
-            .background(CardBackground)
-            .border(1.5.dp, InputBorder, cardShape)
+            .background(dynamicColors.cardBackground)
+            .border(1.5.dp, dynamicColors.cardBorder, cardShape)
     ) {
         // Card Header
         Row(
@@ -163,8 +165,8 @@ fun DSALanguageImplementationCardView(
                         Box(
                             modifier = Modifier
                                 .clip(chipShape)
-                                .background(if (isSelected) DsaBlue else DarkBackground)
-                                .border(1.dp, if (isSelected) DsaBlue else InputBorder, chipShape)
+                                .background(if (isSelected) DsaBlue else dynamicColors.inputBackground)
+                                .border(1.dp, if (isSelected) DsaBlue else dynamicColors.inputBorder, chipShape)
                                 .pressScale()
                                 .clickable {
                                     activeLanguage = lang
@@ -176,7 +178,7 @@ fun DSALanguageImplementationCardView(
                                 text = lang,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color.White else SubtextGray
+                                color = if (isSelected) Color.White else dynamicColors.textSecondary
                             )
                         }
                     }
@@ -195,8 +197,8 @@ fun DSALanguageImplementationCardView(
                         Row(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(DarkBackground)
-                                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                .background(dynamicColors.inputBackground)
+                                .border(1.dp, AmberGold.copy(alpha = if (isDark) 0.4f else 0.6f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 10.dp, vertical = 5.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -210,7 +212,7 @@ fun DSALanguageImplementationCardView(
                                 text = time,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
-                                color = AmberGold
+                                color = if (isDark) AmberGold else Color(0xFFB45309)
                             )
                         }
                     }

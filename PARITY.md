@@ -164,3 +164,47 @@ For future package clean-up (e.g., standardizing `com.simats.codeingo.data.model
   typealias DSAExerciseType = ExerciseType
   ```
 - Retain Room migration version numbers without dropping old column names.
+
+---
+
+### 6. Interactive Visualizers & 3D Battle Arenas Specification (CNS)
+
+The 10 interactive visualizer engines and 5 standalone 3D battle arena modules have been fully migrated to Cryptography & Network Security, maintaining exact enum keys (`DSAVisualizerType`) and route identifiers:
+
+#### A. 10 Interactive CNS Visualizers (`CNSVisualizers.kt`)
+1. **Caesar & Substitution Cipher (`ARRAY`):** Modular alphabet shift wheel $C = (P + K) \pmod{26}$, direction toggle (Encrypt $P+K$ vs Decrypt $C-K$), brute-force drawer exploring all 26 shifts, live frequency distribution bar chart analysis, and educational toy security warnings.
+2. **DES Feistel Network (`STACK`):** 16-round interactive Feistel engine, 32-bit $L_i, R_i$ register swaps, round subkeys $K_i$, $F(R_i, K_i)$ expansion preview, and EFF Deep Crack deprecation advisory.
+3. **AES 128-Bit State Matrix & Modes (`QUEUE`):** Multi-mode studio containing (1) $4\times 4$ byte state matrix in hex with interactive tabs for `SubBytes` (GF($2^8$) S-Box), `ShiftRows`, `MixColumns`, and `AddRoundKey`; and (2) Block Cipher Operating Modes tab comparing ECB (penguin duplicate block pattern leakage), CBC (with IV chaining), CTR (stream mode), and GCM (AEAD with GMAC authentication).
+4. **Vigenère Polyalphabetic Cipher (`LINKED_LIST`):** Secret keyword repeating keystream alignment ribbon, bidirectional Encrypt/Decrypt modes, Tabula Recta coordinate intersection lookup, and Kasiski / Index of Coincidence cryptanalysis notes.
+5. **Diffie-Hellman Key Agreement (`BINARY_TREE`):** Public prime $p=23$ and generator $g=5$, interactive private secret sliders for Alice ($a$) and Bob ($b$), insecure eavesdropper channel, and shared secret $g^{ab} \pmod p$ matching verification.
+6. **RSA Public Key Cryptosystem & Signatures (`AVL_TREE`):** Primes $(p=61, q=53)$, modulus $n=3233$, Euler's totient $\phi(n)=3120$, public key $(e=17, n)$, private key $(d=2753, n)$, dual modes for Confidentiality ($c = m^e \bmod n, m = c^d \bmod n$) and Digital Signatures ($s = m^d \bmod n, m = s^e \bmod n$), with Bleichenbacher padding oracle / RSA-PSS advisories.
+7. **Elliptic Curve Points (`TRIE`):** Explicit real-number $\mathbb{R}$ curve canvas illustration with secant chord line through $P$ and $Q$ and scalar slider $kP$, coupled with a toy finite field $\mathbb{F}_{17}$ arithmetic engine ($y^2 = x^3 + x + 6 \bmod 17$) computing discrete point coordinates and explaining ECDLP hardness.
+8. **SHA-256 Hash Construction & Avalanche (`GRAPH`):** Live plaintext input, 512-bit block padding breakdown, 8 working registers $(A..H)$, real-time 256-bit hexadecimal digest calculation, and an interactive Avalanche comparison engine comparing two inputs with 1-character difference to demonstrate $\sim 50\%$ bit diffusion.
+9. **Real HMAC-SHA256 & Password Salting (`SORTING`):** Genuine RFC 2104 nested hashing using Java `Mac.getInstance("HmacSHA256")` with editable key and message, coupled with an interactive Birthday Paradox $2^{n/2}$ collision bound simulator and a dedicated Password Hashing & Salting card (Argon2id, bcrypt, cryptographic salts vs GPU rainbow tables).
+10. **TLS 1.3 Handshake Swim-Lane Tracer (`STEP_RECORDER`):** Client-to-server and server-to-client swim-lane packet inspector (ClientHello, ServerHello, EncryptedExtensions, CertificateVerify, Finished, AEAD application traffic) with key derivation indicators and a TLS 1.2 vs TLS 1.3 architectural comparison matrix.
+
+#### B. 5 Flagship 3D Battle Arenas
+1. **The Cipher Sanctum Arena (`ArrayKingdomArenaScreen`):** Caesar shift ring, modular offset cryptanalysis, frequency analysis hunt, Vigenère keystream alignment, unscrambled columnar transposition grid, 20s cryptanalysis sprint, and 3-phase Sphinx of Shadows Boss battle with Caesar decryption challenges and heart deductions on incorrect answers.
+2. **The S-Box Citadel Arena (`LinkedListRoadArenaScreen`):** AES SubBytes S-Box lookup table with heart penalty, animated 4×4 ShiftRows cyclic row rotation grid, MixColumns GF($2^8$) column matrix diffusion, AddRoundKey bitwise XOR calculation quiz, 16-round Feistel swap, avalanche diffusion sprint, and 3-phase Block Overlord Boss battle testing AES internal transformations.
+3. **The Key Keepers Spire Arena (`StackTowerArenaScreen`):** Modular exponentiation $b^e \bmod m$, Diffie-Hellman secret synthesis quiz with heart deductions, RSA Euler's totient $\phi(n)$, confidential private key distribution challenge, digital signature verification, prime factorization sprint, and 3-phase Quantum Cryptanalyst Boss battle testing Shor's algorithm vulnerabilities and NIST post-quantum cryptography (ML-KEM/Kyber).
+4. **The Integrity Realm Station Arena (`QueueStationArenaScreen`):** SHA-256 512-bit block chunking quiz, 1-bit avalanche effect demonstration, Keccak 5×5 lane sponge absorb/squeeze phases, Merkle tree root validation, Birthday Paradox collision bound ($2^{n/2}$), HMAC nested authentication purpose quiz, and 3-phase Collision Beast Boss battle with collision & length-extension defense challenges.
+5. **The Cyber Bastion Citadel Arena (`BinaryTreeForestArenaScreen`):** TLS 1.3 1-RTT handshake packet flow, modern AEAD cipher suite negotiation, IPsec ESP tunnel packet segmentation (SPI & sequence anti-replay), stateful firewall port 443 inspection, X.509 PKI certificate chain of trust verification, DDoS SYN Cookie stateless defense challenge, and 3-phase Cyber Titan Boss battle defending against SYN floods, MITM rogue certificates, and data exfiltration.
+
+---
+
+## 7. Visualizer Engine Theme Adaptation (Light & Dark Mode Parity)
+
+All 10 Cryptography and DSA visualizer topics and surrounding host containers adapt to the user's active theme (`AppTheme.LIGHT`, `AppTheme.DARK`, or `AppTheme.SYSTEM`):
+
+- **Dynamic Theme Tokens (`LocalDynamicThemeColors.current`):**
+  - Card, input, and container backgrounds seamlessly adapt between `PhoenixLightCard` (`#FFFFFF`), `PhoenixLightInput` (`#ECEFF5`), and dark modes (`PhoenixCard` `#131D2E`, `PhoenixInput` `#0F1726`).
+  - Text and subtext dynamically bind to `textPrimary` and `textSecondary` (`PhoenixLightText` `#121826` in light mode, `#FFFFFF` in dark mode).
+- **High-Contrast Light Accent Pairs:**
+  - Amber / Gold: `#B45309` (Light) vs `AmberGold` `#FFC800` (Dark)
+  - Cyan: `#0284C7` (Light) vs `Color.Cyan` (Dark)
+  - Teal / Mint: `#047857` / `#0D9488` (Light) vs `Color(0xFF00CD9C)` / `DsaTeal` (Dark)
+  - Emerald: `#15803D` (Light) vs `DsaGreen` (Dark)
+- **Canvas & Interactive Elements:**
+  - ECC Point Addition canvas dynamically adapts coordinate axes, grid ticks, and tangent chord lines between subtle dark (`Color.Black.copy(0.12f)`) and light strokes (`Color.White.copy(0.18f)`).
+  - Language implementation code cards feature language chips and complexity tags that adapt between `dynamicColors.inputBackground` and themed amber borders.
+  - Quick topic switcher carousels and deep-dive header metrics adapt background tints and borders dynamically.

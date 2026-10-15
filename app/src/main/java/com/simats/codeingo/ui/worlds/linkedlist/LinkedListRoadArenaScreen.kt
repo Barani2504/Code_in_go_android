@@ -219,13 +219,13 @@ fun LinkedListRoadArenaScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (currentLevel) {
-                    LinkedListRoadLevel.LEVEL_1 -> LLLevel1Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_1) })
+                    LinkedListRoadLevel.LEVEL_1 -> LLLevel1Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_1) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     LinkedListRoadLevel.LEVEL_2 -> LLLevel2Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_2) })
                     LinkedListRoadLevel.LEVEL_3 -> LLLevel3Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_3) })
-                    LinkedListRoadLevel.LEVEL_4 -> LLLevel4Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_4) })
+                    LinkedListRoadLevel.LEVEL_4 -> LLLevel4Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_4) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                     LinkedListRoadLevel.LEVEL_5 -> LLLevel5Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_5) })
-                    LinkedListRoadLevel.LEVEL_6 -> LLLevel6Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_6) })
-                    LinkedListRoadLevel.BOSS_BATTLE -> LLBossBattleContent(onDefeatBoss = { handleLevelCompleted(LinkedListRoadLevel.BOSS_BATTLE) })
+                    LinkedListRoadLevel.LEVEL_6 -> LLLevel6Content(onComplete = { handleLevelCompleted(LinkedListRoadLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    LinkedListRoadLevel.BOSS_BATTLE -> LLBossBattleContent(onDefeatBoss = { handleLevelCompleted(LinkedListRoadLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
                 }
             }
 
@@ -371,22 +371,33 @@ fun LinkedListRoadArenaScreen(
 // ══════════════════════════════════════════════════════════════════
 // 🧱 S-Box Citadel Levels Content
 // ══════════════════════════════════════════════════════════════════
+// Level Content Composables
+// ══════════════════════════════════════════════════════════════════
 @Composable
-private fun LLLevel1Content(onComplete: () -> Unit) {
+private fun LLLevel1Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    val candidates = listOf("0xED", "0x53", "0x63", "0x7F")
     var selectedByte by remember { mutableStateOf<String?>(null) }
-    val candidates = listOf("0x12", "0xED", "0x5A", "0x7F")
+    var feedback by remember { mutableStateOf<String?>(null) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF2B0E14)).border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), RoundedCornerShape(18.dp)).padding(16.dp)
         ) {
             Text(
-                text = "🧱 SubBytes Transformation: In the AES S-Box lookup table, input byte 0x53 maps to its multiplicative inverse. Select the output byte!",
-                fontSize = 14.sp,
+                text = "🧱 SubBytes Transformation: In the AES S-Box lookup table, input byte 0x53 maps to its multiplicative inverse in GF(2^8) followed by affine mapping. Select the output byte!",
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary,
                 textAlign = TextAlign.Center
             )
+        }
+
+        if (feedback != null) {
+            Text(text = feedback!!, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (selectedByte == "0xED") DuolingoGreen else DuolingoRed)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -401,7 +412,13 @@ private fun LLLevel1Content(onComplete: () -> Unit) {
                         .border(1.5.dp, Color(0xFFEF4444), RoundedCornerShape(12.dp))
                         .clickable {
                             selectedByte = byteStr
-                            if (isCorrect) onComplete()
+                            if (isCorrect) {
+                                feedback = "✓ S-Box(0x53) = 0xED! Non-linear confusion achieved!"
+                                onComplete()
+                            } else {
+                                feedback = "❌ Incorrect S-box lookup. Try 0xED!"
+                                onDeductHeart()
+                            }
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -415,24 +432,49 @@ private fun LLLevel1Content(onComplete: () -> Unit) {
 @Composable
 private fun LLLevel2Content(onComplete: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
-    val rowShifts = listOf("Row 0: 0 byte shift", "Row 1: 1 byte shift", "Row 2: 2 byte shift", "Row 3: 3 byte shift")
+    val rowShifts = listOf("Row 0: Shift 0 bytes (no shift)", "Row 1: Cyclically shift 1 byte left", "Row 2: Cyclically shift 2 bytes left", "Row 3: Cyclically shift 3 bytes left")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "ShiftRows Permutation: Cyclically shifting 4x4 state matrix (${step}/4)", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+    val matrixRows = listOf(
+        listOf("s0,0", "s0,1", "s0,2", "s0,3"),
+        listOf(if (step >= 1) "s1,1" else "s1,0", if (step >= 1) "s1,2" else "s1,1", if (step >= 1) "s1,3" else "s1,2", if (step >= 1) "s1,0" else "s1,3"),
+        listOf(if (step >= 2) "s2,2" else "s2,0", if (step >= 2) "s2,3" else "s2,1", if (step >= 2) "s2,0" else "s2,2", if (step >= 2) "s2,1" else "s2,3"),
+        listOf(if (step >= 3) "s3,3" else "s3,0", if (step >= 3) "s3,0" else "s3,1", if (step >= 3) "s3,1" else "s3,2", if (step >= 3) "s3,2" else "s3,3")
+    )
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(text = "ShiftRows Permutation: Cyclically shifting 4x4 state matrix (${step}/4)", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+
+        // 4x4 Grid preview
+        Column(
+            modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFF2B0E14)).padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            matrixRows.forEachIndexed { r, row ->
+                val isCurrentShift = step == r
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    row.forEach { cell ->
+                        Box(
+                            modifier = Modifier.size(52.dp, 36.dp).clip(RoundedCornerShape(6.dp))
+                                .background(if (isCurrentShift) Color(0xFFEF4444).copy(alpha = 0.4f) else Color(0xFF1E0A0E))
+                                .border(1.dp, if (isCurrentShift) Color(0xFFEF4444) else Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = cell, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF330F16))
-                .padding(14.dp),
+            modifier = Modifier.fillMaxWidth(0.9f).clip(RoundedCornerShape(10.dp)).background(Color(0xFF330F16)).padding(10.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = rowShifts[step.coerceIn(0, 3)], fontSize = 15.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
+            Text(text = rowShifts[step.coerceIn(0, 3)], fontSize = 13.sp, fontWeight = FontWeight.Black, color = AmberGold, fontFamily = FontFamily.Monospace)
         }
 
         Duolingo3DButton(
-            title = if (step < 3) "🔄 EXECUTE ROW SHIFT" else "SHIFTROWS COMPLETE ✓",
+            title = if (step < 3) "🔄 EXECUTE ROW SHIFT (${step + 1}/4)" else "SHIFTROWS COMPLETE ✓",
             style = Duolingo3DButtonStyle.AMBER,
             onClick = {
                 step++
@@ -447,18 +489,33 @@ private fun LLLevel2Content(onComplete: () -> Unit) {
 private fun LLLevel3Content(onComplete: () -> Unit) {
     var isDiffused by remember { mutableStateOf(false) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "MixColumns Diffusion: Polynomial multiplication in GF(2^8)", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text(text = "MixColumns Diffusion: Polynomial multiplication modulo x^4 + 1 in GF(2^8)", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFEF4444)), contentAlignment = Alignment.Center) {
-                Text(text = "[C1]", fontSize = 14.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "c(x) MATRIX", fontSize = 10.sp, color = AmberGold)
+                Box(modifier = Modifier.size(70.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFF2B0E14)), contentAlignment = Alignment.Center) {
+                    Text(text = "[ 02 03 ]\n[ 01 01 ]", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
             }
 
-            Text(text = if (isDiffused) "× [M] ➔ [C1']" else "× [M] ➔ ?", fontSize = 14.sp, color = if (isDiffused) DuolingoGreen else Color.White, fontFamily = FontFamily.Monospace)
+            Text(text = "×", fontSize = 20.sp, color = AmberGold)
 
-            Box(modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp)).background(if (isDiffused) DuolingoGreen else Color(0xFF330F16)), contentAlignment = Alignment.Center) {
-                Text(text = if (isDiffused) "DIFFUSED" else "RAW", fontSize = 11.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "INPUT COL", fontSize = 10.sp, color = Color(0xFFEF4444))
+                Box(modifier = Modifier.size(54.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFEF4444)), contentAlignment = Alignment.Center) {
+                    Text(text = "D4\nBF\n5D\n30", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
+            }
+
+            Text(text = "=", fontSize = 20.sp, color = Color.White)
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "DIFFUSED", fontSize = 10.sp, color = DuolingoGreen)
+                Box(modifier = Modifier.size(54.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(if (isDiffused) DuolingoGreen else Color(0xFF330F16)), contentAlignment = Alignment.Center) {
+                    Text(text = if (isDiffused) "04\n66\n81\nE5" else "??\n??\n??\n??", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
             }
         }
 
@@ -477,30 +534,38 @@ private fun LLLevel3Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun LLLevel4Content(onComplete: () -> Unit) {
-    var isXored by remember { mutableStateOf(false) }
+private fun LLLevel4Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    val options = listOf("0x7F", "0x3F", "0x2B", "0x80")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "AddRoundKey: Bitwise XOR State with 128-bit Subkey K", fontSize = 14.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text(text = "AddRoundKey: Compute bitwise XOR between State Byte and Round Key Byte", fontSize = 13.5.sp, color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "0x54", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            Text(text = "0x54 (01010100)", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             Text(text = "⊕", color = Color(0xFFEF4444), fontSize = 18.sp)
-            Text(text = "0x2B", color = AmberGold, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Text(text = "=", color = Color.White)
-            Text(text = if (isXored) "0x7F" else "???", color = if (isXored) DuolingoGreen else Color(0xFFEF4444), fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+            Text(text = "0x2B (00101011)", color = AmberGold, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
         }
 
-        if (!isXored) {
-            Duolingo3DButton(
-                title = "➕ COMPUTE BITWISE XOR",
-                style = Duolingo3DButtonStyle.GREEN,
-                onClick = {
-                    isXored = true
-                    onComplete()
-                },
-                modifier = Modifier.fillMaxWidth(0.75f)
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == "0x7F"
+                val isSelected = selectedOption == opt
+                Box(
+                    modifier = Modifier
+                        .size(68.dp, 50.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF2B0E14))
+                        .border(1.5.dp, Color(0xFFEF4444), RoundedCornerShape(12.dp))
+                        .clickable {
+                            selectedOption = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = opt, fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
+            }
         }
     }
 }
@@ -537,47 +602,105 @@ private fun LLLevel5Content(onComplete: () -> Unit) {
 }
 
 @Composable
-private fun LLLevel6Content(onComplete: () -> Unit) {
-    var step by remember { mutableIntStateOf(0) }
+private fun LLLevel6Content(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+    var selectedRound by remember { mutableStateOf<String?>(null) }
+    val options = listOf("Round 1", "Round 2-3", "Round 10", "Never")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "⚡ Avalanche Sprint: Single bit flip cascades across 16 rounds!", fontSize = 14.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text(text = "⚡ Avalanche Sprint: Flipping 1 bit in the 128-bit input propagates to flip ~50% of the entire state matrix by which AES round?", fontSize = 13.5.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
-        Duolingo3DButton(
-            title = "👉 PROPAGATE AVALANCHE (${step}/3)",
-            style = Duolingo3DButtonStyle.AMBER,
-            onClick = {
-                step++
-                if (step == 3) onComplete()
-            },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            options.forEach { opt ->
+                val isCorrect = opt == "Round 2-3"
+                val isSelected = selectedRound == opt
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF2B0E14))
+                        .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(10.dp))
+                        .clickable {
+                            selectedRound = opt
+                            if (isCorrect) onComplete() else onDeductHeart()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = opt, fontSize = 12.sp, fontWeight = FontWeight.Black, color = Color.White)
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun LLBossBattleContent(onDefeatBoss: () -> Unit) {
+private fun LLBossBattleContent(onDefeatBoss: () -> Unit, onDeductHeart: () -> Unit) {
     var bossHP by remember { mutableIntStateOf(100) }
-    var bridgeBroken by remember { mutableStateOf(true) }
+    var currentPhase by remember { mutableIntStateOf(1) }
+    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var feedback by remember { mutableStateOf("The Block Overlord locks down the AES Citadel! Break its cipher defenses!") }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Text(text = "👾 THE BLOCK OVERLORD BOSS! (${bossHP} HP)", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+    val phaseData = when (currentPhase) {
+        1 -> Triple("SubBytes Defense: What is the S-Box value for input byte 0x00?", "0x63", listOf("0x63", "0x00", "0xFF", "0x53"))
+        2 -> Triple("MixColumns Diffusion: In which round of AES-128 is MixColumns OMITTED?", "Round 10", listOf("Round 1", "Round 5", "Round 10", "Never"))
+        else -> Triple("Key Expansion: AES-128 expands its 16-byte key into how many 32-bit round words?", "44 words", listOf("44 words", "40 words", "16 words", "64 words"))
+    }
 
-        Text(
-            text = if (bridgeBroken) "⚠️ S-BOX DESYNCHRONIZATION! Realign round keys!" else "✨ Matrix aligned! Dealing critical damage!",
-            fontSize = 13.sp,
-            color = if (bridgeBroken) DuolingoRed else DuolingoGreen
-        )
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "👾 THE BLOCK OVERLORD", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
+            Text(text = "PHASE $currentPhase / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+        }
 
-        Duolingo3DButton(
-            title = "🧱 REALIGN ROUND KEYS!",
-            style = Duolingo3DButtonStyle.GREEN,
-            onClick = {
-                bossHP = maxOf(0, bossHP - 35)
-                bridgeBroken = false
-                if (bossHP <= 0) onDefeatBoss()
-            },
-            modifier = Modifier.fillMaxWidth(0.85f)
-        )
+        Box(modifier = Modifier.fillMaxWidth(0.85f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f))) {
+            Box(modifier = Modifier.fillMaxWidth(bossHP / 100f).height(14.dp).clip(RoundedCornerShape(7.dp)).background(DuolingoRed))
+        }
+        Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF2B0E14)).border(1.5.dp, Color(0xFFEF4444).copy(alpha = 0.6f), RoundedCornerShape(14.dp)).padding(14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = phaseData.first, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+                Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            phaseData.third.chunked(2).forEach { rowOptions ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    rowOptions.forEach { opt ->
+                        val isCorrect = opt == phaseData.second
+                        val isSelected = selectedAnswer == opt
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed) else Color(0xFF1E0A0E))
+                                .border(1.dp, if (isSelected) Color.White else Color(0xFFEF4444).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .clickable {
+                                    selectedAnswer = opt
+                                    if (isCorrect) {
+                                        val newHP = maxOf(0, bossHP - 35)
+                                        bossHP = newHP
+                                        if (newHP <= 0 || currentPhase >= 3) {
+                                            onDefeatBoss()
+                                        } else {
+                                            currentPhase++
+                                            selectedAnswer = null
+                                            feedback = "💥 Direct strike! The Overlord reshuffles round matrices!"
+                                        }
+                                    } else {
+                                        onDeductHeart()
+                                        feedback = "❌ Counterattacked! Review AES standard specifications!"
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = opt, fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
