@@ -137,7 +137,7 @@ fun CreativeTemperatureGaugeView(
                         Icon(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = AmberGold,
+                            tint = if (isDark) AmberGold else Color(0xFFB45309),
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
@@ -145,7 +145,7 @@ fun CreativeTemperatureGaugeView(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = AppFontFamily,
-                            color = AmberGold,
+                            color = if (isDark) AmberGold else Color(0xFFB45309),
                             letterSpacing = 1.sp
                         )
                     }
@@ -188,7 +188,7 @@ fun CreativeTemperatureGaugeView(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                        color = if (isDark) AmberGold else Color(0xFFB45309)
                     )
                 }
             }
@@ -211,7 +211,7 @@ fun CreativeTemperatureGaugeView(
                 // Active Memory Readout Pill
                 val activeColor = if (isChecked) {
                     if (isCorrect) PhoenixGreen else Color(0xFFE8_24_10)
-                } else if (isCurrentCorrect) AmberGold else Color(0xFF1C_B0_F6)
+                } else if (isCurrentCorrect) (if (isDark) AmberGold else Color(0xFFB45309)) else Color(0xFF1C_B0_F6)
 
                 Box(
                     modifier = Modifier
@@ -234,7 +234,7 @@ fun CreativeTemperatureGaugeView(
                     val isSlotSelected = idx == selectedIndex
                     val isTarget = idx == targetIndex
                     val slotBorderColor = if (isSlotSelected) {
-                        if (isChecked) (if (isCorrect) PhoenixGreen else Color(0xFFE8_24_10)) else AmberGold
+                        if (isChecked) (if (isCorrect) PhoenixGreen else Color(0xFFE8_24_10)) else (if (isDark) AmberGold else Color(0xFFB45309))
                     } else if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7_DE_EB)
 
                     Row(
@@ -339,7 +339,8 @@ fun CreativeTemperatureGaugeView(
                     .size(44.dp)
                     .pressScale(targetScale = 0.90f)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(if (isDark) Color(0xFF14_1F_36) else Color(0xFFE2_E8_F0))
+                    .background(if (isDark) Color(0xFF14_1F_36) else Color(0xFFF1_F5_F9))
+                    .border(1.dp, if (isDark) Color.Transparent else Color(0xFFCBD5E1), RoundedCornerShape(12.dp))
                     .clickable(enabled = !isChecked && selectedIndex > 0) {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         selectedIndex--
@@ -349,7 +350,7 @@ fun CreativeTemperatureGaugeView(
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,
                     contentDescription = "Prev",
-                    tint = if (selectedIndex > 0) AmberGold else Color.Gray,
+                    tint = if (selectedIndex > 0) (if (isDark) AmberGold else Color(0xFFB45309)) else Color.Gray,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -378,7 +379,8 @@ fun CreativeTemperatureGaugeView(
                     .size(44.dp)
                     .pressScale(targetScale = 0.90f)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(if (isDark) Color(0xFF14_1F_36) else Color(0xFFE2_E8_F0))
+                    .background(if (isDark) Color(0xFF14_1F_36) else Color(0xFFF1_F5_F9))
+                    .border(1.dp, if (isDark) Color.Transparent else Color(0xFFCBD5E1), RoundedCornerShape(12.dp))
                     .clickable(enabled = !isChecked && selectedIndex < arrayElements.size - 1) {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         selectedIndex++
@@ -388,7 +390,7 @@ fun CreativeTemperatureGaugeView(
                 Icon(
                     imageVector = Icons.Default.ArrowForwardIos,
                     contentDescription = "Next",
-                    tint = if (selectedIndex < arrayElements.size - 1) AmberGold else Color.Gray,
+                    tint = if (selectedIndex < arrayElements.size - 1) (if (isDark) AmberGold else Color(0xFFB45309)) else Color.Gray,
                     modifier = Modifier.size(16.dp)
                 )
             }

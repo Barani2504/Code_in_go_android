@@ -88,8 +88,8 @@ import com.simats.codeingo.data.model.DSAVisualizerType
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
-import com.simats.codeingo.ui.onboarding.LanguagePickerSheet
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DsaBlue
@@ -101,6 +101,7 @@ import com.simats.codeingo.ui.theme.DsaTeal
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
+import com.simats.codeingo.ui.theme.PhoenixGreen
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -136,7 +137,6 @@ fun VisualizerScreen(
     var selectedType by remember { mutableStateOf(DSAVisualizerType.STACK) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
-    var showLanguagePicker by remember { mutableStateOf(false) }
 
     val currentLanguageName = selectedLangObj?.name ?: when (selectedLanguageCode) {
         "es" -> "Spanish"
@@ -144,17 +144,6 @@ fun VisualizerScreen(
         "de" -> "German"
         "ja" -> "Japanese"
         else -> "Python"
-    }
-
-    val currentLanguageFlag = when (currentLanguageName.lowercase()) {
-        "python" -> "🐍"
-        "java" -> "☕"
-        "c++", "cpp" -> "⚙️"
-        "swift" -> "🦅"
-        "go" -> "🐹"
-        "javascript", "js" -> "📜"
-        "kotlin" -> "📱"
-        else -> "🐍"
     }
 
     val categories = listOf("All", "Ciphers", "Symmetric", "Asymmetric", "Protocols")
@@ -175,7 +164,7 @@ fun VisualizerScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -187,10 +176,7 @@ fun VisualizerScreen(
             // Header Bar
             VisualizerHeaderBar(
                 displayMode = displayMode,
-                currentLanguageFlag = currentLanguageFlag,
-                currentLanguageName = currentLanguageName,
-                onBackToList = { displayMode = VisualizerDisplayMode.LIST },
-                onOpenLanguagePicker = { showLanguagePicker = true }
+                onBackToList = { displayMode = VisualizerDisplayMode.LIST }
             )
 
             if (displayMode == VisualizerDisplayMode.LIST) {
@@ -230,22 +216,6 @@ fun VisualizerScreen(
                     onSelectType = { selectedType = it },
                     onBackToList = { displayMode = VisualizerDisplayMode.LIST },
                     currentLanguageName = currentLanguageName
-                )
-            }
-        }
-
-        if (showLanguagePicker) {
-            ModalBottomSheet(
-                onDismissRequest = { showLanguagePicker = false },
-                containerColor = DarkBackground
-            ) {
-                LanguagePickerSheet(
-                    selectedLanguageCode = selectedLanguageCode,
-                    onLanguageSelected = { lang ->
-                        localizationManager.setSelectedLanguage(lang)
-                        showLanguagePicker = false
-                    },
-                    onDismiss = { showLanguagePicker = false }
                 )
             }
         }
@@ -322,10 +292,7 @@ fun VisualizerScreen(
 @Composable
 private fun VisualizerHeaderBar(
     displayMode: VisualizerDisplayMode,
-    currentLanguageFlag: String,
-    currentLanguageName: String,
-    onBackToList: () -> Unit,
-    onOpenLanguagePicker: () -> Unit
+    onBackToList: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -357,6 +324,7 @@ private fun VisualizerHeaderBar(
                         text = "All Topics",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
+                        fontFamily = AppFontFamily,
                         color = LocalDynamicThemeColors.current.textPrimary
                     )
                 }
@@ -367,42 +335,44 @@ private fun VisualizerHeaderBar(
                     text = "CNS Visualizer",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
+                    fontFamily = AppFontFamily,
                     color = LocalDynamicThemeColors.current.textPrimary
                 )
                 Text(
                     text = "Interactive Cryptography & Network Security Lab",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
+                    fontFamily = AppFontFamily,
                     color = SubtextGray
                 )
             }
         }
 
-        // Language Switcher Pill
+        // Active Lab Status Indicator Pill
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(CardBackground.copy(alpha = 0.85f))
-                .border(1.5.dp, DsaBlue.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-                .clickable { onOpenLanguagePicker() }
+                .background(DsaBlue.copy(alpha = 0.15f))
+                .border(1.2.dp, DsaBlue.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
                 .padding(horizontal = 12.dp, vertical = 7.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(text = currentLanguageFlag, fontSize = 15.sp)
-                Text(
-                    text = currentLanguageName,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(PhoenixGreen)
                 )
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = SubtextGray,
-                    modifier = Modifier.size(14.dp)
+                Text(
+                    text = "ACTIVE LAB",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = AppFontFamily,
+                    color = DsaBlue,
+                    letterSpacing = 0.5.sp
                 )
             }
         }

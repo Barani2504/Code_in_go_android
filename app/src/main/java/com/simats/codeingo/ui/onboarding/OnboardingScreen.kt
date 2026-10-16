@@ -79,6 +79,8 @@ import com.simats.codeingo.ui.components.HeaderView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.theme.AmberGoldText
+import com.simats.codeingo.ui.theme.AppFontFamily
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -149,7 +151,7 @@ fun OnboardingScreen(
                         1 -> FeatureSlide(
                             icon = Icons.Default.SportsEsports,
                             badgeText = "DSA ADVENTURE",
-                            badgeColor = AmberGold,
+                            badgeColor = AmberGoldText,
                             title = "Gamified Roadmaps",
                             subtitle = "Level up step-by-step through interactive 3D worlds from Arrays to Dynamic Programming."
                         )
@@ -163,7 +165,7 @@ fun OnboardingScreen(
                         3 -> FeatureSlide(
                             icon = Icons.Default.EmojiEvents,
                             badgeText = "LEADERBOARDS & STREAKS",
-                            badgeColor = Color(0xFFFFD700),
+                            badgeColor = AmberGoldText,
                             title = "Climb the Leagues",
                             subtitle = "Compete with coders worldwide, protect your daily streak, and unlock legendary Phoenix ranks."
                         )
@@ -316,16 +318,18 @@ private fun FeatureSlide(
             )
 
             // Ultra Thin Glass Ring
+            val isDark = LocalDynamicThemeColors.current.isDark
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
+                    .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.White)
                     .border(
                         2.dp,
                         Brush.linearGradient(
-                            listOf(LocalDynamicThemeColors.current.textSecondary, badgeColor.copy(alpha = 0.5f))
+                            if (isDark) listOf(LocalDynamicThemeColors.current.textSecondary, badgeColor.copy(alpha = 0.5f))
+                            else listOf(Color(0xFFCBD5E1), badgeColor.copy(alpha = 0.6f))
                         ),
                         CircleShape
                     )
@@ -345,14 +349,15 @@ private fun FeatureSlide(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
-                .background(badgeColor.copy(alpha = 0.18f))
-                .border(1.dp, badgeColor.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+                .background(badgeColor.copy(alpha = if (LocalDynamicThemeColors.current.isDark) 0.18f else 0.12f))
+                .border(1.dp, badgeColor.copy(alpha = 0.40f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 12.dp, vertical = 5.dp)
         ) {
             Text(
                 text = badgeText,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
+                fontFamily = AppFontFamily,
                 color = badgeColor
             )
         }
@@ -363,6 +368,7 @@ private fun FeatureSlide(
             text = title,
             fontSize = 26.sp,
             fontWeight = FontWeight.Black,
+            fontFamily = AppFontFamily,
             color = LocalDynamicThemeColors.current.textPrimary,
             textAlign = TextAlign.Center
         )
@@ -373,6 +379,7 @@ private fun FeatureSlide(
             text = subtitle,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = AppFontFamily,
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.72f),
             textAlign = TextAlign.Center,
             lineHeight = 20.sp,
@@ -388,6 +395,7 @@ private fun CarouselPageIndicator(
     pageCount: Int,
     modifier: Modifier = Modifier
 ) {
+    val isDark = LocalDynamicThemeColors.current.isDark
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -396,7 +404,8 @@ private fun CarouselPageIndicator(
         for (i in 0 until pageCount) {
             val isSelected = i == currentPage
             val width = if (isSelected) 22.dp else 7.dp
-            val color = if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f)
+            val color = if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309))
+                else (if (isDark) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f) else Color(0xFFCBD5E1))
 
             Box(
                 modifier = Modifier

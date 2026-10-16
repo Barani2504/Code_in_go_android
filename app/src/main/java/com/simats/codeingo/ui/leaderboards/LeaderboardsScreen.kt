@@ -434,7 +434,7 @@ private fun UnlockedLeaderboardsView() {
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = AppFontFamily,
-                            color = AmberGold,
+                            color = if (isDark) AmberGold else Color(0xFFB45309),
                             letterSpacing = 0.8.sp
                         )
                         Text(
@@ -557,12 +557,13 @@ private fun PodiumPedestal(
             maxLines = 1
         )
 
+        val isDark = LocalDynamicThemeColors.current.isDark
         Text(
             text = "${entry.xp} XP",
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
             fontFamily = AppFontFamily,
-            color = AmberGold
+            color = if (isDark) AmberGold else Color(0xFFB45309)
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -652,7 +653,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
             fontSize = 14.sp,
             fontWeight = FontWeight.Black,
             fontFamily = AppFontFamily,
-            color = AmberGold
+            color = if (isDark) AmberGold else Color(0xFFB45309)
         )
     }
 }

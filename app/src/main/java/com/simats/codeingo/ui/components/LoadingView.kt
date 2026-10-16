@@ -142,7 +142,7 @@ fun LoadingView(
 
             Text(
                 text = "Compiling your environment...",
-                color = AmberGold,
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = AppFontFamily

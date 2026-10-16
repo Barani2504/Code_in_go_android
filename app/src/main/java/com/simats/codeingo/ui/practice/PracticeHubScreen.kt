@@ -352,7 +352,7 @@ fun PracticeHubScreen(
                             text = prob.complexity,
                             fontSize = 13.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = AmberGold
+                            color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -594,7 +594,7 @@ private fun DailyReviewTab(
                 text = "DAILY REVIEW COMPLETE!",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
@@ -632,7 +632,7 @@ private fun DailyReviewTab(
                         text = "QUESTION ${currentReviewIdx + 1} OF ${drillQuestions.size}",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmberGold
+                        color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                     )
                     Text(text = "+25 XP Workout", fontSize = 12.sp, color = DuolingoGreen, fontWeight = FontWeight.Bold)
                 }

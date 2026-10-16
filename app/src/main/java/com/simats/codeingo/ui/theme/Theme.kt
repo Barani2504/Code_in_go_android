@@ -58,10 +58,10 @@ private val PhoenixDarkColorScheme = darkColorScheme(
 )
 
 private val PhoenixLightColorScheme = lightColorScheme(
-    primary          = AmberGold,
-    onPrimary        = Color(0xFF1A_0F_00),
-    primaryContainer = AmberGoldDark,
-    onPrimaryContainer = Color.White,
+    primary          = Color(0xFFB45309), // High-contrast warm bronze amber for light mode
+    onPrimary        = Color.White,
+    primaryContainer = Color(0xFFFDE68A),
+    onPrimaryContainer = Color(0xFF78350F),
     secondary        = PhoenixEmber,
     onSecondary      = Color.White,
     secondaryContainer = Color(0xFFFF_E0_D0),
@@ -99,7 +99,8 @@ data class DynamicThemeColors(
     val codeBackground: Color = if (isDark) Color(0xFF09_0E_18) else Color(0xFFEFF2F8),
     val codeBorder: Color = if (isDark) AmberGold.copy(alpha = 0.25f) else Color(0xFFD7_DE_EB),
     val codeText: Color = if (isDark) Color(0xFFE2_E8_F0) else Color(0xFF1E_29_3B),
-    val subtleSurface: Color = if (isDark) Color(0xFF0F_17_2A) else Color(0xFFF1_F5_F9)
+    val subtleSurface: Color = if (isDark) Color(0xFF0F_17_2A) else Color(0xFFF1_F5_F9),
+    val amberText: Color = if (isDark) AmberGold else Color(0xFFB45309)
 )
 
 val LocalDynamicThemeColors = staticCompositionLocalOf {
@@ -122,7 +123,8 @@ val LocalDynamicThemeColors = staticCompositionLocalOf {
         codeBackground = Color(0xFF09_0E_18),
         codeBorder = AmberGold.copy(alpha = 0.25f),
         codeText = Color(0xFFE2_E8_F0),
-        subtleSurface = Color(0xFF0F_17_2A)
+        subtleSurface = Color(0xFF0F_17_2A),
+        amberText = AmberGold
     )
 }
 
@@ -160,7 +162,8 @@ fun CodeingoTheme(
             codeBackground = Color(0xFF09_0E_18),
             codeBorder = AmberGold.copy(alpha = 0.25f),
             codeText = Color(0xFFE2_E8_F0),
-            subtleSurface = Color(0xFF0F_17_2A)
+            subtleSurface = Color(0xFF0F_17_2A),
+            amberText = AmberGold
         )
     } else {
         DynamicThemeColors(
@@ -182,7 +185,8 @@ fun CodeingoTheme(
             codeBackground = Color(0xFFEFF2F8),
             codeBorder = Color(0xFFD7_DE_EB),
             codeText = Color(0xFF1E_29_3B),
-            subtleSurface = Color(0xFFF1_F5_F9)
+            subtleSurface = Color(0xFFF1_F5_F9),
+            amberText = Color(0xFFB45309)
         )
     }
 

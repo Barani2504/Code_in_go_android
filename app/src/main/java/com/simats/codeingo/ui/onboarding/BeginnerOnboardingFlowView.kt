@@ -138,7 +138,7 @@ fun BeginnerOnboardingFlowView(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -183,7 +183,7 @@ fun BeginnerOnboardingFlowView(
                             .weight(1f)
                             .height(12.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(Color(0xFF14_12_24).copy(alpha = 0.85f))
+                            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF14_12_24).copy(alpha = 0.85f) else Color(0xFFE2E8F0))
                             .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(50))
                     ) {
                         Box(
@@ -341,6 +341,7 @@ private fun LanguageSelectionStepView(
     onContinue: () -> Unit
 ) {
     val languages = listOf("Python 🐍", "Swift 🦅", "C++ ⚡", "Java ☕", "Go / Golang 🐹", "JavaScript 🌐")
+    val isDark = LocalDynamicThemeColors.current.isDark
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -368,8 +369,8 @@ private fun LanguageSelectionStepView(
                         .staggeredAppear(index, baseDelayMs = 35)
                         .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.22f else 0.15f) else (if (isDark) Color(0xFF141F38).copy(alpha = 0.8f) else Color.White))
+                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(14.dp))
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(lang) }
                         .padding(horizontal = 18.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -407,6 +408,7 @@ private fun ReferralStepView(
         "High-Performance Engineering 🚀",
         "Brain Training & Problem Solving 🧠"
     )
+    val isDark = LocalDynamicThemeColors.current.isDark
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -434,8 +436,8 @@ private fun ReferralStepView(
                         .staggeredAppear(index, baseDelayMs = 35)
                         .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38).copy(alpha = 0.8f))
-                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.22f else 0.15f) else (if (isDark) Color(0xFF141F38).copy(alpha = 0.8f) else Color.White))
+                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(14.dp))
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(goal) }
                         .padding(horizontal = 18.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -472,7 +474,7 @@ private fun FirstLessonIntroStepView(onContinue: () -> Unit) {
         DuolingoSpeechBubbleView(
             text = "Okay! Here's your first 2 minute lesson.",
             highlightedText = "2 minute",
-            highlightColor = AmberGold
+            highlightColor = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
         )
         Spacer(modifier = Modifier.height(24.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
@@ -502,13 +504,13 @@ private fun SentenceCompletionStepView(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
-                .background(AmberGold.copy(alpha = 0.18f))
-                .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+                .background(if (isDark) AmberGold.copy(alpha = 0.18f) else Color(0xFFFEF3C7))
+                .border(1.dp, if (isDark) AmberGold.copy(alpha = 0.35f) else Color(0xFFF59E0B).copy(alpha = 0.45f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
             Text(
                 text = "DATA HIGHWAY: ZERO-BASED INDEX",
-                color = AmberGold,
+                color = if (isDark) AmberGold else Color(0xFFB45309),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = AppFontFamily
@@ -602,7 +604,7 @@ private fun SentenceCompletionStepView(
         if (isChecked) {
             Text(
                 text = if (isCorrect) "Awesome! In programming, array indexing starts at 0!" else "Not quite! Remember: base offset starts at index 0.",
-                color = if (isCorrect) AmberGold else Color(0xFFFF4B4B),
+                color = if (isCorrect) (if (isDark) AmberGold else Color(0xFFB45309)) else Color(0xFFFF4B4B),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = AppFontFamily,
@@ -661,10 +663,11 @@ private fun StreakEarnedStepView(
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
+        val isDark = LocalDynamicThemeColors.current.isDark
         Icon(
             imageVector = Icons.Default.LocalFireDepartment,
             contentDescription = "Streak Flame",
-            tint = AmberGold,
+            tint = if (isDark) AmberGold else Color(0xFFEA580C),
             modifier = Modifier.size(72.dp)
         )
 
@@ -672,7 +675,7 @@ private fun StreakEarnedStepView(
 
         Text(
             text = "$streakCount",
-            color = AmberGold,
+            color = if (isDark) AmberGold else Color(0xFFB45309),
             fontSize = 54.sp,
             fontWeight = FontWeight.Black,
             fontFamily = AppFontFamily
@@ -703,6 +706,7 @@ private fun StreakGoalStepView(
     onContinue: () -> Unit
 ) {
     val options = listOf(7, 14, 30, 50)
+    val isDark = LocalDynamicThemeColors.current.isDark
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -724,8 +728,8 @@ private fun StreakGoalStepView(
                         .fillMaxWidth()
                         .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = 0.20f) else Color(0xFF141F38))
-                        .border(1.5.dp, if (isSelected) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.20f else 0.15f) else (if (isDark) Color(0xFF141F38) else Color.White))
+                        .border(1.5.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(16.dp))
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelectDays(days) }
                         .padding(horizontal = 18.dp, vertical = 16.dp)
                 ) {
@@ -750,7 +754,7 @@ private fun StreakGoalStepView(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = AmberGold,
+                            tint = if (isDark) AmberGold else Color(0xFFB45309),
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -794,7 +798,7 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
             .padding(24.dp)
     ) {
         CircularProgressIndicator(
-            color = AmberGold,
+            color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309),
             strokeWidth = 4.dp,
             modifier = Modifier.size(54.dp)
         )

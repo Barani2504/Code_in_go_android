@@ -441,7 +441,8 @@ fun OrderStepsExerciseView(
                     text = "DRAG TO REORDER",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
-                    color = AmberGold
+                    fontFamily = AppFontFamily,
+                    color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                 )
             }
         }
@@ -788,7 +789,13 @@ fun FillCodeExerciseView(
                         .background(Color.White.copy(alpha = 0.08f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    Text(text = "PYTHON", fontSize = 10.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                    Text(
+                        text = "PYTHON",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = AppFontFamily,
+                        color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
+                    )
                 }
             }
 

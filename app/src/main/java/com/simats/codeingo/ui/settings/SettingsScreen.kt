@@ -469,7 +469,7 @@ private fun PreferencesTab(
                     EffectTier.OFF -> "Off: Zero animations, instant transitions"
                 },
                 fontSize = 12.sp,
-                color = AmberGold,
+                color = if (isDark) AmberGold else Color(0xFFB45309),
                 modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
             )
 
@@ -560,7 +560,7 @@ private fun PreferencesTab(
                     color = textSecondary
                 )
             }
-            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,

@@ -121,6 +121,16 @@ val DuolingoSubtext: Color
 val DuolingoBlue         = AmberGold
 val DuolingoBlueDark     = AmberGoldDark
 
+/**
+ * Adaptive text color for amber/gold accents.
+ * Resolves to luminous AmberGold in Dark Mode, and deep high-contrast warm bronze (Color(0xFFB45309))
+ * in Light Mode so texts remain perfectly readable on light surfaces.
+ */
+val AmberGoldText: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.amberText
+
 // Accents — legacy "Green" → Phoenix green
 val DuolingoGreen        = PhoenixGreen
 val DuolingoGreenDark    = Color(0xFF1A_AE_47)

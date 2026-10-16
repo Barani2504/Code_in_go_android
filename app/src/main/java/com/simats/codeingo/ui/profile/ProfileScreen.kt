@@ -467,7 +467,7 @@ private fun UserHeaderCard(
                     text = "@$userHandle",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AmberGold
+                    color = if (isDark) AmberGold else Color(0xFFB45309)
                 )
 
                 Text(
@@ -486,13 +486,13 @@ private fun UserHeaderCard(
                         text = "0 Following",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AmberGold
+                        color = if (isDark) AmberGold else Color(0xFFB45309)
                     )
                     Text(
                         text = "0 Followers",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AmberGold
+                        color = if (isDark) AmberGold else Color(0xFFB45309)
                     )
                 }
             }
@@ -551,7 +551,7 @@ private fun LevelProgressCard(
                 text = "$totalXP / $maxLevelXP XP",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
             )
         }
 
@@ -1014,7 +1014,7 @@ private fun AchievementsSection(
                 text = "VIEW ALL",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold,
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309),
                 modifier = Modifier.clickable { onViewAllClick() }
             )
         }
@@ -1365,7 +1365,7 @@ private fun UnauthenticatedProfileBody(
                         text = "GUEST EXPLORER • NOT SIGNED IN",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmberGold
+                        color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                     )
                 }
             }
@@ -1427,7 +1427,7 @@ private fun UnauthenticatedProfileBody(
                     text = "WHY JOIN THE PHOENIX REALM?",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = AmberGold,
+                    color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309),
                     letterSpacing = 0.8.sp
                 )
             }

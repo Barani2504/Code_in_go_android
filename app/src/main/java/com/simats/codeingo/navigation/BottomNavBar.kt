@@ -206,35 +206,7 @@ fun BottomNavBar(
                 val pillWidth = tabWidth - 6.dp
                 val pillLeft = tabWidth * animatedIndex + 3.dp
 
-                // Ambient Radial Liquid Glow beneath the active pill
-                Canvas(
-                    modifier = Modifier
-                        .offset(x = pillLeft)
-                        .width(pillWidth)
-                        .fillMaxHeight()
-                        .graphicsLayer {
-                            scaleX = stretchX * 1.35f
-                            scaleY = squashY * 1.45f
-                            alpha = 0.55f
-                        }
-                ) {
-                    val centerOffset = Offset(size.width / 2f, size.height / 2f)
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFFFF6E0F).copy(alpha = 0.60f),
-                                Color(0xFFFF4010).copy(alpha = 0.25f),
-                                Color.Transparent
-                            ),
-                            center = centerOffset,
-                            radius = size.width * 0.75f
-                        ),
-                        radius = size.width * 0.75f,
-                        center = centerOffset
-                    )
-                }
-
-                // Liquid Morphing Pill Indicator
+                // Liquid Morphing Pill Indicator (Crisp floating bubble without blurry background shadow)
                 Box(
                     modifier = Modifier
                         .offset(x = pillLeft)
@@ -244,6 +216,12 @@ fun BottomNavBar(
                             scaleX = stretchX
                             scaleY = squashY
                         }
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(26.dp),
+                            spotColor = if (isDark) Color(0x44FF3D00) else Color(0x28E65100),
+                            ambientColor = if (isDark) Color(0x22FF5722) else Color(0x18000000)
+                        )
                         .clip(RoundedCornerShape(26.dp))
                         .background(
                             Brush.linearGradient(

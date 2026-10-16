@@ -99,7 +99,7 @@ fun BitFlipLabLevel(
                     Icon(
                         imageVector = Icons.Default.ElectricBolt,
                         contentDescription = null,
-                        tint = AmberGold,
+                        tint = if (isDark) AmberGold else Color(0xFFB45309),
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
@@ -107,7 +107,7 @@ fun BitFlipLabLevel(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                        color = if (isDark) AmberGold else Color(0xFFB45309)
                     )
                 }
                 Text(
@@ -232,7 +232,7 @@ fun BitFlipLabLevel(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    color = if (flipCount > 0) AmberGold else dynamicColors.textPrimary,
+                    color = if (flipCount > 0) (if (isDark) AmberGold else Color(0xFFB45309)) else dynamicColors.textPrimary,
                     lineHeight = 18.sp,
                     letterSpacing = 1.sp
                 )

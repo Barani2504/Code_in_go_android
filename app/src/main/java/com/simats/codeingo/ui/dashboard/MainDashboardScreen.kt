@@ -1083,7 +1083,7 @@ private fun InteractiveGamesSection(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.Monospace,
-                color = AmberGold
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
             )
             Text(
                 text = "5 / 5 ARENAS UNLOCKED",
@@ -1384,7 +1384,7 @@ private fun GrandMasterJourneyCard(
                 text = "GRAND MASTER PHOENIX JOURNEY",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
             )
             Text(
                 text = "$completedCount / $totalCount Stages Conquered",
@@ -1456,7 +1456,7 @@ private fun ChapterGuidebookSheet(
                 text = "CURRICULUM STAGES",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
             )
             unit.nodes.forEach { node ->
                 Row(

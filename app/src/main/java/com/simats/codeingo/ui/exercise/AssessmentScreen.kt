@@ -354,7 +354,8 @@ fun AssessmentScreen(
                                 text = "CH $unitId • STAGE $unitId",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
-                                color = AmberGold
+                                fontFamily = AppFontFamily,
+                                color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                             )
                         }
 
@@ -447,7 +448,8 @@ fun AssessmentScreen(
                                     text = currentQuestion.targetPrompt,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = AmberGold
+                                    fontFamily = AppFontFamily,
+                                    color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                                 )
                             }
                         }

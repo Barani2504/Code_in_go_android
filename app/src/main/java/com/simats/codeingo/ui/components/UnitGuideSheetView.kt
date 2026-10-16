@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.UnitModel
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
@@ -112,7 +113,8 @@ fun UnitGuideSheetView(
                     text = "WHAT YOU'LL LEARN",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
-                    color = AmberGold
+                    fontFamily = AppFontFamily,
+                    color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                 )
                 Text(
                     text = "In this unit, you will practice data structure challenges. Prepare to master:",
