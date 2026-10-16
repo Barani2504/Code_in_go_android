@@ -80,7 +80,7 @@ fun ClockArithmeticLevel(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Mission Briefing
         Box(
@@ -89,7 +89,7 @@ fun ClockArithmeticLevel(
                 .clip(RoundedCornerShape(18.dp))
                 .background(if (isDark) Color(0xFF10192A) else dynamicColors.cardBackground)
                 .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
-                .padding(14.dp)
+                .padding(12.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
@@ -112,10 +112,10 @@ fun ClockArithmeticLevel(
                 }
                 Text(
                     text = "Step through powers of Base 3 in finite field ℤ/7ℤ. Watch the clock hand cycle around the 7-node ring: 3¹ ➔ 3² ➔ 3³ mod 7.",
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
@@ -123,7 +123,7 @@ fun ClockArithmeticLevel(
         // Circular Modular Clock Canvas (Mod 7)
         Box(
             modifier = Modifier
-                .size(230.dp)
+                .size(190.dp)
                 .clip(CircleShape)
                 .background(if (isDark) Color(0xFF090E17) else Color(0xFFF8FAFC))
                 .border(2.dp, AmberGold.copy(alpha = 0.5f), CircleShape),
@@ -287,5 +287,6 @@ fun ClockArithmeticLevel(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

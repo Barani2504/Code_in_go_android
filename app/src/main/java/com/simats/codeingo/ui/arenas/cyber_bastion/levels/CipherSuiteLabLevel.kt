@@ -66,26 +66,28 @@ fun CipherSuiteLabLevel(
 
     var hasAttemptedHandshake by remember { mutableStateOf(false) }
 
+    val sectionAccent = if (dynamicColors.isDark) AmberGold else Color(0xFFB45309)
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "TLS 1.3 AEAD SUITE LAB",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold,
+                color = sectionAccent,
                 letterSpacing = 1.sp
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "Assemble Authenticated Encryption with Associated Data (AEAD)",
                 fontSize = 11.sp,
-                color = dynamicColors.textSecondary,
+                color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569),
                 textAlign = TextAlign.Center
             )
         }
@@ -95,8 +97,8 @@ fun CipherSuiteLabLevel(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(dynamicColors.cardBorder.copy(alpha = 0.2f))
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                .background(if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.85f) else Color.White)
+                .border(1.dp, if (dynamicColors.isDark) sectionAccent.copy(alpha = 0.4f) else Color(0xFFCBD5E1), RoundedCornerShape(16.dp))
                 .padding(14.dp)
         ) {
             Column {
@@ -104,13 +106,13 @@ fun CipherSuiteLabLevel(
                     text = "🔒 TLS 1.3 Pruning & AEAD Mandate",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AmberGold
+                    color = sectionAccent
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "TLS 1.3 removed legacy algorithms (Static RSA, RC4, 3DES, CBC mode, SHA-1). Only modern AEAD ciphers that combine confidentiality and integrity in a single cryptographic primitive are allowed!",
                     fontSize = 11.5.sp,
-                    color = dynamicColors.textPrimary,
+                    color = if (dynamicColors.isDark) dynamicColors.textPrimary else Color(0xFF334155),
                     lineHeight = 16.sp
                 )
             }
@@ -121,10 +123,10 @@ fun CipherSuiteLabLevel(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
-                .background(dynamicColors.cardBackground)
+                .background(if (dynamicColors.isDark) dynamicColors.cardBackground else Color.White)
                 .border(
                     1.5.dp,
-                    if (isSuiteSecure) DuolingoGreen else DuolingoRed,
+                    if (isSuiteSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed,
                     RoundedCornerShape(14.dp)
                 )
                 .padding(14.dp)
@@ -162,7 +164,7 @@ fun CipherSuiteLabLevel(
                 text = "SLOT 1: KEY EXCHANGE (FORWARD SECRECY)",
                 fontSize = 10.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = sectionAccent
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("ECDHE (X25519)", "Static RSA (Legacy)").forEach { kex ->
@@ -173,11 +175,11 @@ fun CipherSuiteLabLevel(
                             .clip(RoundedCornerShape(10.dp))
                             .background(
                                 if (isSelected) (if (kex.contains("ECDHE")) DuolingoGreen.copy(alpha = 0.2f) else DuolingoRed.copy(alpha = 0.2f))
-                                else dynamicColors.cardBorder.copy(alpha = 0.2f)
+                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
                             )
                             .border(
                                 if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (kex.contains("ECDHE")) DuolingoGreen else DuolingoRed) else dynamicColors.cardBorder.copy(alpha = 0.3f),
+                                if (isSelected) (if (kex.contains("ECDHE")) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedKex = kex }
@@ -187,8 +189,8 @@ fun CipherSuiteLabLevel(
                         Text(
                             text = kex,
                             fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Medium,
-                            color = if (isSelected) (if (kex.contains("ECDHE")) DuolingoGreen else DuolingoRed) else dynamicColors.textPrimary,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                            color = if (isSelected) (if (kex.contains("ECDHE")) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFFE2E8F0) else Color(0xFF0F172A)),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -202,7 +204,7 @@ fun CipherSuiteLabLevel(
                 text = "SLOT 2: ENCRYPTION & AUTHENTICATION (AEAD)",
                 fontSize = 10.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = sectionAccent
             )
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf(
@@ -219,11 +221,11 @@ fun CipherSuiteLabLevel(
                             .clip(RoundedCornerShape(10.dp))
                             .background(
                                 if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.15f) else DuolingoRed.copy(alpha = 0.15f))
-                                else dynamicColors.cardBorder.copy(alpha = 0.15f)
+                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
                             )
                             .border(
                                 if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (isSecure) DuolingoGreen else DuolingoRed) else dynamicColors.cardBorder.copy(alpha = 0.3f),
+                                if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedCipher = cipher }
@@ -239,12 +241,12 @@ fun CipherSuiteLabLevel(
                                     text = cipher,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) (if (isSecure) DuolingoGreen else DuolingoRed) else dynamicColors.textPrimary
+                                    color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color.White else Color(0xFF0F172A))
                                 )
                                 Text(
                                     text = desc,
                                     fontSize = 10.5.sp,
-                                    color = dynamicColors.textSecondary
+                                    color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569)
                                 )
                             }
                             if (isSelected) {
@@ -252,7 +254,7 @@ fun CipherSuiteLabLevel(
                                     text = if (isSecure) "✓ AEAD" else "✕ INSECURE",
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.Black,
-                                    color = if (isSecure) DuolingoGreen else DuolingoRed
+                                    color = if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed
                                 )
                             }
                         }
@@ -267,7 +269,7 @@ fun CipherSuiteLabLevel(
                 text = "SLOT 3: HKDF PRF HASH",
                 fontSize = 10.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = sectionAccent
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("SHA-384", "SHA-1 (Legacy Broken)").forEach { hash ->
@@ -279,11 +281,11 @@ fun CipherSuiteLabLevel(
                             .clip(RoundedCornerShape(10.dp))
                             .background(
                                 if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.2f) else DuolingoRed.copy(alpha = 0.2f))
-                                else dynamicColors.cardBorder.copy(alpha = 0.2f)
+                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
                             )
                             .border(
                                 if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (isSecure) DuolingoGreen else DuolingoRed) else dynamicColors.cardBorder.copy(alpha = 0.3f),
+                                if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedHash = hash }
@@ -293,8 +295,8 @@ fun CipherSuiteLabLevel(
                         Text(
                             text = hash,
                             fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Medium,
-                            color = if (isSelected) (if (isSecure) DuolingoGreen else DuolingoRed) else dynamicColors.textPrimary,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                            color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFFE2E8F0) else Color(0xFF0F172A)),
                             textAlign = TextAlign.Center
                         )
                     }

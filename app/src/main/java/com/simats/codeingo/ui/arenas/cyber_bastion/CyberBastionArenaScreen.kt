@@ -51,6 +51,7 @@ import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.arenas.common.ArenaBriefingView
 import com.simats.codeingo.ui.arenas.common.ArenaComboHUD
 import com.simats.codeingo.ui.arenas.common.ArenaDebriefView
+import com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground
 import com.simats.codeingo.ui.arenas.common.ArenaGameSpeed
 import com.simats.codeingo.ui.arenas.common.ArenaLoadoutSheet
 import com.simats.codeingo.ui.arenas.common.ArenaTacticalTool
@@ -95,7 +96,7 @@ fun CyberBastionArenaScreen(
     var showLoadoutSheet by remember { mutableStateOf(false) }
 
     // Cinematic & Feedback Dialogs
-    var showBriefing by remember { mutableStateOf(true) }
+    var showBriefing by remember { mutableStateOf(false) }
     var showDebrief by remember { mutableStateOf(false) }
     var debriefIsVictory by remember { mutableStateOf(false) }
     var showTheoryCodex by remember { mutableStateOf(false) }
@@ -103,7 +104,6 @@ fun CyberBastionArenaScreen(
     // Reset tool status on level change
     LaunchedEffect(currentLevel) {
         toolUsedInLevel = false
-        showBriefing = true
     }
 
     fun onDeductHeart() {
@@ -146,23 +146,27 @@ fun CyberBastionArenaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(dynamicColors.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
+        ArenaEnvironmentBackground(accentColor = Color(0xFF0984E3))
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Top HUD Bar
-            Row(
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 12.dp, vertical = 2.dp)
             ) {
+                // Top HUD Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onDismiss,
@@ -297,60 +301,37 @@ fun CyberBastionArenaScreen(
                 }
             }
 
-            // Level Selector Ribbon
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CyberBastionLevel.values().forEach { lvl ->
-                    val isSelected = currentLevel == lvl
-                    val isUnlocked = unlockedLevels.contains(lvl.id)
-                    val isBoss = lvl == CyberBastionLevel.BOSS_BATTLE
-
-                    val chipColor = when {
-                        isSelected && isBoss -> DuolingoRed
-                        isSelected -> AmberGold
-                        isBoss -> DuolingoRed.copy(alpha = 0.4f)
-                        isUnlocked -> dynamicColors.textSecondary
-                        else -> dynamicColors.cardBorder.copy(alpha = 0.4f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) chipColor.copy(alpha = 0.2f)
-                                else dynamicColors.cardBackground.copy(alpha = 0.5f)
-                            )
-                            .border(
-                                1.5.dp,
-                                if (isSelected) chipColor else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable(enabled = isUnlocked) {
-                                currentLevel = lvl
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = lvl.iconEmoji,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isBoss) "BOSS" else "L${lvl.id}",
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = if (isSelected) chipColor else dynamicColors.textPrimary
-                            )
-                        }
-                    }
+            // Enhanced Cyber Level Selector Ribbon
+            val bastionStations = remember {
+                CyberBastionLevel.values().map { lvl ->
+                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                        id = lvl.id,
+                        title = lvl.title,
+                        shortName = when (lvl.id) {
+                            1 -> "TLS 1.3"
+                            2 -> "CipherSuite"
+                            3 -> "IPsec"
+                            4 -> "Firewall"
+                            5 -> "DNSSEC"
+                            6 -> "SYN Cookie"
+                            else -> "Titan"
+                        },
+                        iconEmoji = lvl.iconEmoji,
+                        isBoss = lvl == CyberBastionLevel.BOSS_BATTLE
+                    )
                 }
             }
+
+            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                stations = bastionStations,
+                currentLevelId = currentLevel.id,
+                unlockedLevels = unlockedLevels,
+                levelStars = levelStars,
+                accentColor = Color(0xFF0984E3),
+                onSelectLevel = { id ->
+                    currentLevel = CyberBastionLevel.fromId(id)
+                }
+            )
 
             // Combo & Tactical HUD
             ArenaComboHUD(
@@ -374,44 +355,61 @@ fun CyberBastionArenaScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(dynamicColors.cardBackground)
                     .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(12.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
                 when (currentLevel) {
-                    CyberBastionLevel.LEVEL_1 -> TlsHandshakeLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_1) },
-                        onActionSuccess = { onActionSuccess(120) }
-                    )
-                    CyberBastionLevel.LEVEL_2 -> CipherSuiteLabLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_2) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    CyberBastionLevel.LEVEL_3 -> IpsecTunnelLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_3) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(180) }
-                    )
-                    CyberBastionLevel.LEVEL_4 -> StatefulFirewallLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_4) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    CyberBastionLevel.LEVEL_5 -> DnssecChainLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_5) },
-                        onActionSuccess = { onActionSuccess(200) }
-                    )
-                    CyberBastionLevel.LEVEL_6 -> SynCookieDefenseLevel(
-                        onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_6) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(220) }
-                    )
-                    CyberBastionLevel.BOSS_BATTLE -> CyberTitanBossLevel(
-                        onDefeatBoss = { handleLevelCompleted(CyberBastionLevel.BOSS_BATTLE) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(300) }
-                    )
-                }
+                        CyberBastionLevel.LEVEL_1 -> TlsHandshakeLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_1) },
+                            onActionSuccess = { onActionSuccess(120) }
+                        )
+                        CyberBastionLevel.LEVEL_2 -> CipherSuiteLabLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_2) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        CyberBastionLevel.LEVEL_3 -> IpsecTunnelLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_3) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(180) }
+                        )
+                        CyberBastionLevel.LEVEL_4 -> StatefulFirewallLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_4) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        CyberBastionLevel.LEVEL_5 -> DnssecChainLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_5) },
+                            onActionSuccess = { onActionSuccess(200) }
+                        )
+                        CyberBastionLevel.LEVEL_6 -> SynCookieDefenseLevel(
+                            onComplete = { handleLevelCompleted(CyberBastionLevel.LEVEL_6) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(220) }
+                        )
+                        CyberBastionLevel.BOSS_BATTLE -> CyberTitanBossLevel(
+                            onDefeatBoss = { handleLevelCompleted(CyberBastionLevel.BOSS_BATTLE) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(300) }
+                        )
+                    }
             }
+
+            } // Close inner weighted Column
+
+            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
+                onOpenCodex = { showTheoryCodex = true },
+                onResetLevel = {
+                    val lvl = currentLevel
+                    currentLevel = CyberBastionLevel.LEVEL_1
+                    currentLevel = lvl
+                },
+                onSkipLevel = {
+                    val nextId = minOf(7, currentLevel.id + 1)
+                    unlockedLevels = unlockedLevels + nextId
+                    currentLevel = CyberBastionLevel.fromId(nextId)
+                }
+            )
         }
 
         // Cinematic Briefing Overlay

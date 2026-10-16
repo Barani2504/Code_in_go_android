@@ -93,10 +93,10 @@ fun ArenaComboHUD(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(dynamicColors.cardBackground.copy(alpha = 0.85f))
-            .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(14.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (dynamicColors.isDark) dynamicColors.cardBackground.copy(alpha = 0.85f) else Color.White)
+            .border(1.dp, dynamicColors.cardBorder.copy(alpha = if (dynamicColors.isDark) 0.5f else 0.8f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -104,7 +104,7 @@ fun ArenaComboHUD(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(34.dp)
+                    .size(26.dp)
                     .scale(pulseScale)
                     .clip(CircleShape)
                     .background(comboColor.copy(alpha = 0.2f)),

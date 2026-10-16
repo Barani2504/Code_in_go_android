@@ -123,12 +123,19 @@ fun CipherSanctumArenaScreen(
     ) {
         CipherArenaEnvironmentView(isBoss = currentLevel == CipherSanctumLevel.BOSS_BATTLE)
 
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = AmberGold)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding()
         ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 2.dp)
+            ) {
             ArenaTopHUD(
                 hearts = hearts,
                 sessionXP = sessionXP,
@@ -139,41 +146,77 @@ fun CipherSanctumArenaScreen(
                 onOpenHint = { showHintSheet = true }
             )
 
-            ArenaLevelTrack(
-                currentLevel = currentLevel,
+            val sanctumStations = remember {
+                CipherSanctumLevel.entries.map { lvl ->
+                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                        id = lvl.id,
+                        title = lvl.title,
+                        shortName = when (lvl.id) {
+                            1 -> "Caesar"
+                            2 -> "Shift"
+                            3 -> "Freq"
+                            4 -> "Vigenere"
+                            5 -> "RailFence"
+                            6 -> "Sprint"
+                            else -> "Sphinx"
+                        },
+                        iconEmoji = lvl.iconEmoji,
+                        isBoss = lvl == CipherSanctumLevel.BOSS_BATTLE
+                    )
+                }
+            }
+
+            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                stations = sanctumStations,
+                currentLevelId = currentLevel.id,
                 unlockedLevels = unlockedLevels,
                 levelStars = levelStars,
-                onSelectLevel = { lvl ->
-                    if (unlockedLevels.contains(lvl.id)) {
-                        currentLevel = lvl
-                    }
+                accentColor = AmberGold,
+                onSelectLevel = { id ->
+                    currentLevel = CipherSanctumLevel.fromId(id)
                 }
             )
 
-            // Dynamic Level Board Content
+            // Dynamic Level Board Content with internal scroll view
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 4.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
-                when (currentLevel) {
-                    CipherSanctumLevel.LEVEL_1 -> CaesarDialLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_1) })
-                    CipherSanctumLevel.LEVEL_2 -> FindTheShiftLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_2) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
-                    CipherSanctumLevel.LEVEL_3 -> FrequencyRadioLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_3) })
-                    CipherSanctumLevel.LEVEL_4 -> VigenereRotorsLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_4) })
-                    CipherSanctumLevel.LEVEL_5 -> RailFenceGridLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_5) })
-                    CipherSanctumLevel.LEVEL_6 -> CryptanalysisSprintLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
-                    CipherSanctumLevel.BOSS_BATTLE -> SphinxBossBattleLevel(onDefeatBoss = { handleLevelCompleted(CipherSanctumLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    when (currentLevel) {
+                        CipherSanctumLevel.LEVEL_1 -> CaesarDialLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_1) })
+                        CipherSanctumLevel.LEVEL_2 -> FindTheShiftLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_2) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                        CipherSanctumLevel.LEVEL_3 -> FrequencyRadioLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_3) })
+                        CipherSanctumLevel.LEVEL_4 -> VigenereRotorsLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_4) })
+                        CipherSanctumLevel.LEVEL_5 -> RailFenceGridLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_5) })
+                        CipherSanctumLevel.LEVEL_6 -> CryptanalysisSprintLevel(onComplete = { handleLevelCompleted(CipherSanctumLevel.LEVEL_6) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                        CipherSanctumLevel.BOSS_BATTLE -> SphinxBossBattleLevel(onDefeatBoss = { handleLevelCompleted(CipherSanctumLevel.BOSS_BATTLE) }, onDeductHeart = { hearts = maxOf(0, hearts - 1) })
+                    }
                 }
             }
 
-            ArenaBottomBar(
-                currentLevel = currentLevel,
+            } // Close inner weighted column
+
+            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
                 onOpenCodex = { showTheoryCodex = true },
-                onResetBoard = {
+                onResetLevel = {
+                    val lvl = currentLevel
                     currentLevel = CipherSanctumLevel.LEVEL_1
+                    currentLevel = lvl
+                },
+                onSkipLevel = {
+                    val nextId = minOf(7, currentLevel.id + 1)
+                    unlockedLevels = unlockedLevels + nextId
+                    currentLevel = CipherSanctumLevel.fromId(nextId)
                 }
             )
         }
@@ -342,109 +385,6 @@ private fun ArenaTopHUD(
     }
 }
 
-@Composable
-private fun ArenaLevelTrack(
-    currentLevel: CipherSanctumLevel,
-    unlockedLevels: Set<Int>,
-    levelStars: Map<Int, Int>,
-    onSelectLevel: (CipherSanctumLevel) -> Unit
-) {
-    val dynamicColors = LocalDynamicThemeColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        CipherSanctumLevel.entries.forEach { lvl ->
-            val isUnlocked = unlockedLevels.contains(lvl.id)
-            val isSelected = currentLevel == lvl
-
-            Box(
-                modifier = Modifier
-                    .pressScale()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(
-                        when {
-                            isSelected && lvl == CipherSanctumLevel.BOSS_BATTLE -> DuolingoRed
-                            isSelected -> AmberGold
-                            isUnlocked -> if (dynamicColors.isDark) Color(0xFF14243C) else dynamicColors.inputBackground
-                            else -> dynamicColors.cardBorder.copy(alpha = 0.3f)
-                        }
-                    )
-                    .border(
-                        1.5.dp,
-                        when {
-                            isSelected -> Color.White
-                            isUnlocked -> AmberGold.copy(alpha = 0.5f)
-                            else -> Color.Transparent
-                        },
-                        RoundedCornerShape(14.dp)
-                    )
-                    .clickable(enabled = isUnlocked) { onSelectLevel(lvl) }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = lvl.iconEmoji,
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = "L${lvl.id}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        color = when {
-                            isSelected -> Color.Black
-                            isUnlocked -> dynamicColors.textPrimary
-                            else -> SubtextGray
-                        }
-                    )
-                    if (!isUnlocked) {
-                        Icon(Icons.Default.Lock, contentDescription = "Locked", tint = SubtextGray, modifier = Modifier.size(10.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ArenaBottomBar(
-    currentLevel: CipherSanctumLevel,
-    onOpenCodex: () -> Unit,
-    onResetBoard: () -> Unit
-) {
-    val dynamicColors = LocalDynamicThemeColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            modifier = Modifier
-                .pressScale()
-                .clip(RoundedCornerShape(12.dp))
-                .background(dynamicColors.cardBorder.copy(alpha = 0.4f))
-                .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(12.dp))
-                .clickable(onClick = onOpenCodex)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            Text(text = "📜 Theory Codex", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-        }
-
-        Text(
-            text = currentLevel.title.uppercase(),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.Monospace,
-            color = AmberGold
-        )
-    }
-}
 
 @Composable
 private fun ArenaVictoryOverlay(

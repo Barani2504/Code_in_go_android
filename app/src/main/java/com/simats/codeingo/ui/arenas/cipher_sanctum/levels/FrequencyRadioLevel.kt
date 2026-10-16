@@ -75,7 +75,7 @@ fun FrequencyRadioLevel(onComplete: () -> Unit) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         // Mission Briefing
@@ -265,5 +265,6 @@ fun FrequencyRadioLevel(onComplete: () -> Unit) {
                 )
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

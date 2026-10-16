@@ -95,7 +95,7 @@ fun BlockCipherForgeArenaScreen(
     var showLoadoutSheet by remember { mutableStateOf(false) }
 
     // Cinematic & Feedback Dialogs
-    var showBriefing by remember { mutableStateOf(true) }
+    var showBriefing by remember { mutableStateOf(false) }
     var showDebrief by remember { mutableStateOf(false) }
     var debriefIsVictory by remember { mutableStateOf(false) }
     var showTheoryCodex by remember { mutableStateOf(false) }
@@ -103,7 +103,6 @@ fun BlockCipherForgeArenaScreen(
     // Reset tool status on level change
     LaunchedEffect(currentLevel) {
         toolUsedInLevel = false
-        showBriefing = true
     }
 
     // Deduction with Second Chance support
@@ -148,16 +147,20 @@ fun BlockCipherForgeArenaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(dynamicColors.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = AmberGold)
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Top HUD Bar: Back, Arena Title, Hearts, Gems, Speed, Loadout
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 2.dp)
+            ) {
+                // Top HUD Bar: Back, Arena Title, Hearts, Gems, Speed, Loadout
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -299,60 +302,37 @@ fun BlockCipherForgeArenaScreen(
                 }
             }
 
-            // Level Selector Ribbon
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                BlockCipherForgeLevel.values().forEach { lvl ->
-                    val isSelected = currentLevel == lvl
-                    val isUnlocked = unlockedLevels.contains(lvl.id)
-                    val isBoss = lvl == BlockCipherForgeLevel.BOSS_BATTLE
-
-                    val chipColor = when {
-                        isSelected && isBoss -> DuolingoRed
-                        isSelected -> AmberGold
-                        isBoss -> DuolingoRed.copy(alpha = 0.4f)
-                        isUnlocked -> dynamicColors.textSecondary
-                        else -> dynamicColors.cardBorder.copy(alpha = 0.4f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) chipColor.copy(alpha = 0.2f)
-                                else dynamicColors.cardBackground.copy(alpha = 0.5f)
-                            )
-                            .border(
-                                1.5.dp,
-                                if (isSelected) chipColor else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable(enabled = isUnlocked) {
-                                currentLevel = lvl
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = lvl.iconEmoji,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isBoss) "BOSS" else "L${lvl.id}",
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = if (isSelected) chipColor else dynamicColors.textPrimary
-                            )
-                        }
-                    }
+            // Enhanced Cyber Level Selector Ribbon
+            val forgeStations = remember {
+                BlockCipherForgeLevel.values().map { lvl ->
+                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                        id = lvl.id,
+                        title = lvl.title,
+                        shortName = when (lvl.id) {
+                            1 -> "S-Box"
+                            2 -> "ShiftRows"
+                            3 -> "MixCols"
+                            4 -> "RoundKey"
+                            5 -> "Modes"
+                            6 -> "Avalanche"
+                            else -> "Overlord"
+                        },
+                        iconEmoji = lvl.iconEmoji,
+                        isBoss = lvl == BlockCipherForgeLevel.BOSS_BATTLE
+                    )
                 }
             }
+
+            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                stations = forgeStations,
+                currentLevelId = currentLevel.id,
+                unlockedLevels = unlockedLevels,
+                levelStars = levelStars,
+                accentColor = AmberGold,
+                onSelectLevel = { id ->
+                    currentLevel = BlockCipherForgeLevel.fromId(id)
+                }
+            )
 
             // Combo & Tactical HUD
             ArenaComboHUD(
@@ -376,48 +356,65 @@ fun BlockCipherForgeArenaScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(dynamicColors.cardBackground)
                     .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(12.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
                 when (currentLevel) {
-                    BlockCipherForgeLevel.LEVEL_1 -> SBoxForgeLevel(
-                        toolActive = equippedTool == ArenaTacticalTool.HINT_LENS && !toolUsedInLevel,
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_1) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(120) }
-                    )
-                    BlockCipherForgeLevel.LEVEL_2 -> ShiftRowsSliderLevel(
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_2) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    BlockCipherForgeLevel.LEVEL_3 -> MixColumnsMixerLevel(
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_3) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(180) }
-                    )
-                    BlockCipherForgeLevel.LEVEL_4 -> AddRoundKeyLockLevel(
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_4) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    BlockCipherForgeLevel.LEVEL_5 -> ModeDetectiveLevel(
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_5) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(200) }
-                    )
-                    BlockCipherForgeLevel.LEVEL_6 -> AvalancheSprintLevel(
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_6) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(220) }
-                    )
-                    BlockCipherForgeLevel.BOSS_BATTLE -> BlockOverlordBossLevel(
-                        timeFreezeActive = equippedTool == ArenaTacticalTool.TIME_FREEZE && toolUsedInLevel,
-                        onComplete = { handleLevelCompleted(BlockCipherForgeLevel.BOSS_BATTLE) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(300) }
-                    )
-                }
+                        BlockCipherForgeLevel.LEVEL_1 -> SBoxForgeLevel(
+                            toolActive = equippedTool == ArenaTacticalTool.HINT_LENS && !toolUsedInLevel,
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_1) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(120) }
+                        )
+                        BlockCipherForgeLevel.LEVEL_2 -> ShiftRowsSliderLevel(
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_2) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        BlockCipherForgeLevel.LEVEL_3 -> MixColumnsMixerLevel(
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_3) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(180) }
+                        )
+                        BlockCipherForgeLevel.LEVEL_4 -> AddRoundKeyLockLevel(
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_4) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        BlockCipherForgeLevel.LEVEL_5 -> ModeDetectiveLevel(
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_5) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(200) }
+                        )
+                        BlockCipherForgeLevel.LEVEL_6 -> AvalancheSprintLevel(
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_6) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(220) }
+                        )
+                        BlockCipherForgeLevel.BOSS_BATTLE -> BlockOverlordBossLevel(
+                            timeFreezeActive = equippedTool == ArenaTacticalTool.TIME_FREEZE && toolUsedInLevel,
+                            onComplete = { handleLevelCompleted(BlockCipherForgeLevel.BOSS_BATTLE) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(300) }
+                        )
+                    }
             }
+
+            } // Close inner weighted column
+
+            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
+                onOpenCodex = { showTheoryCodex = true },
+                onResetLevel = {
+                    val lvl = currentLevel
+                    currentLevel = BlockCipherForgeLevel.LEVEL_1
+                    currentLevel = lvl
+                },
+                onSkipLevel = {
+                    val nextId = minOf(7, currentLevel.id + 1)
+                    unlockedLevels = unlockedLevels + nextId
+                    currentLevel = BlockCipherForgeLevel.fromId(nextId)
+                }
+            )
         }
 
         // Cinematic Briefing Overlay

@@ -95,7 +95,7 @@ fun IntegrityFoundryArenaScreen(
     var showLoadoutSheet by remember { mutableStateOf(false) }
 
     // Cinematic & Feedback Dialogs
-    var showBriefing by remember { mutableStateOf(true) }
+    var showBriefing by remember { mutableStateOf(false) }
     var showDebrief by remember { mutableStateOf(false) }
     var debriefIsVictory by remember { mutableStateOf(false) }
     var showTheoryCodex by remember { mutableStateOf(false) }
@@ -103,7 +103,6 @@ fun IntegrityFoundryArenaScreen(
     // Reset tool status on level change
     LaunchedEffect(currentLevel) {
         toolUsedInLevel = false
-        showBriefing = true
     }
 
     fun onDeductHeart() {
@@ -146,16 +145,20 @@ fun IntegrityFoundryArenaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(dynamicColors.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = Color(0xFF00B894))
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Top HUD Bar
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 2.dp)
+            ) {
+                // Top HUD Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -297,60 +300,37 @@ fun IntegrityFoundryArenaScreen(
                 }
             }
 
-            // Level Selector Ribbon
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                IntegrityFoundryLevel.values().forEach { lvl ->
-                    val isSelected = currentLevel == lvl
-                    val isUnlocked = unlockedLevels.contains(lvl.id)
-                    val isBoss = lvl == IntegrityFoundryLevel.BOSS_BATTLE
-
-                    val chipColor = when {
-                        isSelected && isBoss -> DuolingoRed
-                        isSelected -> AmberGold
-                        isBoss -> DuolingoRed.copy(alpha = 0.4f)
-                        isUnlocked -> dynamicColors.textSecondary
-                        else -> dynamicColors.cardBorder.copy(alpha = 0.4f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) chipColor.copy(alpha = 0.2f)
-                                else dynamicColors.cardBackground.copy(alpha = 0.5f)
-                            )
-                            .border(
-                                1.5.dp,
-                                if (isSelected) chipColor else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable(enabled = isUnlocked) {
-                                currentLevel = lvl
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = lvl.iconEmoji,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isBoss) "BOSS" else "L${lvl.id}",
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = if (isSelected) chipColor else dynamicColors.textPrimary
-                            )
-                        }
-                    }
+            // Enhanced Cyber Level Selector Ribbon
+            val foundryStations = remember {
+                IntegrityFoundryLevel.values().map { lvl ->
+                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                        id = lvl.id,
+                        title = lvl.title,
+                        shortName = when (lvl.id) {
+                            1 -> "Digest"
+                            2 -> "Avalanche"
+                            3 -> "Sponge"
+                            4 -> "Merkle"
+                            5 -> "HMAC"
+                            6 -> "Birthday"
+                            else -> "Collision"
+                        },
+                        iconEmoji = lvl.iconEmoji,
+                        isBoss = lvl == IntegrityFoundryLevel.BOSS_BATTLE
+                    )
                 }
             }
+
+            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                stations = foundryStations,
+                currentLevelId = currentLevel.id,
+                unlockedLevels = unlockedLevels,
+                levelStars = levelStars,
+                accentColor = Color(0xFF00B894),
+                onSelectLevel = { id ->
+                    currentLevel = IntegrityFoundryLevel.fromId(id)
+                }
+            )
 
             // Combo & Tactical HUD
             ArenaComboHUD(
@@ -374,45 +354,62 @@ fun IntegrityFoundryArenaScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(dynamicColors.cardBackground)
                     .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(12.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
                 when (currentLevel) {
-                    IntegrityFoundryLevel.LEVEL_1 -> DigestPressLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_1) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(120) }
-                    )
-                    IntegrityFoundryLevel.LEVEL_2 -> BitFlipLabLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_2) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    IntegrityFoundryLevel.LEVEL_3 -> SpongeChamberLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_3) },
-                        onActionSuccess = { onActionSuccess(180) }
-                    )
-                    IntegrityFoundryLevel.LEVEL_4 -> WaxSealLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_4) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    IntegrityFoundryLevel.LEVEL_5 -> SignatureSealLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_5) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(200) }
-                    )
-                    IntegrityFoundryLevel.LEVEL_6 -> BirthdayRadarLevel(
-                        onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_6) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(220) }
-                    )
-                    IntegrityFoundryLevel.BOSS_BATTLE -> CollisionBeastBossLevel(
-                        onDefeatBoss = { handleLevelCompleted(IntegrityFoundryLevel.BOSS_BATTLE) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(300) }
-                    )
-                }
+                        IntegrityFoundryLevel.LEVEL_1 -> DigestPressLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_1) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(120) }
+                        )
+                        IntegrityFoundryLevel.LEVEL_2 -> BitFlipLabLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_2) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        IntegrityFoundryLevel.LEVEL_3 -> SpongeChamberLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_3) },
+                            onActionSuccess = { onActionSuccess(180) }
+                        )
+                        IntegrityFoundryLevel.LEVEL_4 -> WaxSealLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_4) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        IntegrityFoundryLevel.LEVEL_5 -> SignatureSealLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_5) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(200) }
+                        )
+                        IntegrityFoundryLevel.LEVEL_6 -> BirthdayRadarLevel(
+                            onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_6) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(220) }
+                        )
+                        IntegrityFoundryLevel.BOSS_BATTLE -> CollisionBeastBossLevel(
+                            onDefeatBoss = { handleLevelCompleted(IntegrityFoundryLevel.BOSS_BATTLE) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(300) }
+                        )
+                    }
             }
+
+            } // Close inner weighted column
+
+            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
+                onOpenCodex = { showTheoryCodex = true },
+                onResetLevel = {
+                    val lvl = currentLevel
+                    currentLevel = IntegrityFoundryLevel.LEVEL_1
+                    currentLevel = lvl
+                },
+                onSkipLevel = {
+                    val nextId = minOf(7, currentLevel.id + 1)
+                    unlockedLevels = unlockedLevels + nextId
+                    currentLevel = IntegrityFoundryLevel.fromId(nextId)
+                }
+            )
         }
 
         // Cinematic Briefing Overlay

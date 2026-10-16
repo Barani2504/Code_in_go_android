@@ -95,7 +95,7 @@ fun KeyExchangeCitadelArenaScreen(
     var showLoadoutSheet by remember { mutableStateOf(false) }
 
     // Cinematic & Feedback Dialogs
-    var showBriefing by remember { mutableStateOf(true) }
+    var showBriefing by remember { mutableStateOf(false) }
     var showDebrief by remember { mutableStateOf(false) }
     var debriefIsVictory by remember { mutableStateOf(false) }
     var showTheoryCodex by remember { mutableStateOf(false) }
@@ -103,7 +103,6 @@ fun KeyExchangeCitadelArenaScreen(
     // Reset tool status on level change
     LaunchedEffect(currentLevel) {
         toolUsedInLevel = false
-        showBriefing = true
     }
 
     fun onDeductHeart() {
@@ -146,16 +145,20 @@ fun KeyExchangeCitadelArenaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(dynamicColors.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = Color(0xFF6C5CE7))
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Top HUD Bar
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 2.dp)
+            ) {
+                // Top HUD Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -297,60 +300,37 @@ fun KeyExchangeCitadelArenaScreen(
                 }
             }
 
-            // Level Selector Ribbon
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                KeyExchangeCitadelLevel.values().forEach { lvl ->
-                    val isSelected = currentLevel == lvl
-                    val isUnlocked = unlockedLevels.contains(lvl.id)
-                    val isBoss = lvl == KeyExchangeCitadelLevel.BOSS_BATTLE
-
-                    val chipColor = when {
-                        isSelected && isBoss -> DuolingoRed
-                        isSelected -> AmberGold
-                        isBoss -> DuolingoRed.copy(alpha = 0.4f)
-                        isUnlocked -> dynamicColors.textSecondary
-                        else -> dynamicColors.cardBorder.copy(alpha = 0.4f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) chipColor.copy(alpha = 0.2f)
-                                else dynamicColors.cardBackground.copy(alpha = 0.5f)
-                            )
-                            .border(
-                                1.5.dp,
-                                if (isSelected) chipColor else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable(enabled = isUnlocked) {
-                                currentLevel = lvl
-                            }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = lvl.iconEmoji,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isBoss) "BOSS" else "L${lvl.id}",
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                color = if (isSelected) chipColor else dynamicColors.textPrimary
-                            )
-                        }
-                    }
+            // Enhanced Cyber Level Selector Ribbon
+            val citadelStations = remember {
+                KeyExchangeCitadelLevel.values().map { lvl ->
+                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                        id = lvl.id,
+                        title = lvl.title,
+                        shortName = when (lvl.id) {
+                            1 -> "Clock"
+                            2 -> "PaintMix"
+                            3 -> "Trapdoor"
+                            4 -> "KeyPair"
+                            5 -> "ECC Curve"
+                            6 -> "Gauntlet"
+                            else -> "Quantum"
+                        },
+                        iconEmoji = lvl.iconEmoji,
+                        isBoss = lvl == KeyExchangeCitadelLevel.BOSS_BATTLE
+                    )
                 }
             }
+
+            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                stations = citadelStations,
+                currentLevelId = currentLevel.id,
+                unlockedLevels = unlockedLevels,
+                levelStars = levelStars,
+                accentColor = Color(0xFF6C5CE7),
+                onSelectLevel = { id ->
+                    currentLevel = KeyExchangeCitadelLevel.fromId(id)
+                }
+            )
 
             // Combo & Tactical HUD
             ArenaComboHUD(
@@ -374,46 +354,63 @@ fun KeyExchangeCitadelArenaScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(dynamicColors.cardBackground)
                     .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(12.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.TopCenter
             ) {
                 when (currentLevel) {
-                    KeyExchangeCitadelLevel.LEVEL_1 -> ClockArithmeticLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_1) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(120) }
-                    )
-                    KeyExchangeCitadelLevel.LEVEL_2 -> PaintMixHandshakeLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_2) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    KeyExchangeCitadelLevel.LEVEL_3 -> TrapdoorLabLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_3) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(180) }
-                    )
-                    KeyExchangeCitadelLevel.LEVEL_4 -> KeyPairForgeLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_4) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(150) }
-                    )
-                    KeyExchangeCitadelLevel.LEVEL_5 -> CurveWalkerLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_5) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(200) }
-                    )
-                    KeyExchangeCitadelLevel.LEVEL_6 -> KeySizeGauntletLevel(
-                        onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_6) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(220) }
-                    )
-                    KeyExchangeCitadelLevel.BOSS_BATTLE -> QuantumCryptanalystBossLevel(
-                        onDefeatBoss = { handleLevelCompleted(KeyExchangeCitadelLevel.BOSS_BATTLE) },
-                        onDeductHeart = { onDeductHeart() },
-                        onActionSuccess = { onActionSuccess(300) }
-                    )
-                }
+                        KeyExchangeCitadelLevel.LEVEL_1 -> ClockArithmeticLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_1) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(120) }
+                        )
+                        KeyExchangeCitadelLevel.LEVEL_2 -> PaintMixHandshakeLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_2) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        KeyExchangeCitadelLevel.LEVEL_3 -> TrapdoorLabLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_3) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(180) }
+                        )
+                        KeyExchangeCitadelLevel.LEVEL_4 -> KeyPairForgeLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_4) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(150) }
+                        )
+                        KeyExchangeCitadelLevel.LEVEL_5 -> CurveWalkerLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_5) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(200) }
+                        )
+                        KeyExchangeCitadelLevel.LEVEL_6 -> KeySizeGauntletLevel(
+                            onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_6) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(220) }
+                        )
+                        KeyExchangeCitadelLevel.BOSS_BATTLE -> QuantumCryptanalystBossLevel(
+                            onDefeatBoss = { handleLevelCompleted(KeyExchangeCitadelLevel.BOSS_BATTLE) },
+                            onDeductHeart = { onDeductHeart() },
+                            onActionSuccess = { onActionSuccess(300) }
+                        )
+                    }
             }
+
+            } // Close inner weighted column
+
+            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
+                onOpenCodex = { showTheoryCodex = true },
+                onResetLevel = {
+                    val lvl = currentLevel
+                    currentLevel = KeyExchangeCitadelLevel.LEVEL_1
+                    currentLevel = lvl
+                },
+                onSkipLevel = {
+                    val nextId = minOf(7, currentLevel.id + 1)
+                    unlockedLevels = unlockedLevels + nextId
+                    currentLevel = KeyExchangeCitadelLevel.fromId(nextId)
+                }
+            )
         }
 
         // Cinematic Briefing Overlay

@@ -129,7 +129,7 @@ fun StatefulFirewallLevel(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Mission Briefing
         Box(
@@ -369,6 +369,7 @@ fun StatefulFirewallLevel(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
