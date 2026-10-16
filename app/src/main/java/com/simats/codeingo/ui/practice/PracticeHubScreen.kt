@@ -859,17 +859,22 @@ private fun InterviewPrepTab(
                     )
                 }
 
+                Spacer(modifier = Modifier.width(12.dp))
+
+                val isDark = LocalDynamicThemeColors.current.isDark
+                val effectiveDiffColor = if (prob.diffColor == AmberGold && !isDark) Color(0xFFB45309) else prob.diffColor
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(prob.diffColor.copy(alpha = 0.2f))
+                        .background(effectiveDiffColor.copy(alpha = if (isDark) 0.2f else 0.12f))
+                        .border(1.dp, effectiveDiffColor.copy(alpha = if (isDark) 0.4f else 0.3f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Text(
                         text = prob.difficulty,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        color = prob.diffColor
+                        color = effectiveDiffColor
                     )
                 }
             }

@@ -155,6 +155,7 @@ fun ArenasHubScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
+                        val headerAmber = if (isDark) AmberGold else Color(0xFFB45309)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -162,7 +163,7 @@ fun ArenasHubScreen(
                             Icon(
                                 imageVector = Icons.Default.Shield,
                                 contentDescription = null,
-                                tint = AmberGold,
+                                tint = headerAmber,
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
@@ -170,7 +171,7 @@ fun ArenasHubScreen(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = FontFamily.Monospace,
-                                color = AmberGold,
+                                color = headerAmber,
                                 letterSpacing = 1.2.sp
                             )
                         }
@@ -184,14 +185,19 @@ fun ArenasHubScreen(
                     }
 
                     // Status Badge: All 5 Unlocked
+                    val badgeAmber = if (isDark) AmberGold else Color(0xFFB45309)
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (isDark) AmberGold.copy(alpha = 0.15f)
-                                else AmberGold.copy(alpha = 0.12f)
+                                else Color(0xFFB45309).copy(alpha = 0.10f)
                             )
-                            .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(16.dp))
+                            .border(
+                                1.2.dp,
+                                if (isDark) AmberGold.copy(alpha = 0.45f) else Color(0xFFB45309).copy(alpha = 0.35f),
+                                RoundedCornerShape(16.dp)
+                            )
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
@@ -199,7 +205,7 @@ fun ArenasHubScreen(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = AmberGold
+                            color = badgeAmber
                         )
                     }
                 }
@@ -234,6 +240,7 @@ fun ArenasHubScreen(
                     )
                     .padding(16.dp)
             ) {
+                val statAmber = if (isDark) AmberGold else Color(0xFFB45309)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround,
@@ -241,7 +248,7 @@ fun ArenasHubScreen(
                 ) {
                     CombatStatColumn(label = "ACTIVE ARENAS", value = "5 / 5", color = DuolingoGreen)
                     Box(modifier = Modifier.height(32.dp).width(1.dp).background(SubtextGray.copy(alpha = 0.3f)))
-                    CombatStatColumn(label = "INTERACTIVE LABS", value = "35 STATIONS", color = AmberGold)
+                    CombatStatColumn(label = "INTERACTIVE LABS", value = "35 STATIONS", color = statAmber)
                     Box(modifier = Modifier.height(32.dp).width(1.dp).background(SubtextGray.copy(alpha = 0.3f)))
                     CombatStatColumn(label = "CRYPTO XP", value = "$totalXP XP", color = Color(0xFF60A5FA))
                 }
@@ -286,6 +293,9 @@ private fun ArenaBattleHeroCard(
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
 
+    val effectivePrimary = if (spec.primaryColor == AmberGold && !isDark) Color(0xFFB45309) else spec.primaryColor
+    val effectiveSecondary = if (spec.secondaryColor == Color(0xFFFF9800) && !isDark) Color(0xFFD97706) else spec.secondaryColor
+
     val cardShape = RoundedCornerShape(24.dp)
 
     Box(
@@ -294,19 +304,19 @@ private fun ArenaBattleHeroCard(
             .shadow(
                 elevation = 12.dp,
                 shape = cardShape,
-                spotColor = spec.primaryColor.copy(alpha = if (isDark) 0.30f else 0.18f)
+                spotColor = effectivePrimary.copy(alpha = if (isDark) 0.30f else 0.18f)
             )
             .clip(cardShape)
             .background(
                 if (isDark) Brush.verticalGradient(
                     listOf(
-                        spec.primaryColor.copy(alpha = 0.12f),
+                        effectivePrimary.copy(alpha = 0.12f),
                         Color(0xFF0F172A)
                     )
                 ) else Brush.verticalGradient(
                     listOf(
                         Color.White,
-                        spec.primaryColor.copy(alpha = 0.05f)
+                        effectivePrimary.copy(alpha = 0.05f)
                     )
                 )
             )
@@ -314,8 +324,8 @@ private fun ArenaBattleHeroCard(
                 width = 1.5.dp,
                 brush = Brush.horizontalGradient(
                     listOf(
-                        spec.primaryColor.copy(alpha = 0.75f),
-                        spec.secondaryColor.copy(alpha = 0.35f)
+                        effectivePrimary.copy(alpha = 0.75f),
+                        effectiveSecondary.copy(alpha = 0.35f)
                     )
                 ),
                 shape = cardShape
@@ -323,128 +333,150 @@ private fun ArenaBattleHeroCard(
             .padding(18.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            // Header Row: Emoji Badge, Unit, Boss Tag
+            // 1. Top Meta Row: Unit Pill on left, Boss Badge on right
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                // Unit & Level Pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(effectivePrimary.copy(alpha = if (isDark) 0.15f else 0.10f))
+                        .border(1.dp, effectivePrimary.copy(alpha = if (isDark) 0.40f else 0.25f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 9.dp, vertical = 4.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(spec.primaryColor.copy(alpha = 0.20f))
-                            .border(1.5.dp, spec.primaryColor.copy(alpha = 0.6f), CircleShape),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Text(text = spec.iconEmoji, fontSize = 26.sp)
-                    }
-
-                    Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = "UNIT ${spec.unitNumber}",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.Monospace,
-                                color = spec.primaryColor
-                            )
-                            Text(text = "•", fontSize = 10.sp, color = SubtextGray)
-                            Text(
-                                text = "7 INTERACTIVE LEVELS",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SubtextGray
-                            )
-                        }
                         Text(
-                            text = spec.title,
-                            fontSize = 20.sp,
+                            text = "UNIT ${spec.unitNumber}",
+                            fontSize = 10.5.sp,
                             fontWeight = FontWeight.Black,
-                            color = dynamicColors.textPrimary
+                            fontFamily = FontFamily.Monospace,
+                            color = effectivePrimary
+                        )
+                        Text(text = "•", fontSize = 10.sp, color = SubtextGray)
+                        Text(
+                            text = "7 INTERACTIVE LEVELS",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SubtextGray
                         )
                     }
                 }
 
-                // Boss Badge
+                // Boss Badge (Clean, single-line pill)
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFEF4444).copy(alpha = 0.15f))
-                        .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFEF4444).copy(alpha = if (isDark) 0.15f else 0.10f))
+                        .border(1.dp, Color(0xFFEF4444).copy(alpha = if (isDark) 0.40f else 0.28f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 9.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "BOSS: ${spec.bossName}",
-                        fontSize = 9.sp,
+                        fontSize = 9.5.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = Color(0xFFEF4444)
+                        color = Color(0xFFEF4444),
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
 
-            // Subtitle & Educational Description
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = spec.subtitle,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = spec.primaryColor
-                )
-                Text(
-                    text = spec.description,
-                    fontSize = 12.5.sp,
-                    color = if (isDark) Color(0xFFCBD5E1) else Color(0xFF475569),
-                    lineHeight = 17.sp
-                )
-            }
-
-            // Interactive Gamified Lab Tags
-            Text(
-                text = "INTERACTIVE LAB SIMULATIONS:",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.Monospace,
-                color = SubtextGray
-            )
-
+            // 2. Main Title Row: 52dp Icon + Title & Subtitle aligned together
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                spec.interactiveModules.take(2).forEach { module ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isDark) Color.White.copy(alpha = 0.06f)
-                                else Color.Black.copy(alpha = 0.04f)
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(effectivePrimary.copy(alpha = if (isDark) 0.20f else 0.12f))
+                        .border(1.5.dp, effectivePrimary.copy(alpha = if (isDark) 0.6f else 0.35f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = spec.iconEmoji, fontSize = 26.sp)
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = spec.title,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        color = dynamicColors.textPrimary
+                    )
+                    Text(
+                        text = spec.subtitle,
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = effectivePrimary
+                    )
+                }
+            }
+
+            // 3. Educational Description
+            Text(
+                text = spec.description,
+                fontSize = 12.5.sp,
+                color = if (isDark) Color(0xFFCBD5E1) else Color(0xFF475569),
+                lineHeight = 17.5.sp
+            )
+
+            // 4. Interactive Gamified Lab Tags
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "INTERACTIVE LAB SIMULATIONS:",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = SubtextGray
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    spec.interactiveModules.take(2).forEach { module ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isDark) Color.White.copy(alpha = 0.06f)
+                                    else Color(0xFFF1F5F9)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (isDark) effectivePrimary.copy(alpha = 0.25f)
+                                    else Color(0xFFCBD5E1),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "🎮 $module",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = dynamicColors.textPrimary,
+                                maxLines = 1
                             )
-                            .border(1.dp, spec.primaryColor.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "🎮 $module",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = dynamicColors.textPrimary,
-                            maxLines = 1
-                        )
+                        }
                     }
                 }
             }
 
-            // Action Launch Button
+            // 5. Action Launch Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -452,7 +484,7 @@ private fun ArenaBattleHeroCard(
                     .clip(RoundedCornerShape(16.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(spec.primaryColor, spec.secondaryColor)
+                            listOf(effectivePrimary, effectiveSecondary)
                         )
                     )
                     .pressScale(targetScale = 0.96f)
@@ -466,7 +498,7 @@ private fun ArenaBattleHeroCard(
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Enter",
-                        tint = Color.Black,
+                        tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
@@ -474,7 +506,7 @@ private fun ArenaBattleHeroCard(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = Color.Black,
+                        color = Color.White,
                         letterSpacing = 0.6.sp
                     )
                 }

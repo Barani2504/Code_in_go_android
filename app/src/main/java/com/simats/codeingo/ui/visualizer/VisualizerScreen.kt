@@ -569,7 +569,7 @@ private fun TopicListView(
             }
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(110.dp))
     }
 }
 
@@ -706,35 +706,47 @@ private fun DSATopicListCard(
     type: DSAVisualizerType,
     onSelect: () -> Unit
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val cardAccent = if (type.color == AmberGold && !isDark) Color(0xFFB45309) else type.color
+    val diffAccent = if (type.difficultyColor == AmberGold && !isDark) Color(0xFFB45309) else type.difficultyColor
+
     val cardShape = RoundedCornerShape(22.dp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(cardShape)
-            .background(CardBackground.copy(alpha = 0.85f))
-            .border(1.5.dp, type.color.copy(alpha = 0.45f), cardShape)
+            .background(CardBackground.copy(alpha = if (isDark) 0.85f else 0.98f))
+            .border(
+                1.5.dp,
+                if (isDark) cardAccent.copy(alpha = 0.45f) else cardAccent.copy(alpha = 0.35f),
+                cardShape
+            )
             .pressScale()
             .clickable { onSelect() }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // Top Row: Icon, Category & Difficulty Badge, Title
+        // Top Row: Icon on left, Title + Badges + Tagline on right (aligned together)
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(48.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(type.color.copy(alpha = 0.20f))
-                    .border(1.2.dp, type.color.copy(alpha = 0.6f), RoundedCornerShape(14.dp)),
+                    .background(cardAccent.copy(alpha = if (isDark) 0.20f else 0.12f))
+                    .border(1.2.dp, cardAccent.copy(alpha = if (isDark) 0.6f else 0.35f), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = getDsaTypeIcon(type), fontSize = 22.sp)
+                Text(text = getDsaTypeIcon(type), fontSize = 24.sp)
             }
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -742,57 +754,61 @@ private fun DSATopicListCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(type.color.copy(alpha = 0.15f))
+                            .background(cardAccent.copy(alpha = if (isDark) 0.15f else 0.10f))
+                            .border(1.dp, cardAccent.copy(alpha = if (isDark) 0.30f else 0.20f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 7.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = type.category.uppercase(),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
-                            color = type.color
+                            fontFamily = FontFamily.Monospace,
+                            color = cardAccent
                         )
                     }
 
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(type.difficultyColor.copy(alpha = 0.15f))
+                            .background(diffAccent.copy(alpha = if (isDark) 0.15f else 0.10f))
+                            .border(1.dp, diffAccent.copy(alpha = if (isDark) 0.30f else 0.20f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 7.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = type.difficulty,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
-                            color = type.difficultyColor
+                            color = diffAccent
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(2.dp))
-
                 Text(
                     text = type.title,
-                    fontSize = 17.sp,
+                    fontSize = 17.5.sp,
                     fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    fontFamily = AppFontFamily,
+                    color = dynamicColors.textPrimary
+                )
+
+                Text(
+                    text = type.tagline,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppFontFamily,
+                    color = cardAccent
                 )
             }
         }
 
         Text(
-            text = type.tagline,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = type.color
-        )
-
-        Text(
             text = type.shortDescription,
-            fontSize = 12.sp,
+            fontSize = 12.5.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = AppFontFamily,
             color = SubtextGray,
             maxLines = 2,
-            lineHeight = 16.sp
+            lineHeight = 17.sp
         )
 
         // Operations & Time Complexity
@@ -801,38 +817,54 @@ private fun DSATopicListCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                type.keyOperations.take(3).forEach { op ->
+            Row(
+                modifier = Modifier.weight(1f, fill = false),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                type.keyOperations.take(2).forEach { op ->
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (isDark) Color.White.copy(alpha = 0.08f)
+                                else Color(0xFFF1F5F9)
+                            )
+                            .border(
+                                1.dp,
+                                if (isDark) Color.White.copy(alpha = 0.12f)
+                                else Color(0xFFCBD5E1),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = op,
-                            fontSize = 10.sp,
+                            fontSize = 10.5.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f)
+                            color = dynamicColors.textPrimary.copy(alpha = 0.9f)
                         )
                     }
                 }
             }
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(type.color.copy(alpha = 0.18f))
-                    .border(1.dp, type.color.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                    .background(cardAccent.copy(alpha = if (isDark) 0.18f else 0.12f))
+                    .border(1.dp, cardAccent.copy(alpha = if (isDark) 0.40f else 0.28f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 9.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = type.timeComplexity,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = if (isDark) dynamicColors.textPrimary else cardAccent,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
@@ -845,16 +877,17 @@ private fun DSATopicListCard(
         ) {
             Text(
                 text = "Interactive Visualizer & Code",
-                fontSize = 11.sp,
+                fontSize = 11.5.sp,
                 fontWeight = FontWeight.Black,
-                color = type.color
+                fontFamily = AppFontFamily,
+                color = cardAccent
             )
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(type.color)
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .background(cardAccent)
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -862,15 +895,16 @@ private fun DSATopicListCard(
                 ) {
                     Text(
                         text = "Open",
-                        fontSize = 11.sp,
+                        fontSize = 11.5.sp,
                         fontWeight = FontWeight.Black,
-                        color = LocalDynamicThemeColors.current.textPrimary
+                        fontFamily = AppFontFamily,
+                        color = Color.White
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
-                        contentDescription = null,
+                        contentDescription = "Open",
                         tint = Color.White,
-                        modifier = Modifier.size(12.dp)
+                        modifier = Modifier.size(13.dp)
                     )
                 }
             }
