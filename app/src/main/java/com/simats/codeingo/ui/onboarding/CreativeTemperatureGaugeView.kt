@@ -141,7 +141,7 @@ fun CreativeTemperatureGaugeView(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = "DSA ARENA CHALLENGE",
+                            text = "CRYPTO ARENA CHALLENGE",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = AppFontFamily,

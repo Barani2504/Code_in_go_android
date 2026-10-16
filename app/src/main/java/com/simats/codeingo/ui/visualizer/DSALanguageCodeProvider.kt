@@ -498,7 +498,7 @@ func GenerateECCKey() (*ecdsa.PrivateKey, error) {
         "python" -> """
 import hashlib
 
-data = b"Codeingo Cryptography & Network Security"
+data = b"AshCrypt Cryptography & Network Security"
 hasher = hashlib.sha256()
 hasher.update(data)
 digest = hasher.hexdigest()
@@ -609,7 +609,7 @@ func ComputeHMAC(key, data []byte) []byte {
 import ssl
 import socket
 
-hostname = 'codeingo.edu'
+hostname = 'ashcrypt.edu'
 context = ssl.create_default_context()
 # Enforce TLS 1.3 minimum protocol version
 context.minimum_version = ssl.TLSVersion.TLSv1_3
@@ -629,7 +629,7 @@ public class TLS13Client {
         SSLContext ctx = SSLContext.getInstance("TLSv1.3");
         ctx.init(null, null, null);
         SSLSocketFactory factory = ctx.getSocketFactory();
-        try (SSLSocket socket = (SSLSocket) factory.createSocket("codeingo.edu", 443)) {
+        try (SSLSocket socket = (SSLSocket) factory.createSocket("ashcrypt.edu", 443)) {
             socket.setEnabledProtocols(new String[]{"TLSv1.3"});
             socket.startHandshake();
         }

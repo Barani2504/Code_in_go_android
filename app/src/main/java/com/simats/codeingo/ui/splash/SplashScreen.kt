@@ -333,7 +333,7 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Animated Brand Title "Ashnode"
+            // Animated Brand Title "AshCrypt"
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
@@ -344,7 +344,7 @@ fun SplashScreen(
                 }
             ) {
                 Text(
-                    text = "Ashnode",
+                    text = "AshCrypt",
                     fontSize = 46.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = AppFontFamily,
@@ -352,7 +352,7 @@ fun SplashScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Master Data Structures & Algorithms",
+                    text = "Master Cryptography & Network Security",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = AppFontFamily,

@@ -437,19 +437,21 @@ fun MainDashboardScreen(
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = {
-                BottomNavBar(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab ->
-                        val targetIndex = dashboardTabs.indexOf(tab)
-                        if (targetIndex >= 0) {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(targetIndex)
+                if (activeWorldArena == null) {
+                    BottomNavBar(
+                        selectedTab = selectedTab,
+                        onTabSelected = { tab ->
+                            val targetIndex = dashboardTabs.indexOf(tab)
+                            if (targetIndex >= 0) {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(targetIndex)
+                                }
                             }
-                        }
-                        selectedTab = tab
-                    },
-                    swipePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                )
+                            selectedTab = tab
+                        },
+                        swipePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    )
+                }
             }
         ) { paddingValues ->
             Box(

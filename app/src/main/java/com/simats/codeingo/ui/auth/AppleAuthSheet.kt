@@ -159,7 +159,7 @@ fun AppleAuthSheet(
                             color = dynamicColors.textSecondary
                         )
                         Text(
-                            text = "Codeingo CNS Arena",
+                            text = "AshCrypt CNS Arena",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = dynamicColors.textPrimary
@@ -325,7 +325,7 @@ fun AppleAuthSheet(
                     modifier = Modifier.size(12.dp)
                 )
                 Text(
-                    text = "Apple does not track or profile your activity in Codeingo",
+                    text = "Apple does not track or profile your activity in AshCrypt",
                     fontSize = 10.5.sp,
                     color = dynamicColors.textSecondary,
                     textAlign = TextAlign.Center

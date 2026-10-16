@@ -59,8 +59,11 @@ fun DuolingoSpeechBubbleView(
         popAlpha.animateTo(1.0f, animationSpec = spring(dampingRatio = 0.8f, stiffness = 500f))
     }
 
-    val containerBg = Color(0xFF141F38).copy(alpha = 0.92f)
-    val strokeColor = AmberGold.copy(alpha = 0.40f)
+    val isDark = LocalDynamicThemeColors.current.isDark
+    val containerBg = if (isDark) Color(0xFF141F38).copy(alpha = 0.95f) else Color.White
+    val strokeColor = if (isDark) AmberGold.copy(alpha = 0.45f) else AmberGold.copy(alpha = 0.85f)
+    val shadowAmbient = if (isDark) AmberGold.copy(alpha = 0.15f) else Color(0x18_0F_17_2A)
+    val shadowSpot = if (isDark) AmberGold.copy(alpha = 0.25f) else AmberGold.copy(alpha = 0.20f)
 
     Column(
         modifier = modifier
@@ -68,8 +71,8 @@ fun DuolingoSpeechBubbleView(
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(18.dp),
-                ambientColor = AmberGold.copy(alpha = 0.15f),
-                spotColor = AmberGold.copy(alpha = 0.25f)
+                ambientColor = shadowAmbient,
+                spotColor = shadowSpot
             ),
         horizontalAlignment = Alignment.Start
     ) {

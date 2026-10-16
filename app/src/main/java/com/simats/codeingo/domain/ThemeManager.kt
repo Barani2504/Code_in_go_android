@@ -28,7 +28,7 @@ class ThemeManager private constructor() {
     companion object {
         val instance: ThemeManager by lazy { ThemeManager() }
         val shared: ThemeManager get() = instance
-        private const val PREFS_NAME = "codeingo_theme_prefs"
+        private const val PREFS_NAME = "ashcrypt_theme_prefs"
         private const val KEY_THEME = "app_theme_mode_preference_key"
     }
 

@@ -49,9 +49,9 @@ class AuthService private constructor() {
         val instance: AuthService by lazy { AuthService() }
         val shared: AuthService get() = instance
 
-        private const val PREFS_NAME = "ashnode_auth_prefs"
-        private const val KEY_USER_PROFILE = "ashnode_auth_user_profile_v2"
-        private const val KEY_GOOGLE_ACCOUNTS = "ashnode_saved_google_accounts_v2"
+        private const val PREFS_NAME = "ashcrypt_auth_prefs"
+        private const val KEY_USER_PROFILE = "ashcrypt_auth_user_profile_v2"
+        private const val KEY_GOOGLE_ACCOUNTS = "ashcrypt_saved_google_accounts_v2"
         private const val KEY_PASSWORD_GLOBAL = "dsaUserPasswordKey"
         private const val KEY_PASSWORD_PREFIX = "dsaUserPassword_"
     }
@@ -323,7 +323,7 @@ class AuthService private constructor() {
         val guestId = UUID.randomUUID().toString().take(6)
         val profile = UserAuthProfile(
             name = "Guest Adventurer",
-            email = "guest_$guestId@codeingo.app",
+            email = "guest_$guestId@ashcrypt.app",
             handle = "guest_$guestId",
             avatarInitial = "G",
             avatarColorHex = "#F5A623",

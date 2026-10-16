@@ -112,6 +112,7 @@ fun ProfileScreen(
                 onOpenEmotionSheet = { showEmotionSheet = true },
                 onOpenEditProfile = { showCreateAccountSheet = true },
                 onOpenGemShop = { showGemShopSheet = true },
+                onOpenSettings = onOpenSettings,
                 onSignOutClick = { showSignOutAlert = true }
             )
         } else {
@@ -120,6 +121,7 @@ fun ProfileScreen(
                 currentEmotion = currentEmotion,
                 onCreateAccount = { showCreateAccountSheet = true },
                 onSignIn = { showSignInSheet = true },
+                onOpenSettings = onOpenSettings,
                 onQuickDemoSignIn = {
                     localizationManager.setLoggedIn(true, name = "Vishal Rao", handle = "VishalRao3454")
                 }
@@ -171,7 +173,7 @@ fun ProfileScreen(
         if (showSignOutAlert) {
             AlertDialog(
                 onDismissRequest = { showSignOutAlert = false },
-                containerColor = Color(0xFF141A29),
+                containerColor = if (LocalDynamicThemeColors.current.isDark) Color(0xFF141A29) else Color.White,
                 title = {
                     Text(
                         text = "Sign Out",
@@ -181,8 +183,8 @@ fun ProfileScreen(
                 },
                 text = {
                     Text(
-                        text = "Are you sure you want to sign out of your Phoenix profile?",
-                        color = SubtextGray
+                        text = "Are you sure you want to sign out of your AshCrypt profile?",
+                        color = LocalDynamicThemeColors.current.textSecondary
                     )
                 },
                 confirmButton = {
@@ -228,6 +230,7 @@ private fun AuthenticatedProfileBody(
     onOpenEmotionSheet: () -> Unit,
     onOpenEditProfile: () -> Unit,
     onOpenGemShop: () -> Unit,
+    onOpenSettings: () -> Unit,
     onSignOutClick: () -> Unit
 ) {
     Column(
@@ -238,7 +241,7 @@ private fun AuthenticatedProfileBody(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Top Action Bar with Sign Out
+        // Top Action Bar with Settings and Sign Out
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -260,25 +263,54 @@ private fun AuthenticatedProfileBody(
             val isDark = LocalDynamicThemeColors.current.isDark
             val pillBg = if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f)
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(pillBg)
-                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
-                    .clickable { onSignOutClick() }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                // Settings Button
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(pillBg)
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                        .clickable { onOpenSettings() }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "↪", fontSize = 12.sp, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
-                    Text(
-                        text = "Sign Out",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = "⚙️", fontSize = 12.sp)
+                        Text(
+                            text = "Settings",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
+                        )
+                    }
+                }
+
+                // Sign Out Button
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(pillBg)
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                        .clickable { onSignOutClick() }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = "↪", fontSize = 12.sp, color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f))
+                        Text(
+                            text = "Sign Out",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
+                        )
+                    }
                 }
             }
         }
@@ -811,11 +843,11 @@ private data class LearningJourneyTopic(
 private fun LearningJourneySection() {
     val topics = remember {
         listOf(
-            LearningJourneyTopic("array", "Array", "📦", Color(0xFF2B70CA), 0.85f, false),
-            LearningJourneyTopic("stack", "Stack", "🥞", Color(0xFFF5A623), 0.70f, false),
-            LearningJourneyTopic("queue", "Queue", "🚶‍♂️", Color(0xFF58CC02), 0.55f, false),
-            LearningJourneyTopic("linked_list", "Linked List", "🔗", Color(0xFFA659F2), 0.30f, false),
-            LearningJourneyTopic("binary_tree", "Binary Tree", "🌲", Color(0xFFEB4747), 0.0f, true)
+            LearningJourneyTopic("ciphers", "Classical Ciphers", "🏛️", Color(0xFFB45309), 0.85f, false),
+            LearningJourneyTopic("block_ciphers", "Block Ciphers & AES", "⚙️", Color(0xFFEF4444), 0.70f, false),
+            LearningJourneyTopic("key_exchange", "Key Exchange & RSA", "🏰", Color(0xFFF59E0B), 0.55f, false),
+            LearningJourneyTopic("integrity", "Hashes & Integrity", "🛡️", Color(0xFFA855F7), 0.30f, false),
+            LearningJourneyTopic("network_defense", "Cyber Network Defense", "⚡", Color(0xFF10B981), 0.0f, true)
         )
     }
 
@@ -1035,7 +1067,7 @@ private fun AchievementsSection(
                 icon = "🧙‍♂️",
                 level = 1,
                 title = "Sage",
-                subtitle = "Earn 100 XP in DSA courses",
+                subtitle = "Earn 100 XP in Cryptography labs",
                 progress = minOf(totalXP, 100),
                 maxProgress = 100,
                 barColor = Color(0xFF2CB84B),
@@ -1258,6 +1290,7 @@ private fun UnauthenticatedProfileBody(
     currentEmotion: com.simats.codeingo.data.model.PhoenixEmotion,
     onCreateAccount: () -> Unit,
     onSignIn: () -> Unit,
+    onOpenSettings: () -> Unit,
     onQuickDemoSignIn: () -> Unit
 ) {
     Column(
@@ -1287,14 +1320,42 @@ private fun UnauthenticatedProfileBody(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
-                    .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
-                    .padding(6.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = flagEmoji, fontSize = 22.sp)
+                // Settings Button
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                        .clickable { onOpenSettings() }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = "⚙️", fontSize = 12.sp)
+                        Text(
+                            text = "Settings",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (LocalDynamicThemeColors.current.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
+                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                        .padding(6.dp)
+                ) {
+                    Text(text = flagEmoji, fontSize = 22.sp)
+                }
             }
         }
 
@@ -1383,7 +1444,7 @@ private fun UnauthenticatedProfileBody(
                 )
 
                 Text(
-                    text = "Join thousands of engineers leveling up Data Structures, saving daily streaks, and climbing the global Obsidian League.",
+                    text = "Join thousands of engineers mastering Cryptography & Network Security, saving daily streaks, and climbing the global Obsidian League.",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.65f),
@@ -1439,7 +1500,7 @@ private fun UnauthenticatedProfileBody(
                 BenefitCard(
                     icon = "🔥",
                     title = "Daily Fire Streaks",
-                    subtitle = "Keep your algorithm flame alive without losing progress.",
+                    subtitle = "Keep your cryptographic security flame alive without losing progress.",
                     accentColor = Color(0xFFFF9500),
                     modifier = Modifier.weight(1f)
                 )
@@ -1458,8 +1519,8 @@ private fun UnauthenticatedProfileBody(
             ) {
                 BenefitCard(
                     icon = "⚡",
-                    title = "Save Solved DSA",
-                    subtitle = "Synchronize solved Trees, Graphs & Dynamic Programming.",
+                    title = "Save Solved Labs",
+                    subtitle = "Synchronize solved Ciphers, AES, RSA & Hash Forge.",
                     accentColor = Color(0xFF4DB0FF),
                     modifier = Modifier.weight(1f)
                 )
@@ -1513,8 +1574,12 @@ private fun BenefitCard(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF0F1726))
-            .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF0F1726) else Color.White)
+            .border(
+                1.dp,
+                if (LocalDynamicThemeColors.current.isDark) accentColor.copy(alpha = 0.25f) else accentColor.copy(alpha = 0.35f),
+                RoundedCornerShape(16.dp)
+            )
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

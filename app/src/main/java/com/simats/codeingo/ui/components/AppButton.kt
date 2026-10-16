@@ -47,7 +47,7 @@ import com.simats.codeingo.ui.theme.PhoenixGreen
 import com.simats.codeingo.ui.theme.PhoenixMotion
 
 // ══════════════════════════════════════════════════════════════════
-// 🔘 AppButton — Duolingo / Ashnode 3D Pushable Button System
+// 🔘 AppButton — AshCrypt 3D Pushable Button System
 // Features: 4dp physical extruded bevel shadow, glossy light sheen,
 // tactile press depression, haptic feedback, and dynamic themes.
 // ══════════════════════════════════════════════════════════════════

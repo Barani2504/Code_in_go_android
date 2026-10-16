@@ -266,7 +266,7 @@ private fun HeroPageSlide() {
         Spacer(modifier = Modifier.height(18.dp))
 
         Text(
-            text = "Rise with Code in Go",
+            text = "Rise with AshCrypt",
             fontSize = 28.sp,
             fontWeight = FontWeight.Black,
             color = LocalDynamicThemeColors.current.textPrimary,
@@ -276,7 +276,7 @@ private fun HeroPageSlide() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "The fiery, fun, and gamified way to master Data Structures & Algorithms!",
+            text = "The fiery, fun, and gamified way to master Cryptography & Network Security!",
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),

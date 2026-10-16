@@ -6,10 +6,10 @@ import androidx.compose.ui.unit.dp
 
 enum class DashboardTab(val id: Int, val gameEmoji: String, val title: String) {
     LEARN(0, "🏡", "Learn"),
-    VISUALIZER(1, "🔬", "Visualizer"),
+    VISUALIZER(1, "🔬", "Visualize"),
     PRACTICE(2, "🛠️", "Practice"),
-    LEADERBOARDS(3, "🛡️", "Leaderboards"),
-    ARENAS(4, "⚔️", "Arenas"),
+    LEADERBOARDS(3, "🛡️", "Leaderboard"),
+    ARENAS(4, "⚔️", "Arena"),
     SHOP(5, "🦴", "Shop"),
     PROFILE(6, "👤", "Profile"),
     MORE(7, "💬", "More")

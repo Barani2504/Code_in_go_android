@@ -188,7 +188,7 @@ fun GoogleAuthSheet(
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = "to continue to Codeingo",
+                text = "to continue to AshCrypt",
                 fontSize = 13.sp,
                 color = dynamicColors.textSecondary
             )
@@ -286,7 +286,7 @@ fun GoogleAuthSheet(
                             .border(1.dp, if (isDark) Color(0xFF334155).copy(alpha = 0.5f) else Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
                             .clickable {
                                 selectedName = "Developer Agent"
-                                selectedEmail = "agent@codeingo.io"
+                                selectedEmail = "agent@ashcrypt.io"
                                 isAuthenticating = true
                             }
                             .padding(14.dp),
@@ -322,7 +322,7 @@ fun GoogleAuthSheet(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "To continue, Google will share your name, email address, and profile picture with Codeingo. Review Codeingo's Privacy Policy and Terms of Service.",
+                text = "To continue, Google will share your name, email address, and profile picture with AshCrypt. Review AshCrypt's Privacy Policy and Terms of Service.",
                 fontSize = 10.5.sp,
                 color = dynamicColors.textSecondary.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,

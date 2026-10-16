@@ -125,7 +125,7 @@ fun PhoenixDynamicLogoView(
             Column {
                 if (showTitle) {
                     Text(
-                        text = "Code in Go",
+                        text = "AshCrypt",
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = if (size > 30.dp) 18.sp else 14.sp,
                         fontWeight = FontWeight.Black,

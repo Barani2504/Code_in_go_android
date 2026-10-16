@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import android.content.Context
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -34,9 +36,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -52,6 +58,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.simats.codeingo.data.model.Language
+import com.simats.codeingo.data.model.PhoenixEmotion
+import com.simats.codeingo.ui.onboarding.LanguagePickerSheet
+import com.simats.codeingo.ui.phoenix.PhoenixEmotionPickerSheet
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -86,6 +101,7 @@ import kotlinx.coroutines.launch
 
 private val tabTitles = listOf("Preferences", "Notifications", "Courses", "Account")
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onDismiss: () -> Unit,
@@ -111,10 +127,17 @@ fun SettingsScreen(
     val dynamicColors = LocalDynamicThemeColors.current
 
     val isAutoEmotion by emotionManager.isAutoEmotionEnabled.collectAsState()
+    val currentEmotion by emotionManager.currentEmotion.collectAsState()
     val userName by locManager.userName.collectAsState()
     val userHandle by locManager.userHandle.collectAsState()
     val selectedLang by locManager.selectedLanguage.collectAsState()
     val streakDays by gameManager.streakDays.collectAsState()
+
+    // ── SharedPreferences & System Services ──────────────────────
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+    val view = LocalView.current
+    val settingsPrefs = remember { context.getSharedPreferences("ashcrypt_settings_prefs", Context.MODE_PRIVATE) }
 
     // ── Motion & Feedback state ─────────────────────────────────
     val effectTier by MotionController.effectTier.collectAsState()
@@ -124,33 +147,60 @@ fun SettingsScreen(
     // ── Tab state ────────────────────────────────────────────────
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // ── Lesson Experience toggles ─────────────────────────────────
-    var animations by remember { mutableStateOf(true) }
-    var motivationalMessages by remember { mutableStateOf(true) }
-    var listeningExercises by remember { mutableStateOf(true) }
+    // ── Lesson Experience toggles (persisted) ──────────────────────
+    var animations by remember { mutableStateOf(settingsPrefs.getBoolean("pref_animations", true)) }
+    var motivationalMessages by remember { mutableStateOf(settingsPrefs.getBoolean("pref_motivational", true)) }
+    var listeningExercises by remember { mutableStateOf(settingsPrefs.getBoolean("pref_listening", true)) }
 
-    // ── Notification toggles (General) ───────────────────────────
-    var notifLessons by remember { mutableStateOf(true) }
-    var notifStreakAlerts by remember { mutableStateOf(true) }
-    var notifAchievements by remember { mutableStateOf(false) }
-    var notifLeaderboard by remember { mutableStateOf(false) }
-    var notifTips by remember { mutableStateOf(true) }
-    var notifUpdates by remember { mutableStateOf(false) }
+    // ── Notification toggles (persisted) ───────────────────────────
+    var notifLessons by remember { mutableStateOf(settingsPrefs.getBoolean("notif_lessons", true)) }
+    var notifStreakAlerts by remember { mutableStateOf(settingsPrefs.getBoolean("notif_streak_alerts", true)) }
+    var notifAchievements by remember { mutableStateOf(settingsPrefs.getBoolean("notif_achievements", true)) }
+    var notifLeaderboard by remember { mutableStateOf(settingsPrefs.getBoolean("notif_leaderboard", false)) }
+    var notifTips by remember { mutableStateOf(settingsPrefs.getBoolean("notif_tips", true)) }
+    var notifUpdates by remember { mutableStateOf(settingsPrefs.getBoolean("notif_updates", false)) }
+    var quietHoursEnabled by remember { mutableStateOf(settingsPrefs.getBoolean("notif_quiet_hours", false)) }
+    var vibrateOnAlerts by remember { mutableStateOf(settingsPrefs.getBoolean("notif_vibrate_alerts", true)) }
 
-    // ── Daily reminder ────────────────────────────────────────────
-    var dailyReminderEnabled by remember { mutableStateOf(true) }
-    var practiceTime by remember { mutableStateOf("9:00 AM") }
+    // ── Daily reminder (persisted) ─────────────────────────────────
+    var dailyReminderEnabled by remember { mutableStateOf(settingsPrefs.getBoolean("notif_daily_reminder", true)) }
+    var practiceTime by remember { mutableStateOf(settingsPrefs.getString("notif_practice_time", "9:00 AM") ?: "9:00 AM") }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    // ── Reset alert / toast ───────────────────────────────────────
+    // ── Account & Security details (persisted) ──────────────────────
+    var userEmail by remember { mutableStateOf(settingsPrefs.getString("user_email", "agent@ashcrypt.io") ?: "agent@ashcrypt.io") }
+    var telemetryEnabled by remember { mutableStateOf(settingsPrefs.getBoolean("sec_telemetry", false)) }
+
+    // ── Dialog & Sheet States ──────────────────────────────────────
     var showResetAlert by remember { mutableStateOf(false) }
     var showResetToast by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
+    var showLogoutAlert by remember { mutableStateOf(false) }
+    var showEditNameDialog by remember { mutableStateOf(false) }
+    var showEditHandleDialog by remember { mutableStateOf(false) }
+    var showEditEmailDialog by remember { mutableStateOf(false) }
+    var showLanguagePickerSheet by remember { mutableStateOf(false) }
+    var showEmotionPickerSheet by remember { mutableStateOf(false) }
+    var selectedArenaDossier by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    var toastMessage by remember { mutableStateOf<String?>(null) }
+
+    var tempEditName by remember { mutableStateOf("") }
+    var tempEditHandle by remember { mutableStateOf("") }
+    var tempEditEmail by remember { mutableStateOf("") }
 
     // ── Forgot / Change Password Sheet & Toast ─────────────────────
     var showForgotPasswordSheet by remember { mutableStateOf(false) }
     var passwordChangeSuccessToast by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    fun showFeedback(msg: String) {
+        scope.launch {
+            toastMessage = msg
+            delay(2200)
+            toastMessage = null
+        }
+    }
 
     // ── Dynamic Theme adaptive colors ────────────────────────────
     val textPrimary = dynamicColors.textPrimary
@@ -172,7 +222,7 @@ fun SettingsScreen(
             },
             text = {
                 Text(
-                    "Are you sure you want to reset all your progress in this course? This cannot be undone.",
+                    "Are you sure you want to reset all your progress in AshCrypt? This will reset all your completed battle arenas.",
                     fontSize = 14.sp,
                     color = textSecondary
                 )
@@ -181,11 +231,7 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     showResetAlert = false
                     gameManager.resetAllProgress()
-                    scope.launch {
-                        showResetToast = true
-                        delay(2500)
-                        showResetToast = false
-                    }
+                    showFeedback("Progress reset successfully!")
                 }) {
                     Text("RESET", color = DuolingoRed, fontWeight = FontWeight.Black)
                 }
@@ -193,6 +239,308 @@ fun SettingsScreen(
             dismissButton = {
                 TextButton(onClick = { showResetAlert = false }) {
                     Text("CANCEL", color = DuolingoBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Logout confirmation dialog ───────────────────────────────
+    if (showLogoutAlert) {
+        AlertDialog(
+            onDismissRequest = { showLogoutAlert = false },
+            title = {
+                Text(
+                    "Log Out",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = textPrimary
+                )
+            },
+            text = {
+                Text(
+                    "Are you sure you want to log out of your AshCrypt profile?",
+                    fontSize = 14.sp,
+                    color = textSecondary
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutAlert = false
+                    onLogout()
+                }) {
+                    Text("LOG OUT", color = DuolingoRed, fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutAlert = false }) {
+                    Text("CANCEL", color = DuolingoBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Help & Support Dialog ─────────────────────────────────────
+    if (showHelpDialog) {
+        AlertDialog(
+            onDismissRequest = { showHelpDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🛡️", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "AshCrypt Help & Support",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = textPrimary
+                    )
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Version: v2.4.0 (Crypto Security Edition)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = AmberGold
+                    )
+                    Text(
+                        "Need assistance with security challenges, arena key exchanges, or account sync? Our team is available 24/7.",
+                        fontSize = 13.sp,
+                        color = textSecondary,
+                        lineHeight = 18.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isDark) Color(0xFF14_1F_36) else Color(0xFFF1_F5_F9))
+                            .border(1.dp, cardBorder, RoundedCornerShape(12.dp))
+                            .padding(12.dp)
+                    ) {
+                        Column {
+                            Text("Official Support Desk", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = textSecondary)
+                            Text("support@ashcrypt.io", fontSize = 14.sp, fontWeight = FontWeight.Black, color = textPrimary)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clipboardManager.setText(AnnotatedString("support@ashcrypt.io"))
+                        showHelpDialog = false
+                        showFeedback("Copied support@ashcrypt.io to clipboard! 📋")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = AmberGold)
+                ) {
+                    Text("Copy Email", color = Color(0xFF1A1205), fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHelpDialog = false }) {
+                    Text("CLOSE", color = textSecondary, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Edit Name Dialog ──────────────────────────────────────────
+    if (showEditNameDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog = false },
+            title = {
+                Text("Edit Name", fontWeight = FontWeight.Black, fontSize = 18.sp, color = textPrimary)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Enter your display name:", fontSize = 13.sp, color = textSecondary)
+                    OutlinedTextField(
+                        value = tempEditName,
+                        onValueChange = { tempEditName = it },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AmberGold,
+                            unfocusedBorderColor = cardBorder,
+                            focusedTextColor = textPrimary,
+                            unfocusedTextColor = textPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (tempEditName.isNotBlank()) {
+                        locManager.updateUserProfile(tempEditName.trim(), userHandle)
+                        settingsPrefs.edit().putString("user_name", tempEditName.trim()).apply()
+                        showFeedback("Name updated successfully! ✨")
+                    }
+                    showEditNameDialog = false
+                }) {
+                    Text("SAVE", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog = false }) {
+                    Text("CANCEL", color = textSecondary, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Edit Handle Dialog ────────────────────────────────────────
+    if (showEditHandleDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditHandleDialog = false },
+            title = {
+                Text("Edit Username", fontWeight = FontWeight.Black, fontSize = 18.sp, color = textPrimary)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Enter your unique handle:", fontSize = 13.sp, color = textSecondary)
+                    OutlinedTextField(
+                        value = tempEditHandle,
+                        onValueChange = { tempEditHandle = it.removePrefix("@").trim() },
+                        prefix = { Text("@", color = AmberGold, fontWeight = FontWeight.Black) },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AmberGold,
+                            unfocusedBorderColor = cardBorder,
+                            focusedTextColor = textPrimary,
+                            unfocusedTextColor = textPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (tempEditHandle.isNotBlank()) {
+                        val cleanHandle = tempEditHandle.trim().removePrefix("@")
+                        locManager.updateUserProfile(userName, cleanHandle)
+                        settingsPrefs.edit().putString("user_handle", cleanHandle).apply()
+                        showFeedback("Username updated! 🔥")
+                    }
+                    showEditHandleDialog = false
+                }) {
+                    Text("SAVE", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditHandleDialog = false }) {
+                    Text("CANCEL", color = textSecondary, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Edit Email Dialog ─────────────────────────────────────────
+    if (showEditEmailDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditEmailDialog = false },
+            title = {
+                Text("Edit Email Address", fontWeight = FontWeight.Black, fontSize = 18.sp, color = textPrimary)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Enter your primary email address:", fontSize = 13.sp, color = textSecondary)
+                    OutlinedTextField(
+                        value = tempEditEmail,
+                        onValueChange = { tempEditEmail = it.trim() },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AmberGold,
+                            unfocusedBorderColor = cardBorder,
+                            focusedTextColor = textPrimary,
+                            unfocusedTextColor = textPrimary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (tempEditEmail.isNotBlank()) {
+                        userEmail = tempEditEmail.trim()
+                        settingsPrefs.edit().putString("user_email", tempEditEmail.trim()).apply()
+                        showFeedback("Email updated successfully! 📧")
+                    }
+                    showEditEmailDialog = false
+                }) {
+                    Text("SAVE", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditEmailDialog = false }) {
+                    Text("CANCEL", color = textSecondary, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Arena Dossier Inspection Dialog ──────────────────────────
+    if (selectedArenaDossier != null) {
+        val arena = selectedArenaDossier!!
+        AlertDialog(
+            onDismissRequest = { selectedArenaDossier = null },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(arena.first, fontSize = 24.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        arena.second,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 17.sp,
+                        color = textPrimary
+                    )
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "CRYPTOGRAPHIC SPECIFICATIONS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = AmberGold,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        arena.third,
+                        fontSize = 14.sp,
+                        color = textPrimary,
+                        fontWeight = FontWeight.Medium
+                    )
+                    SettingsDivider(cardBorder)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Security Clearance:", fontSize = 12.sp, color = textSecondary)
+                        Text("Level 5 (Unrestricted)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DuolingoGreen)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Deployment Status:", fontSize = 12.sp, color = textSecondary)
+                        Text("Online & Guarded", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedArenaDossier = null
+                    showFeedback("Arena dossier verified! 🛡️")
+                }) {
+                    Text("CLOSE", color = DuolingoBlue, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = cardBg
@@ -296,52 +644,167 @@ fun SettingsScreen(
                         hapticsEnabled = hapticsEnabled,
                         onHapticsEnabledChange = { MotionController.setHapticsEnabled(it) },
                         animations = animations,
-                        onAnimationsChange = { animations = it },
+                        onAnimationsChange = {
+                            animations = it
+                            settingsPrefs.edit().putBoolean("pref_animations", it).apply()
+                        },
                         motivationalMessages = motivationalMessages,
-                        onMotivationalChange = { motivationalMessages = it },
+                        onMotivationalChange = {
+                            motivationalMessages = it
+                            settingsPrefs.edit().putBoolean("pref_motivational", it).apply()
+                        },
                         listeningExercises = listeningExercises,
-                        onListeningChange = { listeningExercises = it },
+                        onListeningChange = {
+                            listeningExercises = it
+                            settingsPrefs.edit().putBoolean("pref_listening", it).apply()
+                        },
                         streakDays = streakDays,
                         onAddDay = { gameManager.completeLessonAndExtendStreak() },
                         onResetStreak = { gameManager.debugResetStreak() },
                         onOpenForgotPassword = { showForgotPasswordSheet = true },
                         onOpenAnimationLab = onOpenAnimationLab,
+                        onOpenLanguagePicker = { showLanguagePickerSheet = true },
+                        onOpenEmotionPicker = { showEmotionPickerSheet = true },
+                        selectedLanguage = selectedLang,
+                        currentEmotion = currentEmotion,
+                        userName = userName.ifEmpty { "Agent 007" },
+                        userHandle = userHandle.ifEmpty { "ashcrypt_operative" },
+                        dailyReminderEnabled = dailyReminderEnabled,
+                        practiceTime = practiceTime,
+                        onNavigate = { destination ->
+                            when (destination) {
+                                "Account" -> selectedTab = 3
+                                "Preferences" -> selectedTab = 0
+                                "Profile" -> onDismiss()
+                                "Notifications" -> selectedTab = 1
+                                "Courses" -> selectedTab = 2
+                                "Help & Support" -> showHelpDialog = true
+                            }
+                        },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
                         cardBorder = cardBorder
                     )
                     1 -> NotificationsTab(
-                        notifLessons = notifLessons, onNotifLessons = { notifLessons = it },
-                        notifStreakAlerts = notifStreakAlerts, onNotifStreakAlerts = { notifStreakAlerts = it },
-                        notifAchievements = notifAchievements, onNotifAchievements = { notifAchievements = it },
-                        notifLeaderboard = notifLeaderboard, onNotifLeaderboard = { notifLeaderboard = it },
-                        notifTips = notifTips, onNotifTips = { notifTips = it },
-                        notifUpdates = notifUpdates, onNotifUpdates = { notifUpdates = it },
-                        dailyReminderEnabled = dailyReminderEnabled, onDailyReminderChange = { dailyReminderEnabled = it },
+                        notifLessons = notifLessons,
+                        onNotifLessons = {
+                            notifLessons = it
+                            settingsPrefs.edit().putBoolean("notif_lessons", it).apply()
+                        },
+                        notifStreakAlerts = notifStreakAlerts,
+                        onNotifStreakAlerts = {
+                            notifStreakAlerts = it
+                            settingsPrefs.edit().putBoolean("notif_streak_alerts", it).apply()
+                        },
+                        notifAchievements = notifAchievements,
+                        onNotifAchievements = {
+                            notifAchievements = it
+                            settingsPrefs.edit().putBoolean("notif_achievements", it).apply()
+                        },
+                        notifLeaderboard = notifLeaderboard,
+                        onNotifLeaderboard = {
+                            notifLeaderboard = it
+                            settingsPrefs.edit().putBoolean("notif_leaderboard", it).apply()
+                        },
+                        notifTips = notifTips,
+                        onNotifTips = {
+                            notifTips = it
+                            settingsPrefs.edit().putBoolean("notif_tips", it).apply()
+                        },
+                        notifUpdates = notifUpdates,
+                        onNotifUpdates = {
+                            notifUpdates = it
+                            settingsPrefs.edit().putBoolean("notif_updates", it).apply()
+                        },
+                        quietHoursEnabled = quietHoursEnabled,
+                        onQuietHoursChange = {
+                            quietHoursEnabled = it
+                            settingsPrefs.edit().putBoolean("notif_quiet_hours", it).apply()
+                        },
+                        vibrateOnAlerts = vibrateOnAlerts,
+                        onVibrateAlertsChange = {
+                            vibrateOnAlerts = it
+                            settingsPrefs.edit().putBoolean("notif_vibrate_alerts", it).apply()
+                        },
+                        dailyReminderEnabled = dailyReminderEnabled,
+                        onDailyReminderChange = {
+                            dailyReminderEnabled = it
+                            settingsPrefs.edit().putBoolean("notif_daily_reminder", it).apply()
+                        },
                         practiceTime = practiceTime,
                         showTimePicker = showTimePicker,
                         onShowTimePicker = { showTimePicker = it },
-                        onTimeSelected = { practiceTime = it; showTimePicker = false },
+                        onTimeSelected = {
+                            practiceTime = it
+                            showTimePicker = false
+                            settingsPrefs.edit().putString("notif_practice_time", it).apply()
+                        },
+                        onSendTestNotification = {
+                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            showFeedback("🔔 [AshCrypt Alert] Daily cryptographic drills ready for execution!")
+                        },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
                         cardBorder = cardBorder
                     )
                     2 -> CoursesTab(
-                        flagEmoji = selectedLang?.flagEmoji ?: "🇺🇸",
-                        langName = selectedLang?.name ?: "English",
+                        onArenaClick = { selectedArenaDossier = it },
                         onResetClick = { showResetAlert = true },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
-                        cardBorder = cardBorder
+                        cardBorder = cardBorder,
+                        isDark = isDark
                     )
                     3 -> AccountTab(
-                        userName = userName.ifEmpty { "Lokesh Kumar" },
-                        userHandle = userHandle.ifEmpty { "lokesh_dev" },
+                        userName = userName.ifEmpty { "Agent 007" },
+                        userHandle = userHandle.ifEmpty { "ashcrypt_operative" },
+                        userEmail = userEmail,
+                        onEditNameClick = {
+                            tempEditName = userName.ifEmpty { "Agent 007" }
+                            showEditNameDialog = true
+                        },
+                        onEditHandleClick = {
+                            tempEditHandle = userHandle.ifEmpty { "ashcrypt_operative" }
+                            showEditHandleDialog = true
+                        },
+                        onEditEmailClick = {
+                            tempEditEmail = userEmail
+                            showEditEmailDialog = true
+                        },
                         onOpenForgotPassword = { showForgotPasswordSheet = true },
-                        onLogout = onLogout,
+                        onCopyPublicKey = {
+                            clipboardManager.setText(AnnotatedString("0x9E44-A71C-B302-8DF6-C59A-1082"))
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            showFeedback("Public key fingerprint copied to clipboard! 📋")
+                        },
+                        telemetryEnabled = telemetryEnabled,
+                        onTelemetryChange = {
+                            telemetryEnabled = it
+                            settingsPrefs.edit().putBoolean("sec_telemetry", it).apply()
+                        },
+                        onClearCache = {
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            showFeedback("Security cache flushed & re-indexed: 14.8 MB freed! ✨")
+                        },
+                        onExportDossier = {
+                            val dossier = """
+                                ================ ASHCRYPT SECURITY DOSSIER ================
+                                Operative: ${userName.ifEmpty { "Agent 007" }} (@${userHandle.ifEmpty { "ashcrypt_operative" }})
+                                Public Key: 0x9E44-A71C-B302-8DF6-C59A-1082
+                                Security Level: Class 5 Encrypted Operative
+                                Current Streak: $streakDays Days
+                                Active Battlefields: 5 Operational Arenas
+                                Generated: ${java.util.Date()}
+                                ===========================================================
+                            """.trimIndent()
+                            clipboardManager.setText(AnnotatedString(dossier))
+                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            showFeedback("Security dossier exported to clipboard! 📋")
+                        },
+                        onLogoutClick = { showLogoutAlert = true },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
@@ -353,19 +816,25 @@ fun SettingsScreen(
         }
 
         // ── Toast overlay ─────────────────────────────────────────
-        if (showResetToast) {
+        if (toastMessage != null) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 40.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF1C2733))
+                    .background(if (isDark) Color(0xFF1C2733) else Color.White)
+                    .border(1.5.dp, DuolingoGreen, RoundedCornerShape(20.dp))
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Done, contentDescription = null, tint = DuolingoGreen, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Progress reset successfully!", color = LocalDynamicThemeColors.current.textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(
+                        text = toastMessage ?: "",
+                        color = textPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
@@ -389,7 +858,7 @@ fun SettingsScreen(
 
         if (showForgotPasswordSheet) {
             com.simats.codeingo.ui.auth.ForgotPasswordSheet(
-                initialEmail = "lokeshkumar1232005@gmail.com",
+                initialEmail = userEmail,
                 onPasswordResetSuccess = {
                     showForgotPasswordSheet = false
                     scope.launch {
@@ -399,6 +868,31 @@ fun SettingsScreen(
                     }
                 },
                 onDismiss = { showForgotPasswordSheet = false }
+            )
+        }
+
+        if (showLanguagePickerSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showLanguagePickerSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = cardBg
+            ) {
+                val currentLangCode by locManager.selectedLanguageCode.collectAsState()
+                LanguagePickerSheet(
+                    selectedLanguageCode = currentLangCode,
+                    onLanguageSelected = { lang: Language ->
+                        locManager.selectLanguage(lang.code)
+                        showLanguagePickerSheet = false
+                        showFeedback("Language switched to ${lang.name} ${lang.flagEmoji}")
+                    },
+                    onDismiss = { showLanguagePickerSheet = false }
+                )
+            }
+        }
+
+        if (showEmotionPickerSheet) {
+            PhoenixEmotionPickerSheet(
+                onDismiss = { showEmotionPickerSheet = false }
             )
         }
     }
@@ -431,6 +925,15 @@ private fun PreferencesTab(
     onResetStreak: () -> Unit,
     onOpenForgotPassword: () -> Unit,
     onOpenAnimationLab: () -> Unit,
+    onOpenLanguagePicker: () -> Unit,
+    onOpenEmotionPicker: () -> Unit,
+    selectedLanguage: Language?,
+    currentEmotion: PhoenixEmotion,
+    userName: String,
+    userHandle: String,
+    dailyReminderEnabled: Boolean,
+    practiceTime: String,
+    onNavigate: (String) -> Unit = {},
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -448,6 +951,48 @@ private fun PreferencesTab(
         cardBg = cardBg,
         cardBorder = cardBorder
     )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Language & Localization
+    SectionHeader("Language & Localization", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenLanguagePicker() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedLanguage?.flagEmoji ?: "🐍",
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Coding Language",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    text = selectedLanguage?.let { "${it.name} (${it.nativeName})" } ?: "Python (Default)",
+                    fontSize = 12.sp,
+                    color = AmberGold
+                )
+            }
+            Text("Switch", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -607,12 +1152,49 @@ private fun PreferencesTab(
     Spacer(modifier = Modifier.height(24.dp))
 
     // Live Emotion Icon
-    SectionHeader("Live Emotion Icon", textSecondary)
+    SectionHeader("Live Emotion Mascot", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
     SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenEmotionPicker() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = currentEmotion.emoji,
+                fontSize = 26.sp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Phoenix Emotion: ${currentEmotion.title}",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    text = "${currentEmotion.feeling} • ${currentEmotion.triggerDescription}",
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
+            Text("Browse", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        SettingsDivider(cardBorder)
+
         ToggleRow(
-            title = "Auto Emotion",
-            subtitle = if (isAutoEmotion) "Changes automatically based on app activity" else "Static icon active",
+            title = "Auto Emotion Engine",
+            subtitle = if (isAutoEmotion) "Changes automatically based on user progress & streaks" else "Manual emotion active",
             checked = isAutoEmotion,
             onCheckedChange = onAutoEmotionChange,
             textPrimary = textPrimary,
@@ -664,19 +1246,19 @@ private fun PreferencesTab(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    // Account navigation rows
-    SectionHeader("Account", textSecondary)
+    // Quick Navigation Quick Links
+    SectionHeader("Quick Navigation", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
     SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
-        NavigationRow(title = "Account", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "Account Details", detail = "@$userHandle", textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Account") })
         SettingsDivider(cardBorder)
-        NavigationRow(title = "Preferences", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "Preferences", detail = currentTheme.title, textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Preferences") })
         SettingsDivider(cardBorder)
-        NavigationRow(title = "Profile", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "User Profile", detail = userName, textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Profile") })
         SettingsDivider(cardBorder)
-        NavigationRow(title = "Notifications", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "Notifications", detail = if (dailyReminderEnabled) practiceTime else "Off", textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Notifications") })
         SettingsDivider(cardBorder)
-        NavigationRow(title = "Courses", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "Courses & Arenas", detail = "5 Arenas Active", textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Courses") })
     }
 
     Spacer(modifier = Modifier.height(24.dp))
@@ -685,7 +1267,7 @@ private fun PreferencesTab(
     SectionHeader("Support", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))
     SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
-        NavigationRow(title = "Help & Support", detail = "", textPrimary = textPrimary, textSecondary = textSecondary)
+        NavigationRow(title = "Help & Support", detail = "support@ashcrypt.io", textPrimary = textPrimary, textSecondary = textSecondary, onClick = { onNavigate("Help & Support") })
     }
 }
 
@@ -857,11 +1439,14 @@ private fun NotificationsTab(
     notifLeaderboard: Boolean, onNotifLeaderboard: (Boolean) -> Unit,
     notifTips: Boolean, onNotifTips: (Boolean) -> Unit,
     notifUpdates: Boolean, onNotifUpdates: (Boolean) -> Unit,
+    quietHoursEnabled: Boolean, onQuietHoursChange: (Boolean) -> Unit,
+    vibrateOnAlerts: Boolean, onVibrateAlertsChange: (Boolean) -> Unit,
     dailyReminderEnabled: Boolean, onDailyReminderChange: (Boolean) -> Unit,
     practiceTime: String,
     showTimePicker: Boolean,
     onShowTimePicker: (Boolean) -> Unit,
     onTimeSelected: (String) -> Unit,
+    onSendTestNotification: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -890,6 +1475,10 @@ private fun NotificationsTab(
         CheckboxRow(title = "Tips & Suggestions", checked = notifTips, onCheckedChange = onNotifTips, textPrimary = textPrimary, textSecondary = textSecondary)
         SettingsDivider(cardBorder)
         CheckboxRow(title = "App Updates & News", checked = notifUpdates, onCheckedChange = onNotifUpdates, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Quiet Hours (10 PM - 7 AM)", checked = quietHoursEnabled, onCheckedChange = onQuietHoursChange, textPrimary = textPrimary, textSecondary = textSecondary)
+        SettingsDivider(cardBorder)
+        CheckboxRow(title = "Vibrate on Alerts", checked = vibrateOnAlerts, onCheckedChange = onVibrateAlertsChange, textPrimary = textPrimary, textSecondary = textSecondary)
     }
 
     Spacer(modifier = Modifier.height(24.dp))
@@ -958,6 +1547,45 @@ private fun NotificationsTab(
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Diagnostics & Notification Simulation
+    SectionHeader("Diagnostics & Alert Simulation", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onSendTestNotification() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🔔", fontSize = 18.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Send Test Alert Notification",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    "Verify alert pop-up, sound, and tactile feedback",
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
+            Text("Test", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -965,21 +1593,30 @@ private fun NotificationsTab(
 // ══════════════════════════════════════════════════════════════════
 @Composable
 private fun CoursesTab(
-    flagEmoji: String,
-    langName: String,
+    onArenaClick: (Triple<String, String, String>) -> Unit,
     onResetClick: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
-    cardBorder: Color
+    cardBorder: Color,
+    isDark: Boolean
 ) {
     Text(
-        text = "Courses",
+        text = "Courses & Battle Arenas",
         fontSize = 24.sp,
         fontWeight = FontWeight.Black,
         color = textPrimary
     )
+    Spacer(modifier = Modifier.height(6.dp))
+    Text(
+        text = "Track your cryptographic mastery across all 5 active defense battlegrounds. Tap any arena to inspect its security dossier.",
+        fontSize = 13.sp,
+        color = textSecondary
+    )
     Spacer(modifier = Modifier.height(20.dp))
+
+    SectionHeader("Active Track", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
     SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
         Row(
             modifier = Modifier
@@ -987,22 +1624,86 @@ private fun CoursesTab(
                 .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(flagEmoji, fontSize = 32.sp)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isDark) AmberGold.copy(alpha = 0.2f) else Color(0xFFFEF3C7)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🛡️", fontSize = 24.sp)
+            }
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = langName,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = textPrimary,
-                modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "AshCrypt: Cryptography & CNS",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = textPrimary
+                )
+                Text(
+                    text = "5 Arenas • 30+ Interactive Security Modules",
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
             TextButton(onClick = onResetClick) {
                 Text(
                     text = "RESET",
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = textSecondary
+                    color = DuolingoRed
                 )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    SectionHeader("Syllabus & Arenas (Tap to Inspect)", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        val arenas = listOf(
+            Triple("🏛️", "Classical Ciphers Citadel", "Caesar, Vigenère & Transposition Grid"),
+            Triple("🔐", "Block Ciphers & AES Chamber", "Feistel Network, S-Box, SPN Architecture"),
+            Triple("🔑", "Key Exchange & RSA Spire", "Diffie-Hellman Protocol & Modular Arithmetic"),
+            Triple("⚡", "Hashes & Integrity Bastion", "SHA-256, HMAC Verification & Merkle-Damgård"),
+            Triple("🛡️", "Cyber Network Defense Fortress", "Firewall Rules, MITM Defense & Zero-Trust")
+        )
+        arenas.forEachIndexed { index, arena ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onArenaClick(arena) }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(arena.first, fontSize = 20.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = arena.second,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textPrimary
+                    )
+                    Text(
+                        text = arena.third,
+                        fontSize = 11.sp,
+                        color = textSecondary
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(DuolingoGreen.copy(alpha = if (isDark) 0.20f else 0.15f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text("ACTIVE", fontSize = 10.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
+                }
+            }
+            if (index < arenas.size - 1) {
+                SettingsDivider(cardBorder)
             }
         }
     }
@@ -1015,8 +1716,17 @@ private fun CoursesTab(
 private fun AccountTab(
     userName: String,
     userHandle: String,
+    userEmail: String,
+    onEditNameClick: () -> Unit,
+    onEditHandleClick: () -> Unit,
+    onEditEmailClick: () -> Unit,
     onOpenForgotPassword: () -> Unit,
-    onLogout: () -> Unit,
+    onCopyPublicKey: () -> Unit,
+    telemetryEnabled: Boolean,
+    onTelemetryChange: (Boolean) -> Unit,
+    onClearCache: () -> Unit,
+    onExportDossier: () -> Unit,
+    onLogoutClick: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -1028,6 +1738,12 @@ private fun AccountTab(
         fontWeight = FontWeight.Black,
         color = textPrimary
     )
+    Spacer(modifier = Modifier.height(6.dp))
+    Text(
+        text = "Tap on any field below to update your profile details and cryptographic credentials.",
+        fontSize = 13.sp,
+        color = textSecondary
+    )
     Spacer(modifier = Modifier.height(20.dp))
 
     // Profile info card
@@ -1035,16 +1751,20 @@ private fun AccountTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onEditNameClick() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Name", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
             Text(userName, fontSize = 15.sp, color = textSecondary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("✏️", fontSize = 13.sp)
         }
         SettingsDivider(cardBorder)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onEditHandleClick() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1054,16 +1774,21 @@ private fun AccountTab(
                 fontSize = 15.sp,
                 color = textSecondary
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("✏️", fontSize = 13.sp)
         }
         SettingsDivider(cardBorder)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onEditEmailClick() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Email", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
-            Text("lokeshkumar1232005@gmail.com", fontSize = 14.sp, color = textSecondary)
+            Text(userEmail, fontSize = 14.sp, color = textSecondary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("✏️", fontSize = 13.sp)
         }
         SettingsDivider(cardBorder)
         Row(
@@ -1081,13 +1806,84 @@ private fun AccountTab(
         }
     }
 
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Cryptographic Identity & Hardware Security
+    SectionHeader("Cryptographic Identity", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onCopyPublicKey() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Public Key Fingerprint", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                Text("0x9E44-A71C-B302-8DF6-C59A-1082", fontSize = 12.sp, color = AmberGold)
+            }
+            Text("Copy", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary, modifier = Modifier.size(16.dp))
+        }
+        SettingsDivider(cardBorder)
+        ToggleRow(
+            title = "Anonymous Cryptographic Telemetry",
+            subtitle = "Contribute anonymous defense challenge telemetry",
+            checked = telemetryEnabled,
+            onCheckedChange = onTelemetryChange,
+            textPrimary = textPrimary,
+            textSecondary = textSecondary
+        )
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Security Cache & Storage
+    SectionHeader("Security Cache & Storage", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClearCache() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Clear Cache & Re-index Arenas", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                Text("Flushes temporary cipher buffers and syncs arena modules", fontSize = 12.sp, color = textSecondary)
+            }
+            Text("Flush", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoRed)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary, modifier = Modifier.size(16.dp))
+        }
+        SettingsDivider(cardBorder)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onExportDossier() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Export Security Dossier", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                Text("Export comprehensive operative credentials & completion report", fontSize = 12.sp, color = textSecondary)
+            }
+            Text("Export", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoGreen)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary, modifier = Modifier.size(16.dp))
+        }
+    }
+
     Spacer(modifier = Modifier.height(32.dp))
 
     // Log out 3D extruded button
     AppButton(
-        title = "🚪 LOG OUT OF PROFILE",
+        title = "🚪 LOG OUT OF ASHCRYPT",
         style = AppButtonStyle.DANGER_CRIMSON,
-        onClick = onLogout,
+        onClick = onLogoutClick,
         modifier = Modifier.fillMaxWidth().height(48.dp)
     )
 }
@@ -1222,14 +2018,15 @@ private fun CheckboxRow(
 @Composable
 private fun NavigationRow(
     title: String,
-    detail: String,
+    detail: String = "",
     textPrimary: Color,
-    textSecondary: Color
+    textSecondary: Color,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* navigate */ }
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

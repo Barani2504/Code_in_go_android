@@ -326,7 +326,7 @@ fun ProfileCreationScreen(
                             onClick = {
                                 localizationManager.updateUserProfile(displayName, generatedHandle)
                                 localizationManager.setLoggedIn(true)
-                                onProfileCreated(displayName, emailText.ifEmpty { "user@codeingo.dev" })
+                                onProfileCreated(displayName, emailText.ifEmpty { "user@ashcrypt.dev" })
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -1084,7 +1084,7 @@ private fun CelebrationStepView(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Welcome to Code in Go, $displayName! Your Phoenix is ready to conquer Data Structures.",
+                text = "Welcome to AshCrypt, $displayName! Your Phoenix is ready to conquer Cryptography & Network Security.",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),

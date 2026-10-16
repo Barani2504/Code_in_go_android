@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App identity -->
-    <string name="app_name">Code in Go</string>
-    <string name="duolingo_on_the_go">Code in Go</string>
-    <string name="hero_subtitle">The free, fun, and effective way to master Data Structures!</string>
-    <string name="master_dsa_subtitle">Master Data Structures &amp; Algorithms</string>
+    <string name="app_name">AshCrypt</string>
+    <string name="duolingo_on_the_go">AshCrypt</string>
+    <string name="hero_subtitle">The free, fun, and effective way to master Cryptography &amp; Network Security!</string>
+    <string name="master_dsa_subtitle">Master Cryptography &amp; Network Security</string>
 
     <!-- Language Picker -->
     <string name="site_language">SITE LANGUAGE:</string>
@@ -26,7 +26,7 @@
     <string name="age">Age</string>
     <string name="create_account">CREATE ACCOUNT</string>
     <string name="create_profile">Create profile</string>
-    <string name="terms_privacy">By signing in to Codeingo, you agree to our Terms and Privacy Policy.</string>
+    <string name="terms_privacy">By signing in to AshCrypt, you agree to our Terms and Privacy Policy.</string>
     <string name="recaptcha">This site is protected by reCAPTCHA Enterprise and the Google Privacy Policy and Terms of Service apply.</string>
     <string name="google_auth">GOOGLE</string>
     <string name="facebook_auth">FACEBOOK</string>
@@ -53,7 +53,7 @@
 
     <!-- Navigation / Tabs (new iOS tab labels) -->
     <string name="learn">CODE</string>
-    <string name="visualizer">DSA LAB</string>
+    <string name="visualizer">CRYPTO LAB</string>
     <string name="practice">PRACTICE</string>
     <string name="leaderboards">RANKINGS</string>
     <string name="profile">DEVELOPER</string>
@@ -199,8 +199,8 @@
     <string name="emotion_cat_love">Love &amp; Charm</string>
 
     <!-- Onboarding flow steps -->
-    <string name="onboarding_welcome">Welcome to Code in Go! 🔥</string>
-    <string name="onboarding_welcome_sub">The fun, effective way to master Data Structures.</string>
+    <string name="onboarding_welcome">Welcome to AshCrypt! 🔥</string>
+    <string name="onboarding_welcome_sub">The fun, effective way to master Cryptography &amp; Network Security.</string>
     <string name="onboarding_10_questions">Answer 10 quick questions to set up your path</string>
     <string name="onboarding_choose_language">What programming language do you want to learn?</string>
     <string name="onboarding_referral">How did you hear about us?</string>

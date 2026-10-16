@@ -417,7 +417,7 @@ private fun ReferralStepView(
         Row(verticalAlignment = Alignment.CenterVertically) {
             PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Noting(isWriting = selected != null), size = 100.dp)
             Spacer(modifier = Modifier.width(10.dp))
-            DuolingoSpeechBubbleView(text = "Why are you learning Data Structures?", modifier = Modifier.weight(1f))
+            DuolingoSpeechBubbleView(text = "Why are you learning Cryptography & Network Security?", modifier = Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -509,7 +509,7 @@ private fun SentenceCompletionStepView(
                 .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
             Text(
-                text = "DATA HIGHWAY: ZERO-BASED INDEX",
+                text = "SECURITY LAB: ZERO-BASED INDEX",
                 color = if (isDark) AmberGold else Color(0xFFB45309),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
@@ -520,7 +520,7 @@ private fun SentenceCompletionStepView(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Complete the DSA Concept",
+            text = "Complete the Crypto Protocol",
             color = if (isDark) Color.White else Color(0xFF12_18_26),
             fontSize = 20.sp,
             fontWeight = FontWeight.Black,
@@ -538,7 +538,7 @@ private fun SentenceCompletionStepView(
         ) {
             Column {
                 Text(
-                    text = "In contiguous memory, an Array's first element is always stored at index",
+                    text = "In cryptographic buffer memory, an array's first cipher byte is stored at index",
                     color = if (isDark) Color.White else Color(0xFF12_18_26),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -552,13 +552,13 @@ private fun SentenceCompletionStepView(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (placedWord != null) AmberGold else Color.White.copy(alpha = 0.08f))
-                        .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .background(if (placedWord != null) AmberGold else (if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0)))
+                        .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 20.dp, vertical = 10.dp)
                 ) {
                     Text(
                         text = placedWord ?: "  [ ? ]  ",
-                        color = if (placedWord != null) Color(0xFF1A1205) else LocalDynamicThemeColors.current.placeholder,
+                        color = if (placedWord != null) Color(0xFF1A1205) else (if (isDark) LocalDynamicThemeColors.current.placeholder else Color(0xFF64748B)),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace
@@ -636,7 +636,7 @@ private fun ProudCelebrationStepView(onContinue: () -> Unit) {
         Spacer(modifier = Modifier.weight(1f))
         CandyCrushStarsView(earnedStars = 5)
         Spacer(modifier = Modifier.height(24.dp))
-        DuolingoSpeechBubbleView(text = "Incredible work! You crushed your first DSA concept!")
+        DuolingoSpeechBubbleView(text = "Incredible work! You crushed your first Cryptography concept!")
         Spacer(modifier = Modifier.height(20.dp))
         PhoenixAnimatedMascotView(pose = PhoenixMascotPose.StarryEyes, size = 190.dp)
         Spacer(modifier = Modifier.weight(1f))

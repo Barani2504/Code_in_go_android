@@ -296,7 +296,7 @@ fun LoginScreen(
                             .background(AmberGold)
                     )
                     Text(
-                        text = "CODEINGO ✦ ACCESS",
+                        text = "ASHCRYPT ✦ ACCESS",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -512,7 +512,7 @@ fun LoginScreen(
                                     decorationBox = { innerTextField ->
                                         if (emailOrUsername.isEmpty()) {
                                             Text(
-                                                text = "agent@codeingo.io or username",
+                                                text = "agent@ashcrypt.io or username",
                                                 color = dynamicColors.textSecondary.copy(alpha = 0.5f),
                                                 fontSize = 14.sp,
                                                 fontFamily = AppFontFamily
