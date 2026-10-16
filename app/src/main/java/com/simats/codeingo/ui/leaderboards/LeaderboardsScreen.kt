@@ -62,6 +62,7 @@ import androidx.compose.foundation.verticalScroll
 import com.simats.codeingo.ui.theme.liquidGlassCard
 import com.simats.codeingo.ui.theme.liquidGlassPill
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixGreen
 import com.simats.codeingo.ui.theme.floating
@@ -230,7 +231,7 @@ private fun LockedLeaderboardsView(
                 text = "Unlock Leaderboards!",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                 textAlign = TextAlign.Center
             )
@@ -239,7 +240,7 @@ private fun LockedLeaderboardsView(
                 text = "Complete $remaining more lesson${if (remaining > 1) "s" else ""} to enter the Bronze League and compete with coders worldwide!",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
                 textAlign = TextAlign.Center,
                 lineHeight = 20.sp
@@ -432,7 +433,7 @@ private fun UnlockedLeaderboardsView() {
                             text = "BRONZE LEAGUE",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             color = AmberGold,
                             letterSpacing = 0.8.sp
                         )
@@ -440,7 +441,7 @@ private fun UnlockedLeaderboardsView() {
                             text = "Top 3 advance to Silver League in 3 days!",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B)
                         )
                     }
@@ -472,7 +473,7 @@ private fun UnlockedLeaderboardsView() {
                     text = "PROMOTION ZONE",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = PhoenixGreen,
                     letterSpacing = 1.sp
                 )
@@ -551,7 +552,7 @@ private fun PodiumPedestal(
             text = entry.name.substringBefore(" "),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = if (isDark) Color.White else Color(0xFF12_18_26),
             maxLines = 1
         )
@@ -560,7 +561,7 @@ private fun PodiumPedestal(
             text = "${entry.xp} XP",
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = AmberGold
         )
 
@@ -588,7 +589,7 @@ private fun PodiumPedestal(
                 text = "$place",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = color
             )
         }
@@ -622,7 +623,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
             text = "${entry.rank}",
             fontSize = 15.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = if (entry.isUser) AmberGold else (if (isDark) Color.White.copy(alpha = 0.6f) else Color(0xFF64_74_8B)),
             modifier = Modifier.width(22.dp)
         )
@@ -641,7 +642,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
             text = entry.name,
             fontSize = 15.sp,
             fontWeight = if (entry.isUser) FontWeight.Black else FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = if (isDark) Color.White else Color(0xFF12_18_26),
             modifier = Modifier.weight(1f)
         )
@@ -650,7 +651,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
             text = "${entry.xp} XP",
             fontSize = 14.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = AmberGold
         )
     }

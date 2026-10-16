@@ -93,9 +93,13 @@ data class DynamicThemeColors(
     val placeholder: Color,
     val cardBorder: Color = inputBorder,
     val divider: Color = inputBorder.copy(alpha = 0.5f),
-    val secondaryButtonFill: Color = if (isDark) Color(0xFF14_1E_37) else Color.White.copy(alpha = 0.90f),
+    val secondaryButtonFill: Color = if (isDark) Color(0xFF14_1E_37) else Color.White.copy(alpha = 0.95f),
     val secondaryButtonBorder: Color = if (isDark) AmberGold.copy(alpha = 0.40f) else AmberGold.copy(alpha = 0.50f),
-    val secondaryButtonText: Color = if (isDark) Color.White else Color(0xFF12_18_26)
+    val secondaryButtonText: Color = if (isDark) Color.White else Color(0xFF12_18_26),
+    val codeBackground: Color = if (isDark) Color(0xFF09_0E_18) else Color(0xFFEFF2F8),
+    val codeBorder: Color = if (isDark) AmberGold.copy(alpha = 0.25f) else Color(0xFFD7_DE_EB),
+    val codeText: Color = if (isDark) Color(0xFFE2_E8_F0) else Color(0xFF1E_29_3B),
+    val subtleSurface: Color = if (isDark) Color(0xFF0F_17_2A) else Color(0xFFF1_F5_F9)
 )
 
 val LocalDynamicThemeColors = staticCompositionLocalOf {
@@ -114,7 +118,11 @@ val LocalDynamicThemeColors = staticCompositionLocalOf {
         divider = PhoenixBorder.copy(alpha = 0.5f),
         secondaryButtonFill = Color(0xFF14_1E_37),
         secondaryButtonBorder = AmberGold.copy(alpha = 0.40f),
-        secondaryButtonText = Color.White
+        secondaryButtonText = Color.White,
+        codeBackground = Color(0xFF09_0E_18),
+        codeBorder = AmberGold.copy(alpha = 0.25f),
+        codeText = Color(0xFFE2_E8_F0),
+        subtleSurface = Color(0xFF0F_17_2A)
     )
 }
 
@@ -148,7 +156,11 @@ fun CodeingoTheme(
             divider = PhoenixBorder.copy(alpha = 0.5f),
             secondaryButtonFill = Color(0xFF14_1E_37),
             secondaryButtonBorder = AmberGold.copy(alpha = 0.40f),
-            secondaryButtonText = Color.White
+            secondaryButtonText = Color.White,
+            codeBackground = Color(0xFF09_0E_18),
+            codeBorder = AmberGold.copy(alpha = 0.25f),
+            codeText = Color(0xFFE2_E8_F0),
+            subtleSurface = Color(0xFF0F_17_2A)
         )
     } else {
         DynamicThemeColors(
@@ -164,9 +176,13 @@ fun CodeingoTheme(
             placeholder = PhoenixLightPlaceholder,
             cardBorder = PhoenixLightBorder,
             divider = PhoenixLightBorder.copy(alpha = 0.7f),
-            secondaryButtonFill = Color.White.copy(alpha = 0.90f),
+            secondaryButtonFill = Color.White.copy(alpha = 0.95f),
             secondaryButtonBorder = AmberGold.copy(alpha = 0.50f),
-            secondaryButtonText = PhoenixLightText
+            secondaryButtonText = PhoenixLightText,
+            codeBackground = Color(0xFFEFF2F8),
+            codeBorder = Color(0xFFD7_DE_EB),
+            codeText = Color(0xFF1E_29_3B),
+            subtleSurface = Color(0xFFF1_F5_F9)
         )
     }
 
@@ -225,34 +241,44 @@ fun Modifier.liquidGlassCard(
 ): Modifier = composed {
     val isDark = LocalDynamicThemeColors.current.isDark
     val shape = RoundedCornerShape(cornerRadius)
-    val shadowAmbient = if (isDark) Color.Black.copy(alpha = 0.45f) else Color(0x14_26_33_59)
-    val specularAmbient = accentGlow.copy(alpha = if (isDark) 0.30f else 0.12f)
+    val shadowAmbient = if (isDark) Color.Black.copy(alpha = 0.45f) else Color(0x12_1E_29_3B)
+    val specularAmbient = accentGlow.copy(alpha = if (isDark) 0.30f else 0.10f)
     val fillBrush = Brush.linearGradient(
         if (isDark) listOf(
-            Color(0xFF10_18_2C).copy(alpha = fillOpacity),
-            Color(0xFF08_0D_1A).copy(alpha = fillOpacity + 0.18f),
+            Color(0xFF10_18_2C).copy(alpha = fillOpacity.coerceAtLeast(0.88f)),
+            Color(0xFF09_0E_1B).copy(alpha = (fillOpacity + 0.15f).coerceAtMost(1f)),
         ) else listOf(
-            Color.White.copy(alpha = fillOpacity * 0.95f),
-            Color(0xFFF4_F6_FC).copy(alpha = fillOpacity * 0.90f),
+            Color.White.copy(alpha = 0.98f),
+            Color(0xFFF7_F9_FD).copy(alpha = 0.96f),
         )
     )
     val borderBrush = Brush.linearGradient(
         if (isDark) listOf(
-            Color.White.copy(alpha = 0.40f),
+            Color.White.copy(alpha = 0.28f),
             accentGlow,
-            Color.White.copy(alpha = 0.06f),
-            accentGlow.copy(alpha = 0.25f),
+            Color.White.copy(alpha = 0.08f),
+            accentGlow.copy(alpha = 0.30f),
         ) else listOf(
             Color.White,
-            Color(0xFFD7_DE_EB).copy(alpha = 0.80f),
-            Color.White.copy(alpha = 0.60f),
-            accentGlow.copy(alpha = 0.30f),
+            Color(0xFFD7_DE_EB),
+            Color.White.copy(alpha = 0.85f),
+            Color(0xFFCBD5E1),
         )
     )
 
     this
-        .shadow(14.dp, shape, ambientColor = shadowAmbient, spotColor = shadowAmbient)
-        .shadow(8.dp, shape, ambientColor = specularAmbient, spotColor = specularAmbient)
+        .shadow(
+            elevation = if (isDark) 10.dp else 6.dp,
+            shape = shape,
+            ambientColor = shadowAmbient,
+            spotColor = shadowAmbient
+        )
+        .shadow(
+            elevation = if (isDark) 6.dp else 2.dp,
+            shape = shape,
+            ambientColor = specularAmbient,
+            spotColor = specularAmbient
+        )
         .clip(shape)
         .background(fillBrush)
         .border(width = 1.2.dp, brush = borderBrush, shape = shape)
@@ -267,30 +293,30 @@ fun Modifier.liquidGlassPill(
 ): Modifier = composed {
     val isDark = LocalDynamicThemeColors.current.isDark
     val shape = RoundedCornerShape(50)
-    val fillColor = if (isSelected) accentColor.copy(alpha = 0.28f)
-                    else if (isDark) Color(0xFF12_1A_2E).copy(alpha = 0.55f)
-                    else Color.White.copy(alpha = 0.85f)
+    val fillColor = if (isSelected) accentColor.copy(alpha = if (isDark) 0.25f else 0.15f)
+                    else if (isDark) Color(0xFF12_1A_2E).copy(alpha = 0.80f)
+                    else Color.White
     val borderBrush = Brush.linearGradient(
         if (isSelected) listOf(
-            accentColor.copy(alpha = 0.90f),
-            accentColor.copy(alpha = 0.40f)
+            accentColor.copy(alpha = 0.95f),
+            accentColor.copy(alpha = 0.50f)
         ) else if (isDark) listOf(
-            Color.White.copy(alpha = 0.32f),
+            Color.White.copy(alpha = 0.28f),
             Color.White.copy(alpha = 0.08f)
         ) else listOf(
             Color(0xFFD7_DE_EB),
-            Color.White.copy(alpha = 0.60f)
+            Color(0xFFE2_E8_F0)
         )
     )
     val shadowColor = if (isSelected) accentColor.copy(alpha = 0.35f)
-                      else if (isDark) Color.Black.copy(alpha = 0.25f)
-                      else Color.Black.copy(alpha = 0.05f)
+                      else if (isDark) Color.Black.copy(alpha = 0.30f)
+                      else Color(0x0F_1E_29_3B)
 
     this
-        .shadow(if (isSelected) 8.dp else 4.dp, shape, ambientColor = shadowColor, spotColor = shadowColor)
+        .shadow(if (isSelected) 6.dp else 3.dp, shape, ambientColor = shadowColor, spotColor = shadowColor)
         .clip(shape)
         .background(fillColor)
-        .border(if (isSelected) 1.5.dp else 1.dp, borderBrush, shape)
+        .border(if (isSelected) 1.5.dp else 1.2.dp, borderBrush, shape)
 }
 
 /**
@@ -302,26 +328,26 @@ fun Modifier.liquidGlassIsland(
 ): Modifier = composed {
     val isDark = LocalDynamicThemeColors.current.isDark
     val shape = RoundedCornerShape(cornerRadius)
-    val fillColor = if (isDark) Color(0xFF0A_10_1E).copy(alpha = 0.70f)
-                    else Color.White.copy(alpha = 0.88f)
+    val fillColor = if (isDark) Color(0xFF0A_10_1E).copy(alpha = 0.90f)
+                    else Color.White.copy(alpha = 0.98f)
     val borderBrush = Brush.linearGradient(
         if (isDark) listOf(
-            Color.White.copy(alpha = 0.38f),
-            Color.White.copy(alpha = 0.12f),
+            Color.White.copy(alpha = 0.32f),
+            Color.White.copy(alpha = 0.10f),
             glowColor,
             Color.White.copy(alpha = 0.05f)
         ) else listOf(
             Color.White,
-            Color(0xFFD7_DE_EB).copy(alpha = 0.80f),
+            Color(0xFFD7_DE_EB),
             glowColor,
-            Color.White.copy(alpha = 0.40f)
+            Color(0xFFCBD5E1)
         )
     )
-    val shadowAmbient = if (isDark) Color.Black.copy(alpha = 0.50f) else Color(0x1A_26_33_59)
+    val shadowAmbient = if (isDark) Color.Black.copy(alpha = 0.50f) else Color(0x14_26_33_59)
 
     this
-        .shadow(18.dp, shape, ambientColor = shadowAmbient, spotColor = shadowAmbient)
-        .shadow(10.dp, shape, ambientColor = glowColor.copy(alpha = 0.30f), spotColor = glowColor.copy(alpha = 0.30f))
+        .shadow(12.dp, shape, ambientColor = shadowAmbient, spotColor = shadowAmbient)
+        .shadow(6.dp, shape, ambientColor = glowColor.copy(alpha = 0.25f), spotColor = glowColor.copy(alpha = 0.25f))
         .clip(shape)
         .background(fillColor)
         .border(1.2.dp, borderBrush, shape)

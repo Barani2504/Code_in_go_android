@@ -6,8 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -34,7 +37,8 @@ import com.simats.codeingo.ui.theme.pressScale
 /**
  * 🛡️ Robust & Elevated Docked Action Bar Across All 5 Battle Arenas
  * Features:
- * - Guaranteed clearance above Android navigation bar and gesture pill
+ * - Dynamic safe insets: calculates navigationBars padding with a guaranteed minimum clearance
+ *   so system gesture pills or 3-button navigation bars NEVER obscure or cut off buttons on any device.
  * - High-contrast light and dark mode colors
  * - Theory Codex on the left, Replay 🔄 and Skip ⏭ on the right
  */
@@ -48,33 +52,33 @@ fun ArenaBottomBar(
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
 
-    val barBg = if (isDark) Color(0xFF0D1527).copy(alpha = 0.95f) else Color.White.copy(alpha = 0.96f)
+    val barBg = if (isDark) Color(0xFF0D1527).copy(alpha = 0.96f) else Color.White.copy(alpha = 0.98f)
     val barBorder = if (isDark) Color(0xFF1E293B) else Color(0xFFCBD5E1)
-    val buttonBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.8f) else Color(0xFFF1F5F9)
+    val buttonBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.9f) else Color(0xFFF1F5F9)
     val buttonBorder = if (isDark) Color(0xFF334155) else Color(0xFFCBD5E1)
     val buttonTextColor = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)
     val skipAccent = if (isDark) AmberGold else Color(0xFFD97706)
     val skipBg = if (isDark) AmberGold.copy(alpha = 0.15f) else Color(0xFFFEF3C7)
 
+    // Calculate safe navigation bar clearance dynamically
+    val navBarsPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val safeBottomPadding = maxOf(navBarsPadding, 24.dp) + 8.dp
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .background(barBg)
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
-                    listOf(
-                        barBorder,
-                        Color.Transparent
-                    )
+                    listOf(barBorder, Color.Transparent)
                 ),
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
             )
-            .navigationBarsPadding()
             .padding(horizontal = 14.dp)
-            .padding(top = 8.dp, bottom = 14.dp)
+            .padding(top = 8.dp, bottom = safeBottomPadding)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -85,11 +89,13 @@ fun ArenaBottomBar(
             Box(
                 modifier = Modifier
                     .pressScale()
+                    .height(38.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(buttonBg)
                     .border(1.dp, buttonBorder, RoundedCornerShape(12.dp))
                     .clickable(onClick = onOpenCodex)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                    .padding(horizontal = 14.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -114,7 +120,7 @@ fun ArenaBottomBar(
                 Box(
                     modifier = Modifier
                         .pressScale()
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(buttonBg)
                         .border(1.dp, buttonBorder, CircleShape)
@@ -125,7 +131,7 @@ fun ArenaBottomBar(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Restart Level",
                         tint = buttonTextColor,
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
@@ -133,11 +139,12 @@ fun ArenaBottomBar(
                 Box(
                     modifier = Modifier
                         .pressScale()
+                        .height(38.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(skipBg)
                         .border(1.2.dp, skipAccent.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                         .clickable(onClick = onSkipLevel)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(

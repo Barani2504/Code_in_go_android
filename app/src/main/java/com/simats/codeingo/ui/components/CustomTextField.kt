@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.components
+package com.simats.codeingo.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoInputBg
 import com.simats.codeingo.ui.theme.DuolingoInputBorder
@@ -61,6 +62,7 @@ fun CustomTextField(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
+            fontFamily = AppFontFamily,
             color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
@@ -85,6 +87,7 @@ fun CustomTextField(
                             color = DuolingoPlaceholder,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
+                            fontFamily = AppFontFamily
                         )
                     }
                     innerTextField()
@@ -141,6 +144,7 @@ fun CustomSecureField(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
+            fontFamily = AppFontFamily,
             color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
@@ -166,6 +170,7 @@ fun CustomSecureField(
                             color = DuolingoPlaceholder,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
+                            fontFamily = AppFontFamily
                         )
                     }
                     innerTextField()

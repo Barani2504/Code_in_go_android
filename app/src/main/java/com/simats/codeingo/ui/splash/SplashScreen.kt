@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.phoenix.SmoothFlyingPhoenixView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.exp
@@ -346,7 +347,7 @@ fun SplashScreen(
                     text = "Ashnode",
                     fontSize = 46.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -354,7 +355,7 @@ fun SplashScreen(
                     text = "Master Data Structures & Algorithms",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
             }

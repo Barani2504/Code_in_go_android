@@ -39,6 +39,7 @@ import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.SmoothFlyingPhoenixView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixMotion
 import kotlinx.coroutines.delay
@@ -162,7 +163,7 @@ fun LoadingScreen(
                 text = LocalizationManager.instance.string("loading").replace("...", "").uppercase(),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                 letterSpacing = 1.5.sp
             )

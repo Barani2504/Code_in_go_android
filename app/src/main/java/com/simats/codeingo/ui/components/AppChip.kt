@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.liquidGlassPill
 import com.simats.codeingo.ui.theme.pressScale
@@ -68,7 +69,7 @@ fun AppChip(
                 color = if (isSelected) accentColor else (if (isDark) Color.White else Color(0xFF1A_20_2C)),
                 fontSize = 13.sp,
                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = AppFontFamily
             )
         }
     }

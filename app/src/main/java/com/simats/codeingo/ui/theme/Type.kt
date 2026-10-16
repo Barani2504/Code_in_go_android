@@ -1,9 +1,12 @@
+@file:OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+
 package com.simats.codeingo.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
@@ -11,21 +14,33 @@ import com.simats.codeingo.R
 
 // Modern, ultra-readable typography inspired by iOS .system(.rounded) and modern dev platforms
 val AppFontFamily = FontFamily(
-    Font(R.font.outfit, weight = FontWeight.Normal),
-    Font(R.font.outfit, weight = FontWeight.Medium),
-    Font(R.font.outfit, weight = FontWeight.SemiBold),
-    Font(R.font.outfit, weight = FontWeight.Bold),
-    Font(R.font.outfit, weight = FontWeight.ExtraBold),
-    Font(R.font.outfit, weight = FontWeight.Black)
+    Font(R.font.outfit, weight = FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
+    Font(R.font.outfit, weight = FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
+    Font(R.font.outfit, weight = FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
+    Font(R.font.outfit, weight = FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.outfit, weight = FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
+    Font(R.font.outfit, weight = FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),
+    Font(R.font.outfit, weight = FontWeight.Black, variationSettings = FontVariation.Settings(FontVariation.weight(900)))
 )
 
 val RoundedFontFamily = FontFamily(
-    Font(R.font.nunito, weight = FontWeight.Normal),
-    Font(R.font.nunito, weight = FontWeight.Medium),
-    Font(R.font.nunito, weight = FontWeight.SemiBold),
-    Font(R.font.nunito, weight = FontWeight.Bold),
-    Font(R.font.nunito, weight = FontWeight.ExtraBold),
-    Font(R.font.nunito, weight = FontWeight.Black)
+    Font(R.font.nunito, weight = FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
+    Font(R.font.nunito, weight = FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
+    Font(R.font.nunito, weight = FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
+    Font(R.font.nunito, weight = FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.nunito, weight = FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
+    Font(R.font.nunito, weight = FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),
+    Font(R.font.nunito, weight = FontWeight.Black, variationSettings = FontVariation.Settings(FontVariation.weight(900)))
+)
+
+val CodeFontFamily = FontFamily.Monospace
+
+val CodeTextStyle = TextStyle(
+    fontFamily = CodeFontFamily,
+    fontWeight = FontWeight.Medium,
+    fontSize = 13.sp,
+    lineHeight = 18.sp,
+    letterSpacing = 0.5.sp
 )
 
 val AppTypography = Typography(

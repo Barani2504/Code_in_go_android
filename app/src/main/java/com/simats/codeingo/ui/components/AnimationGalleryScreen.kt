@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CodeingoTheme
 import com.simats.codeingo.ui.theme.DuolingoDarkBg
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
@@ -67,7 +68,7 @@ fun AnimationGalleryScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DuolingoDarkBg)
+            .background(LocalDynamicThemeColors.current.background)
             .verticalScroll(rememberScrollState())
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -76,7 +77,7 @@ fun AnimationGalleryScreen() {
             text = "Phoenix Motion & Design Gallery",
             fontSize = 24.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = if (isDark) Color.White else Color(0xFF12_18_26),
             modifier = Modifier.staggeredAppear(0)
         )
@@ -92,7 +93,7 @@ fun AnimationGalleryScreen() {
                     text = "1. Stat Badges (Tap to Increment)",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
                 Row(
@@ -122,7 +123,7 @@ fun AnimationGalleryScreen() {
                     text = "2. 3D Tactile Push Buttons",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
                 AppButton(
@@ -156,7 +157,7 @@ fun AnimationGalleryScreen() {
                     text = "3. Liquid Glass Pills",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -183,7 +184,7 @@ fun AnimationGalleryScreen() {
                     text = "4. Motion Modifiers (Floating, Tilt3D, Pulse)",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
                 Row(
@@ -227,7 +228,7 @@ fun AnimationGalleryScreen() {
                     text = "5. Shimmer Skeleton Placeholders",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = AmberGold
                 )
                 SkeletonBox(modifier = Modifier.fillMaxWidth().height(18.dp))
@@ -244,7 +245,7 @@ fun AnimationGalleryScreen() {
                 text = "Phoenix Bird Life",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = AmberGold
             )
             Spacer(modifier = Modifier.height(8.dp))

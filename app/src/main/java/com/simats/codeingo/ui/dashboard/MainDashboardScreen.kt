@@ -73,6 +73,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.zIndex
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -1038,12 +1040,13 @@ fun MainDashboardScreen(
 
         // 3D Interactive World Full-Screen Arena
         activeWorldArena?.let { arenaKey ->
-            Dialog(
-                onDismissRequest = { activeWorldArena = null },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false
-                )
+            BackHandler {
+                activeWorldArena = null
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(500f)
             ) {
                 when (arenaKey) {
                     ArenaRoute.CIPHER_SANCTUM -> CipherSanctumArenaScreen(onDismiss = { activeWorldArena = null })

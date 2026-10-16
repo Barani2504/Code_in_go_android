@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.foundation.border
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.PhoenixPlaceholder
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
@@ -145,12 +147,15 @@ fun Duolingo3DButton(
             },
         contentAlignment = Alignment.BottomCenter
     ) {
+        val isDark = LocalDynamicThemeColors.current.isDark
+        val shape = RoundedCornerShape(16.dp)
+
         // Bottom 3D Bevel Shadow
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(shape)
                 .background(activeStyle.shadowColor)
         )
 
@@ -160,8 +165,13 @@ fun Duolingo3DButton(
                 .fillMaxWidth()
                 .height(height)
                 .offset(y = currentOffset - depth)
-                .clip(RoundedCornerShape(16.dp))
-                .background(activeStyle.surfaceColor),
+                .clip(shape)
+                .background(activeStyle.surfaceColor)
+                .then(
+                    if (activeStyle == Duolingo3DButtonColor.WHITE) {
+                        Modifier.border(1.2.dp, if (isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFD7DEEB), shape)
+                    } else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -182,7 +192,7 @@ fun Duolingo3DButton(
                     color = activeStyle.textColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     letterSpacing = 0.8.sp
                 )
             }

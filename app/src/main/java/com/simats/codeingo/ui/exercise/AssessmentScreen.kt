@@ -82,6 +82,7 @@ import com.simats.codeingo.ui.components.ProgressBarAnimated
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoCardBg
@@ -833,7 +834,7 @@ private fun HolographicCommandTile(
                 text = text,
                 fontSize = 15.sp,
                 fontWeight = if (isCodeSyntax) FontWeight.Black else FontWeight.Bold,
-                fontFamily = if (isCodeSyntax) FontFamily.Monospace else FontFamily.Default,
+                fontFamily = if (isCodeSyntax) FontFamily.Monospace else AppFontFamily,
                 color = LocalDynamicThemeColors.current.textPrimary,
                 modifier = Modifier.weight(1f)
             )

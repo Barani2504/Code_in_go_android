@@ -40,6 +40,7 @@ import com.simats.codeingo.R
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import kotlinx.coroutines.delay
 import kotlin.math.sin
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
@@ -133,7 +134,7 @@ fun LoadingView(
                 color = LocalDynamicThemeColors.current.textPrimary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 letterSpacing = 1.5.sp
             )
 
@@ -144,7 +145,7 @@ fun LoadingView(
                 color = AmberGold,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = AppFontFamily
             )
         }
     }

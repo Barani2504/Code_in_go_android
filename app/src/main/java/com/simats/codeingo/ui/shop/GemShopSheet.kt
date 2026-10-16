@@ -83,6 +83,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
 import com.simats.codeingo.ui.theme.DuolingoGreen
@@ -523,7 +524,7 @@ fun GemShopSheet(
                     text = "Gem Shop",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = LocalDynamicThemeColors.current.textPrimary
                 )
 

@@ -76,6 +76,7 @@ import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixMotion
@@ -378,7 +379,7 @@ private fun LanguageSelectionStepView(
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif
+                        fontFamily = AppFontFamily
                     )
                 }
             }
@@ -444,7 +445,7 @@ private fun ReferralStepView(
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif
+                        fontFamily = AppFontFamily
                     )
                 }
             }
@@ -510,7 +511,7 @@ private fun SentenceCompletionStepView(
                 color = AmberGold,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = AppFontFamily
             )
         }
 
@@ -521,7 +522,7 @@ private fun SentenceCompletionStepView(
             color = if (isDark) Color.White else Color(0xFF12_18_26),
             fontSize = 20.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif
+            fontFamily = AppFontFamily
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -539,7 +540,7 @@ private fun SentenceCompletionStepView(
                     color = if (isDark) Color.White else Color(0xFF12_18_26),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     lineHeight = 22.sp
                 )
 
@@ -604,7 +605,7 @@ private fun SentenceCompletionStepView(
                 color = if (isCorrect) AmberGold else Color(0xFFFF4B4B),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
         }
@@ -674,7 +675,7 @@ private fun StreakEarnedStepView(
             color = AmberGold,
             fontSize = 54.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif
+            fontFamily = AppFontFamily
         )
 
         Text(
@@ -682,7 +683,7 @@ private fun StreakEarnedStepView(
             color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             letterSpacing = 1.sp
         )
 
@@ -734,14 +735,14 @@ private fun StreakGoalStepView(
                             color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.SansSerif
+                            fontFamily = AppFontFamily
                         )
                         Text(
                             text = if (days == 7) "Casual" else if (days == 14) "Regular" else if (days == 30) "Serious" else "Master",
                             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily.SansSerif
+                            fontFamily = AppFontFamily
                         )
                     }
 
@@ -803,7 +804,7 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
             color = LocalDynamicThemeColors.current.textPrimary,
             fontSize = 18.sp,
             fontWeight = FontWeight.Black,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             letterSpacing = 1.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -812,7 +813,7 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            fontFamily = FontFamily.SansSerif
+            fontFamily = AppFontFamily
         )
     }
 }

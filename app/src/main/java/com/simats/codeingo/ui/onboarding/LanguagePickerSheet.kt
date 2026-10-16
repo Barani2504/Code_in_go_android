@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.Language
 import com.simats.codeingo.ui.components.AppCard
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixGreen
@@ -83,7 +84,7 @@ fun LanguagePickerSheet(
                 text = "What language do you code in?",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = AppFontFamily,
                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                 modifier = Modifier.weight(1f)
             )
@@ -100,7 +101,7 @@ fun LanguagePickerSheet(
             text = "Select your primary language for examples, syntax, and exercises:",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = AppFontFamily,
             color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -146,13 +147,13 @@ fun LanguagePickerSheet(
                             text = language.name,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             color = if (isDark) Color.White else Color(0xFF12_18_26)
                         )
                         Text(
                             text = language.nativeName,
                             fontSize = 12.sp,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             color = if (isDark) Color.White.copy(alpha = 0.60f) else Color(0xFF64_74_8B)
                         )
                     }

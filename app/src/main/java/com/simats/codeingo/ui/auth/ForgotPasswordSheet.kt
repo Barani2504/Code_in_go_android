@@ -54,6 +54,7 @@ import com.simats.codeingo.ui.components.CustomSecureField
 import com.simats.codeingo.ui.components.CustomTextField
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixGreen
@@ -98,7 +99,7 @@ fun ForgotPasswordSheet(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -129,7 +130,7 @@ fun ForgotPasswordSheet(
                     text = "RESET PASSWORD",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     color = if (isDark) Color.White else Color(0xFF12_18_26),
                     letterSpacing = 1.sp
                 )
@@ -157,7 +158,7 @@ fun ForgotPasswordSheet(
                                 text = "Forgot your password?",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                                 textAlign = TextAlign.Center
                             )
@@ -166,7 +167,7 @@ fun ForgotPasswordSheet(
                                 text = "Enter your registered email address to receive a 6-digit recovery code.",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
                                 textAlign = TextAlign.Center
                             )
@@ -210,7 +211,7 @@ fun ForgotPasswordSheet(
                         text = "Sending recovery code...",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = AppFontFamily,
                         color = if (isDark) Color.White else Color(0xFF12_18_26)
                     )
                 }
@@ -232,7 +233,7 @@ fun ForgotPasswordSheet(
                                 text = "Enter Verification Code",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                                 textAlign = TextAlign.Center
                             )
@@ -241,7 +242,7 @@ fun ForgotPasswordSheet(
                                 text = "We sent a 6-digit code to $email",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
                                 textAlign = TextAlign.Center
                             )
@@ -294,7 +295,7 @@ fun ForgotPasswordSheet(
                                 text = "Create New Password",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White else Color(0xFF12_18_26),
                                 textAlign = TextAlign.Center
                             )
@@ -372,7 +373,7 @@ fun ForgotPasswordSheet(
                                 text = "Password Updated!",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White else Color(0xFF12_18_26)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -380,7 +381,7 @@ fun ForgotPasswordSheet(
                                 text = "Your password has been successfully updated. You can now sign in with your new credentials.",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.SansSerif,
+                                fontFamily = AppFontFamily,
                                 color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B),
                                 textAlign = TextAlign.Center
                             )

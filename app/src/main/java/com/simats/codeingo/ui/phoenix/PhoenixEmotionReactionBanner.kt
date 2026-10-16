@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import kotlin.math.roundToInt
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
@@ -146,7 +147,7 @@ fun PhoenixEmotionReactionBanner(
                             color = LocalDynamicThemeColors.current.textPrimary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.SansSerif
+                            fontFamily = AppFontFamily
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
@@ -161,7 +162,7 @@ fun PhoenixEmotionReactionBanner(
                             color = emotion.auraColor,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             maxLines = 1
                         )
 
@@ -187,7 +188,7 @@ fun PhoenixEmotionReactionBanner(
                                     color = emotion.auraColor,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif
+                                    fontFamily = AppFontFamily
                                 )
                             }
                         }
@@ -211,7 +212,7 @@ fun PhoenixEmotionReactionBanner(
                         color = emotion.auraColor.copy(alpha = 0.9f),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif
+                        fontFamily = AppFontFamily
                     )
                 }
             }

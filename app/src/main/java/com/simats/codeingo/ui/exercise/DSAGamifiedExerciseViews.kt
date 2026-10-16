@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.simats.codeingo.ui.theme.FeedbackManager
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DsaPurple
@@ -1453,7 +1454,7 @@ private fun SynapseNodeCard(
                 text = text,
                 fontSize = 13.sp,
                 fontWeight = if (isMonospace) FontWeight.Black else FontWeight.Bold,
-                fontFamily = if (isMonospace) FontFamily.Monospace else FontFamily.Default,
+                fontFamily = if (isMonospace) FontFamily.Monospace else AppFontFamily,
                 color = if (isMatched) PhoenixGreen else LocalDynamicThemeColors.current.textPrimary,
                 modifier = Modifier.weight(1f)
             )

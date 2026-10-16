@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
@@ -97,7 +98,7 @@ fun HeaderView(
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.SansSerif
+                        fontFamily = AppFontFamily
                     )
                 } else {
                     Text(
@@ -105,7 +106,7 @@ fun HeaderView(
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.SansSerif
+                        fontFamily = AppFontFamily
                     )
                 }
             }

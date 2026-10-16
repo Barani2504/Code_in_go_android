@@ -73,7 +73,7 @@ fun CipherSuiteLabLevel(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -86,7 +86,7 @@ fun CipherSuiteLabLevel(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "Assemble Authenticated Encryption with Associated Data (AEAD)",
-                fontSize = 11.sp,
+                fontSize = 10.5.sp,
                 color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569),
                 textAlign = TextAlign.Center
             )
@@ -96,24 +96,24 @@ fun CipherSuiteLabLevel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.85f) else Color.White)
-                .border(1.dp, if (dynamicColors.isDark) sectionAccent.copy(alpha = 0.4f) else Color(0xFFCBD5E1), RoundedCornerShape(16.dp))
-                .padding(14.dp)
+                .border(1.dp, if (dynamicColors.isDark) sectionAccent.copy(alpha = 0.4f) else Color(0xFFCBD5E1), RoundedCornerShape(12.dp))
+                .padding(10.dp)
         ) {
             Column {
                 Text(
                     text = "🔒 TLS 1.3 Pruning & AEAD Mandate",
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = sectionAccent
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "TLS 1.3 removed legacy algorithms (Static RSA, RC4, 3DES, CBC mode, SHA-1). Only modern AEAD ciphers that combine confidentiality and integrity in a single cryptographic primitive are allowed!",
-                    fontSize = 11.5.sp,
+                    fontSize = 11.sp,
                     color = if (dynamicColors.isDark) dynamicColors.textPrimary else Color(0xFF334155),
-                    lineHeight = 16.sp
+                    lineHeight = 15.sp
                 )
             }
         }
@@ -122,36 +122,36 @@ fun CipherSuiteLabLevel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(if (dynamicColors.isDark) dynamicColors.cardBackground else Color.White)
                 .border(
                     1.5.dp,
                     if (isSuiteSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed,
-                    RoundedCornerShape(14.dp)
+                    RoundedCornerShape(12.dp)
                 )
-                .padding(14.dp)
+                .padding(10.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "NEGOTIATED CIPHER SUITE TOKEN",
-                    fontSize = 10.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = dynamicColors.textSecondary
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "TLS_${selectedCipher.replace("-", "_")}_$selectedHash",
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
                     color = if (isSuiteSecure) DuolingoGreen else DuolingoRed,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = if (isSuiteSecure) "✓ AEAD Compliant • Forward Secrecy Guaranteed"
                     else "⚠️ Insecure Primitives Present in Suite!",
-                    fontSize = 11.sp,
+                    fontSize = 10.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isSuiteSecure) DuolingoGreen else DuolingoRed
                 )
@@ -198,63 +198,57 @@ fun CipherSuiteLabLevel(
             }
         }
 
-        // Slot 2: Bulk Cipher (AEAD vs Legacy)
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Slot 2: Bulk Cipher (AEAD vs Legacy) in a clean 2x2 grid
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = "SLOT 2: ENCRYPTION & AUTHENTICATION (AEAD)",
-                fontSize = 10.5.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
                 color = sectionAccent
             )
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf(
-                    Pair("AES-256-GCM", "Modern Galois/Counter AEAD"),
-                    Pair("CHACHA20-POLY1305", "High-speed modern AEAD"),
-                    Pair("3DES-EDE-CBC", "Legacy 64-bit block (Sweet32 attack)"),
-                    Pair("RC4-128", "Deprecated biased stream cipher")
-                ).forEach { (cipher, desc) ->
-                    val isSelected = selectedCipher == cipher
-                    val isSecure = cipher.contains("GCM") || cipher.contains("POLY1305")
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.15f) else DuolingoRed.copy(alpha = 0.15f))
-                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
-                            )
-                            .border(
-                                if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { selectedCipher = cipher }
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+
+            val cipherPairs = listOf(
+                Pair(Pair("AES-256-GCM", "Modern AEAD"), Pair("CHACHA20-POLY1305", "Fast AEAD")),
+                Pair(Pair("3DES-EDE-CBC", "Legacy 64-bit"), Pair("RC4-128", "Deprecated stream"))
+            )
+
+            cipherPairs.forEach { (c1, c2) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(c1, c2).forEach { (cipher, desc) ->
+                        val isSelected = selectedCipher == cipher
+                        val isSecure = cipher.contains("GCM") || cipher.contains("POLY1305")
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.15f) else DuolingoRed.copy(alpha = 0.15f))
+                                    else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
+                                )
+                                .border(
+                                    if (isSelected) 2.dp else 1.dp,
+                                    if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable { selectedCipher = cipher }
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
                         ) {
-                            Column {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                                 Text(
                                     text = cipher,
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color.White else Color(0xFF0F172A))
+                                    color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color.White else Color(0xFF0F172A)),
+                                    textAlign = TextAlign.Center
                                 )
                                 Text(
                                     text = desc,
-                                    fontSize = 10.5.sp,
-                                    color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569)
-                                )
-                            }
-                            if (isSelected) {
-                                Text(
-                                    text = if (isSecure) "✓ AEAD" else "✕ INSECURE",
-                                    fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed
+                                    fontSize = 9.5.sp,
+                                    color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569),
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
@@ -264,10 +258,10 @@ fun CipherSuiteLabLevel(
         }
 
         // Slot 3: Hash Algorithm
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = "SLOT 3: HKDF PRF HASH",
-                fontSize = 10.5.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
                 color = sectionAccent
             )
@@ -289,7 +283,7 @@ fun CipherSuiteLabLevel(
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedHash = hash }
-                            .padding(vertical = 10.dp, horizontal = 8.dp),
+                            .padding(vertical = 8.dp, horizontal = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -317,8 +311,8 @@ fun CipherSuiteLabLevel(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
+                .height(46.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (hasAttemptedHandshake && isSuiteSecure) DuolingoGreen
                 else if (hasAttemptedHandshake) DuolingoRed
@@ -330,9 +324,11 @@ fun CipherSuiteLabLevel(
                 else if (hasAttemptedHandshake) "✕ HANDSHAKE REJECTED (INSECURE SUITE)"
                 else "NEGOTIATE SECURE TLS 1.3 SESSION",
                 fontWeight = FontWeight.Black,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 color = Color.Black
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }

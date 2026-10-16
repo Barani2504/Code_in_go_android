@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CodeingoTheme
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixMotion
@@ -136,27 +137,36 @@ fun BottomNavBar(
                     if (isDark) {
                         Brush.verticalGradient(
                             listOf(
-                                Color(0xFF131D33).copy(alpha = 0.88f),
-                                Color(0xFF090E1B).copy(alpha = 0.94f)
+                                Color(0xFF131D33).copy(alpha = 0.92f),
+                                Color(0xFF090E1B).copy(alpha = 0.96f)
                             )
                         )
                     } else {
                         Brush.verticalGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.92f),
-                                Color(0xFFEFF3F8).copy(alpha = 0.96f)
+                                Color.White.copy(alpha = 0.98f),
+                                Color(0xFFF1F5F9).copy(alpha = 0.98f)
                             )
                         )
                     }
                 )
                 .border(
                     width = 1.2.dp,
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            Color.White.copy(alpha = if (isDark) 0.24f else 0.65f),
-                            Color.White.copy(alpha = if (isDark) 0.05f else 0.18f)
+                    brush = if (isDark) {
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.White.copy(alpha = 0.24f),
+                                Color.White.copy(alpha = 0.05f)
+                            )
                         )
-                    ),
+                    } else {
+                        Brush.verticalGradient(
+                            listOf(
+                                Color(0xFFCBD5E1),
+                                Color(0xFFE2E8F0)
+                            )
+                        )
+                    },
                     shape = capsuleShape
                 )
         ) {
@@ -337,7 +347,7 @@ fun BottomNavBar(
                                     text = tab.title,
                                     fontSize = 10.5.sp,
                                     fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif,
+                                    fontFamily = AppFontFamily,
                                     color = contentColor,
                                     letterSpacing = 0.2.sp,
                                     maxLines = 1

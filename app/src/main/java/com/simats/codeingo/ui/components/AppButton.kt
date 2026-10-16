@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixCrimson
 import com.simats.codeingo.ui.theme.PhoenixEmber
@@ -177,7 +179,12 @@ fun AppButton(
                 .heightIn(min = height)
                 .offset(y = currentOffset - depth)
                 .clip(shape)
-                .background(activeStyle.getFaceBrush(isDark)),
+                .background(activeStyle.getFaceBrush(isDark))
+                .then(
+                    if (activeStyle == AppButtonStyle.SECONDARY_GLASS) {
+                        Modifier.border(1.2.dp, if (isDark) AmberGold.copy(alpha = 0.40f) else Color(0xFFCBD5E1), shape)
+                    } else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
             // Subtle Glossy Top-Rim Shine Highlight
@@ -213,7 +220,7 @@ fun AppButton(
                     color = activeStyle.getTextColor(isDark),
                     fontSize = fontSize,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = AppFontFamily,
                     letterSpacing = 0.8.sp
                 )
             }

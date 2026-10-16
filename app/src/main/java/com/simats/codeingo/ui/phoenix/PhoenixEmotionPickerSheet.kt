@@ -63,6 +63,7 @@ import com.simats.codeingo.data.model.filtered
 import com.simats.codeingo.domain.EmotionRule
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.pressScale
 
@@ -123,7 +124,7 @@ fun PhoenixEmotionPickerSheet(
                     color = LocalDynamicThemeColors.current.textPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif
+                    fontFamily = AppFontFamily
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(

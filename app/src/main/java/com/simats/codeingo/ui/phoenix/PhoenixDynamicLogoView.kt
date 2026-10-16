@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.PhoenixEmotion
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 // ══════════════════════════════════════════════════════════════════
@@ -128,7 +129,7 @@ fun PhoenixDynamicLogoView(
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = if (size > 30.dp) 18.sp else 14.sp,
                         fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = AppFontFamily,
                         maxLines = 1
                     )
                 }
@@ -153,7 +154,7 @@ fun PhoenixDynamicLogoView(
                             color = currentEmotion.auraColor,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.width(3.dp))
@@ -169,7 +170,7 @@ fun PhoenixDynamicLogoView(
                             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.92f),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             maxLines = 1
                         )
                     }

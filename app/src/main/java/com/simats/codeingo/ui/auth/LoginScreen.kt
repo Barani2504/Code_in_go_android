@@ -95,6 +95,7 @@ import com.simats.codeingo.ui.components.AppleLogoView
 import com.simats.codeingo.ui.components.GoogleLogoView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
@@ -474,10 +475,10 @@ fun LoginScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isDark) Color(0xFF0F172A).copy(alpha = 0.90f) else Color.White)
+                                    .background(if (isDark) Color(0xFF0F172A).copy(alpha = 0.90f) else Color(0xFFF1F5F9))
                                     .border(
                                         width = if (isEmailFocused) 1.8.dp else 1.dp,
-                                        color = if (isEmailFocused) AmberGold else dynamicColors.cardBorder.copy(alpha = 0.4f),
+                                        color = if (isEmailFocused) AmberGold else if (isDark) dynamicColors.cardBorder.copy(alpha = 0.4f) else Color(0xFFD7DEEB),
                                         shape = RoundedCornerShape(14.dp)
                                     )
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -498,6 +499,7 @@ fun LoginScreen(
                                         .weight(1f)
                                         .onFocusChanged { isEmailFocused = it.isFocused },
                                     textStyle = TextStyle(
+                                        fontFamily = AppFontFamily,
                                         color = dynamicColors.textPrimary,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Medium
@@ -511,8 +513,9 @@ fun LoginScreen(
                                         if (emailOrUsername.isEmpty()) {
                                             Text(
                                                 text = "agent@codeingo.io or username",
-                                                color = dynamicColors.textSecondary.copy(alpha = 0.4f),
-                                                fontSize = 14.sp
+                                                color = dynamicColors.textSecondary.copy(alpha = 0.5f),
+                                                fontSize = 14.sp,
+                                                fontFamily = AppFontFamily
                                             )
                                         }
                                         innerTextField()
@@ -523,7 +526,7 @@ fun LoginScreen(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Clear",
-                                        tint = dynamicColors.textSecondary.copy(alpha = 0.4f),
+                                        tint = dynamicColors.textSecondary.copy(alpha = 0.5f),
                                         modifier = Modifier
                                             .size(16.dp)
                                             .clickable { emailOrUsername = "" }
@@ -552,6 +555,7 @@ fun LoginScreen(
                                         text = if (isPasswordStrong) "STRONG PASSKEY ✓" else "MIN 4 CHARS",
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Black,
+                                        fontFamily = AppFontFamily,
                                         color = if (isPasswordStrong) DuolingoGreen else AmberGold
                                     )
                                 }
@@ -561,10 +565,10 @@ fun LoginScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isDark) Color(0xFF0F172A).copy(alpha = 0.90f) else Color.White)
+                                    .background(if (isDark) Color(0xFF0F172A).copy(alpha = 0.90f) else Color(0xFFF1F5F9))
                                     .border(
                                         width = if (isPasswordFocused) 1.8.dp else 1.dp,
-                                        color = if (isPasswordFocused) AmberGold else dynamicColors.cardBorder.copy(alpha = 0.4f),
+                                        color = if (isPasswordFocused) AmberGold else if (isDark) dynamicColors.cardBorder.copy(alpha = 0.4f) else Color(0xFFD7DEEB),
                                         shape = RoundedCornerShape(14.dp)
                                     )
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -586,6 +590,7 @@ fun LoginScreen(
                                         .onFocusChanged { isPasswordFocused = it.isFocused },
                                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                     textStyle = TextStyle(
+                                        fontFamily = AppFontFamily,
                                         color = dynamicColors.textPrimary,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Medium
@@ -600,8 +605,9 @@ fun LoginScreen(
                                         if (password.isEmpty()) {
                                             Text(
                                                 text = "Enter passkey",
-                                                color = dynamicColors.textSecondary.copy(alpha = 0.4f),
-                                                fontSize = 14.sp
+                                                color = dynamicColors.textSecondary.copy(alpha = 0.5f),
+                                                fontSize = 14.sp,
+                                                fontFamily = AppFontFamily
                                             )
                                         }
                                         innerTextField()

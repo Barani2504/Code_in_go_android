@@ -65,6 +65,7 @@ import com.simats.codeingo.ui.components.AppChip
 import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixGreen
@@ -143,7 +144,7 @@ fun CreativeTemperatureGaugeView(
                             text = "DSA ARENA CHALLENGE",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = AppFontFamily,
                             color = AmberGold,
                             letterSpacing = 1.sp
                         )
@@ -179,7 +180,7 @@ fun CreativeTemperatureGaugeView(
                         text = "Align Memory Pointer to: ",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = AppFontFamily,
                         color = if (isDark) Color.White.copy(alpha = 0.70f) else Color(0xFF64_74_8B)
                     )
                     Text(
@@ -319,7 +320,7 @@ fun CreativeTemperatureGaugeView(
                         },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = AppFontFamily,
                         color = if (isDark) Color.White else Color(0xFF12_18_26),
                         textAlign = TextAlign.Center
                     )

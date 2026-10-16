@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixCrimson
 import com.simats.codeingo.ui.theme.PhoenixEmber
@@ -123,7 +124,7 @@ fun StatBadge(
                     color = if (isDark) Color.White else Color(0xFF12_18_26),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.SansSerif
+                    fontFamily = AppFontFamily
                 )
             }
         }
