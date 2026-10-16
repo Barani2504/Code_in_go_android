@@ -45,21 +45,21 @@ fun UnitSectionBanner(
     modifier: Modifier = Modifier
 ) {
     val eraLore = when (unit.id) {
-        1 -> "Primordial Ember Era"
-        2 -> "The Celestial Chain"
-        3 -> "Solar Peak Ascent"
-        4 -> "Astral Wings Cycle"
-        5 -> "Immortal Sovereign Reign"
-        else -> "Phoenix Realm ${unit.unitNumber}"
+        1 -> "The Classical Cryptography Era"
+        2 -> "The Symmetric Block Fortress"
+        3 -> "The Asymmetric Spire Era"
+        4 -> "The Cryptographic Integrity Era"
+        5 -> "The Network Defense Sovereign"
+        else -> "Phoenix Security Realm ${unit.unitNumber}"
     }
 
     val topicsPreview = when (unit.id) {
-        1 -> "Contiguous Blocks • Dynamic Arrays • Pointer Math • Vector Registers"
-        2 -> "Pointer Traversal • Doubly Linked • Cycle Detection • Node Insertion"
-        3 -> "LIFO Architecture • Solar Call Stack • Expression Parsing • Reversals"
-        4 -> "FIFO Dispatcher • Ring Buffers • Breadth Traversals • Sliding Window"
-        5 -> "Root Ancestry • BST Invariants • Subtree Rotations • Sovereign Traversal"
-        else -> "Data Structures & Algorithmic Principles"
+        1 -> "Caesar & Atbash • Vigenère Tableau • Rotor Stepping • Frequency Radio"
+        2 -> "AES-128 State Matrix • S-Box Non-Linearity • ShiftRows • MixColumns GF(2^8)"
+        3 -> "Diffie-Hellman Key Exchange • Modular Trapdoors • RSA Clock • ECC Point Addition"
+        4 -> "SHA-256 Digest • Keccak Sponge Chamber • Merkle Tree Proofs • Digital Signatures"
+        5 -> "TLS 1.3 1-RTT Handshake • 5-Tuple Stateful Firewall • ARP Defense • IPsec Packets"
+        else -> "Cryptography & Network Security Principles"
     }
 
     val dynamicColors = LocalDynamicThemeColors.current

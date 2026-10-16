@@ -62,7 +62,7 @@ class UserPreferences(private val context: Context) {
         it[KEY_UNLOCKED_LEVELS] ?: setOf("1")
     }
     val maxUnlockedChapter: Flow<Int> = context.dataStore.data.map {
-        it[KEY_MAX_UNLOCKED_CHAPTER] ?: 1
+        it[KEY_MAX_UNLOCKED_CHAPTER] ?: 5
     }
     val completedChapters: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_COMPLETED_CHAPTERS] ?: emptySet()

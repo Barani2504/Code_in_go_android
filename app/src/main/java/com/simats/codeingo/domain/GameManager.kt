@@ -112,7 +112,7 @@ class GameManager private constructor() {
     private val _unlockedLevelIndices = MutableStateFlow<Set<Int>>(setOf(1))
     val unlockedLevelIndices: StateFlow<Set<Int>> = _unlockedLevelIndices.asStateFlow()
 
-    private val _maxUnlockedChapter = MutableStateFlow(1)
+    private val _maxUnlockedChapter = MutableStateFlow(5)
     val maxUnlockedChapter: StateFlow<Int> = _maxUnlockedChapter.asStateFlow()
 
     private val _completedChapters = MutableStateFlow<Set<Int>>(emptySet())

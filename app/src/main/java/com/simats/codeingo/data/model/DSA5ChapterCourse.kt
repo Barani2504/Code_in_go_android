@@ -15,11 +15,11 @@ enum class DSAEnvironmentTheme(
     val icon: String,    // Material icon name
     val emoji: String,
 ) {
-    HIGHWAY       ("Futuristic Highway",        "directions_car",   "🚀"),
-    CHAIN_WORLD   ("Magical Chain World",        "link",             "🔗"),
-    TOWER_PLATES  ("Restaurant Tower",           "restaurant",       "🍽️"),
-    TICKET_STATION("Futuristic Ticket Station",  "local_activity",   "🎟️"),
-    DATA_KINGDOM  ("Magical Data Kingdom",       "park",             "🌳"),
+    HIGHWAY       ("The Cipher Sanctum",        "security",        "🏛️"),
+    CHAIN_WORLD   ("The Block Cipher Forge",    "vpn_key",         "⚙️"),
+    TOWER_PLATES  ("The Key Exchange Citadel",  "castle",          "🏰"),
+    TICKET_STATION("The Integrity Foundry",     "verified_user",   "🛡️"),
+    DATA_KINGDOM  ("The Cyber Bastion",         "shield",          "⚡"),
 }
 
 // ── Interaction Types ─────────────────────────────────────────────

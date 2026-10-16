@@ -906,45 +906,45 @@ private fun WorldPracticeBanners(
         }
         item {
             PracticeBannerCard(
-                tag = "3D S-BOX CITADEL",
-                tagColor = DsaPurple,
-                title = "🧱 S-Box Citadel",
+                tag = "3D BLOCK CIPHER FORGE",
+                tagColor = Color(0xFFEF4444),
+                title = "⚙️ Block Cipher Forge",
                 subtitle = "AES Matrix & Block Overlord",
                 emotionRes = R.drawable.phoenix_emotion_4,
-                gradientColors = listOf(DsaPurple, Color(0xFF6200EA)),
+                gradientColors = listOf(Color(0xFFEF4444), Color(0xFFB71C1C)),
                 onClick = { onOpenLinkedListRoad?.invoke() }
             )
         }
         item {
             PracticeBannerCard(
-                tag = "3D KEY KEEPERS SPIRE",
-                tagColor = DsaBlue,
-                title = "🔑 Key Keepers Spire",
+                tag = "3D KEY EXCHANGE CITADEL",
+                tagColor = Color(0xFFF59E0B),
+                title = "🏰 Key Exchange Citadel",
                 subtitle = "Diffie-Hellman & Quantum Duel",
                 emotionRes = R.drawable.phoenix_emotion_28,
-                gradientColors = listOf(Color(0xFF00E5FF), DsaBlue),
+                gradientColors = listOf(Color(0xFFF59E0B), Color(0xFFB45309)),
                 onClick = { onOpenStackTower?.invoke() }
             )
         }
         item {
             PracticeBannerCard(
-                tag = "3D INTEGRITY REALM",
-                tagColor = DuolingoGreen,
-                title = "🛡️ Integrity Realm",
+                tag = "3D INTEGRITY FOUNDRY",
+                tagColor = Color(0xFFA855F7),
+                title = "🛡️ Integrity Foundry",
                 subtitle = "SHA-256 & Collision Beast",
                 emotionRes = R.drawable.phoenix_emotion_25,
-                gradientColors = listOf(DuolingoGreen, Color(0xFF00897B)),
+                gradientColors = listOf(Color(0xFFA855F7), Color(0xFF6B21A8)),
                 onClick = { onOpenQueueStation?.invoke() }
             )
         }
         item {
             PracticeBannerCard(
                 tag = "3D CYBER BASTION",
-                tagColor = Color(0xFF00CD9C),
-                title = "🏰 Cyber Bastion",
+                tagColor = Color(0xFF10B981),
+                title = "⚡ Cyber Bastion",
                 subtitle = "TLS 1.3 & Cyber Titan",
                 emotionRes = R.drawable.phoenix_emotion_13,
-                gradientColors = listOf(Color(0xFF00CD9C), Color(0xFF7B1FA2)),
+                gradientColors = listOf(Color(0xFF10B981), Color(0xFF047857)),
                 onClick = { onOpenBinaryTreeForest?.invoke() }
             )
         }

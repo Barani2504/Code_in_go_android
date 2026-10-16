@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -89,7 +90,7 @@ fun BottomNavBar(
         DashboardTab.LEARN,
         DashboardTab.VISUALIZER,
         DashboardTab.LEADERBOARDS,
-        DashboardTab.SHOP,
+        DashboardTab.ARENAS,
         DashboardTab.PROFILE
     )
 
@@ -299,6 +300,7 @@ fun BottomNavBar(
                             DashboardTab.LEARN -> Icons.Default.Home
                             DashboardTab.VISUALIZER -> Icons.Default.Build
                             DashboardTab.LEADERBOARDS -> Icons.Default.Leaderboard
+                            DashboardTab.ARENAS -> Icons.Default.Shield
                             DashboardTab.SHOP -> Icons.Default.ShoppingBag
                             DashboardTab.PROFILE -> Icons.Default.Person
                             else -> Icons.Default.Home

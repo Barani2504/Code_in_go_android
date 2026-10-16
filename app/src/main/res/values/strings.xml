@@ -92,19 +92,19 @@
     <string name="order_food_drinks">Compile code</string>
     <string name="discuss_travel_plans">Deploy application</string>
 
-    <!-- 5 DSA Chapter Worlds -->
-    <string name="world_array_kingdom">Array Kingdom</string>
-    <string name="world_array_kingdom_sub">3D Sorting Arena — Bubble Sort Battle</string>
-    <string name="world_stack_tower">Stack Tower</string>
-    <string name="world_stack_tower_sub">Restaurant Tower — LIFO Plate Stacking</string>
-    <string name="world_queue_station">Queue Station</string>
-    <string name="world_queue_station_sub">Futuristic Ticket Station — FIFO Chaos</string>
-    <string name="world_linked_list_road">Linked List Road</string>
-    <string name="world_linked_list_road_sub">Magical Chain World — Pointer Adventure</string>
-    <string name="world_binary_tree_forest">Binary Tree Forest</string>
-    <string name="world_binary_tree_forest_sub">Magical Data Kingdom — BST Labyrinth</string>
+    <!-- 5 CNS Battle Arenas -->
+    <string name="world_array_kingdom">Cipher Sanctum</string>
+    <string name="world_array_kingdom_sub">Classical Ciphers &amp; Cryptanalysis Arena</string>
+    <string name="world_stack_tower">Key Exchange Citadel</string>
+    <string name="world_stack_tower_sub">Diffie-Hellman &amp; Asymmetric Cryptography Citadel</string>
+    <string name="world_queue_station">Integrity Foundry</string>
+    <string name="world_queue_station_sub">SHA-2/3 Keccak &amp; Merkle Root Integrity Foundry</string>
+    <string name="world_linked_list_road">Block Cipher Forge</string>
+    <string name="world_linked_list_road_sub">FIPS-197 AES Rounds &amp; S-Box Forge</string>
+    <string name="world_binary_tree_forest">Cyber Bastion</string>
+    <string name="world_binary_tree_forest_sub">TLS 1.3, IPsec &amp; Zero Trust Bastion</string>
     <string name="world_final_master_journey">Final Master Journey</string>
-    <string name="world_final_master_journey_sub">Complete all 5 chapters to unlock</string>
+    <string name="world_final_master_journey_sub">Complete all 5 arenas to unlock</string>
 
     <!-- DSA Chapter Course Names (5 chapters) -->
     <string name="chapter_1_name">Chapter 1: Array — The Data Highway</string>

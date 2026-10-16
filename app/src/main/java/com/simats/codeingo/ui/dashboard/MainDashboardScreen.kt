@@ -122,11 +122,13 @@ import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.shop.GemShopSheet
 import com.simats.codeingo.ui.visualizer.VisualizerScreen
-import com.simats.codeingo.ui.worlds.array.ArrayKingdomArenaScreen
-import com.simats.codeingo.ui.worlds.linkedlist.LinkedListRoadArenaScreen
-import com.simats.codeingo.ui.worlds.queue.QueueStationArenaScreen
-import com.simats.codeingo.ui.worlds.stack.StackTowerArenaScreen
-import com.simats.codeingo.ui.worlds.tree.BinaryTreeForestArenaScreen
+import com.simats.codeingo.ui.arenas.cipher_sanctum.CipherSanctumArenaScreen
+import com.simats.codeingo.ui.arenas.block_cipher_forge.BlockCipherForgeArenaScreen
+import com.simats.codeingo.ui.arenas.key_exchange_citadel.KeyExchangeCitadelArenaScreen
+import com.simats.codeingo.ui.arenas.integrity_foundry.IntegrityFoundryArenaScreen
+import com.simats.codeingo.ui.arenas.cyber_bastion.CyberBastionArenaScreen
+import com.simats.codeingo.ui.arenas.routing.ArenaRoute
+import com.simats.codeingo.ui.arenas.hub.ArenasHubScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -184,7 +186,7 @@ fun MainDashboardScreen(
             DashboardTab.LEARN,
             DashboardTab.VISUALIZER,
             DashboardTab.LEADERBOARDS,
-            DashboardTab.SHOP,
+            DashboardTab.ARENAS,
             DashboardTab.PROFILE
         )
     }
@@ -475,17 +477,7 @@ fun MainDashboardScreen(
                                 // Spacing for floating top stats header (status bar + cutout insets + header height)
                                 Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
 
-                                // 1. 3D INTERACTIVE WORLDS CAROUSEL
-                                InteractiveGamesSection(
-                                    maxUnlockedChapter = maxUnlockedChapter,
-                                    onOpenWorld = { worldKey ->
-                                        activeWorldArena = worldKey
-                                    }
-                                )
-
-                                Spacer(modifier = Modifier.height(18.dp))
-
-                                // 2. CHAPTER UNITS PATH (Visible Current + 1 Next Preview)
+                                // 1. CHAPTER UNITS PATH (Visible Current + 1 Next Preview)
                                 visibleUnits.forEach { unit ->
                                     val isUnitOpen = unit.id <= maxUnlockedChapter
 
@@ -828,22 +820,22 @@ fun MainDashboardScreen(
 
                     DashboardTab.VISUALIZER -> {
                         VisualizerScreen(
-                            onOpenArrayKingdom = { activeWorldArena = "array" },
-                            onOpenStackTower = { activeWorldArena = "stack" },
-                            onOpenQueueStation = { activeWorldArena = "queue" },
-                            onOpenLinkedListRoad = { activeWorldArena = "linkedlist" },
-                            onOpenBinaryTreeForest = { activeWorldArena = "tree" },
+                            onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
+                            onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
+                            onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
+                            onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
+                            onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
                             modifier = Modifier.fillMaxSize()
                         )
                     }
 
                     DashboardTab.PRACTICE -> {
                         PracticeHubScreen(
-                            onOpenArrayKingdom = { activeWorldArena = "array" },
-                            onOpenStackTower = { activeWorldArena = "stack" },
-                            onOpenQueueStation = { activeWorldArena = "queue" },
-                            onOpenLinkedListRoad = { activeWorldArena = "linkedlist" },
-                            onOpenBinaryTreeForest = { activeWorldArena = "tree" },
+                            onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
+                            onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
+                            onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
+                            onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
+                            onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -853,6 +845,15 @@ fun MainDashboardScreen(
                         LeaderboardsScreen(
                             completedLessons = completedLessonCount.size,
                             onStartLesson = { selectedTab = DashboardTab.LEARN },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    DashboardTab.ARENAS -> {
+                        ArenasHubScreen(
+                            onOpenArena = { arenaKey ->
+                                activeWorldArena = arenaKey
+                            },
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -1045,12 +1046,12 @@ fun MainDashboardScreen(
                 )
             ) {
                 when (arenaKey) {
-                    "array" -> ArrayKingdomArenaScreen(onDismiss = { activeWorldArena = null })
-                    "stack" -> StackTowerArenaScreen(onDismiss = { activeWorldArena = null })
-                    "queue" -> QueueStationArenaScreen(onDismiss = { activeWorldArena = null })
-                    "linkedlist" -> LinkedListRoadArenaScreen(onDismiss = { activeWorldArena = null })
-                    "tree" -> BinaryTreeForestArenaScreen(onDismiss = { activeWorldArena = null })
-                    else -> ArrayKingdomArenaScreen(onDismiss = { activeWorldArena = null })
+                    ArenaRoute.CIPHER_SANCTUM -> CipherSanctumArenaScreen(onDismiss = { activeWorldArena = null })
+                    ArenaRoute.BLOCK_CIPHER_FORGE -> BlockCipherForgeArenaScreen(onDismiss = { activeWorldArena = null })
+                    ArenaRoute.KEY_EXCHANGE_CITADEL -> KeyExchangeCitadelArenaScreen(onDismiss = { activeWorldArena = null })
+                    ArenaRoute.INTEGRITY_FOUNDRY -> IntegrityFoundryArenaScreen(onDismiss = { activeWorldArena = null })
+                    ArenaRoute.CYBER_BASTION -> CyberBastionArenaScreen(onDismiss = { activeWorldArena = null })
+                    else -> CipherSanctumArenaScreen(onDismiss = { activeWorldArena = null })
                 }
             }
         }
@@ -1082,7 +1083,7 @@ private fun InteractiveGamesSection(
                 color = AmberGold
             )
             Text(
-                text = "${minOf(maxUnlockedChapter, 5)} / 5 ARENAS UNLOCKED",
+                text = "5 / 5 ARENAS UNLOCKED",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f)
@@ -1096,11 +1097,11 @@ private fun InteractiveGamesSection(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            WorldPortalCard("array", 1, "🏰 ARRAY KINGDOM", "Traverse Contiguous Memory Mazes", AmberGold, maxUnlockedChapter, onOpenWorld)
-            WorldPortalCard("linkedlist", 2, "🔗 LINKED LIST ROAD", "Follow Pointers Across Pointer Bridges", Color(0xFFEF4444), maxUnlockedChapter, onOpenWorld)
-            WorldPortalCard("stack", 3, "🥞 SOLAR STACK TOWER", "Ascend Solar Plates & Escape the Spire", Color(0xFFF59E0B), maxUnlockedChapter, onOpenWorld)
-            WorldPortalCard("queue", 4, "🎫 ASTRAL QUEUE STATION", "Manage FIFO Rail Networks & Dispatch", Color(0xFFA855F7), maxUnlockedChapter, onOpenWorld)
-            WorldPortalCard("tree", 5, "🌲 BINARY TREE FOREST", "Explore BST Canopies & Lost Forest", Color(0xFF10B981), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard(ArenaRoute.CIPHER_SANCTUM, 1, "🏛️ CIPHER SANCTUM", "Classical Ciphers, Rotors & Frequency Radio", AmberGold, maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard(ArenaRoute.BLOCK_CIPHER_FORGE, 2, "⚙️ BLOCK CIPHER FORGE", "FIPS-197 AES Rounds, S-Box & Modes", Color(0xFFEF4444), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard(ArenaRoute.KEY_EXCHANGE_CITADEL, 3, "🏰 KEY EXCHANGE CITADEL", "Diffie-Hellman, RSA Trapdoors & Curves", Color(0xFFF59E0B), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard(ArenaRoute.INTEGRITY_FOUNDRY, 4, "🛡️ INTEGRITY FOUNDRY", "SHA-2/3 Keccak, Merkle Trees & HMAC", Color(0xFFA855F7), maxUnlockedChapter, onOpenWorld)
+            WorldPortalCard(ArenaRoute.CYBER_BASTION, 5, "⚡ CYBER BASTION", "TLS 1.3, IPsec, Firewalls & Zero Trust", Color(0xFF10B981), maxUnlockedChapter, onOpenWorld)
         }
     }
 }
@@ -1116,7 +1117,7 @@ private fun WorldPortalCard(
     onOpenWorld: (String) -> Unit
 ) {
     val isDark = LocalDynamicThemeColors.current.isDark
-    val isUnlocked = chapterId <= maxUnlockedChapter
+    val isUnlocked = true // All arenas unlocked for testing
 
     Box(
         modifier = Modifier

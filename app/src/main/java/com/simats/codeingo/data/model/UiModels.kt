@@ -9,9 +9,10 @@ enum class DashboardTab(val id: Int, val gameEmoji: String, val title: String) {
     VISUALIZER(1, "🔬", "Visualizer"),
     PRACTICE(2, "🛠️", "Practice"),
     LEADERBOARDS(3, "🛡️", "Leaderboards"),
-    SHOP(4, "🦴", "Shop"),
-    PROFILE(5, "👤", "Profile"),
-    MORE(6, "💬", "More")
+    ARENAS(4, "⚔️", "Arenas"),
+    SHOP(5, "🦴", "Shop"),
+    PROFILE(6, "👤", "Profile"),
+    MORE(7, "💬", "More")
 }
 
 enum class UnitCharacterType {

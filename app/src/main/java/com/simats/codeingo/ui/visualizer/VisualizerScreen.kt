@@ -434,57 +434,7 @@ private fun TopicListView(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // 1. CHAPTER ROADMAP PROGRESS HEADER
-        ChapterRoadmapHeader(
-            maxUnlockedChapter = maxUnlockedChapter,
-            completedChapters = completedChapters,
-            onReset = onResetProgression
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // 2. 5 CHAPTER SUMMARY CARDS WITH PROGRESSIVE UNLOCKING
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            DSA5ChapterData.chapters.forEach { chapter ->
-                val isUnlocked = chapter.id <= maxUnlockedChapter
-                val isCompleted = completedChapters.contains(chapter.id)
-                val isCurrentInProgress = chapter.id == maxUnlockedChapter && !isCompleted
-
-                DSAChapterSummaryCard(
-                    chapter = chapter,
-                    isUnlocked = isUnlocked,
-                    isCompleted = isCompleted,
-                    isCurrentInProgress = isCurrentInProgress,
-                    onTap = {
-                        if (isUnlocked) {
-                            onChapterTap(chapter)
-                        }
-                    }
-                )
-
-                // UNLOCK NEXT CHAPTER BUTTON after completing current level
-                if (isCompleted && chapter.id == maxUnlockedChapter && chapter.id < 5) {
-                    val nextChapter = DSA5ChapterData.chapters.firstOrNull { it.id == chapter.id + 1 }
-                    if (nextChapter != null) {
-                        UnlockNextChapterButton(
-                            nextChapter = nextChapter,
-                            onUnlock = { onUnlockNextChapter(nextChapter.id) }
-                        )
-                    }
-                } else if (isCompleted && chapter.id == 5) {
-                    GrandChampionBanner()
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Section Title: Interactive Visualizer Directory
         Row(
@@ -494,7 +444,7 @@ private fun TopicListView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "⚡ EXPLORE DATA STRUCTURES & ALGORITHMS",
+                text = "⚡ EXPLORE CRYPTOGRAPHY & NETWORK SECURITY",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.Monospace,
@@ -590,17 +540,7 @@ private fun TopicListView(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // 3D Game Arenas Quick Access Carousel
-        VisualizerGameArenasRow(
-            maxUnlockedChapter = maxUnlockedChapter,
-            onOpenArrayKingdom = onOpenArrayKingdom,
-            onOpenStackTower = onOpenStackTower,
-            onOpenQueueStation = onOpenQueueStation,
-            onOpenLinkedListRoad = onOpenLinkedListRoad,
-            onOpenBinaryTreeForest = onOpenBinaryTreeForest
-        )
 
-        Spacer(modifier = Modifier.height(14.dp))
 
         // Directory Info Banner
         Box(
@@ -682,57 +622,57 @@ private fun VisualizerGameArenasRow(
             ArenaCard(
                 chapterId = 1,
                 maxUnlockedChapter = maxUnlockedChapter,
-                title = "👑 ARRAY KINGDOM",
-                subtitle = "3D Sorting Arena",
+                title = "🏛️ CIPHER SANCTUM",
+                subtitle = "Classical Ciphers & Radio",
                 accentColor = AmberGold,
                 emotionRes = R.drawable.phoenix_emotion_4,
                 onClick = { onOpenArrayKingdom?.invoke() }
             )
         }
-        // Linked List Road (Chapter 2)
+        // Block Cipher Forge (Chapter 2)
         item {
             ArenaCard(
                 chapterId = 2,
                 maxUnlockedChapter = maxUnlockedChapter,
-                title = "🛣️ LINKED LIST ROAD",
-                subtitle = "3D Pointer Highway & Boss",
-                accentColor = Color(0xFF00E5FF),
+                title = "⚙️ BLOCK CIPHER FORGE",
+                subtitle = "FIPS-197 AES & S-Box",
+                accentColor = Color(0xFFEF4444),
                 emotionRes = R.drawable.phoenix_emotion_4,
                 onClick = { onOpenLinkedListRoad?.invoke() }
             )
         }
-        // Stack Tower (Chapter 3)
+        // Key Exchange Citadel (Chapter 3)
         item {
             ArenaCard(
                 chapterId = 3,
                 maxUnlockedChapter = maxUnlockedChapter,
-                title = "🗼 STACK TOWER",
-                subtitle = "3D LIFO Tower & Boss",
-                accentColor = Color(0xFF00E5FF),
+                title = "🏰 KEY EXCHANGE CITADEL",
+                subtitle = "Diffie-Hellman & RSA Curves",
+                accentColor = Color(0xFFF59E0B),
                 emotionRes = R.drawable.phoenix_emotion_28,
                 onClick = { onOpenStackTower?.invoke() }
             )
         }
-        // Queue Station (Chapter 4)
+        // Integrity Foundry (Chapter 4)
         item {
             ArenaCard(
                 chapterId = 4,
                 maxUnlockedChapter = maxUnlockedChapter,
-                title = "🚋 QUEUE STATION",
-                subtitle = "3D FIFO Station & Boss",
-                accentColor = DuolingoGreen,
+                title = "🛡️ INTEGRITY FOUNDRY",
+                subtitle = "SHA-2/3 & Merkle Trees",
+                accentColor = Color(0xFFA855F7),
                 emotionRes = R.drawable.phoenix_emotion_25,
                 onClick = { onOpenQueueStation?.invoke() }
             )
         }
-        // Binary Tree Forest (Chapter 5)
+        // Cyber Bastion (Chapter 5)
         item {
             ArenaCard(
                 chapterId = 5,
                 maxUnlockedChapter = maxUnlockedChapter,
-                title = "🌲 BINARY TREE FOREST",
-                subtitle = "3D Tree Canopies & Boss",
-                accentColor = Color(0xFF00CD9C),
+                title = "⚡ CYBER BASTION",
+                subtitle = "TLS 1.3, IPsec & Firewalls",
+                accentColor = Color(0xFF10B981),
                 emotionRes = R.drawable.phoenix_emotion_13,
                 onClick = { onOpenBinaryTreeForest?.invoke() }
             )
@@ -750,7 +690,7 @@ private fun ArenaCard(
     emotionRes: Int,
     onClick: () -> Unit
 ) {
-    val isUnlocked = chapterId <= maxUnlockedChapter
+    val isUnlocked = true // All arenas unlocked for testing
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = Modifier
