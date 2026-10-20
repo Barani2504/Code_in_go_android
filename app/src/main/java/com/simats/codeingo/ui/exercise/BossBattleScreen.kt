@@ -31,9 +31,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -105,6 +108,11 @@ fun BossBattleScreen(
     var currentPhase by remember { mutableIntStateOf(1) }
     var isVictory by remember { mutableStateOf(false) }
     var isDefeat by remember { mutableStateOf(false) }
+    var showQuitConfirmDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = !isVictory && !isDefeat) {
+        showQuitConfirmDialog = true
+    }
 
     val context = LocalContext.current
     val feedback = remember { FeedbackManager(context) }
@@ -291,7 +299,13 @@ fun BossBattleScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onDismiss) {
+                    IconButton(onClick = {
+                        if (!isVictory && !isDefeat) {
+                            showQuitConfirmDialog = true
+                        } else {
+                            onDismiss()
+                        }
+                    }) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = "Exit", tint = SubtextGray)
                     }
 
@@ -472,6 +486,42 @@ fun BossBattleScreen(
                     )
                 }
             }
+        }
+
+        if (showQuitConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showQuitConfirmDialog = false },
+                title = {
+                    Text(
+                        "Flee Boss Battle?",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = LocalDynamicThemeColors.current.textPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        "Are you sure you want to retreat from battle? All damage dealt to ${boss.name} will be lost.",
+                        fontSize = 14.sp,
+                        color = SubtextGray
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showQuitConfirmDialog = false
+                        onDismiss()
+                    }) {
+                        Text("RETREAT", color = DuolingoRed, fontWeight = FontWeight.Black)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showQuitConfirmDialog = false }) {
+                        Text("KEEP FIGHTING", color = DuolingoGreen, fontWeight = FontWeight.Bold)
+                    }
+                },
+                containerColor = CardBackground,
+                shape = RoundedCornerShape(18.dp)
+            )
         }
     }
 }

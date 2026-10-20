@@ -319,7 +319,7 @@ class PhoenixEmotionManager private constructor() {
         if (isCorrect) {
             if (currentStreak >= 5) {
                 _activeRule.value = EmotionRule.HIGH_COMBO
-                setEmotion(phoenixEmotion(13), "5x Eureka Combo! Brilliant spark! 💡", true, true)
+                setEmotion(phoenixEmotion(13), "5x Eureka Combo! Brilliant spark! 💡", true, false)
             } else {
                 val winEmotionId = if (currentStreak >= 3) 6 else (if (Math.random() < 0.5) 3 else 2)
                 val winEmotion = phoenixEmotion(winEmotionId)
@@ -329,10 +329,10 @@ class PhoenixEmotionManager private constructor() {
         } else {
             if (remainingHearts <= 0) {
                 _activeRule.value = EmotionRule.ZERO_HEARTS
-                setEmotion(phoenixEmotion(17), "Out of Hearts! 0 HP Remaining! 😭", true, true)
+                setEmotion(phoenixEmotion(17), "Out of Hearts! 0 HP Remaining! 😭", true, false)
             } else if (remainingHearts == 1) {
                 _activeRule.value = EmotionRule.LOW_HEARTS
-                setEmotion(phoenixEmotion(19), "Danger! 1 Heart remaining! 😮‍💨", true, true)
+                setEmotion(phoenixEmotion(19), "Danger! 1 Heart remaining! 😮‍💨", true, false)
             } else {
                 setEmotion(phoenixEmotion(15), "Oops! Learn from mistakes! 🥺", false, false)
             }
@@ -446,7 +446,7 @@ class PhoenixEmotionManager private constructor() {
     }
 
     // MARK: - 📲 System Alternate App Icon Updater
-    fun applySystemAppIcon(named: String?) {
+    fun applySystemAppIcon(named: String?, showToast: Boolean = false) {
         val iconName = named ?: "phoenix_emotion_0"
         _lastAppliedIconName.value = iconName
         Log.d("PhoenixEmotion", "Requested launcher app icon sync: $iconName")
@@ -468,7 +468,24 @@ class PhoenixEmotionManager private constructor() {
                 val targetComponent = ComponentName(pkgName, "$pkgName.$targetAlias")
 
                 try {
+                    val prefs = ctx.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
+                    val currentActiveId = prefs.getInt("active_emotion_id", -1)
                     val currentSetting = pm.getComponentEnabledSetting(targetComponent)
+
+                    if (currentActiveId == id && currentSetting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                        Log.d("PhoenixEmotion", "Target launcher alias $targetAlias is already active. Skipping redundant IPC calls.")
+                        if (showToast) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    ctx,
+                                    "App icon updated to ${phoenixEmotion(id).title}! 🔥",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        return@launch
+                    }
+
                     Log.d("PhoenixEmotion", "Switching launcher alias to $targetAlias (current: $currentSetting)")
 
                     // 1. Enable target component FIRST using DONT_KILL_APP
@@ -532,12 +549,14 @@ class PhoenixEmotionManager private constructor() {
 
                     Log.d("PhoenixEmotion", "Successfully switched and persisted launcher app icon: $targetAlias")
 
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            ctx,
-                            "App icon updated to ${phoenixEmotion(id).title}! 🔥",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    if (showToast) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                ctx,
+                                "App icon updated to ${phoenixEmotion(id).title}! 🔥",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 } catch (e: Exception) {
                     Log.e("PhoenixEmotion", "Failed to update launcher app icon: ${e.message}", e)

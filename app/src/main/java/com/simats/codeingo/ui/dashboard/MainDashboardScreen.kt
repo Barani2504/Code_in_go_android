@@ -173,9 +173,6 @@ fun MainDashboardScreen(
     val savedStreakDays by gameManager.savedStreakDays.collectAsState()
     val heartsCount by gameManager.heartsCount.collectAsState()
     val unlockedLevels by gameManager.unlockedLevelIndices.collectAsState()
-    val showEvolutionModal by gameManager.showEvolutionModal.collectAsState()
-    val evolutionFromStage by gameManager.evolutionFromStage.collectAsState()
-    val evolutionToStage by gameManager.evolutionToStage.collectAsState()
 
     val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
     val completedChapters by gameManager.completedChapters.collectAsState()
@@ -992,19 +989,6 @@ fun MainDashboardScreen(
             )
         }
 
-        // Phoenix Evolution Fullscreen Celebration Modal
-        if (showEvolutionModal) {
-            Dialog(
-                onDismissRequest = { gameManager.dismissEvolutionModal() },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                PhoenixEvolutionCelebrationScreen(
-                    fromStageId = evolutionFromStage,
-                    toStageId = evolutionToStage,
-                    onDismiss = { gameManager.dismissEvolutionModal() }
-                )
-            }
-        }
 
         // DSA Final Master Journey Fullscreen Celebration Modal
         if (showFinalMasterJourney) {

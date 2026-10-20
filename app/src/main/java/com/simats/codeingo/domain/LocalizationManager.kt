@@ -24,6 +24,9 @@ class LocalizationManager private constructor() {
         private const val LAST_OPEN_DATE_KEY = "duolingo_last_open_date_key"
         private const val DAY_STREAK_COUNT_KEY = "duolingo_day_streak_count_key"
         private const val SELECTED_LANG_KEY = "duolingo_selected_language_key"
+        private const val KEY_IS_LOGGED_IN = "duolingo_is_logged_in_key"
+        private const val KEY_USER_NAME = "duolingo_user_name_key"
+        private const val KEY_USER_HANDLE = "duolingo_user_handle_key"
     }
 
     private var prefs: SharedPreferences? = null
@@ -34,13 +37,13 @@ class LocalizationManager private constructor() {
     private val _selectedLanguageCode = MutableStateFlow("en")
     val selectedLanguageCode: StateFlow<String> = _selectedLanguageCode.asStateFlow()
 
-    private val _isLoggedIn = MutableStateFlow(true)
+    private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
-    private val _userName = MutableStateFlow("Lokesh Kumar")
+    private val _userName = MutableStateFlow("")
     val userName: StateFlow<String> = _userName.asStateFlow()
 
-    private val _userHandle = MutableStateFlow("lokesh_dev")
+    private val _userHandle = MutableStateFlow("")
     val userHandle: StateFlow<String> = _userHandle.asStateFlow()
 
     private val _dayStreak = MutableStateFlow(1)
@@ -57,6 +60,11 @@ class LocalizationManager private constructor() {
         if (savedLangCode != null) {
             selectLanguage(savedLangCode)
         }
+
+        val savedLoggedIn = prefs?.getBoolean(KEY_IS_LOGGED_IN, false) ?: false
+        _isLoggedIn.value = savedLoggedIn
+        _userName.value = prefs?.getString(KEY_USER_NAME, "") ?: ""
+        _userHandle.value = prefs?.getString(KEY_USER_HANDLE, "") ?: ""
 
         checkAndUpdateStreak()
     }
@@ -79,18 +87,35 @@ class LocalizationManager private constructor() {
     fun updateUserProfile(name: String, handle: String) {
         if (name.isNotEmpty()) _userName.value = name
         if (handle.isNotEmpty()) _userHandle.value = handle
+        prefs?.edit()?.apply {
+            if (name.isNotEmpty()) putString(KEY_USER_NAME, name)
+            if (handle.isNotEmpty()) putString(KEY_USER_HANDLE, handle)
+            apply()
+        }
     }
 
     fun setLoggedIn(loggedIn: Boolean, name: String = "", handle: String = "") {
         _isLoggedIn.value = loggedIn
         if (name.isNotEmpty()) _userName.value = name
         if (handle.isNotEmpty()) _userHandle.value = handle
+        prefs?.edit()?.apply {
+            putBoolean(KEY_IS_LOGGED_IN, loggedIn)
+            if (name.isNotEmpty()) putString(KEY_USER_NAME, name)
+            if (handle.isNotEmpty()) putString(KEY_USER_HANDLE, handle)
+            apply()
+        }
     }
 
     fun resetProfileData() {
         _isLoggedIn.value = false
         _userName.value = ""
         _userHandle.value = ""
+        prefs?.edit()?.apply {
+            putBoolean(KEY_IS_LOGGED_IN, false)
+            remove(KEY_USER_NAME)
+            remove(KEY_USER_HANDLE)
+            apply()
+        }
     }
 
     fun checkAndUpdateStreak() {

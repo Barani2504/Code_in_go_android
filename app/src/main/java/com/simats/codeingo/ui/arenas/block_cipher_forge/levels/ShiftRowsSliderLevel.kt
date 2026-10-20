@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -169,7 +169,7 @@ fun ShiftRowsSliderLevel(
                             .background(Color(0xFF00C3FF).copy(alpha = 0.15f))
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowForward,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Shift",
                             tint = Color(0xFF00C3FF),
                             modifier = Modifier.size(16.dp)
@@ -183,7 +183,7 @@ fun ShiftRowsSliderLevel(
 
         // Lock Alignment Button
         Duolingo3DButton(
-            title = if (allCorrect) "Lock State Permutation" else "Align Rows ($shifts)",
+            title = if (allCorrect) "Lock State Permutation" else "Align Rows",
             style = if (allCorrect) Duolingo3DButtonColor.GREEN else Duolingo3DButtonColor.AMBER,
             onClick = {
                 if (allCorrect) {

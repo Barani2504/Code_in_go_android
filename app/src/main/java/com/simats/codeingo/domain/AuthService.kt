@@ -68,20 +68,8 @@ class AuthService private constructor() {
     val savedGoogleAccounts: StateFlow<List<SavedGoogleAccount>> = _savedGoogleAccounts.asStateFlow()
 
     init {
-        // Fallback default profile matching iOS
-        val defaultProfile = UserAuthProfile(
-            name = "Lokesh Kumar",
-            email = "lokeshkumar1232005@gmail.com",
-            handle = "lokesh_dev",
-            avatarInitial = "L",
-            avatarColorHex = "#4285F4",
-            provider = AuthProvider.GOOGLE,
-            isEmailVerified = true,
-            lastLoginDate = System.currentTimeMillis(),
-            streakDays = 1
-        )
-        _currentUser.value = defaultProfile
-        _isAuthenticated.value = true
+        _currentUser.value = null
+        _isAuthenticated.value = false
 
         _savedGoogleAccounts.value = listOf(
             SavedGoogleAccount(name = "Lokesh Kumar", email = "lokeshkumar1232005@gmail.com", colorIndex = 0),
@@ -104,10 +92,10 @@ class AuthService private constructor() {
                 val json = JSONObject(jsonString)
                 val profile = UserAuthProfile(
                     id = json.optString("id", UUID.randomUUID().toString()),
-                    name = json.optString("name", "Lokesh Kumar"),
-                    email = json.optString("email", "lokeshkumar1232005@gmail.com"),
-                    handle = json.optString("handle", "lokesh_dev"),
-                    avatarInitial = json.optString("avatarInitial", "L"),
+                    name = json.optString("name", "Operative"),
+                    email = json.optString("email", ""),
+                    handle = json.optString("handle", "operative"),
+                    avatarInitial = json.optString("avatarInitial", "O"),
                     avatarColorHex = json.optString("avatarColorHex", "#4285F4"),
                     provider = runCatching { AuthProvider.valueOf(json.optString("provider", "EMAIL")) }.getOrDefault(AuthProvider.EMAIL),
                     isEmailVerified = json.optBoolean("isEmailVerified", true),
@@ -121,19 +109,9 @@ class AuthService private constructor() {
             } catch (_: Exception) { }
         }
 
-        // Use LocalizationManager state if available
-        val existingName = LocalizationManager.shared.userName.value.ifEmpty { "Lokesh Kumar" }
-        val existingHandle = LocalizationManager.shared.userHandle.value.ifEmpty { "lokesh_dev" }
-        val fallback = UserAuthProfile(
-            name = existingName,
-            email = "${existingName.lowercase().replace(" ", ".")}@gmail.com",
-            handle = existingHandle,
-            avatarInitial = existingName.take(1).uppercase(),
-            avatarColorHex = "#4285F4",
-            provider = AuthProvider.GOOGLE
-        )
-        _currentUser.value = fallback
-        _isAuthenticated.value = LocalizationManager.shared.isLoggedIn.value
+        // If no saved user session in prefs, user is unauthenticated
+        _currentUser.value = null
+        _isAuthenticated.value = false
     }
 
     private fun saveSession(user: UserAuthProfile?) {
@@ -336,6 +314,14 @@ class AuthService private constructor() {
 
     fun signOut() {
         saveSession(null)
+    }
+
+    /** Permanently deletes the user account and purges local storage (Google Play User Data Deletion Policy) */
+    fun deleteAccount() {
+        signOut()
+        prefs?.edit()?.clear()?.apply()
+        LocalizationManager.shared.resetProfileData()
+        GameManager.instance.deleteAccountAndClearAllData()
     }
 
     // ── Password Management & Storage ──────────────────────────────────────────

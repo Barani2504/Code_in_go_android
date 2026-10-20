@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -37,6 +38,8 @@ class UserPreferences(private val context: Context) {
         val KEY_COMPLETED_CHAPTERS = stringSetPreferencesKey("dsa_shared_completed_chapters")
         val KEY_COMPLETED_LEVEL_INDICES = stringSetPreferencesKey("home_completed_levels")
         val KEY_ACTIVE_LEVEL_INDEX = intPreferencesKey("home_active_level_index")
+        val KEY_LAST_PRACTICED_MS = longPreferencesKey("dsa_last_practiced_timestamp_ms")
+        val KEY_LAST_PLAYED_MS = longPreferencesKey("dsa_last_played_date_ms")
     }
 
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { it[KEY_IS_LOGGED_IN] ?: false }
@@ -51,6 +54,9 @@ class UserPreferences(private val context: Context) {
     val activePhoenixStage: Flow<Int> = context.dataStore.data.map { it[KEY_PHOENIX_STAGE] ?: 1 }
     val highestCombo: Flow<Int> = context.dataStore.data.map { it[KEY_HIGHEST_COMBO] ?: 5 }
     val eggCrackLevel: Flow<Int> = context.dataStore.data.map { it[KEY_EGG_CRACK] ?: 0 }
+
+    val lastPracticedTimestampMs: Flow<Long> = context.dataStore.data.map { it[KEY_LAST_PRACTICED_MS] ?: 0L }
+    val lastPlayedDateMs: Flow<Long> = context.dataStore.data.map { it[KEY_LAST_PLAYED_MS] ?: 0L }
 
     val completedLessons: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_COMPLETED_LESSONS] ?: setOf("u1_l1_what_is_ds")
@@ -167,11 +173,24 @@ class UserPreferences(private val context: Context) {
         }
     }
 
+    suspend fun updatePracticeTimestamps(lastPracticedMs: Long, lastPlayedMs: Long) {
+        context.dataStore.edit {
+            it[KEY_LAST_PRACTICED_MS] = lastPracticedMs
+            it[KEY_LAST_PLAYED_MS] = lastPlayedMs
+        }
+    }
+
     suspend fun clearSession() {
         context.dataStore.edit {
             it[KEY_IS_LOGGED_IN] = false
             it[KEY_USER_NAME] = "Guest"
             it[KEY_USER_EMAIL] = ""
+        }
+    }
+
+    suspend fun clearAllUserData() {
+        context.dataStore.edit {
+            it.clear()
         }
     }
 }

@@ -176,6 +176,9 @@ fun SettingsScreen(
     var showResetToast by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showLogoutAlert by remember { mutableStateOf(false) }
+    var showDeleteAccountAlert by remember { mutableStateOf(false) }
+    var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
+    var showTermsDialog by remember { mutableStateOf(false) }
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showEditHandleDialog by remember { mutableStateOf(false) }
     var showEditEmailDialog by remember { mutableStateOf(false) }
@@ -275,6 +278,130 @@ fun SettingsScreen(
             dismissButton = {
                 TextButton(onClick = { showLogoutAlert = false }) {
                     Text("CANCEL", color = DuolingoBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Delete Account & Data Dialog (Play Store Compliance) ──────
+    if (showDeleteAccountAlert) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountAlert = false },
+            title = {
+                Text(
+                    "Delete Account & Data",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = DuolingoRed
+                )
+            },
+            text = {
+                Text(
+                    "Are you sure you want to permanently delete your AshCrypt account and purge all local progress, credentials, and achievements? This action is irreversible.",
+                    fontSize = 14.sp,
+                    color = textSecondary
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteAccountAlert = false
+                    scope.launch {
+                        com.simats.codeingo.domain.AuthService.instance.deleteAccount()
+                        onLogout()
+                    }
+                }) {
+                    Text("PERMANENTLY DELETE", color = DuolingoRed, fontWeight = FontWeight.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAccountAlert = false }) {
+                    Text("CANCEL", color = DuolingoBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Privacy Policy Dialog ─────────────────────────────────────
+    if (showPrivacyPolicyDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyPolicyDialog = false },
+            title = {
+                Text(
+                    "AshCrypt Privacy Policy",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = textPrimary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 4.dp)
+                ) {
+                    Text(
+                        "Last Updated: October 2026\n\n" +
+                        "1. Data Collection & Safety\n" +
+                        "AshCrypt is built with a zero-knowledge, privacy-first architecture. All user progression, streak data, and cryptographic key generation exercises are computed and stored strictly locally on your device.\n\n" +
+                        "2. Anonymous Telemetry\n" +
+                        "If you opt into Anonymous Cryptographic Telemetry in Settings, only aggregated arena completion rates are collected. No personally identifiable information (PII) is ever linked to telemetry.\n\n" +
+                        "3. Data Retention & Deletion\n" +
+                        "In compliance with Google Play Store User Data policies, you may permanently purge and delete all your account data, credentials, and game records at any time using the 'Delete Account & Data' button in the Account tab.\n\n" +
+                        "4. Contact & Security\n" +
+                        "For data safety inquiries or security disclosures, contact security@ashcrypt.io.",
+                        fontSize = 13.sp,
+                        color = textSecondary,
+                        lineHeight = 18.sp
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacyPolicyDialog = false }) {
+                    Text("CLOSE", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                }
+            },
+            containerColor = cardBg
+        )
+    }
+
+    // ── Terms of Service Dialog ───────────────────────────────────
+    if (showTermsDialog) {
+        AlertDialog(
+            onDismissRequest = { showTermsDialog = false },
+            title = {
+                Text(
+                    "AshCrypt Terms of Service",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = textPrimary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 4.dp)
+                ) {
+                    Text(
+                        "1. Educational Purpose\n" +
+                        "AshCrypt and its cryptographic battle arenas (Block Ciphers, Asymmetric Vault, Sponge Chambers) are interactive educational simulations designed solely for learning cryptography, computer science, and data safety.\n\n" +
+                        "2. Responsible Usage\n" +
+                        "Simulations within this application must not be used for malicious exploitation or unauthorized penetration testing. All cryptographic exercises operate within isolated virtual sandboxes.\n\n" +
+                        "3. Intellectual Property\n" +
+                        "All algorithm animations, dynamic visualizers, and learning modules are proprietary to AshCrypt.\n\n" +
+                        "4. Service Availability\n" +
+                        "AshCrypt is provided 'as is' for offline and online educational reinforcement.",
+                        fontSize = 13.sp,
+                        color = textSecondary,
+                        lineHeight = 18.sp
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTermsDialog = false }) {
+                    Text("I AGREE", color = DuolingoGreen, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = cardBg
@@ -805,6 +932,9 @@ fun SettingsScreen(
                             showFeedback("Security dossier exported to clipboard! 📋")
                         },
                         onLogoutClick = { showLogoutAlert = true },
+                        onDeleteAccountClick = { showDeleteAccountAlert = true },
+                        onPrivacyPolicyClick = { showPrivacyPolicyDialog = true },
+                        onTermsClick = { showTermsDialog = true },
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
                         cardBg = cardBg,
@@ -1727,6 +1857,9 @@ private fun AccountTab(
     onClearCache: () -> Unit,
     onExportDossier: () -> Unit,
     onLogoutClick: () -> Unit,
+    onDeleteAccountClick: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit,
+    onTermsClick: () -> Unit,
     textPrimary: Color,
     textSecondary: Color,
     cardBg: Color,
@@ -1877,6 +2010,41 @@ private fun AccountTab(
         }
     }
 
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Legal & Privacy Compliance
+    SectionHeader("Legal & Privacy", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onPrivacyPolicyClick() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Privacy Policy", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                Text("Zero telemetry tracking, local encrypted on-device storage", fontSize = 12.sp, color = textSecondary)
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary, modifier = Modifier.size(16.dp))
+        }
+        SettingsDivider(cardBorder)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onTermsClick() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Terms of Service", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                Text("Educational cryptographic simulations & acceptable usage guidelines", fontSize = 12.sp, color = textSecondary)
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary, modifier = Modifier.size(16.dp))
+        }
+    }
+
     Spacer(modifier = Modifier.height(32.dp))
 
     // Log out 3D extruded button
@@ -1884,6 +2052,16 @@ private fun AccountTab(
         title = "🚪 LOG OUT OF ASHCRYPT",
         style = AppButtonStyle.DANGER_CRIMSON,
         onClick = onLogoutClick,
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Delete Account (Google Play Store Data Safety Compliance)
+    AppButton(
+        title = "⚠️ DELETE ACCOUNT & DATA",
+        style = AppButtonStyle.SECONDARY_GLASS,
+        onClick = onDeleteAccountClick,
         modifier = Modifier.fillMaxWidth().height(48.dp)
     )
 }

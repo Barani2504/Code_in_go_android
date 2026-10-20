@@ -91,7 +91,12 @@ fun AppNavHost(
             ) {
                 SplashScreen(
                     onFinishedSplash = {
-                        navController.navigate(Screen.Onboarding.route) {
+                        val destination = if (com.simats.codeingo.domain.AuthService.instance.isAuthenticated.value) {
+                            Screen.Dashboard.route
+                        } else {
+                            Screen.Onboarding.route
+                        }
+                        navController.navigate(destination) {
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }
                     }
@@ -101,6 +106,9 @@ fun AppNavHost(
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onGetStarted = {
+                        if (!com.simats.codeingo.domain.AuthService.instance.isAuthenticated.value) {
+                            com.simats.codeingo.domain.AuthService.instance.signInAsGuest()
+                        }
                         navController.navigate(Screen.Dashboard.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }

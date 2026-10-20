@@ -324,9 +324,14 @@ fun ProfileCreationScreen(
                             title = "CONTINUE",
                             style = com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER,
                             onClick = {
+                                val resolvedEmail = emailText.ifEmpty { "${generatedHandle.removePrefix("@")}@ashcrypt.app" }
+                                com.simats.codeingo.domain.AuthService.instance.signInWithEmail(resolvedEmail, displayName)
+                                if (passwordText.isNotEmpty()) {
+                                    com.simats.codeingo.domain.AuthService.instance.updatePassword(resolvedEmail, passwordText)
+                                }
                                 localizationManager.updateUserProfile(displayName, generatedHandle)
-                                localizationManager.setLoggedIn(true)
-                                onProfileCreated(displayName, emailText.ifEmpty { "user@ashcrypt.dev" })
+                                localizationManager.setLoggedIn(true, displayName, generatedHandle)
+                                onProfileCreated(displayName, resolvedEmail)
                             },
                             modifier = Modifier.fillMaxWidth()
                         )

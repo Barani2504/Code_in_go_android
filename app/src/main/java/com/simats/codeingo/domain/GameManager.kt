@@ -28,7 +28,7 @@ class GameManager private constructor() {
 
     // ── Core stats ────────────────────────────────────────────────────────────
 
-    private val _totalXP = MutableStateFlow(860)
+    private val _totalXP = MutableStateFlow(120)
     val totalXP: StateFlow<Int> = _totalXP.asStateFlow()
 
     private val _gemsCount = MutableStateFlow(450)
@@ -49,7 +49,7 @@ class GameManager private constructor() {
     private val _savedStreakDays = MutableStateFlow(0)
     val savedStreakDays: StateFlow<Int> = _savedStreakDays.asStateFlow()
 
-    private val _lastPracticedTimestamp = MutableStateFlow(System.currentTimeMillis() / 1000.0)
+    private val _lastPracticedTimestamp = MutableStateFlow(0.0)
     val lastPracticedTimestamp: StateFlow<Double> = _lastPracticedTimestamp.asStateFlow()
 
     private val _streakLostTimestamp = MutableStateFlow(0.0)
@@ -156,6 +156,15 @@ class GameManager private constructor() {
             _completedLevelIndices.value = p.completedLevelIndices.first().mapNotNull { it.toIntOrNull() }.toSet()
             _activeLevelIndex.value = p.activeLevelIndex.first()
 
+            val savedPracticedMs = p.lastPracticedTimestampMs.first()
+            if (savedPracticedMs > 0L) {
+                _lastPracticedTimestamp.value = savedPracticedMs / 1000.0
+            }
+            val savedPlayedMs = p.lastPlayedDateMs.first()
+            if (savedPlayedMs > 0L) {
+                _lastPlayedDateUnix.value = savedPlayedMs / 1000.0
+            }
+
             // Re-evaluate streak with restored persisted timestamp
             evaluateStreakOnLaunch()
         }
@@ -174,6 +183,10 @@ class GameManager private constructor() {
                 phoenixStage = _activePhoenixStage.value,
                 highestCombo = _highestCombo.value,
                 eggCrack = _eggCrackLevel.value
+            )
+            p.updatePracticeTimestamps(
+                lastPracticedMs = (_lastPracticedTimestamp.value * 1000).toLong(),
+                lastPlayedMs = (_lastPlayedDateUnix.value * 1000).toLong()
             )
         }
     }
@@ -252,7 +265,23 @@ class GameManager private constructor() {
         persistStats()
         val p = prefs
         if (p != null) {
-            scope.launch { p.resetChapterProgression() }
+            scope.launch { 
+                p.resetChapterProgression() 
+                p.updatePracticeTimestamps(0L, 0L)
+            }
+        }
+    }
+
+    /** Purges all local user game data upon account deletion (Play Store Account Deletion Rule) */
+    fun deleteAccountAndClearAllData() {
+        resetAllProgress()
+        _mistakeVault.value = emptyList()
+        initializeDailyQuests()
+        val p = prefs
+        if (p != null) {
+            scope.launch {
+                p.clearAllUserData()
+            }
         }
     }
 

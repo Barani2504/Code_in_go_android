@@ -36,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -140,6 +141,7 @@ fun AssessmentScreen(
     var isChecked       by remember { mutableStateOf(false) }
     var isAnswerCorrect by remember { mutableStateOf(false) }
     var isFinished      by remember { mutableStateOf(false) }
+    var showQuitConfirmDialog by remember { mutableStateOf(false) }
     var correctCount    by remember { mutableIntStateOf(0) }
     var showHintDialog  by remember { mutableStateOf(false) }
     var wrongAnswerCount by remember { mutableIntStateOf(0) }
@@ -169,6 +171,14 @@ fun AssessmentScreen(
     val currentQuestion: QuizQuestion = questions.getOrElse(currentIndex) {
         QuizQuestion(typeTitle = "DSA Challenge", speakerName = "Duo", speakerImage = "DuoPencil",
             promptSentence = "Analyze the algorithmic logic:", targetPrompt = "Select the correct option")
+    }
+
+    LaunchedEffect(Unit) {
+        com.simats.codeingo.domain.PhoenixEmotionManager.instance.handleQuizStarted()
+    }
+
+    BackHandler(enabled = !isFinished && heartsCount > 0) {
+        showQuitConfirmDialog = true
     }
 
     LaunchedEffect(currentIndex) {
@@ -285,7 +295,13 @@ fun AssessmentScreen(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onDismiss) {
+                    IconButton(onClick = {
+                        if (!isFinished && heartsCount > 0) {
+                            showQuitConfirmDialog = true
+                        } else {
+                            onDismiss()
+                        }
+                    }) {
                         Icon(Icons.Default.Close, "Close", tint = SubtextGray, modifier = Modifier.size(24.dp))
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -701,6 +717,44 @@ fun AssessmentScreen(
                 },
                 text = { Text(currentQuestion.hint ?: "Master the data structure patterns!", fontSize = 14.sp, color = SubtextGray) },
                 confirmButton = { TextButton(onClick = { showHintDialog = false }) { Text("GOT IT! ⚡️", fontWeight = FontWeight.Black, color = DuolingoBlue) } },
+                containerColor = DuolingoCardBg,
+                shape = RoundedCornerShape(18.dp)
+            )
+        }
+
+        // Quit confirmation dialog (accidental exit protection)
+        if (showQuitConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showQuitConfirmDialog = false },
+                title = {
+                    Text(
+                        "Quit Lesson?",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = LocalDynamicThemeColors.current.textPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        "Are you sure you want to quit? You will lose your current progress in this lesson.",
+                        fontSize = 14.sp,
+                        color = SubtextGray
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showQuitConfirmDialog = false
+                        com.simats.codeingo.domain.PhoenixEmotionManager.instance.handleQuizCompleted(0.0, heartsCount)
+                        onDismiss()
+                    }) {
+                        Text("QUIT", color = DuolingoRed, fontWeight = FontWeight.Black)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showQuitConfirmDialog = false }) {
+                        Text("KEEP GOING", color = DuolingoGreen, fontWeight = FontWeight.Bold)
+                    }
+                },
                 containerColor = DuolingoCardBg,
                 shape = RoundedCornerShape(18.dp)
             )
