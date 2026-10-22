@@ -236,25 +236,41 @@ fun ModuloClockLab(
                     drawCircle(color = Color.White, radius = 2.5.dp.toPx(), center = center)
                 }
 
-                // Center Remainder Text
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = if (selectedModulus == 26) {
-                            "'$('A'.code + remainder).toChar()'"
-                        } else {
-                            "$remainder"
-                        },
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Black,
-                        color = amberAccent,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        text = "mod $selectedModulus",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = dynamicColors.textSecondary
-                    )
+                // Center Remainder Hub
+                val centerLabel = if (selectedModulus == 26) {
+                    val letter = ('A'.code + remainder).toChar()
+                    "'$letter'"
+                } else {
+                    "$remainder"
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(68.dp)
+                        .clip(CircleShape)
+                        .background(dynamicColors.cardBackground.copy(alpha = 0.95f))
+                        .border(1.5.dp, amberAccent.copy(alpha = 0.6f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = centerLabel,
+                            fontSize = if (selectedModulus == 26) 22.sp else 20.sp,
+                            fontWeight = FontWeight.Black,
+                            color = amberAccent,
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "mod $selectedModulus",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = dynamicColors.textSecondary
+                        )
+                    }
                 }
             }
 
