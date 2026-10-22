@@ -114,7 +114,7 @@ class GameManager private constructor() {
     private val _unlockedLevelIndices = MutableStateFlow<Set<Int>>(setOf(1))
     val unlockedLevelIndices: StateFlow<Set<Int>> = _unlockedLevelIndices.asStateFlow()
 
-    private val _maxUnlockedChapter = MutableStateFlow(5)
+    private val _maxUnlockedChapter = MutableStateFlow(1)
     val maxUnlockedChapter: StateFlow<Int> = _maxUnlockedChapter.asStateFlow()
 
     private val _completedChapters = MutableStateFlow<Set<Int>>(emptySet())
@@ -162,10 +162,34 @@ class GameManager private constructor() {
             _completedBossIds.value = p.completedBosses.first()
             _unlockedLevelIndices.value = p.unlockedLevels.first().mapNotNull { it.toIntOrNull() }.toSet()
                 .ifEmpty { setOf(1) }
-            _maxUnlockedChapter.value = p.maxUnlockedChapter.first()
             _completedChapters.value = p.completedChapters.first().mapNotNull { it.toIntOrNull() }.toSet()
             _completedLevelIndices.value = p.completedLevelIndices.first().mapNotNull { it.toIntOrNull() }.toSet()
-            _activeLevelIndex.value = p.activeLevelIndex.first()
+
+            val storedMaxChap = p.maxUnlockedChapter.first()
+            val completedLevels = _completedLevelIndices.value
+            val completedChaps = _completedChapters.value
+
+            // Sanitize maxUnlockedChapter if it was erroneously set to 5 on a fresh or early profile
+            val legitimateMaxChapter = when {
+                completedLevels.contains(25) || completedChaps.contains(5) -> maxOf(6, storedMaxChap)
+                completedLevels.contains(20) || completedChaps.contains(4) -> maxOf(5, storedMaxChap.coerceAtMost(5))
+                completedLevels.contains(15) || completedChaps.contains(3) -> maxOf(4, storedMaxChap.coerceAtMost(4))
+                completedLevels.contains(10) || completedChaps.contains(2) -> maxOf(3, storedMaxChap.coerceAtMost(3))
+                completedLevels.contains(5) || completedChaps.contains(1) -> maxOf(2, storedMaxChap.coerceAtMost(2))
+                else -> 1
+            }
+            _maxUnlockedChapter.value = legitimateMaxChapter
+            if (storedMaxChap != legitimateMaxChapter && storedMaxChap >= 5 && legitimateMaxChapter == 1) {
+                p.setMaxUnlockedChapter(legitimateMaxChapter)
+            }
+
+            val savedActive = p.activeLevelIndex.first()
+            if (legitimateMaxChapter == 1 && savedActive !in 1..5) {
+                _activeLevelIndex.value = 1
+                p.setActiveLevelIndex(1)
+            } else {
+                _activeLevelIndex.value = savedActive
+            }
             _basecampCompletedLevels.value = p.basecampCompletedLevels.first()
             _diagnosticTaken.value = p.diagnosticTaken.first()
             _diagnosticRecommendedChapter.value = p.diagnosticRecommendedChapter.first()

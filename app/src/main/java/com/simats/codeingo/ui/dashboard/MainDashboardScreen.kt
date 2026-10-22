@@ -333,14 +333,10 @@ fun MainDashboardScreen(
         }
     }
 
-    val visibleUnits = remember(reviewingPreviousUnitId, maxUnlockedChapter, masterUnits) {
-        val reviewId = reviewingPreviousUnitId
-        if (reviewId != null) {
-            masterUnits.filter { it.id == reviewId }
-        } else {
-            masterUnits.filter { unit ->
-                unit.id >= maxUnlockedChapter && unit.id <= minOf(maxUnlockedChapter + 1, masterUnits.size)
-            }
+    // Sequential curriculum flow from Chapter 1 to 5 (plus unlocked expansion chapters)
+    val visibleUnits = remember(maxUnlockedChapter, masterUnits) {
+        masterUnits.filter { unit ->
+            unit.id in 1..5 || unit.id <= maxUnlockedChapter + 1
         }
     }
 
@@ -457,15 +453,6 @@ fun MainDashboardScreen(
                                                     guideSelectedUnit = unit
                                                 }
                                             }
-                                        )
-
-                                        // Review Navigation Banner (Return to Current / Review Previous)
-                                        ReviewNavigationButton(
-                                            unit = unit,
-                                            maxUnlockedChapter = maxUnlockedChapter,
-                                            reviewingPreviousUnitId = reviewingPreviousUnitId,
-                                            onReturnToCurrent = { returnToCurrentChapterPath() },
-                                            onShowPrevious = { showPreviousChapterPath() }
                                         )
 
                                         // Winding 3D Level Nodes with Stepping Stones Path & Smooth Flying Mascot
