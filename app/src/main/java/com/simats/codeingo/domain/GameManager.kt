@@ -6,6 +6,8 @@ import com.simats.codeingo.data.model.DSABossSpec
 import com.simats.codeingo.data.model.DSAExerciseItem
 import com.simats.codeingo.data.model.DailyQuestItem
 import com.simats.codeingo.data.model.MistakeVaultItem
+import com.simats.codeingo.data.repository.ChapterRegistry
+import com.simats.codeingo.data.repository.QuizQuestion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -121,6 +123,15 @@ class GameManager private constructor() {
     private val _completedLevelIndices = MutableStateFlow<Set<Int>>(emptySet())
     val completedLevelIndices: StateFlow<Set<Int>> = _completedLevelIndices.asStateFlow()
 
+    private val _basecampCompletedLevels = MutableStateFlow<Set<String>>(emptySet())
+    val basecampCompletedLevels: StateFlow<Set<String>> = _basecampCompletedLevels.asStateFlow()
+
+    private val _diagnosticTaken = MutableStateFlow(false)
+    val diagnosticTaken: StateFlow<Boolean> = _diagnosticTaken.asStateFlow()
+
+    private val _diagnosticRecommendedChapter = MutableStateFlow(1)
+    val diagnosticRecommendedChapter: StateFlow<Int> = _diagnosticRecommendedChapter.asStateFlow()
+
     private val _activeLevelIndex = MutableStateFlow(1)
     val activeLevelIndex: StateFlow<Int> = _activeLevelIndex.asStateFlow()
 
@@ -155,6 +166,9 @@ class GameManager private constructor() {
             _completedChapters.value = p.completedChapters.first().mapNotNull { it.toIntOrNull() }.toSet()
             _completedLevelIndices.value = p.completedLevelIndices.first().mapNotNull { it.toIntOrNull() }.toSet()
             _activeLevelIndex.value = p.activeLevelIndex.first()
+            _basecampCompletedLevels.value = p.basecampCompletedLevels.first()
+            _diagnosticTaken.value = p.diagnosticTaken.first()
+            _diagnosticRecommendedChapter.value = p.diagnosticRecommendedChapter.first()
 
             val savedPracticedMs = p.lastPracticedTimestampMs.first()
             if (savedPracticedMs > 0L) {
@@ -313,6 +327,19 @@ class GameManager private constructor() {
         _completedLevelIndices.value = _completedLevelIndices.value + level
         val p = prefs ?: return
         scope.launch { p.markLevelCompleted(level) }
+    }
+
+    fun markBasecampLevelCompleted(levelId: String) {
+        _basecampCompletedLevels.value = _basecampCompletedLevels.value + levelId
+        val p = prefs ?: return
+        scope.launch { p.markBasecampLevelCompleted(levelId) }
+    }
+
+    fun setDiagnosticResult(recommendedChapter: Int) {
+        _diagnosticTaken.value = true
+        _diagnosticRecommendedChapter.value = recommendedChapter
+        val p = prefs ?: return
+        scope.launch { p.setDiagnosticResult(recommendedChapter) }
     }
 
     fun resetChapterProgression() {
@@ -478,6 +505,32 @@ class GameManager private constructor() {
         persistStats()
     }
 
+    fun recordWrongAnswer(
+        question: QuizQuestion,
+        userAnswer: String,
+        correctAnswer: String,
+        chapterId: Int = 1
+    ) {
+        _currentCombo.value = 0
+        if (_heartsCount.value > 0) {
+            _heartsCount.value -= 1
+        }
+
+        val mistake = MistakeVaultItem(
+            id = UUID.randomUUID().toString(),
+            prompt = question.promptSentence.ifEmpty { question.targetPrompt },
+            conceptId = question.conceptTag.ifEmpty { question.id },
+            wrongAnswerGiven = userAnswer,
+            correctAnswer = correctAnswer,
+            explanation = question.explanation.ifEmpty { question.hint ?: "" },
+            conceptTag = question.conceptTag,
+            misconceptionTag = question.misconceptionTag,
+            chapterId = chapterId
+        )
+        _mistakeVault.value = _mistakeVault.value + mistake
+        persistStats()
+    }
+
     fun triggerEvolution(toStage: Int) {
         if (toStage > _activePhoenixStage.value && toStage <= 18) {
             _evolutionFromStage.value = _activePhoenixStage.value
@@ -517,9 +570,27 @@ class GameManager private constructor() {
         isBoss: Boolean = false,
         nextUnitFirstLevelIndex: Int? = null
     ) {
+        if (ChapterRegistry.isBasecampLevel(currentLevelIndex)) {
+            val levelId = "c0_l${currentLevelIndex - 100}"
+            markBasecampLevelCompleted(levelId)
+            val nextLevel = if (currentLevelIndex < 105) currentLevelIndex + 1 else 105
+            setActiveLevel(nextLevel)
+            if (isBoss) {
+                _eggCrackLevel.value = 0
+                val targetStage = (_activePhoenixStage.value + 1).coerceAtMost(18)
+                triggerEvolution(targetStage)
+            }
+            persistStats()
+            return
+        }
+
         markLevelCompleted(currentLevelIndex)
         val nextLevel = if (isBoss) {
-            val currentUnitId = ((currentLevelIndex - 1) / 5) + 1
+            val currentUnitId = if (ChapterRegistry.isExpansionLevel(currentLevelIndex)) {
+                ((currentLevelIndex - 26) / 5) + 6
+            } else {
+                ((currentLevelIndex - 1) / 5) + 1
+            }
             markChapterCompleted(currentUnitId)
             val nextUnitId = currentUnitId + 1
             unlockNextChapter(nextUnitId)

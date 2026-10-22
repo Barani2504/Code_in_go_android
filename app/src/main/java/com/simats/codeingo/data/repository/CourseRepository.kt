@@ -794,6 +794,8 @@ object CourseRepository {
     }
 
     fun getBossById(id: String): DSABossSpec? {
-        return allUnits.firstOrNull { it.boss.id == id }?.boss
+        val courseBoss = allUnits.firstOrNull { it.boss.id == id }?.boss
+        if (courseBoss != null) return courseBoss
+        return ChapterRegistry.getAllChapters().firstOrNull { it.bossSpec?.id == id }?.bossSpec
     }
 }

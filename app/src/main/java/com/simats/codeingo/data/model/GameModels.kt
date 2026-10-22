@@ -12,7 +12,10 @@ data class MistakeVaultItem(
     val correctAnswer: String,
     val explanation: String,
     val timestamp: Long = System.currentTimeMillis(),
-    var isRepaired: Boolean = false
+    var isRepaired: Boolean = false,
+    val conceptTag: String = "",
+    val misconceptionTag: String = "",
+    val chapterId: Int = 1
 )
 
 @Serializable

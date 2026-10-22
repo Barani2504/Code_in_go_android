@@ -25,12 +25,29 @@ data class QuizQuestion(
     val complexityCodeSnippet: String = "",
     val complexityDialCorrect: String = "O(1)",
     val trueFalseStatement: String = "",
-    val trueFalseIsCorrectTrue: Boolean = true
+    val trueFalseIsCorrectTrue: Boolean = true,
+
+    // ── PART 4 EXTENSIONS (All defaulted for 100% backward compatibility) ──
+    val conceptTag: String = "",
+    val misconceptionTag: String = "",
+    val difficulty: Int = 1,
+    val hint1: String? = null,
+    val hint2: String? = null,
+    val hint3: String? = null,
+    val explanation: String = "",
+    val wrongOptionExplanations: Map<Int, String> = emptyMap(),
+    val sourceNote: String = ""
 )
 
 object QuizQuestionsData {
 
     fun getQuestionsForUnit(unitId: Int, levelNumber: Int): List<QuizQuestion> {
+        if (ChapterRegistry.isBasecampLevel(levelNumber)) {
+            return BasecampQuestionsData.getQuestionsForLevel(levelNumber)
+        }
+        if (levelNumber in 26..30) {
+            return Chapter6QuestionsData.getQuestionsForLevel(levelNumber)
+        }
         val effectiveLevel = if (levelNumber in 1..25) levelNumber else (((levelNumber - 1) % 25) + 1)
         return when (effectiveLevel) {
             1 -> dsaLevel1Questions()

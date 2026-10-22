@@ -268,6 +268,14 @@ fun PracticeHubScreen(
                                 .padding(14.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (item.conceptTag.isNotEmpty()) {
+                                    Text(
+                                        text = "🏷️ CONCEPT: ${item.conceptTag}${if (item.misconceptionTag.isNotEmpty()) "  •  ⚠️ PITFALL: ${item.misconceptionTag}" else ""}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = DsaOrange
+                                    )
+                                }
                                 Text(
                                     text = "EXPLANATION & WHY:",
                                     fontSize = 11.sp,
@@ -280,7 +288,7 @@ fun PracticeHubScreen(
                                     color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.9f),
                                     lineHeight = 18.sp
                                 )
-                                Divider(color = InputBorder)
+                                androidx.compose.material3.HorizontalDivider(color = InputBorder)
                                 Text(
                                     text = "Correct Answer: ${item.correctAnswer}",
                                     fontSize = 13.sp,
@@ -549,6 +557,16 @@ private fun MistakeVaultTab(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = DuolingoGreen
+                        )
+                    }
+
+                    if (item.conceptTag.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "🏷️ ${item.conceptTag}${if (item.misconceptionTag.isNotEmpty()) " • ⚠️ ${item.misconceptionTag}" else ""}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = DsaOrange
                         )
                     }
                 }

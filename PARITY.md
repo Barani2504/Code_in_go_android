@@ -233,3 +233,30 @@ All 10 Cryptography and DSA visualizer topics and surrounding host containers ad
    - **Universal Font Inheritance (`Theme.kt`):**
      - Global `LocalTextStyle` provides `AppFontFamily` (`Outfit`) and `dynamicColors.textPrimary` across all unstyled composables with zero text drift or invisible white-on-white artifacts.
 
+---
+
+## 9. Intentional Divergences: Android Foundations & Expansion Tracks
+
+In accordance with the dual-skin evolution policy, the Core Curriculum (Chapters 1..5, Levels 1..25) remains **frozen and byte-compatible with the iOS schema**. Android introduces two intentional modular extensions that plug into the shared platform without altering core invariants:
+
+### A. Chapter 0: Foundations Primer ("Basecamp")
+- **Audience & Goal:** Beginners entering cryptography without prerequisites in binary, hex, modular arithmetic, or bitwise operations.
+- **Isolation & Parity Protection:**
+  - Level indices are allocated in an isolated space: **Levels 101..105** (`c0_l1` to `c0_boss`).
+  - Does NOT touch or alter the core 25-level index range `1..25`.
+  - Completion is tracked via dedicated preference keys (`KEY_BASECAMP_COMPLETED_LEVELS`).
+  - Optional 12-question Diagnostic Placement Quiz recommends either Chapter 0 (Foundations) or Chapter 1 (Cipher Sanctum) based on test score, with zero heart penalty and zero XP award for skipped units.
+
+### B. Chapters 6..10: Advanced Defense Expansion Track
+- **Sequencing:** Sequentially follows completion of Chapter 5 (Core Network Security) to address syllabus gaps in applied defense:
+  - **Chapter 6 (Levels 26..30):** Identity Vault (MFA, TOTP/HOTP, Kerberos, KMS lifecycle, OAuth/OIDC).
+  - **Chapter 7 (Levels 31..35):** Web Fortress (Same-origin policy, SQLi, XSS, CSRF, OWASP Top 10).
+  - **Chapter 8 (Levels 36..40):** Wireless, Mail & Remote Access (WPA3 SAE, PGP vs S/MIME, anti-phishing, SSH).
+  - **Chapter 9 (Levels 41..45):** Defense Ops (IDS vs IPS, layered perimeters, malware taxonomy, NIST incident response).
+  - **Chapter 10 (Levels 46..50):** Crypto in the Wild (CSPRNG vs pseudo-random, padding oracles, timing side-channels, Heartbleed, post-quantum FIPS 203/204).
+- **Parity Protection:**
+  - Unlocks sequentially only after Level 25 is cleared.
+  - Reuses existing 6 core question primitives (`MULTIPLE_CHOICE`, `FILL_CODE`, `MATCH_PAIRS`, `TRUE_FALSE_SWIPE`, `ORDER_STEPS`, `COMPLEXITY_DIAL`).
+  - iOS client remains on 5 core chapters without database migration errors.
+
+

@@ -224,6 +224,16 @@ fun AssessmentScreen(
         else                             -> currentQuestion.options.getOrElse(currentQuestion.correctOptionIndex) { "" }
     }
 
+    val userAnswerSummary: String = when (currentQuestion.gameType) {
+        DSAExerciseType.MULTIPLE_CHOICE  -> selectedOptionIndex?.let { currentQuestion.options.getOrNull(it) } ?: "Option"
+        DSAExerciseType.MATCH_PAIRS      -> "Mismatched pair connections"
+        DSAExerciseType.ORDER_STEPS      -> orderedSteps.joinToString(" → ")
+        DSAExerciseType.FILL_CODE        -> selectedFillToken ?: "Empty"
+        DSAExerciseType.COMPLEXITY_DIAL  -> selectedComplexity ?: "None"
+        DSAExerciseType.TRUE_FALSE_SWIPE -> if (selectedTrueFalse == true) "True" else "False"
+        else                             -> selectedOptionIndex?.let { currentQuestion.options.getOrNull(it) } ?: "Option"
+    }
+
     val starsEarned = when (correctCount) { 10 -> 5; in 8..9 -> 4; in 6..7 -> 3; in 4..5 -> 2; in 1..3 -> 1; else -> 0 }
     val accuracyPercentage = if (questions.isNotEmpty()) ((correctCount.toFloat() / questions.size) * 100).toInt() else 100
     val totalXPEarned = (unitId * 10) + (starsEarned * 5)
@@ -639,6 +649,24 @@ fun AssessmentScreen(
                                         color = PhoenixGreen.copy(alpha = 0.9f)
                                     )
                                 }
+
+                                val activeExplanation = if (!isCorrect) {
+                                    val wrongOptExplanation = selectedOptionIndex?.let { currentQuestion.wrongOptionExplanations[it] }
+                                    wrongOptExplanation ?: currentQuestion.explanation.ifEmpty { currentQuestion.hint ?: "" }
+                                } else {
+                                    currentQuestion.explanation
+                                }
+
+                                if (activeExplanation.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = activeExplanation,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        lineHeight = 16.sp
+                                    )
+                                }
                             }
                         }
                     }
@@ -678,6 +706,7 @@ fun AssessmentScreen(
                                     if (correct) {
                                         correctCount += 1
                                         currentCombo += 1
+                                        gameManager.recordCorrectAnswer()
                                         feedback.correct(currentCombo)
                                         DynamicPillController.post(DynamicPillEvent.XP(15))
                                         if (currentCombo >= 2) {
@@ -688,7 +717,12 @@ fun AssessmentScreen(
                                         particleTrigger++
                                     } else {
                                         currentCombo = 0
-                                        gameManager.loseHeart()
+                                        gameManager.recordWrongAnswer(
+                                            question = currentQuestion,
+                                            userAnswer = userAnswerSummary,
+                                            correctAnswer = correctAnswerSummary,
+                                            chapterId = unitId
+                                        )
                                         feedback.wrong()
                                         wrongAnswerCount += 1
                                         DynamicPillController.post(DynamicPillEvent.HeartLost)
@@ -715,7 +749,21 @@ fun AssessmentScreen(
                         Text("Phoenix Cheat Code", fontSize = 18.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
                     }
                 },
-                text = { Text(currentQuestion.hint ?: "Master the data structure patterns!", fontSize = 14.sp, color = SubtextGray) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (!currentQuestion.hint1.isNullOrEmpty()) {
+                            Text("💡 Hint 1: ${currentQuestion.hint1}", fontSize = 13.sp, color = LocalDynamicThemeColors.current.textPrimary)
+                            if (!currentQuestion.hint2.isNullOrEmpty()) {
+                                Text("🔍 Hint 2: ${currentQuestion.hint2}", fontSize = 13.sp, color = LocalDynamicThemeColors.current.textPrimary)
+                            }
+                            if (!currentQuestion.hint3.isNullOrEmpty()) {
+                                Text("⚡ Hint 3: ${currentQuestion.hint3}", fontSize = 13.sp, color = LocalDynamicThemeColors.current.textPrimary)
+                            }
+                        } else {
+                            Text(currentQuestion.hint?.ifEmpty { "Master the cryptography patterns!" } ?: "Master the cryptography patterns!", fontSize = 14.sp, color = SubtextGray)
+                        }
+                    }
+                },
                 confirmButton = { TextButton(onClick = { showHintDialog = false }) { Text("GOT IT! ⚡️", fontWeight = FontWeight.Black, color = DuolingoBlue) } },
                 containerColor = DuolingoCardBg,
                 shape = RoundedCornerShape(18.dp)

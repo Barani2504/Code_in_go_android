@@ -50,6 +50,11 @@ fun UnitSectionBanner(
         3 -> "The Asymmetric Spire Era"
         4 -> "The Cryptographic Integrity Era"
         5 -> "The Network Defense Sovereign"
+        6 -> "The Identity Vault Era"
+        7 -> "The Web Fortress Era"
+        8 -> "The Spectrum Citadel Era"
+        9 -> "The Defense Operations Era"
+        10 -> "The Cryptographic Wilds Era"
         else -> "Phoenix Security Realm ${unit.unitNumber}"
     }
 
@@ -59,6 +64,11 @@ fun UnitSectionBanner(
         3 -> "Diffie-Hellman Key Exchange • Modular Trapdoors • RSA Clock • ECC Point Addition"
         4 -> "SHA-256 Digest • Keccak Sponge Chamber • Merkle Tree Proofs • Digital Signatures"
         5 -> "TLS 1.3 1-RTT Handshake • 5-Tuple Stateful Firewall • ARP Defense • IPsec Packets"
+        6 -> "3 Factors & Argon2id • TOTP Time Buckets • Kerberos TGT • KMS & Envelope Encryption • OAuth PKCE"
+        7 -> "HTTPS & SOP • SQLi & Parameterized Queries • XSS & CSRF • OWASP Top 10"
+        8 -> "WPA3 SAE Handshake • PGP & S/MIME • Anti-Phishing • SSH Host Verification"
+        9 -> "IDS vs IPS • DMZ & Honeypots • Malware Zoo • NIST Incident Response"
+        10 -> "CSPRNG Entropy • Padding Oracles • Historic Crypto Flaws • Post-Quantum FIPS 203"
         else -> "Cryptography & Network Security Principles"
     }
 

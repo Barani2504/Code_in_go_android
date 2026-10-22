@@ -100,6 +100,7 @@ import com.simats.codeingo.data.model.DashboardTab
 import com.simats.codeingo.data.model.LessonNodeItem
 import com.simats.codeingo.data.model.UnitCharacterType
 import com.simats.codeingo.data.model.UnitModel
+import com.simats.codeingo.data.repository.ChapterRegistry
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.DynamicPillHUD
@@ -138,6 +139,10 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.liquidGlassCard
+import com.simats.codeingo.ui.exercise.DiagnosticScreen
+import com.simats.codeingo.ui.exercise.labs.BitTogglerLab
+import com.simats.codeingo.ui.exercise.labs.ModuloClockLab
+import com.simats.codeingo.ui.exercise.labs.XorBoardLab
 
 /**
  * MainDashboardScreen faithfully synchronized with iOS MainDashboardView.swift (commit 2b2c2ab).
@@ -221,6 +226,13 @@ fun MainDashboardScreen(
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
     var activeWorldArena by remember { mutableStateOf<String?>(null) }
 
+    val basecampCompletedLevels by gameManager.basecampCompletedLevels.collectAsState()
+    val diagnosticTaken by gameManager.diagnosticTaken.collectAsState()
+    val diagnosticRecommendedChapter by gameManager.diagnosticRecommendedChapter.collectAsState()
+
+    var showDiagnosticScreen by remember { mutableStateOf(false) }
+    var activeMicroLab by remember { mutableStateOf<String?>(null) }
+
     var reviewingPreviousUnitId by remember { mutableStateOf<Int?>(null) }
     var replayReturnLevelIndex by remember { mutableStateOf<Int?>(null) }
     var selectedLockedNodeId by remember { mutableStateOf<Int?>(null) }
@@ -269,85 +281,9 @@ fun MainDashboardScreen(
         String.format("%02d:%02d", mins, secs)
     } else null
 
-    // 5 Master Chapters
+    // Core (1..5) & Expansion (6..10) Chapters from ChapterRegistry
     val masterUnits = remember {
-        listOf(
-            UnitModel(
-                id = 1, sectionNumber = 1, unitNumber = 1,
-                titleKey = "unit_1_title", titleDefault = "🔥 Chapter 1: Classical Ciphers — The Cipher Sanctum",
-                themeColor = Color(0xFFFF6E0F),
-                themeDarkColor = Color(0xFFC84105),
-                nodes = listOf(
-                    LessonNodeItem(1, 1, "lock", 0.dp, "Stage 1: Meet the Shift Cipher"),
-                    LessonNodeItem(2, 2, "key", (-45).dp, "Stage 2: Substitution Ciphers"),
-                    LessonNodeItem(3, 3, "arrow.triangle.swap", 45.dp, "Stage 3: Transposition Ciphers"),
-                    LessonNodeItem(4, 4, "chart.bar", (-20).dp, "Stage 4: Frequency Cryptanalysis"),
-                    LessonNodeItem(5, 5, "flame", 0.dp, "Stage 5: Boss: The Cipher Breaker", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Cipher Sanctum"
-            ),
-            UnitModel(
-                id = 2, sectionNumber = 2, unitNumber = 2,
-                titleKey = "unit_2_title", titleDefault = "🏰 Chapter 2: Symmetric Encryption — The Block Fortress",
-                themeColor = Color(0xFFF02D4B),
-                themeDarkColor = Color(0xFFB41432),
-                nodes = listOf(
-                    LessonNodeItem(6, 6, "shield", 0.dp, "Stage 1: DES & Feistel Networks"),
-                    LessonNodeItem(7, 7, "square.grid.3x3", 45.dp, "Stage 2: AES Architecture"),
-                    LessonNodeItem(8, 8, "link", (-45).dp, "Stage 3: Block Cipher Modes (CBC/CTR)"),
-                    LessonNodeItem(9, 9, "checkmark.shield", 20.dp, "Stage 4: Authenticated Encryption (GCM)"),
-                    LessonNodeItem(10, 10, "flame", 0.dp, "Stage 5: Boss: The Block Overlord", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Block Fortress"
-            ),
-            UnitModel(
-                id = 3, sectionNumber = 3, unitNumber = 3,
-                titleKey = "unit_3_title", titleDefault = "🔑 Chapter 3: Asymmetric Cryptography — The Asymmetric Spire",
-                themeColor = Color(0xFFFFA500),
-                themeDarkColor = Color(0xFFD26E00),
-                nodes = listOf(
-                    LessonNodeItem(11, 11, "number", 0.dp, "Stage 1: Modular Math & Euler's Totient"),
-                    LessonNodeItem(12, 12, "arrow.triangle.2.circlepath", (-45).dp, "Stage 2: Diffie-Hellman Key Exchange"),
-                    LessonNodeItem(13, 13, "key.horizontal", 45.dp, "Stage 3: RSA Public-Key Encryption"),
-                    LessonNodeItem(14, 14, "waveform.path", (-20).dp, "Stage 4: Elliptic Curve Cryptography"),
-                    LessonNodeItem(15, 15, "flame", 0.dp, "Stage 5: Boss: The Quantum Cryptanalyst", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Asymmetric Spire"
-            ),
-            UnitModel(
-                id = 4, sectionNumber = 4, unitNumber = 4,
-                titleKey = "unit_4_title", titleDefault = "🛡️ Chapter 4: Hashes & Signatures — The Signature Bastion",
-                themeColor = Color(0xFFB946FA),
-                themeDarkColor = Color(0xFF8228BE),
-                nodes = listOf(
-                    LessonNodeItem(16, 16, "fingerprint", 0.dp, "Stage 1: Cryptographic Hash Functions"),
-                    LessonNodeItem(17, 17, "arrow.down.doc", 45.dp, "Stage 2: SHA-2 & SHA-3 Families"),
-                    LessonNodeItem(18, 18, "lock.badge.clock", (-45).dp, "Stage 3: Message Authentication Codes (HMAC)"),
-                    LessonNodeItem(19, 19, "doc.plaintext", 20.dp, "Stage 4: Digital Signatures & PKI"),
-                    LessonNodeItem(20, 20, "flame", 0.dp, "Stage 5: Boss: The Collision Beast", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Signature Bastion"
-            ),
-            UnitModel(
-                id = 5, sectionNumber = 5, unitNumber = 5,
-                titleKey = "unit_5_title", titleDefault = "🌐 Chapter 5: Network Security — The Firewall Citadel",
-                themeColor = Color(0xFFFF4623),
-                themeDarkColor = Color(0xFFC31E0A),
-                nodes = listOf(
-                    LessonNodeItem(21, 21, "network", 0.dp, "Stage 1: TLS 1.3 Handshake"),
-                    LessonNodeItem(22, 22, "lock.shield", (-45).dp, "Stage 2: IPsec & Secure VPNs"),
-                    LessonNodeItem(23, 23, "flame.fill", 45.dp, "Stage 3: Firewalls & Zero Trust"),
-                    LessonNodeItem(24, 24, "exclamationmark.shield", (-20).dp, "Stage 4: Network Attacks & Defenses"),
-                    LessonNodeItem(25, 25, "flame", 0.dp, "Stage 5: Boss: The Cyber Titan", isBoss = true)
-                ),
-                characterType = UnitCharacterType.PHOENIX,
-                worldTheme = "The Firewall Citadel"
-            )
-        )
+        ChapterRegistry.getCoreUnits() + ChapterRegistry.getExpansionUnits()
     }
 
     fun getMascotPositionForLevel(level: Int): DpOffset {
@@ -478,6 +414,21 @@ fun MainDashboardScreen(
                                 // Spacing for floating top stats header (status bar + cutout insets + header height)
                                 Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
 
+                                // Chapter 0: Basecamp Foundations Primer Card (Android Expansion)
+                                BasecampFoundationsCard(
+                                    completedStages = basecampCompletedLevels,
+                                    diagnosticTaken = diagnosticTaken,
+                                    recommendedChapter = diagnosticRecommendedChapter,
+                                    onOpenDiagnostic = { showDiagnosticScreen = true },
+                                    onOpenBitLab = { activeMicroLab = "bit" },
+                                    onOpenModuloLab = { activeMicroLab = "modulo" },
+                                    onOpenXorLab = { activeMicroLab = "xor" },
+                                    onStartStage = { levelNumber, isBoss ->
+                                        onStartLesson(0, levelNumber, 5, isBoss)
+                                    },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+
                                 // 1. CHAPTER UNITS PATH (Visible Current + 1 Next Preview)
                                 visibleUnits.forEach { unit ->
                                     val isUnitOpen = unit.id <= maxUnlockedChapter
@@ -489,6 +440,11 @@ fun MainDashboardScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
+                                        // Expansion Track Header Divider when entering Chapter 6
+                                        if (unit.id == 6) {
+                                            ExpansionTrackHeader()
+                                        }
+
                                         // Unit Section Banner
                                         UnitSectionBanner(
                                             unit = unit,
@@ -615,12 +571,12 @@ fun MainDashboardScreen(
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                // Grand Master Journey Milestone Card
+                                // Grand Master Journey Milestone Card (Core 25 Levels)
                                 GrandMasterJourneyCard(
-                                    completedCount = unlockedLevels.size,
+                                    completedCount = unlockedLevels.filter { it in 1..25 }.size.coerceAtMost(25),
                                     totalCount = 25,
                                     onOpenSanctuary = {
-                                        if (unlockedLevels.size >= 25) {
+                                        if (unlockedLevels.filter { it in 1..25 }.size >= 25) {
                                             showFinalMasterJourney = true
                                         } else {
                                             onOpenPhoenixSanctuary()
@@ -1044,6 +1000,43 @@ fun MainDashboardScreen(
                 }
             }
         }
+
+        // Chapter 0: Diagnostic Placement Quiz Fullscreen Assessment
+        if (showDiagnosticScreen) {
+            BackHandler { showDiagnosticScreen = false }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(600f)
+            ) {
+                DiagnosticScreen(
+                    gameManager = gameManager,
+                    onDismiss = { showDiagnosticScreen = false },
+                    onSelectChapter = { targetChapter ->
+                        showDiagnosticScreen = false
+                        if (targetChapter == 1) {
+                            gameManager.setActiveLevel(1)
+                        }
+                    }
+                )
+            }
+        }
+
+        // Chapter 0: Interactive Micro-Labs Fullscreen Studios
+        activeMicroLab?.let { lab ->
+            BackHandler { activeMicroLab = null }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(600f)
+            ) {
+                when (lab) {
+                    "bit" -> BitTogglerLab(onDismiss = { activeMicroLab = null })
+                    "modulo" -> ModuloClockLab(onDismiss = { activeMicroLab = null })
+                    "xor" -> XorBoardLab(onDismiss = { activeMicroLab = null })
+                }
+            }
+        }
     }
 }
 
@@ -1429,8 +1422,12 @@ private fun ChapterGuidebookSheet(
             color = unit.themeColor
         )
 
+        val chapterDef = ChapterRegistry.getChapterById(unit.id)
+        val descriptionText = chapterDef?.description?.ifEmpty { null }
+            ?: "Master the cryptographic foundations and protocol defenses of this realm through 5 structured interactive stages. Complete each stage in sequence to challenge the Chapter Boss and unlock the next world."
+
         Text(
-            text = "Master the architectural foundations of this data structure through 5 structured interactive stages. Complete each stage in sequence to challenge the Chapter Boss and unlock the next world.",
+            text = descriptionText,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
@@ -1645,3 +1642,86 @@ private fun ConnectorSteppingStones(
         }
     }
 }
+
+// MARK: - Expansion Track Header Divider
+@Composable
+private fun ExpansionTrackHeader(
+    modifier: Modifier = Modifier
+) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.horizontalGradient(
+                    if (isDark) listOf(
+                        Color(0xFF312E81).copy(alpha = 0.85f),
+                        Color(0xFF1E1B4B).copy(alpha = 0.95f)
+                    ) else listOf(
+                        Color(0xFFE0E7FF),
+                        Color(0xFFEEF2FF)
+                    )
+                )
+            )
+            .border(
+                1.5.dp,
+                Brush.horizontalGradient(
+                    listOf(
+                        Color(0xFF818CF8).copy(alpha = 0.7f),
+                        Color(0xFFC084FC).copy(alpha = 0.7f)
+                    )
+                ),
+                RoundedCornerShape(20.dp)
+            )
+            .padding(16.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color(0xFF6366F1).copy(alpha = 0.25f))
+                        .border(1.dp, Color(0xFF818CF8), CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = "⚡ ANDROID EXCLUSIVE",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (isDark) Color(0xFFA5B4FC) else Color(0xFF4338CA)
+                    )
+                }
+                Text(
+                    text = "EXPANSION TRACK",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (isDark) Color.White.copy(alpha = 0.75f) else Color(0xFF475569)
+                )
+            }
+            Text(
+                text = "Advanced Applied Defense",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
+                color = if (isDark) Color.White else Color(0xFF1E1B4B)
+            )
+            Text(
+                text = "5 Specialized Chapters (Levels 26–50): Identity & Key Management, Web Fortress, Wireless & Mail, SOC Operations, and Cryptographic Pitfalls.",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (isDark) Color.White.copy(alpha = 0.8f) else Color(0xFF334155),
+                lineHeight = 16.sp
+            )
+        }
+    }
+}
+

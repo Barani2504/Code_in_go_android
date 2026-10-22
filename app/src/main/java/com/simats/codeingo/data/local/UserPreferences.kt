@@ -40,6 +40,11 @@ class UserPreferences(private val context: Context) {
         val KEY_ACTIVE_LEVEL_INDEX = intPreferencesKey("home_active_level_index")
         val KEY_LAST_PRACTICED_MS = longPreferencesKey("dsa_last_practiced_timestamp_ms")
         val KEY_LAST_PLAYED_MS = longPreferencesKey("dsa_last_played_date_ms")
+
+        // ── Chapter 0 Basecamp & Diagnostic Placement Keys ─────────
+        val KEY_BASECAMP_COMPLETED_LEVELS = stringSetPreferencesKey("basecamp_completed_levels")
+        val KEY_DIAGNOSTIC_TAKEN = booleanPreferencesKey("diagnostic_taken")
+        val KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER = intPreferencesKey("diagnostic_recommended_chapter")
     }
 
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { it[KEY_IS_LOGGED_IN] ?: false }
@@ -78,6 +83,31 @@ class UserPreferences(private val context: Context) {
     }
     val activeLevelIndex: Flow<Int> = context.dataStore.data.map {
         it[KEY_ACTIVE_LEVEL_INDEX] ?: 1
+    }
+
+    val basecampCompletedLevels: Flow<Set<String>> = context.dataStore.data.map {
+        it[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet()
+    }
+    val diagnosticTaken: Flow<Boolean> = context.dataStore.data.map {
+        it[KEY_DIAGNOSTIC_TAKEN] ?: false
+    }
+    val diagnosticRecommendedChapter: Flow<Int> = context.dataStore.data.map {
+        it[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1
+    }
+
+    suspend fun markBasecampLevelCompleted(levelId: String) {
+        context.dataStore.edit {
+            val current = (it[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet()).toMutableSet()
+            current.add(levelId)
+            it[KEY_BASECAMP_COMPLETED_LEVELS] = current
+        }
+    }
+
+    suspend fun setDiagnosticResult(recommendedChapter: Int) {
+        context.dataStore.edit {
+            it[KEY_DIAGNOSTIC_TAKEN] = true
+            it[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] = recommendedChapter
+        }
     }
 
     suspend fun setLoggedIn(loggedIn: Boolean, name: String = "", email: String = "") {
