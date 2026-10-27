@@ -143,4 +143,24 @@ class ArenaCryptoEngineTest {
         assertEquals(64, ArenaCryptoEngine.groverEffectiveBits(128))
         assertEquals(128, ArenaCryptoEngine.groverEffectiveBits(256))
     }
+
+    @Test
+    fun testAvalanche_standardInput() {
+        val result = ArenaCryptoEngine.computeAvalanche("Hello World")
+        // Avalanche criterion guarantees about 50% of 256 bits flip (typically 100..160 bits)
+        assertTrue("Flipped bits should be between 100 and 160", result.flippedBits in 100..160)
+        assertTrue("Percentage should be between 39% and 63%", result.percentage in 39.0..63.0)
+        assertTrue("Scientific summary should contain exact expected phrase",
+            result.scientificSummary.contains("about 50% of output bits flip on average"))
+    }
+
+    @Test
+    fun testAvalanche_emptyInput() {
+        val result = ArenaCryptoEngine.computeAvalanche("")
+        // Empty string must trigger a simulated 1-bit input flip and NOT return 0%
+        assertTrue("Flipped bits on empty input should not be zero", result.flippedBits > 80)
+        assertTrue("Percentage should reflect avalanche", result.percentage > 30.0)
+        assertTrue("Scientific summary should contain exact expected phrase",
+            result.scientificSummary.contains("about 50% of output bits flip on average"))
+    }
 }

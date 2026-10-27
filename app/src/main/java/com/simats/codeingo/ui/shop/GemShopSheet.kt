@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -615,7 +616,9 @@ fun GemShopSheet(
 
                             // Animated Bird Mascot with sinusoidal idle kinematics
                             Box(
-                                modifier = Modifier.offset(y = birdHoverOffset.dp)
+                                modifier = Modifier.graphicsLayer {
+                                    translationY = birdHoverOffset * density
+                                }
                             ) {
                                 PhoenixAnimatedMascotView(
                                     pose = PhoenixMascotPose.Welcoming,

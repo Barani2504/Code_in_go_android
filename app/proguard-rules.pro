@@ -48,3 +48,8 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+# ── Room Database ───────────────────────────────────────────────────
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+-keep class com.simats.codeingo.data.db.** { *; }

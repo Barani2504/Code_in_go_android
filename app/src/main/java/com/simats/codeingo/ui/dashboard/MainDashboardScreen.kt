@@ -259,28 +259,6 @@ fun MainDashboardScreen(
         }
     }
 
-    // 5-Minute Heart Regeneration Timer
-    var heartTimerRemainingSeconds by remember { mutableIntStateOf(300) }
-    LaunchedEffect(heartsCount) {
-        if (heartsCount < 10) {
-            while (isActive && heartsCount < 10) {
-                delay(1000)
-                if (heartTimerRemainingSeconds > 0) {
-                    heartTimerRemainingSeconds--
-                } else {
-                    gameManager.regenerateHeart()
-                    heartTimerRemainingSeconds = 300
-                }
-            }
-        }
-    }
-
-    val heartTimerStr = if (heartsCount < 10) {
-        val mins = heartTimerRemainingSeconds / 60
-        val secs = heartTimerRemainingSeconds % 60
-        String.format("%02d:%02d", mins, secs)
-    } else null
-
     // Core (1..5) & Expansion (6..10) Chapters from ChapterRegistry
     val masterUnits = remember {
         ChapterRegistry.getCoreUnits() + ChapterRegistry.getExpansionUnits()
@@ -583,7 +561,7 @@ fun MainDashboardScreen(
                                 totalXP = totalXP,
                                 heartsCount = heartsCount,
                                 gemsCount = gemsCount,
-                                heartTimerString = heartTimerStr,
+                                heartTimerString = null,
                                 onMenuClick = { showSideMenu = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onStreakClick = { showStreakSheet = true },
@@ -905,7 +883,7 @@ fun MainDashboardScreen(
             ) {
                 HeartsInfoSheet(
                     heartsCount = heartsCount,
-                    timerString = heartTimerStr,
+                    timerString = null,
                     onRefillHearts = {
                         gameManager.refillHearts()
                         showHeartsSheet = false

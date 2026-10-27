@@ -1,8 +1,10 @@
 package com.simats.codeingo.data.repository
 
+import androidx.compose.runtime.Immutable
 import com.simats.codeingo.data.model.DSAExerciseType
 import java.util.UUID
 
+@Immutable
 data class QuizQuestion(
     val id: String = UUID.randomUUID().toString(),
     val gameType: DSAExerciseType = DSAExerciseType.MULTIPLE_CHOICE,

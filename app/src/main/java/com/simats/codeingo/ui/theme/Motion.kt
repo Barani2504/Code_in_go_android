@@ -52,8 +52,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -218,38 +220,39 @@ object PhoenixMotion {
 /**
  * 3D Press Scale with automatic haptic feedback.
  * Cancel-safe: rapid taps or exit cleanly resets without state bleed.
+ * Optimized: Animates directly in graphicsLayer without triggering composable recompositions.
  */
 fun Modifier.pressScale(
     targetScale: Float = 0.96f,
     onClick: (() -> Unit)? = null
 ): Modifier = composed {
-    var isPressed by remember { mutableStateOf(false) }
     val tier = LocalEffectTier.current
     val reduceMotion = LocalReduceMotion.current || tier != EffectTier.FULL
-
-    val scale by animateFloatAsState(
-        targetValue = when {
-            tier == EffectTier.OFF -> 1.0f
-            isPressed && reduceMotion -> 0.985f
-            isPressed -> targetScale
-            else -> 1.0f
-        },
-        animationSpec = PhoenixMotion.PressSpring,
-        label = "pressScale"
-    )
+    val effectiveTarget = when {
+        tier == EffectTier.OFF -> 1.0f
+        reduceMotion -> 0.985f
+        else -> targetScale
+    }
+    val scaleAnim = remember { Animatable(1.0f) }
+    val coroutineScope = rememberCoroutineScope()
 
     this
         .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
+            scaleX = scaleAnim.value
+            scaleY = scaleAnim.value
         }
-        .pointerInput(tier) {
+        .pointerInput(tier, effectiveTarget) {
             if (tier == EffectTier.OFF) return@pointerInput
             awaitEachGesture {
                 awaitFirstDown(requireUnconsumed = false)
-                isPressed = true
+                val downJob = coroutineScope.launch {
+                    scaleAnim.animateTo(effectiveTarget, PhoenixMotion.PressSpring)
+                }
                 waitForUpOrCancellation()
-                isPressed = false
+                downJob.cancel()
+                coroutineScope.launch {
+                    scaleAnim.animateTo(1.0f, PhoenixMotion.PressSpring)
+                }
             }
         }
 }

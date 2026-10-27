@@ -111,7 +111,7 @@ fun BitFlipLabLevel(
                     )
                 }
                 Text(
-                    text = "Tap any bit in the 8-bit input register below to flip it (0 ↔ 1). Observe how a single flipped bit triggers a 50%+ pseudorandom explosion across the 256-bit SHA digest!",
+                    text = "Tap any bit in the 8-bit input register below to flip it (0 ↔ 1). Observe how a single flipped bit triggers a pseudorandom explosion (about 50% of output bits flip on average) across the 256-bit SHA digest!",
                     fontSize = 12.5.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,

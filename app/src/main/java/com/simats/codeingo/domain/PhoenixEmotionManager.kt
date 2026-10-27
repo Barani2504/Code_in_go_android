@@ -135,6 +135,16 @@ class PhoenixEmotionManager private constructor() {
     private val _isDynamicIconEnabled = MutableStateFlow(true)
     val isDynamicIconEnabled: StateFlow<Boolean> = _isDynamicIconEnabled.asStateFlow()
 
+    private fun safeLog(msg: String) {
+        runCatching { Log.d("PhoenixEmotion", msg) }
+    }
+    private fun safeLogW(msg: String) {
+        runCatching { Log.w("PhoenixEmotion", msg) }
+    }
+    private fun safeLogE(msg: String, tr: Throwable? = null) {
+        runCatching { if (tr != null) Log.e("PhoenixEmotion", msg, tr) else Log.e("PhoenixEmotion", msg) }
+    }
+
     fun setDynamicIconEnabled(enabled: Boolean) {
         _isDynamicIconEnabled.value = enabled
         appContext?.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
@@ -175,7 +185,7 @@ class PhoenixEmotionManager private constructor() {
                 })
             }
         } catch (e: Exception) {
-            Log.w("PhoenixEmotion", "Error restoring saved icon state: ${e.message}")
+            safeLogW("Error restoring saved icon state: ${e.message}")
         }
     }
 
@@ -194,7 +204,7 @@ class PhoenixEmotionManager private constructor() {
                         (alias == "MainActivityAliasDefault" && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
             }
             if (!anyEnabled) {
-                Log.w("PhoenixEmotion", "No launcher alias active on launch! Recovering MainActivityAliasDefault.")
+                safeLogW("No launcher alias active on launch! Recovering MainActivityAliasDefault.")
                 val defaultComp = ComponentName(pkgName, "$pkgName.MainActivityAliasDefault")
                 pm.setComponentEnabledSetting(
                     defaultComp,
@@ -213,7 +223,7 @@ class PhoenixEmotionManager private constructor() {
                 prefs.edit().putString("current_active_alias", active).apply()
             }
         } catch (e: Exception) {
-            Log.w("PhoenixEmotion", "Failed to verify launcher alias integrity on launch: ${e.message}")
+            safeLogW("Failed to verify launcher alias integrity on launch: ${e.message}")
         }
     }
 
@@ -512,7 +522,7 @@ class PhoenixEmotionManager private constructor() {
     fun applySystemAppIcon(named: String?, showToast: Boolean = false) {
         val iconName = named ?: "phoenix_emotion_0"
         _lastAppliedIconName.value = iconName
-        Log.d("PhoenixEmotion", "Requested launcher app icon sync: $iconName (staged for onStop)")
+        safeLog("Requested launcher app icon sync: $iconName (staged for onStop)")
 
         val rawId = when {
             iconName.startsWith("phoenix_emotion_") -> iconName.removePrefix("phoenix_emotion_").toIntOrNull() ?: 0
@@ -567,13 +577,13 @@ class PhoenixEmotionManager private constructor() {
         pendingTargetAlias = null // Immediately consume to rate-limit to once per background transition
 
         if (!_isDynamicIconEnabled.value && targetAlias != "MainActivityAliasDefault") {
-            Log.d("PhoenixEmotion", "Dynamic launcher icon disabled by user setting. Skipping.")
+            safeLog("Dynamic launcher icon disabled by user setting. Skipping.")
             return
         }
 
         val now = System.currentTimeMillis()
         if (now - lastBackgroundSwitchTimestamp < 1500L) {
-            Log.d("PhoenixEmotion", "Rate limiting background alias switch (< 1500ms since last switch)")
+            safeLog("Rate limiting background alias switch (< 1500ms since last switch)")
             return
         }
         lastBackgroundSwitchTimestamp = now
@@ -587,12 +597,12 @@ class PhoenixEmotionManager private constructor() {
             val previousActiveAlias = prefs.getString("current_active_alias", "MainActivityAliasDefault") ?: "MainActivityAliasDefault"
 
             if (previousActiveAlias == targetAlias) {
-                Log.d("PhoenixEmotion", "Target launcher alias $targetAlias is already active. Skipping.")
+                safeLog("Target launcher alias $targetAlias is already active. Skipping.")
                 return@launch
             }
 
             try {
-                Log.d("PhoenixEmotion", "Background alias switch: $previousActiveAlias -> $targetAlias")
+                safeLog("Background alias switch: $previousActiveAlias -> $targetAlias")
 
                 // 1. Enable new target alias FIRST with DONT_KILL_APP
                 pm.setComponentEnabledSetting(
@@ -604,7 +614,7 @@ class PhoenixEmotionManager private constructor() {
                 // 2. Verify target alias is confirmed enabled
                 val verifiedState = pm.getComponentEnabledSetting(targetComponent)
                 if (verifiedState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                    Log.e("PhoenixEmotion", "Failed to verify enabled state for target alias: $targetAlias")
+                    safeLogE("Failed to verify enabled state for target alias: $targetAlias")
                     return@launch
                 }
 
@@ -618,7 +628,7 @@ class PhoenixEmotionManager private constructor() {
                             PackageManager.DONT_KILL_APP
                         )
                     } catch (e: Exception) {
-                        Log.w("PhoenixEmotion", "Failed to disable previous alias $previousActiveAlias: ${e.message}")
+                        safeLogW("Failed to disable previous alias $previousActiveAlias: ${e.message}")
                     }
                 }
 
@@ -631,7 +641,7 @@ class PhoenixEmotionManager private constructor() {
                 }
 
                 if (!anyEnabled) {
-                    Log.e("PhoenixEmotion", "CRITICAL: All aliases disabled! Recovering target alias: $targetAlias")
+                    safeLogE("CRITICAL: All aliases disabled! Recovering target alias: $targetAlias")
                     pm.setComponentEnabledSetting(
                         targetComponent,
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -646,9 +656,9 @@ class PhoenixEmotionManager private constructor() {
                     .putString("active_icon_name", targetAlias)
                     .apply()
 
-                Log.d("PhoenixEmotion", "Successfully switched and persisted launcher app icon: $targetAlias")
+                safeLog("Successfully switched and persisted launcher app icon: $targetAlias")
             } catch (e: Exception) {
-                Log.e("PhoenixEmotion", "Failed to switch launcher app icon: ${e.message}", e)
+                safeLogE("Failed to switch launcher app icon: ${e.message}", e)
                 ensureLauncherAliasIntegrity()
             }
         }

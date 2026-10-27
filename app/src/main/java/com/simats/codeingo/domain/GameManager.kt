@@ -1,6 +1,8 @@
 package com.simats.codeingo.domain
 
 import android.content.Context
+import com.simats.codeingo.data.db.CodeingoDatabase
+import com.simats.codeingo.data.db.MistakeVaultEntity
 import com.simats.codeingo.data.local.UserPreferences
 import com.simats.codeingo.data.model.DSABossSpec
 import com.simats.codeingo.data.model.DSAExerciseItem
@@ -30,6 +32,7 @@ class GameManager private constructor() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var prefs: UserPreferences? = null
+    private var database: CodeingoDatabase? = null
     private var persistJob: Job? = null
 
     private val _isInitialized = MutableStateFlow(false)
@@ -156,6 +159,21 @@ class GameManager private constructor() {
     fun initialize(context: Context) {
         val p = UserPreferences(context)
         prefs = p
+
+        val db = CodeingoDatabase.getDatabase(context)
+        database = db
+
+        // Observe Room mistakes and mirror into reactive state flow
+        scope.launch {
+            db.mistakeVaultDao().getAllMistakesFlow().collect { entities ->
+                if (entities.isNotEmpty()) {
+                    _mistakeVault.value = entities.map { it.toDomain() }
+                } else {
+                    seedDefaultMistakesIntoRoom(db)
+                }
+            }
+        }
+
         scope.launch {
             // Load full immutable GameStateSnapshot in ONE single DataStore pass
             val snapshot = p.gameStateSnapshot.first()
@@ -513,7 +531,25 @@ class GameManager private constructor() {
             correctAnswer = correctAnswer,
             explanation = exercise.explanation
         )
-        _mistakeVault.update { it + mistake }
+        _mistakeVault.update { list ->
+            val existing = list.firstOrNull { it.prompt == mistake.prompt && it.wrongAnswerGiven == mistake.wrongAnswerGiven }
+            if (existing != null) {
+                list.map { if (it.id == existing.id) it.copy(timestamp = System.currentTimeMillis()) else it }
+            } else {
+                listOf(mistake) + list
+            }
+        }
+        database?.let { db ->
+            scope.launch {
+                val existingEntity = db.mistakeVaultDao().findByPromptAndWrongAnswer(mistake.prompt, mistake.wrongAnswerGiven)
+                val attemptCount = (existingEntity?.attemptCount ?: 0) + 1
+                val entity = MistakeVaultEntity.fromDomain(
+                    item = mistake.copy(id = existingEntity?.id ?: mistake.id),
+                    attemptCount = attemptCount
+                )
+                db.mistakeVaultDao().insertOrUpdate(entity)
+            }
+        }
         persistStats()
     }
 
@@ -537,7 +573,25 @@ class GameManager private constructor() {
             misconceptionTag = question.misconceptionTag,
             chapterId = chapterId
         )
-        _mistakeVault.update { it + mistake }
+        _mistakeVault.update { list ->
+            val existing = list.firstOrNull { it.prompt == mistake.prompt && it.wrongAnswerGiven == mistake.wrongAnswerGiven }
+            if (existing != null) {
+                list.map { if (it.id == existing.id) it.copy(timestamp = System.currentTimeMillis()) else it }
+            } else {
+                listOf(mistake) + list
+            }
+        }
+        database?.let { db ->
+            scope.launch {
+                val existingEntity = db.mistakeVaultDao().findByPromptAndWrongAnswer(mistake.prompt, mistake.wrongAnswerGiven)
+                val attemptCount = (existingEntity?.attemptCount ?: 0) + 1
+                val entity = MistakeVaultEntity.fromDomain(
+                    item = mistake.copy(id = existingEntity?.id ?: mistake.id),
+                    attemptCount = attemptCount
+                )
+                db.mistakeVaultDao().insertOrUpdate(entity)
+            }
+        }
         persistStats()
     }
 
@@ -646,6 +700,11 @@ class GameManager private constructor() {
             }
         }
         if (found) {
+            database?.let { db ->
+                scope.launch {
+                    db.mistakeVaultDao().markRepaired(id)
+                }
+            }
             _totalXP.update { it + 10 }
             _gemsCount.update { it + 5 }
             persistStats()
@@ -721,6 +780,28 @@ class GameManager private constructor() {
                 isClaimed = false
             )
         )
+    }
+
+    private suspend fun seedDefaultMistakesIntoRoom(db: CodeingoDatabase) {
+        val seedEntities = listOf(
+            MistakeVaultEntity(
+                id = "seed_1",
+                prompt = "What is the worst-case search time in an unsorted array of size n?",
+                conceptId = "array_search",
+                wrongAnswerGiven = "O(log n)",
+                correctAnswer = "O(n)",
+                explanation = "Unsorted arrays must check every element from beginning to end in the worst case."
+            ),
+            MistakeVaultEntity(
+                id = "seed_2",
+                prompt = "In a linked list insertion at head, which pointer assignment must happen FIRST?",
+                conceptId = "pointer_order",
+                wrongAnswerGiven = "head = newNode",
+                correctAnswer = "newNode.next = head",
+                explanation = "If head is updated first, you lose reference to the rest of the list!"
+            )
+        )
+        db.mistakeVaultDao().insertAll(seedEntities)
     }
 
     private fun loadDefaultMistakes() {

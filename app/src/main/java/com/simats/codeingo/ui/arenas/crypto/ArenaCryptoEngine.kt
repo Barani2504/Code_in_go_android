@@ -157,13 +157,11 @@ object ArenaCryptoEngine {
      * Guaranteed strictly educational message: "about 50% of output bits flip on average"
      */
     fun computeAvalanche(originalText: String): AvalancheResult {
-        val originalBytes = originalText.toByteArray(Charsets.UTF_8)
+        val originalBytes = if (originalText.isEmpty()) byteArrayOf(0x00) else originalText.toByteArray(Charsets.UTF_8)
         val flippedBytes = originalBytes.clone()
-        if (flippedBytes.isNotEmpty()) {
-            flippedBytes[0] = (flippedBytes[0].toInt() xor 0x01).toByte()
-        }
+        flippedBytes[0] = (flippedBytes[0].toInt() xor 0x01).toByte()
 
-        val hash1 = sha256(originalBytes)
+        val hash1 = sha256(if (originalText.isEmpty()) byteArrayOf() else originalBytes)
         val hash2 = sha256(flippedBytes)
         val flippedBits = hammingBitDistance(hash1, hash2)
         val totalBits = 256

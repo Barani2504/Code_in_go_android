@@ -29,7 +29,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import com.simats.codeingo.ui.phoenix.PhoenixDynamicLogoView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
@@ -233,42 +239,80 @@ fun TopStatsHeader(
                 }
 
                 // 6. Hearts Pill (with countdown if regenerating & pulse if low)
-                val isHeartLow = heartsCount <= 3
-                Row(
-                    modifier = Modifier
-                        .pressScale(0.92f)
-                        .then(if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
-                        .clip(CircleShape)
-                        .background(pillBg)
-                        .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
-                        .clickable { onHeartsClick() }
-                        .padding(horizontal = 7.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    Text(text = "❤️", fontSize = 12.sp)
-                    AnimatedContent(
-                        targetState = heartsCount,
-                        transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
-                        label = "heartsAnim"
-                    ) { count ->
-                        Text(
-                            text = "$count",
-                            fontSize = 11.5.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFFFF4D4D)
-                        )
-                    }
-                    if (heartTimerString != null) {
-                        Text(
-                            text = heartTimerString,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040)
-                        )
-                    }
+                HeartPill(
+                    heartsCount = heartsCount,
+                    heartTimerString = heartTimerString,
+                    isDark = isDark,
+                    pillBg = pillBg,
+                    onHeartsClick = onHeartsClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeartPill(
+    heartsCount: Int,
+    heartTimerString: String?,
+    isDark: Boolean,
+    pillBg: Color,
+    onHeartsClick: () -> Unit
+) {
+    var timerRemainingSeconds by remember { mutableIntStateOf(300) }
+    LaunchedEffect(heartsCount) {
+        if (heartsCount < 10 && heartTimerString == null) {
+            while (isActive && heartsCount < 10) {
+                delay(1000)
+                if (timerRemainingSeconds > 0) {
+                    timerRemainingSeconds--
+                } else {
+                    com.simats.codeingo.domain.GameManager.instance.regenerateHeart()
+                    timerRemainingSeconds = 300
                 }
             }
+        }
+    }
+
+    val displayTimer = heartTimerString ?: if (heartsCount < 10) {
+        val mins = timerRemainingSeconds / 60
+        val secs = timerRemainingSeconds % 60
+        String.format("%02d:%02d", mins, secs)
+    } else null
+
+    val isHeartLow = heartsCount <= 3
+    Row(
+        modifier = Modifier
+            .pressScale(0.92f)
+            .then(if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
+            .clip(CircleShape)
+            .background(pillBg)
+            .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
+            .clickable { onHeartsClick() }
+            .padding(horizontal = 7.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Text(text = "❤️", fontSize = 12.sp)
+        AnimatedContent(
+            targetState = heartsCount,
+            transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
+            label = "heartsAnim"
+        ) { count ->
+            Text(
+                text = "$count",
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Black,
+                color = Color(0xFFFF4D4D)
+            )
+        }
+        if (displayTimer != null) {
+            Text(
+                text = displayTimer,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040)
+            )
         }
     }
 }
