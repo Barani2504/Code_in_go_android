@@ -1,9 +1,10 @@
 package com.simats.codeingo.ui.phoenix
 
-import android.os.Build
+import android.graphics.drawable.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -12,15 +13,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
+import coil.imageLoader
 import coil.request.ImageRequest
+import coil.size.Precision
 import com.simats.codeingo.R
+import com.simats.codeingo.ui.theme.EffectTier
+import com.simats.codeingo.ui.theme.LocalEffectTier
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -55,7 +60,7 @@ val FlyFlapFrames = intArrayOf(
  * - Priority 1A: 24-frame PNG sequence for `phoenix_flying_nodes` (100% transparent 3D model, zero background)
  * - Priority 1B: 24-frame PNG sequence for `phoenix_waving` (100% transparent, zero background)
  * - Priority 1C: 16-frame PNG sequence for `phoenix_flying`
- * - Fallback: Coil animated GIF decoder for R.raw assets
+ * - Fallback: Coil animated GIF decoder for R.raw assets using Application ImageLoader
  */
 @Composable
 fun AnimatedGIFView(
@@ -66,6 +71,9 @@ fun AnimatedGIFView(
     durationSeconds: Double? = null
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
+    val tier = LocalEffectTier.current
+    val reduceMotion = LocalReduceMotion.current || tier == EffectTier.OFF
     val cleanName = resourceName.removeSuffix(".gif")
 
     val isFlyingNodes = cleanName == "phoenix_flying_nodes" ||
@@ -98,7 +106,11 @@ fun AnimatedGIFView(
         val frameDelayMs = maxOf(16L, (effectiveDurationMs / frameResources.size).toLong())
 
         var currentFrameIndex by remember { mutableIntStateOf(0) }
-        LaunchedEffect(speed, durationSeconds, frameResources) {
+        LaunchedEffect(speed, durationSeconds, frameResources, reduceMotion) {
+            if (reduceMotion) {
+                currentFrameIndex = 0
+                return@LaunchedEffect
+            }
             while (isActive) {
                 delay(frameDelayMs)
                 currentFrameIndex = (currentFrameIndex + 1) % frameResources.size
@@ -114,7 +126,7 @@ fun AnimatedGIFView(
         return
     }
 
-    // Fallback: Coil Animated GIF rendering from raw resources
+    // Fallback: Coil Animated GIF rendering from raw resources via Application-level ImageLoader
     val gifResId = when (cleanName) {
         "phoenix_flying_nodes" -> R.raw.phoenix_flying_nodes
         "phoenix_waving", "phoenix-waving" -> R.raw.phoenix_waving
@@ -127,25 +139,35 @@ fun AnimatedGIFView(
         else -> R.raw.phoenix_stage_1
     }
 
-    val imageLoader = remember(context) {
-        ImageLoader.Builder(context)
-            .components {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(ImageDecoderDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
-            }
-            .build()
+    val pxSize = remember(density, size) {
+        with(density) { size.roundToPx() }
     }
+
+    // Reuse application-level ImageLoader from CodeingoApp (never build a local instance)
+    val imageLoader = context.imageLoader
 
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context)
             .data(gifResId)
+            .size(pxSize, pxSize)
+            .precision(Precision.INEXACT)
             .crossfade(false)
             .build(),
         imageLoader = imageLoader
     )
+
+    // Pause animation when off-screen or when reduce motion is active
+    DisposableEffect(painter.state, reduceMotion) {
+        val animatable = (painter.state as? AsyncImagePainter.State.Success)?.result?.drawable as? Animatable
+        if (reduceMotion) {
+            animatable?.stop()
+        } else {
+            animatable?.start()
+        }
+        onDispose {
+            animatable?.stop()
+        }
+    }
 
     Image(
         painter = painter,

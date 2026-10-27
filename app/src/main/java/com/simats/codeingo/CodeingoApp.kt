@@ -50,6 +50,19 @@ class CodeingoApp : Application(), ImageLoaderFactory {
                     add(GifDecoder.Factory())
                 }
             }
+            .memoryCache {
+                coil.memory.MemoryCache.Builder(this)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                coil.disk.DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(50L * 1024 * 1024) // 50 MB disk cache limit
+                    .build()
+            }
+            .respectCacheHeaders(false)
+            .allowHardware(true)
             .build()
     }
 }
