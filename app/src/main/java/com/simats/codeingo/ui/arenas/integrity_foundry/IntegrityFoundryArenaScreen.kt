@@ -3,7 +3,6 @@ package com.simats.codeingo.ui.arenas.integrity_foundry
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +52,12 @@ import com.simats.codeingo.ui.arenas.common.ArenaComboHUD
 import com.simats.codeingo.ui.arenas.common.ArenaDebriefView
 import com.simats.codeingo.ui.arenas.common.ArenaGameSpeed
 import com.simats.codeingo.ui.arenas.common.ArenaLoadoutSheet
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaParticleBurst
+import com.simats.codeingo.ui.arenas.common.ArenaShockwaveEffect
 import com.simats.codeingo.ui.arenas.common.ArenaTacticalTool
+import com.simats.codeingo.ui.arenas.common.arenaShake
+import com.simats.codeingo.ui.arenas.common.rememberArenaShakeController
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.BirthdayRadarLevel
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.BitFlipLabLevel
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.CollisionBeastBossLevel
@@ -61,7 +65,6 @@ import com.simats.codeingo.ui.arenas.integrity_foundry.levels.DigestPressLevel
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.SignatureSealLevel
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.SpongeChamberLevel
 import com.simats.codeingo.ui.arenas.integrity_foundry.levels.WaxSealLevel
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.LocalReduceMotion
@@ -75,6 +78,14 @@ fun IntegrityFoundryArenaScreen(
     val gameManager = GameManager.instance
     val dynamicColors = LocalDynamicThemeColors.current
     val reduceMotion = LocalReduceMotion.current
+
+    val primary = ArenaPalettes.Arena4Primary
+    val accent = ArenaPalettes.Arena4Accent
+
+    // Screen Shake & Motion State
+    val shakeController = rememberArenaShakeController()
+    var shockwaveTrigger by remember { mutableStateOf<Any?>(null) }
+    var particleTrigger by remember { mutableStateOf<Any?>(null) }
 
     // Hearts economy strictly observes GameManager (Max 10)
     val heartsCount by gameManager.heartsCount.collectAsState()
@@ -111,6 +122,7 @@ fun IntegrityFoundryArenaScreen(
         } else {
             gameManager.loseHeart()
             comboCount = 0
+            shakeController.shake()
             if (heartsCount <= 1) {
                 debriefIsVictory = false
                 showDebrief = true
@@ -138,6 +150,9 @@ fun IntegrityFoundryArenaScreen(
         gameManager.addXP(lvl.xpReward)
         gameManager.addGems(lvl.coinReward)
 
+        particleTrigger = System.currentTimeMillis()
+        shockwaveTrigger = System.currentTimeMillis()
+
         debriefIsVictory = true
         showDebrief = true
     }
@@ -147,10 +162,12 @@ fun IntegrityFoundryArenaScreen(
             .fillMaxSize()
             .statusBarsPadding()
     ) {
-        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = Color(0xFF00B894))
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = primary)
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .arenaShake(shakeController)
         ) {
             Column(
                 modifier = Modifier
@@ -159,205 +176,205 @@ fun IntegrityFoundryArenaScreen(
                     .padding(horizontal = 12.dp, vertical = 2.dp)
             ) {
                 // Top HUD Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Exit",
-                            tint = dynamicColors.textPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Column {
-                        Text(
-                            text = "INTEGRITY FOUNDRY",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black,
-                            color = dynamicColors.textPrimary,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = currentLevel.title,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AmberGold
-                        )
-                    }
-                }
-
-                // Economy Badges
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Tactical Tool Icon
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                equippedTool?.accentColor?.copy(alpha = 0.15f)
-                                    ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
-                            )
-                            .border(
-                                1.dp,
-                                equippedTool?.accentColor ?: dynamicColors.cardBorder,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clickable { showLoadoutSheet = true }
-                            .padding(horizontal = 7.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
+                        ) {
                             Icon(
-                                imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
-                                contentDescription = "Tool",
-                                tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
-                                modifier = Modifier.size(13.dp)
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Exit",
+                                tint = dynamicColors.textPrimary,
+                                modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column {
                             Text(
-                                text = if (toolUsedInLevel) "USED" else "READY",
-                                fontSize = 9.sp,
+                                text = "INTEGRITY FOUNDRY",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = dynamicColors.textPrimary,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = currentLevel.title,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                color = primary
                             )
                         }
                     }
 
-                    // Hearts HUD
+                    // Economy Badges
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(DuolingoRed.copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Hearts",
-                            tint = DuolingoRed,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$heartsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = DuolingoRed
-                        )
-                    }
+                        // Tactical Tool Icon
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    equippedTool?.accentColor?.copy(alpha = 0.15f)
+                                        ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
+                                )
+                                .border(
+                                    1.dp,
+                                    equippedTool?.accentColor ?: dynamicColors.cardBorder,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { showLoadoutSheet = true }
+                                .padding(horizontal = 7.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
+                                    contentDescription = "Tool",
+                                    tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = if (toolUsedInLevel) "USED" else "READY",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                )
+                            }
+                        }
 
-                    // Gems HUD
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Diamond,
-                            contentDescription = "Gems",
-                            tint = Color(0xFF00C3FF),
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$gemsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFF00C3FF)
-                        )
-                    }
+                        // Hearts HUD
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(DuolingoRed.copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Hearts",
+                                tint = DuolingoRed,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$heartsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = DuolingoRed
+                            )
+                        }
 
-                    // Codex Button
-                    IconButton(
-                        onClick = { showTheoryCodex = true },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Theory",
-                            tint = dynamicColors.textSecondary,
-                            modifier = Modifier.size(18.dp)
+                        // Gems HUD
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Diamond,
+                                contentDescription = "Gems",
+                                tint = Color(0xFF00C3FF),
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$gemsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFF00C3FF)
+                            )
+                        }
+
+                        // Codex Button
+                        IconButton(
+                            onClick = { showTheoryCodex = true },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.HelpOutline,
+                                contentDescription = "Theory",
+                                tint = dynamicColors.textSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Enhanced Cyber Level Selector Ribbon
+                val foundryStations = remember {
+                    IntegrityFoundryLevel.values().map { lvl ->
+                        com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                            id = lvl.id,
+                            title = lvl.title,
+                            shortName = when (lvl.id) {
+                                1 -> "Digest"
+                                2 -> "Avalanche"
+                                3 -> "Sponge"
+                                4 -> "HMAC"
+                                5 -> "Signature"
+                                6 -> "Birthday"
+                                else -> "Collision"
+                            },
+                            iconEmoji = lvl.iconEmoji,
+                            isBoss = lvl == IntegrityFoundryLevel.BOSS_BATTLE
                         )
                     }
                 }
-            }
 
-            // Enhanced Cyber Level Selector Ribbon
-            val foundryStations = remember {
-                IntegrityFoundryLevel.values().map { lvl ->
-                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
-                        id = lvl.id,
-                        title = lvl.title,
-                        shortName = when (lvl.id) {
-                            1 -> "Digest"
-                            2 -> "Avalanche"
-                            3 -> "Sponge"
-                            4 -> "Merkle"
-                            5 -> "HMAC"
-                            6 -> "Birthday"
-                            else -> "Collision"
-                        },
-                        iconEmoji = lvl.iconEmoji,
-                        isBoss = lvl == IntegrityFoundryLevel.BOSS_BATTLE
-                    )
-                }
-            }
+                com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                    stations = foundryStations,
+                    currentLevelId = currentLevel.id,
+                    unlockedLevels = unlockedLevels,
+                    levelStars = levelStars,
+                    accentColor = primary,
+                    onSelectLevel = { id ->
+                        currentLevel = IntegrityFoundryLevel.fromId(id)
+                    }
+                )
 
-            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
-                stations = foundryStations,
-                currentLevelId = currentLevel.id,
-                unlockedLevels = unlockedLevels,
-                levelStars = levelStars,
-                accentColor = Color(0xFF00B894),
-                onSelectLevel = { id ->
-                    currentLevel = IntegrityFoundryLevel.fromId(id)
-                }
-            )
+                // Combo & Tactical HUD
+                ArenaComboHUD(
+                    comboCount = comboCount,
+                    score = score,
+                    equippedTool = equippedTool,
+                    toolUsed = toolUsedInLevel,
+                    onActivateTool = {
+                        toolUsedInLevel = true
+                    },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
 
-            // Combo & Tactical HUD
-            ArenaComboHUD(
-                comboCount = comboCount,
-                score = score,
-                equippedTool = equippedTool,
-                toolUsed = toolUsedInLevel,
-                onActivateTool = {
-                    toolUsedInLevel = true
-                },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Main Level Canvas
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(dynamicColors.cardBackground)
-                    .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                when (currentLevel) {
+                // Main Level Canvas
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(dynamicColors.cardBackground)
+                        .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    when (currentLevel) {
                         IntegrityFoundryLevel.LEVEL_1 -> DigestPressLevel(
                             onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_1) },
                             onDeductHeart = { onDeductHeart() },
@@ -370,6 +387,7 @@ fun IntegrityFoundryArenaScreen(
                         )
                         IntegrityFoundryLevel.LEVEL_3 -> SpongeChamberLevel(
                             onComplete = { handleLevelCompleted(IntegrityFoundryLevel.LEVEL_3) },
+                            onDeductHeart = { onDeductHeart() },
                             onActionSuccess = { onActionSuccess(180) }
                         )
                         IntegrityFoundryLevel.LEVEL_4 -> WaxSealLevel(
@@ -390,10 +408,12 @@ fun IntegrityFoundryArenaScreen(
                         IntegrityFoundryLevel.BOSS_BATTLE -> CollisionBeastBossLevel(
                             onDefeatBoss = { handleLevelCompleted(IntegrityFoundryLevel.BOSS_BATTLE) },
                             onDeductHeart = { onDeductHeart() },
-                            onActionSuccess = { onActionSuccess(300) }
+                            onActionSuccess = { onActionSuccess(300) },
+                            onTriggerShake = { shakeController.shake() },
+                            onTriggerShockwave = { shockwaveTrigger = System.currentTimeMillis() }
                         )
                     }
-            }
+                }
 
             } // Close inner weighted column
 
@@ -412,25 +432,32 @@ fun IntegrityFoundryArenaScreen(
             )
         }
 
+        // Motion FX Overlays
+        ArenaShockwaveEffect(trigger = shockwaveTrigger, color = primary)
+        ArenaParticleBurst(
+            trigger = particleTrigger,
+            colors = listOf(primary, accent, Color.White)
+        )
+
         // Cinematic Briefing Overlay
         if (showBriefing) {
             val objective = when (currentLevel) {
-                IntegrityFoundryLevel.LEVEL_1 -> "Compress arbitrary message streams into irreversible, fixed-size 256-bit digests via Merkle-Damgård padding."
-                IntegrityFoundryLevel.LEVEL_2 -> "Observe the strict avalanche criterion: verify that altering 1 input bit alters approximately 50% of the output hash."
-                IntegrityFoundryLevel.LEVEL_3 -> "Operate the SHA-3 Keccak sponge construction: absorb message bits into the rate r and squeeze out the digest."
-                IntegrityFoundryLevel.LEVEL_4 -> "Validate hierarchical integrity using Merkle tree root hashes over cryptographic leaf blocks."
-                IntegrityFoundryLevel.LEVEL_5 -> "Calculate the square-root collision search boundary: 2^(n/2) for n-bit hash functions via the Birthday Paradox."
-                IntegrityFoundryLevel.LEVEL_6 -> "Construct keyed-hash message authentication codes (HMAC) using inner/outer pads to defeat length extension attacks."
-                IntegrityFoundryLevel.BOSS_BATTLE -> "Confront the Collision Beast! Defend certificate digests from birthday collision attacks and length extensions!"
+                IntegrityFoundryLevel.LEVEL_1 -> "Assemble 512-bit message blocks with 0x80 delimiter, zero padding, and 64-bit length trailer before crushing."
+                IntegrityFoundryLevel.LEVEL_2 -> "Validate the Strict Avalanche Criterion (SAC): a 1-bit input flip must invert ~50% of the 256 output bits."
+                IntegrityFoundryLevel.LEVEL_3 -> "Master the SHA-3 Keccak-f[1600] permutation sponge across Rate (r=1088b) and Capacity (c=512b) lanes."
+                IntegrityFoundryLevel.LEVEL_4 -> "Synthesize the RFC 2104 HMAC wax seal with inner pad (0x36) and outer pad (0x5C) to defeat length extension."
+                IntegrityFoundryLevel.LEVEL_5 -> "Execute asymmetric digital signatures: sign digest h with private key d, verify with public key e."
+                IntegrityFoundryLevel.LEVEL_6 -> "Analyze the Birthday Paradox square-root collision barrier: finding collisions takes O(2^(n/2)) work."
+                IntegrityFoundryLevel.BOSS_BATTLE -> "Defend against the Collision Beast! Preserve Merkle tree roots, collision resistance, and HMAC envelopes!"
             }
             val mechanic = when (currentLevel) {
-                IntegrityFoundryLevel.LEVEL_1 -> "Identify the standard block chunk processing size for SHA-256."
-                IntegrityFoundryLevel.LEVEL_2 -> "Flip 1 bit in the input message and confirm the avalanche cascade."
-                IntegrityFoundryLevel.LEVEL_3 -> "Advance through Keccak absorb, 24-round permutation, and squeeze stages."
-                IntegrityFoundryLevel.LEVEL_4 -> "Verify the root hash commitment from child node hashes."
-                IntegrityFoundryLevel.LEVEL_5 -> "Determine the birthday bound trial space for a 256-bit digest."
-                IntegrityFoundryLevel.LEVEL_6 -> "Select the cryptographic vulnerability eliminated by HMAC nested padding."
-                IntegrityFoundryLevel.BOSS_BATTLE -> "Answer collision resistance bounds across 3 defensive boss phases."
+                IntegrityFoundryLevel.LEVEL_1 -> "Assemble the delimiter and length trailer correctly."
+                IntegrityFoundryLevel.LEVEL_2 -> "Flip input bits and observe the live Hamming distance meter."
+                IntegrityFoundryLevel.LEVEL_3 -> "Absorb message chunks into rate lanes and squeeze the digest."
+                IntegrityFoundryLevel.LEVEL_4 -> "Execute the 4-stage RFC 2104 inner and outer pad sequence."
+                IntegrityFoundryLevel.LEVEL_5 -> "Sign the message digest with private key d and verify with e."
+                IntegrityFoundryLevel.LEVEL_6 -> "Select appropriate digest bit sizes to maintain 128-bit collision resistance."
+                IntegrityFoundryLevel.BOSS_BATTLE -> "Neutralize 3 collision and tamper phases to vanquish the Beast."
             }
 
             ArenaBriefingView(
@@ -446,18 +473,18 @@ fun IntegrityFoundryArenaScreen(
         // Post-Game Debrief View
         if (showDebrief) {
             val concepts = when (currentLevel) {
-                IntegrityFoundryLevel.LEVEL_1 -> listOf("Merkle-Damgård Construction", "512-bit Block Padding", "SHA-256 Compression")
-                IntegrityFoundryLevel.LEVEL_2 -> listOf("Strict Avalanche Criterion", "One-Way Pre-image Resistance", "Diffusion in Hashes")
-                IntegrityFoundryLevel.LEVEL_3 -> listOf("Keccak Sponge Construction", "Rate (r) and Capacity (c)", "Keccak-f[1600] Permutation")
-                IntegrityFoundryLevel.LEVEL_4 -> listOf("Merkle Trees", "Hierarchical Digest Authentication", "Cryptographic Accumulators")
-                IntegrityFoundryLevel.LEVEL_5 -> listOf("Birthday Paradox Collision Bound: 2^(n/2)", "Collision vs Pre-image Resistance")
-                IntegrityFoundryLevel.LEVEL_6 -> listOf("HMAC Construction", "ipad (0x36) & opad (0x5C)", "Length Extension Attack Defense")
-                IntegrityFoundryLevel.BOSS_BATTLE -> listOf("Full Digest Integrity", "Collision Beast Defeated", "Mastered Hash Foundations")
+                IntegrityFoundryLevel.LEVEL_1 -> listOf("Merkle-Damgård Structure", "512-bit Block Padding", "Davies-Meyer Compression")
+                IntegrityFoundryLevel.LEVEL_2 -> listOf("Strict Avalanche Criterion (SAC)", "Hamming Bit Distance", "Diffusion")
+                IntegrityFoundryLevel.LEVEL_3 -> listOf("Keccak Sponge Construction", "Rate vs Capacity", "State Cube Permutation")
+                IntegrityFoundryLevel.LEVEL_4 -> listOf("RFC 2104 HMAC", "Inner & Outer Pads (0x36 / 0x5C)", "Length Extension Immunity")
+                IntegrityFoundryLevel.LEVEL_5 -> listOf("Hash-Then-Sign Paradigm", "Asymmetric Signatures", "Non-Repudiation")
+                IntegrityFoundryLevel.LEVEL_6 -> listOf("Birthday Paradox", "O(2^(n/2)) Collision Complexity", "Preimage vs Collision")
+                IntegrityFoundryLevel.BOSS_BATTLE -> listOf("Merkle Tree Cascading Integrity", "Collision Defense", "Keyed Hash Envelopes")
             }
             val pitfalls = if (!debriefIsVictory) listOf(
-                "Never use plain H(K || M) with Merkle-Damgård hashes; use HMAC to avoid length extension attacks.",
-                "MD5 and SHA-1 have broken collision resistance and must not be used for digital certificates.",
-                "Collision resistance requires 2^(n/2) work, whereas pre-image resistance requires 2^n work."
+                "Plain H(Key ∥ Message) is vulnerable to Merkle-Damgård length extension; always use HMAC.",
+                "Birthday collisions require only O(2^(n/2)) hash operations; 128-bit hashes offer only 64 bits of collision resistance.",
+                "Digital signatures must always be generated with the private key and verified with the public key."
             ) else emptyList()
 
             ArenaDebriefView(
@@ -519,10 +546,10 @@ fun IntegrityFoundryArenaScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "THEORY CODEX • HASH & INTEGRITY",
+                            text = "THEORY CODEX • CRYPTOGRAPHIC INTEGRITY",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
-                            color = AmberGold
+                            color = primary
                         )
                         IconButton(onClick = { showTheoryCodex = false }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = dynamicColors.textSecondary)
@@ -532,16 +559,12 @@ fun IntegrityFoundryArenaScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Cryptographic Hash Functions & Integrity\n\n" +
-                                "A cryptographic hash function H maps arbitrary-length inputs to fixed-length outputs satisfying:\n" +
-                                "1. Pre-image Resistance: Given y, it is computationally infeasible to find x such that H(x) = y (2^n work).\n" +
-                                "2. Second Pre-image Resistance: Given x, it is infeasible to find x' ≠ x such that H(x) = H(x') (2^n work).\n" +
-                                "3. Collision Resistance: Infeasible to find any pair (x, x') such that H(x) = H(x') (2^(n/2) work via Birthday Paradox).\n\n" +
-                                "HMAC (Keyed-Hash Message Authentication Code):\n" +
-                                "HMAC(K, M) = H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ M))\n" +
-                                "where ipad = 0x36 repeated and opad = 0x5C repeated. This inner/outer nested hashing structurally prevents length extension attacks that plague Merkle-Damgård hash functions.\n\n" +
-                                "Keccak / SHA-3 Sponge Construction:\n" +
-                                "Replaces Merkle-Damgård with an absorb-squeeze state machine over a 1600-bit permutation state (rate r + capacity c), providing inherent resistance against length extension without needing HMAC.",
+                        text = "Cryptographic Hashes & Integrity Primitives\n\n" +
+                                "1. Merkle-Damgård Construction: Iterative hash design (MD5, SHA-1, SHA-2). Pads inputs to multiples of 512 bits with a trailing 64-bit length integer. Vulnerable to length extension when keyed naively.\n\n" +
+                                "2. Keccak Sponge Construction (SHA-3): State width b = r + c (1600 bits). Message bits are XORed into rate r; capacity c provides security margin. Squeezes output exclusively from rate lanes, completely immune to length extension.\n\n" +
+                                "3. HMAC (RFC 2104): Keyed message authentication code using nested hashing: H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ M)). Defeats length extension attacks and provides proof of authenticity and integrity.\n\n" +
+                                "4. Digital Signatures: Hash-then-sign paradigm. Signer creates signature s = hᵈ mod n using private key d; verifier computes sᵉ mod n using public key e. Provides authenticity and non-repudiation.\n\n" +
+                                "5. Birthday Paradox: Collisions H(m₁) = H(m₂) require only O(2^(n/2)) trials with 50% probability. A 256-bit hash provides 128 bits of collision resistance.",
                         fontSize = 13.sp,
                         color = dynamicColors.textPrimary,
                         lineHeight = 18.sp

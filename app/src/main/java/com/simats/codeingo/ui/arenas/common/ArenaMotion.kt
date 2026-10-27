@@ -65,10 +65,14 @@ object ArenaPalettes {
     // Arena 1: Cipher Sanctum — Ancient Papyrus & Amber Gold
     val Arena1Primary = Color(0xFFFFC800)
     val Arena1Accent = Color(0xFFD97706)
+    val Arena1BackgroundDark = Color(0xFF181203)
+    val Arena1CardDark = Color(0xFF261D07)
 
     // Arena 2: Block Cipher Forge — Industrial Magma & Crimson Red
     val Arena2Primary = Color(0xFFF02D4B)
     val Arena2Accent = Color(0xFFFF6D00)
+    val Arena2BackgroundDark = Color(0xFF1E0508)
+    val Arena2CardDark = Color(0xFF300B10)
 
     // Arena 3: Key Exchange Citadel — Celestial Sapphire & Royal Gold
     val Arena3Primary = Color(0xFF3B82F6) // Celestial Sapphire
@@ -79,10 +83,14 @@ object ArenaPalettes {
     // Arena 4: Integrity Foundry — Neon Amethyst & Deep Violet
     val Arena4Primary = Color(0xFFB946FA)
     val Arena4Accent = Color(0xFF9333EA)
+    val Arena4BackgroundDark = Color(0xFF140624)
+    val Arena4CardDark = Color(0xFF220C3A)
 
     // Arena 5: Cyber Bastion — Matrix Cyber Emerald & Terminal Cyan
     val Arena5Primary = Color(0xFF10B981)
     val Arena5Accent = Color(0xFF06B6D4)
+    val Arena5BackgroundDark = Color(0xFF041812)
+    val Arena5CardDark = Color(0xFF092920)
 }
 
 // ══════════════════════════════════════════════════════════════════

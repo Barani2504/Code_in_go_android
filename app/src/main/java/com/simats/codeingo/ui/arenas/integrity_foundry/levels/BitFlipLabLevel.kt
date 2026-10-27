@@ -31,18 +31,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
 import com.simats.codeingo.ui.components.Tactile3DButton
 import com.simats.codeingo.ui.components.Tactile3DButtonColor
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 import java.security.MessageDigest
 
 @Composable
@@ -54,8 +61,13 @@ fun BitFlipLabLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
 
-    // 8-bit interactive input register
+    val primary = ArenaPalettes.Arena4Primary
+    val accent = ArenaPalettes.Arena4Accent
+
+    // 8-bit interactive register
     val bits = remember { mutableStateListOf(0, 1, 1, 0, 0, 0, 1, 1) }
     var flipCount by remember { mutableIntStateOf(0) }
 
@@ -72,7 +84,7 @@ fun BitFlipLabLevel(
         currentDigest.joinToString("") { "%02x".format(it) }
     }
 
-    // Live Hamming distance between pre-flip digest and post-flip digest
+    // Live Hamming distance between pre-flip and post-flip digest
     val hammingDistance = remember(previousDigest, currentDigest) {
         if (previousDigest != null) {
             ArenaCryptoEngine.hammingBitDistance(previousDigest!!, currentDigest)
@@ -87,58 +99,73 @@ fun BitFlipLabLevel(
         0f
     }
 
+    val isTargetReached = flipCount >= 3 && avalanchePercentage >= 35f
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Mission Briefing
+        // Mission Briefing & Status Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(if (isDark) Color(0xFF10192A) else dynamicColors.cardBackground)
-                .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena4CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
                 .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ElectricBolt,
-                        contentDescription = null,
-                        tint = AmberGold,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "STRICT AVALANCHE HAMMING RADAR",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ElectricBolt,
+                            contentDescription = null,
+                            tint = primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "STRICT AVALANCHE RADAR",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = primary
+                        )
+                    }
+
+                    ArenaStatusBadge(
+                        type = if (isTargetReached) ArenaBadgeType.SUCCESS else ArenaBadgeType.INFO,
+                        label = if (isTargetReached) "SAC SATISFIED ✓" else "FLIPS: $flipCount / 3"
                     )
                 }
+
                 Text(
-                    text = "Strict Avalanche Criterion (SAC): Flipping any single input bit must cause each output bit to flip with probability 0.5 (about 50% on average). Observe the Hamming distance between H(M) and H(M')!",
-                    fontSize = 12.5.sp,
+                    text = "Strict Avalanche Criterion (SAC): In SHA-256, changing a single bit in the input causes approximately 50% (~128 of 256) of output bits to invert pseudo-randomly. Tap bits to observe live Hamming bit distance!",
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
 
-        // 8-Bit Interactive Register (48dp+ touch target)
+        // 8-Bit Interactive Register (Enforced 48dp+ touch target per bit)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(0.95f)
         ) {
             Text(
-                text = "INTERACTIVE 8-BIT REGISTER (TAP ANY BIT TO FLIP):",
+                text = "INTERACTIVE 8-BIT INPUT REGISTER (TAP ANY BIT):",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.Monospace,
@@ -155,21 +182,24 @@ fun BitFlipLabLevel(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(50.dp)
+                            .minTouchTarget48()
+                            .height(52.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isOne) AmberGold.copy(alpha = 0.25f)
-                                else if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9)
+                                if (isOne) primary.copy(alpha = 0.3f)
+                                else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
                             )
                             .border(
                                 1.5.dp,
-                                if (isOne) AmberGold else dynamicColors.cardBorder,
+                                if (isOne) primary else Color.Transparent,
                                 RoundedCornerShape(10.dp)
                             )
+                            .pressScale()
                             .clickable {
                                 previousDigest = currentDigest.copyOf()
-                                bits[idx] = if (bits[idx] == 0) 1 else 0
+                                bits[idx] = if (isOne) 0 else 1
                                 flipCount++
+                                ArenaHaptics.tap(view, reduceMotion)
                                 onActionSuccess()
                             },
                         contentAlignment = Alignment.Center
@@ -179,67 +209,102 @@ fun BitFlipLabLevel(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = if (isOne) AmberGold else dynamicColors.textPrimary
+                            color = if (isOne) primary else dynamicColors.textPrimary
                         )
                     }
                 }
             }
         }
 
-        // Digest Comparison Card
+        // Live Hamming Distance & Avalanche Metrics
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(if (isDark) Color(0xFF0F1A2E) else dynamicColors.cardBackground)
-                .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
-                .padding(12.dp)
+                .fillMaxWidth(0.95f)
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (isDark) ArenaPalettes.Arena4BackgroundDark else Color(0xFFF8FAFC))
+                .border(1.5.dp, if (isTargetReached) ArenaSuccessGreen else primary.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                .padding(14.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = "SHA-256 DIGEST: H(M)",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    color = SubtextGray
-                )
-                Text(
-                    text = currentHashHex.chunked(32).joinToString("\n"),
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = dynamicColors.textPrimary
-                )
-                Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "HAMMING DISTANCE ΔH:",
+                        text = "HAMMING BIT DISTANCE (ΔH):",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmberGold
+                        color = SubtextGray
                     )
                     Text(
-                        text = if (previousDigest != null) "$hammingDistance / 256 bits (${String.format("%.1f", avalanchePercentage)}%)" else "Tap a bit to measure ΔH",
+                        text = "$hammingDistance / 256 bits inverted",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = if (avalanchePercentage in 40f..60f) ArenaSuccessGreen else AmberGold
+                        color = if (isTargetReached) ArenaSuccessGreen else primary
                     )
                 }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "AVALANCHE PERCENTAGE:",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = SubtextGray
+                    )
+                    Text(
+                        text = "${"%.1f".format(avalanchePercentage)}% (Expected ~50%)",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (isTargetReached) ArenaSuccessGreen else accent
+                    )
+                }
+            }
+        }
+
+        // Output Hash Hex Snippet
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9))
+                .padding(10.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(text = "CURRENT SHA-256 DIGEST:", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                Text(
+                    text = currentHashHex.chunked(32).joinToString("\n"),
+                    fontSize = 10.5.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = dynamicColors.textPrimary
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Tactile3DButton(
-            title = if (flipCount >= 2) "Confirm Avalanche Metric ➔" else "Flip at least 2 bits (${flipCount}/2)",
-            style = if (flipCount >= 2) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
-            isEnabled = flipCount >= 2,
-            onClick = onComplete,
-            modifier = Modifier.fillMaxWidth()
+            title = if (isTargetReached) "AVALANCHE EFFECT CONFIRMED! ADVANCE ➔" else "FLIP AT LEAST 3 BITS (${flipCount}/3)",
+            style = if (isTargetReached) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.DISABLED,
+            isEnabled = isTargetReached,
+            onClick = {
+                if (isTargetReached) {
+                    ArenaHaptics.success(view, reduceMotion)
+                    onComplete()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .minTouchTarget48()
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }

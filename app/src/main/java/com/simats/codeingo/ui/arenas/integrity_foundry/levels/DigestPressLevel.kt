@@ -14,32 +14,39 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
+import com.simats.codeingo.ui.theme.ArenaDangerRed
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.pressScale
 
@@ -52,76 +59,105 @@ fun DigestPressLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
 
-    // Interactive Stages:
-    // 0: Raw Message M = "CNS" (24 bits)
-    // 1: Add 0x80 delimiter (1 bit + 7 zeros)
-    // 2: Zero Padding to 448 bits
-    // 3: Append 64-bit length L=24 (Standard 512-bit block achieved!)
-    // 4: Hydraulic Compression into 256-bit Digest
+    val primary = ArenaPalettes.Arena4Primary
+    val accent = ArenaPalettes.Arena4Accent
+
+    // Stages:
+    // 0: Select Delimiter (0x80)
+    // 1: Select Zero-Padding target length (448 bits)
+    // 2: Select 64-bit Length encoding (24 bits)
+    // 3: 512-bit block forged -> Compress into 256-bit digest
+    // 4: Complete
     var stage by remember { mutableIntStateOf(0) }
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    var feedbackText by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Mission Briefing
+        // Mission Briefing & Status Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(if (isDark) Color(0xFF10192A) else dynamicColors.cardBackground)
-                .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena4CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
                 .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Compress,
-                        contentDescription = null,
-                        tint = AmberGold,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "MERKLE-DAMGÅRD 512-BIT HYDRAULIC PRESS",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Compress,
+                            contentDescription = null,
+                            tint = primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "MERKLE-DAMGÅRD 512-BIT PRESS",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = primary
+                        )
+                    }
+
+                    ArenaStatusBadge(
+                        type = when (stage) {
+                            4 -> ArenaBadgeType.SUCCESS
+                            3 -> ArenaBadgeType.WARNING
+                            else -> ArenaBadgeType.INFO
+                        },
+                        label = when (stage) {
+                            0 -> "STAGE 1: DELIMITER"
+                            1 -> "STAGE 2: PADDING"
+                            2 -> "STAGE 3: LENGTH"
+                            3 -> "STAGE 4: COMPRESS"
+                            else -> "256-BIT DIGEST"
+                        }
                     )
                 }
+
                 Text(
                     text = when (stage) {
-                        0 -> "Step 1: Input message M = 'CNS' (3 bytes = 24 bits). Standard SHA-256 requires 512-bit (64-byte) blocks."
-                        1 -> "Step 2: Append single '1' bit followed by seven '0' bits (0x80 byte) to demarcate message end."
-                        2 -> "Step 3: Pad with zeros until message length reaches exactly 448 bits (512 - 64 bits)."
-                        3 -> "Step 4: Append 64-bit big-endian length integer (L = 24). Standard 512-bit block is forged!"
-                        else -> "🎉 Compression Success! The 512-bit chunk was crushed through 64 Davies-Meyer rounds into a 256-bit hash digest!"
+                        0 -> "Input message M = 'CNS' (3 bytes = 24 bits). Standard SHA-256 operates on 512-bit (64-byte) blocks. How must the message boundary be marked?"
+                        1 -> "With delimiter appended (32 bits total), how far must we pad with zeros before appending the 64-bit length?"
+                        2 -> "Final block formation: In what format is the original 24-bit message length encoded into the 64-bit trailer?"
+                        3 -> "The 512-bit chunk is fully assembled! Trigger the Davies-Meyer hydraulic press to compress it into a 256-bit digest."
+                        else -> "🎉 256-bit digest forged! The 512-bit block was crushed through 64 compression rounds into a collision-resistant fingerprint."
                     },
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
 
-        // 512-Bit Chamber Visualizer
+        // 512-Bit Chunk Anatomy Visualizer
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(if (isDark) Color(0xFF090E17) else Color(0xFFF8FAFC))
-                .border(1.5.dp, if (stage >= 3) DuolingoGreen else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-                .padding(16.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena4BackgroundDark else Color(0xFFF8FAFC))
+                .border(1.5.dp, if (stage >= 3) ArenaSuccessGreen else primary.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,10 +172,10 @@ fun DigestPressLevel(
                     )
                     Text(
                         text = if (stage >= 3) "512 BITS (64 BYTES) ✓" else "CURRENT: ${when (stage) { 0 -> "24 bits"; 1 -> "32 bits"; else -> "448 bits" }}",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = if (stage >= 3) DuolingoGreen else AmberGold
+                        color = if (stage >= 3) ArenaSuccessGreen else primary
                     )
                 }
 
@@ -152,52 +188,52 @@ fun DigestPressLevel(
                     Box(
                         modifier = Modifier
                             .weight(1.5f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(AmberGold.copy(alpha = 0.25f))
-                            .border(1.dp, AmberGold, RoundedCornerShape(8.dp)),
+                            .background(primary.copy(alpha = 0.25f))
+                            .border(1.dp, primary, RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "M: 'CNS' (24b)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = AmberGold)
+                        Text(text = "M: 'CNS' (24b)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = primary)
                     }
 
                     // Delimiter block
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (stage >= 1) Color(0xFF3B82F6).copy(alpha = 0.25f) else Color.Transparent)
-                            .border(1.dp, if (stage >= 1) Color(0xFF3B82F6) else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                            .background(if (stage >= 1) accent.copy(alpha = 0.25f) else Color.Transparent)
+                            .border(1.dp, if (stage >= 1) accent else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (stage >= 1) "10000000" else "?", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 1) Color(0xFF60A5FA) else SubtextGray)
+                        Text(text = if (stage >= 1) "0x80 (1b)" else "?", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 1) accent else SubtextGray)
                     }
 
                     // Zero pad block
                     Box(
                         modifier = Modifier
                             .weight(2f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (stage >= 2) Color(0xFF8B5CF6).copy(alpha = 0.20f) else Color.Transparent)
-                            .border(1.dp, if (stage >= 2) Color(0xFF8B5CF6) else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                            .background(if (stage >= 2) Color(0xFF3B82F6).copy(alpha = 0.20f) else Color.Transparent)
+                            .border(1.dp, if (stage >= 2) Color(0xFF3B82F6) else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (stage >= 2) "000...000 (416b)" else "Pad ➔ 448b", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 2) Color(0xFFA78BFA) else SubtextGray)
+                        Text(text = if (stage >= 2) "000... (416b)" else "Pad ➔ 448b", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 2) Color(0xFF60A5FA) else SubtextGray)
                     }
 
                     // Length block
                     Box(
                         modifier = Modifier
                             .weight(1.5f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (stage >= 3) DuolingoGreen.copy(alpha = 0.25f) else Color.Transparent)
-                            .border(1.dp, if (stage >= 3) DuolingoGreen else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                            .background(if (stage >= 3) ArenaSuccessGreen.copy(alpha = 0.25f) else Color.Transparent)
+                            .border(1.dp, if (stage >= 3) ArenaSuccessGreen else SubtextGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = if (stage >= 3) "L=24 (64b)" else "Len", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 3) DuolingoGreen else SubtextGray)
+                        Text(text = if (stage >= 3) "L=24 (64b)" else "Len", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (stage >= 3) ArenaSuccessGreen else SubtextGray)
                     }
                 }
             }
@@ -209,12 +245,12 @@ fun DigestPressLevel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(DuolingoGreen.copy(alpha = 0.12f))
-                    .border(1.2.dp, DuolingoGreen, RoundedCornerShape(16.dp))
+                    .background(ArenaSuccessGreen.copy(alpha = 0.12f))
+                    .border(1.2.dp, ArenaSuccessGreen, RoundedCornerShape(16.dp))
                     .padding(14.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "CRUSHED 256-BIT HASH DIGEST:", fontSize = 10.sp, fontWeight = FontWeight.Black, color = DuolingoGreen)
+                    Text(text = "CRUSHED 256-BIT HASH DIGEST:", fontSize = 10.sp, fontWeight = FontWeight.Black, color = ArenaSuccessGreen)
                     Text(
                         text = "e2d6b384c7a523b1239f884109fa771a25be11b98024cf4b54e70b9ac782a691",
                         fontSize = 11.sp,
@@ -226,53 +262,223 @@ fun DigestPressLevel(
             }
         }
 
-        // Interactive Hydraulic Action Button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (stage >= 4) Brush.horizontalGradient(listOf(DuolingoGreen, Color(0xFF059669)))
-                    else Brush.horizontalGradient(listOf(AmberGold, Color(0xFFD97706)))
-                )
-                .pressScale(targetScale = 0.96f)
-                .clickable {
-                    if (stage < 4) {
-                        stage++
-                        onActionSuccess()
-                    } else {
-                        onComplete()
+        // Interactive Stage Decision
+        when (stage) {
+            0 -> {
+                // Delimiter Question
+                Column(modifier = Modifier.fillMaxWidth(0.95f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "HOW IS THE SHA-256 MESSAGE DELIMITER FORMED?",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    listOf(
+                        "Append a single '1' bit followed by zeros (0x80 byte)" to true,
+                        "Append a null terminator (0x00 byte)" to false,
+                        "Append standard newline character (0x0A)" to false
+                    ).forEach { (opt, isCorrect) ->
+                        val isSelected = selectedOption == opt
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .minTouchTarget48()
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) (if (isCorrect) ArenaSuccessGreen else ArenaDangerRed)
+                                    else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                )
+                                .border(1.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(12.dp))
+                                .pressScale()
+                                .clickable {
+                                    selectedOption = opt
+                                    if (isCorrect) {
+                                        ArenaHaptics.success(view, reduceMotion)
+                                        stage = 1
+                                        selectedOption = null
+                                        feedbackText = "✓ 0x80 appended! Now pad with zeros."
+                                        onActionSuccess()
+                                    } else {
+                                        ArenaHaptics.error(view, reduceMotion)
+                                        onDeductHeart()
+                                        feedbackText = "❌ A single '1' bit is required to unambiguously demarcate message end."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = opt,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected && isCorrect) Color.Black else dynamicColors.textPrimary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 6.dp)
+                            )
+                        }
                     }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = if (stage >= 4) Icons.Default.Check else Icons.Default.Compress,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = when (stage) {
-                        0 -> "1. APPEND '1' DELIMITER (0x80) →"
-                        1 -> "2. ZERO-PAD TO 448 BITS →"
-                        2 -> "3. APPEND 64-BIT LENGTH (512b) →"
-                        3 -> "4. COMPRESS 512-BIT CHUNK 💥"
-                        else -> "256-BIT DIGEST PRODUCED! ADVANCE →"
+                }
+            }
+            1 -> {
+                // Padding Question
+                Column(modifier = Modifier.fillMaxWidth(0.95f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "TO WHAT LENGTH MUST ZEROS BE PADDED BEFORE THE TRAILER?",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    listOf(
+                        "448 bits (512 - 64 bits for trailer)" to true,
+                        "512 bits directly" to false,
+                        "256 bits" to false
+                    ).forEach { (opt, isCorrect) ->
+                        val isSelected = selectedOption == opt
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .minTouchTarget48()
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) (if (isCorrect) ArenaSuccessGreen else ArenaDangerRed)
+                                    else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                )
+                                .border(1.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(12.dp))
+                                .pressScale()
+                                .clickable {
+                                    selectedOption = opt
+                                    if (isCorrect) {
+                                        ArenaHaptics.success(view, reduceMotion)
+                                        stage = 2
+                                        selectedOption = null
+                                        feedbackText = "✓ Padded to 448 bits! Leaves room for 64-bit length."
+                                        onActionSuccess()
+                                    } else {
+                                        ArenaHaptics.error(view, reduceMotion)
+                                        onDeductHeart()
+                                        feedbackText = "❌ Must pad to 448 bits so 64-bit length completes the 512-bit block."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = opt,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected && isCorrect) Color.Black else dynamicColors.textPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+            2 -> {
+                // Length trailer question
+                Column(modifier = Modifier.fillMaxWidth(0.95f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "WHAT VALUE IS STORED IN THE 64-BIT LENGTH TRAILER?",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    listOf(
+                        "Bit length: L = 24 bits (0x0000000000000018)" to true,
+                        "Byte length: L = 3 bytes (0x0000000000000003)" to false,
+                        "Block size: L = 512 bits" to false
+                    ).forEach { (opt, isCorrect) ->
+                        val isSelected = selectedOption == opt
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .minTouchTarget48()
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) (if (isCorrect) ArenaSuccessGreen else ArenaDangerRed)
+                                    else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                )
+                                .border(1.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(12.dp))
+                                .pressScale()
+                                .clickable {
+                                    selectedOption = opt
+                                    if (isCorrect) {
+                                        ArenaHaptics.success(view, reduceMotion)
+                                        stage = 3
+                                        selectedOption = null
+                                        feedbackText = "✓ Exactly 512 bits assembled! Ready for hydraulic press."
+                                        onActionSuccess()
+                                    } else {
+                                        ArenaHaptics.error(view, reduceMotion)
+                                        onDeductHeart()
+                                        feedbackText = "❌ SHA-256 stores bit length (3 bytes × 8 = 24 bits)."
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = opt,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected && isCorrect) Color.Black else dynamicColors.textPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+            3 -> {
+                // Compress button
+                Tactile3DButton(
+                    title = "COMPRESS 512-BIT CHUNK INTO 256-BIT DIGEST 💥",
+                    style = Tactile3DButtonColor.AMBER,
+                    onClick = {
+                        ArenaHaptics.criticalStrike(view, reduceMotion)
+                        stage = 4
+                        feedbackText = "🎉 SHA-256 compression complete! 256-bit digest generated."
+                        onActionSuccess()
                     },
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.Black,
-                    letterSpacing = 0.5.sp
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .minTouchTarget48()
+                )
+            }
+            else -> {
+                // Advance
+                Tactile3DButton(
+                    title = "256-BIT DIGEST PRODUCED! ADVANCE FOUNDRY ➔",
+                    style = Tactile3DButtonColor.GREEN,
+                    onClick = {
+                        ArenaHaptics.success(view, reduceMotion)
+                        onComplete()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .minTouchTarget48()
                 )
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+
+        if (feedbackText != null) {
+            Text(
+                text = feedbackText!!,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (feedbackText!!.startsWith("✓") || feedbackText!!.startsWith("🎉")) ArenaSuccessGreen else ArenaDangerRed,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
