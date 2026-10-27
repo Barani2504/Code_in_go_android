@@ -53,3 +53,9 @@
 -keep class * extends androidx.room.RoomDatabase
 -dontwarn androidx.room.paging.**
 -keep class com.simats.codeingo.data.db.** { *; }
+
+# ── Dagger / Hilt ───────────────────────────────────────────────────
+-keep class * extends dagger.hilt.internal.GeneratedComponent
+-keep class * implements dagger.hilt.internal.GeneratedComponent
+-keep class androidx.hilt.navigation.compose.** { *; }
+-dontwarn dagger.hilt.**

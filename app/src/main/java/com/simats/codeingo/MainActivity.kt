@@ -15,7 +15,9 @@ import com.simats.codeingo.ui.theme.ProvideScreenMetrics
 import android.view.View
 import android.view.ViewTreeObserver
 import com.simats.codeingo.domain.GameManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

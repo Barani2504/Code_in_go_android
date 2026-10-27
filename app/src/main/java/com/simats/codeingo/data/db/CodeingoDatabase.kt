@@ -31,5 +31,7 @@ abstract class CodeingoDatabase : RoomDatabase() {
                 instance
             }
         }
+
+        fun getInstance(context: Context): CodeingoDatabase = getDatabase(context)
     }
 }

@@ -10,7 +10,9 @@ import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
 import com.simats.codeingo.domain.ThemeManager
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class CodeingoApp : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
