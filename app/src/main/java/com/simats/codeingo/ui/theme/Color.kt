@@ -141,6 +141,14 @@ val DuolingoOrangeDark   = Color(0xFFCC_43_0E)
 val DuolingoRed          = PhoenixCrimson
 val DuolingoRedDark      = Color(0xFFBB_1C_0A)
 
+// Neutral brand aliases (Defect 20)
+val ArenaSuccessGreen    = DuolingoGreen
+val ArenaDangerRed       = DuolingoRed
+val ArenaAccentGold      = AmberGold
+val TactileGreen         = DuolingoGreen
+val TactileRed           = DuolingoRed
+val TactileAmber         = AmberGold
+
 val DarkBackground: Color
     @Composable
     @ReadOnlyComposable

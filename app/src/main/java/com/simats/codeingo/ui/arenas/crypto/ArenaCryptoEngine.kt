@@ -114,6 +114,30 @@ object ArenaCryptoEngine {
         return out
     }
 
+    /** SubBytes transformation on entire 4x4 state matrix */
+    fun subBytes(state: Array<IntArray>): Array<IntArray> {
+        val out = Array(4) { IntArray(4) }
+        for (r in 0 until 4) {
+            for (c in 0 until 4) {
+                out[r][c] = sBoxLookup(state[r][c])
+            }
+        }
+        return out
+    }
+
+    /** MixColumns transformation on entire 4x4 state matrix */
+    fun mixColumns(state: Array<IntArray>): Array<IntArray> {
+        val out = Array(4) { IntArray(4) }
+        for (c in 0 until 4) {
+            val col = intArrayOf(state[0][c], state[1][c], state[2][c], state[3][c])
+            val mixed = mixColumn(col)
+            for (r in 0 until 4) {
+                out[r][c] = mixed[r]
+            }
+        }
+        return out
+    }
+
     /**
      * AddRoundKey: state XOR roundKey bitwise
      */
@@ -125,6 +149,82 @@ object ArenaCryptoEngine {
             }
         }
         return out
+    }
+
+    fun bytesToState(bytes: ByteArray): Array<IntArray> {
+        val state = Array(4) { IntArray(4) }
+        for (r in 0 until 4) {
+            for (c in 0 until 4) {
+                val idx = r + 4 * c
+                state[r][c] = if (idx < bytes.size) bytes[idx].toInt() and 0xFF else 0
+            }
+        }
+        return state
+    }
+
+    fun stateToBytes(state: Array<IntArray>): ByteArray {
+        val bytes = ByteArray(16)
+        for (r in 0 until 4) {
+            for (c in 0 until 4) {
+                bytes[r + 4 * c] = (state[r][c] and 0xFF).toByte()
+            }
+        }
+        return bytes
+    }
+
+    data class AesRoundDiff(
+        val round: Int,
+        val totalDifferingBits: Int,
+        val byteDiffs: IntArray // 16 values (bits changed per byte)
+    )
+
+    /**
+     * Executes real AES round diffusion on two 16-byte states differing by 1 bit,
+     * returning the exact bit differences and byte-by-byte heat maps for Round 0..3.
+     */
+    fun computeAesDiffusionRounds(input1: ByteArray, input2: ByteArray, key: ByteArray = ByteArray(16) { 0x2B.toByte() }): List<AesRoundDiff> {
+        var s1 = bytesToState(input1)
+        var s2 = bytesToState(input2)
+        val kState = bytesToState(key)
+
+        val diffs = mutableListOf<AesRoundDiff>()
+
+        fun recordDiff(round: Int, a: Array<IntArray>, b: Array<IntArray>) {
+            val byteDiffs = IntArray(16)
+            var totalBits = 0
+            for (r in 0 until 4) {
+                for (c in 0 until 4) {
+                    val idx = r * 4 + c
+                    val xorVal = (a[r][c] xor b[r][c]) and 0xFF
+                    val bits = Integer.bitCount(xorVal)
+                    byteDiffs[idx] = bits
+                    totalBits += bits
+                }
+            }
+            diffs.add(AesRoundDiff(round, totalBits, byteDiffs))
+        }
+
+        // Round 0 (Input diff)
+        recordDiff(0, s1, s2)
+
+        // Pre-round AddRoundKey
+        s1 = addRoundKey(s1, kState)
+        s2 = addRoundKey(s2, kState)
+
+        // Rounds 1, 2, 3
+        for (round in 1..3) {
+            s1 = subBytes(s1)
+            s2 = subBytes(s2)
+            s1 = shiftRows(s1)
+            s2 = shiftRows(s2)
+            s1 = mixColumns(s1)
+            s2 = mixColumns(s2)
+            s1 = addRoundKey(s1, kState)
+            s2 = addRoundKey(s2, kState)
+            recordDiff(round, s1, s2)
+        }
+
+        return diffs
     }
 
     // =========================================================================
@@ -194,9 +294,94 @@ object ArenaCryptoEngine {
         return mac.doFinal(message)
     }
 
+    /** HMAC computation breakdown into RFC 2104 inner and outer stages */
+    data class HmacStepResult(
+        val kIpadHex: String,
+        val kOpadHex: String,
+        val innerHashHex: String,
+        val outerTagHex: String
+    )
+
+    fun computeHmacSteps(key: ByteArray, message: ByteArray): HmacStepResult {
+        val blockSize = 64
+        val paddedKey = ByteArray(blockSize)
+        if (key.size > blockSize) {
+            val hashedKey = sha256(key)
+            System.arraycopy(hashedKey, 0, paddedKey, 0, hashedKey.size)
+        } else {
+            System.arraycopy(key, 0, paddedKey, 0, key.size)
+        }
+
+        val kIpad = ByteArray(blockSize) { i -> (paddedKey[i].toInt() xor 0x36).toByte() }
+        val kOpad = ByteArray(blockSize) { i -> (paddedKey[i].toInt() xor 0x5C).toByte() }
+
+        val innerInput = kIpad + message
+        val innerHash = sha256(innerInput)
+
+        val outerInput = kOpad + innerHash
+        val outerTag = sha256(outerInput)
+
+        return HmacStepResult(
+            kIpadHex = bytesToHex(kIpad),
+            kOpadHex = bytesToHex(kOpad),
+            innerHashHex = bytesToHex(innerHash),
+            outerTagHex = bytesToHex(outerTag)
+        )
+    }
+
     // =========================================================================
     // 3. CLASSICAL CIPHERS & KASISKI EXAMINATION
     // =========================================================================
+
+    /** Rail Fence 3-rail zigzag encryption. Test: WEAREDISCOVEREDFLEEATONCE -> WECRLTEERDSOEEFEAOCAIVDEN */
+    fun railFenceEncrypt(plaintext: String, rails: Int = 3): String {
+        if (rails <= 1 || plaintext.length <= rails) return plaintext
+        val fence = Array(rails) { StringBuilder() }
+        var rail = 0
+        var direction = 1
+        for (ch in plaintext) {
+            fence[rail].append(ch)
+            rail += direction
+            if (rail == rails - 1) direction = -1
+            else if (rail == 0) direction = 1
+        }
+        return fence.joinToString("") { it.toString() }
+    }
+
+    /** Rail Fence 3-rail zigzag decryption */
+    fun railFenceDecrypt(ciphertext: String, rails: Int = 3): String {
+        if (rails <= 1 || ciphertext.length <= rails) return ciphertext
+        val pattern = Array(rails) { BooleanArray(ciphertext.length) }
+        var rail = 0
+        var direction = 1
+        for (i in ciphertext.indices) {
+            pattern[rail][i] = true
+            rail += direction
+            if (rail == rails - 1) direction = -1
+            else if (rail == 0) direction = 1
+        }
+
+        val chars = Array(rails) { CharArray(ciphertext.length) }
+        var idx = 0
+        for (r in 0 until rails) {
+            for (c in ciphertext.indices) {
+                if (pattern[r][c] && idx < ciphertext.length) {
+                    chars[r][c] = ciphertext[idx++]
+                }
+            }
+        }
+
+        val result = StringBuilder()
+        rail = 0
+        direction = 1
+        for (i in ciphertext.indices) {
+            result.append(chars[rail][i])
+            rail += direction
+            if (rail == rails - 1) direction = -1
+            else if (rail == 0) direction = 1
+        }
+        return result.toString()
+    }
 
     /** Caesar shift with strict modular alphabet wrap C = (P + K) mod 26 */
     fun caesarEncrypt(plaintext: String, shift: Int): String {
@@ -313,6 +498,156 @@ object ArenaCryptoEngine {
 
         fun encrypt(message: Long): Long = modPow(message, E, N)
         fun decrypt(ciphertext: Long): Long = modPow(ciphertext, D, N)
+    }
+
+    /** Unified Toy RSA parameters for L3 & L4: p=5, q=11, n=55, e=3, d=27 */
+    object ToyRSA5_11 {
+        const val P = 5L
+        const val Q = 11L
+        const val N = P * Q // 55L
+        const val PHI = (P - 1) * (Q - 1) // 40L
+        const val E = 3L // gcd(3, 40) = 1
+        const val D = 27L // (3 * 27) % 40 = 81 % 40 = 1
+
+        fun encrypt(message: Long): Long = modPow(message, E, N)
+        fun decrypt(ciphertext: Long): Long = modPow(ciphertext, D, N)
+    }
+
+    /**
+     * Toy Elliptic Curve over F17:
+     * Equation: y^2 = x^3 + 2x + 2 (mod 17)
+     * Base point G = (5, 1), group order n = 19, doubling 2G = (6, 3).
+     */
+    data class ECPoint(val x: Int, val y: Int, val isInfinity: Boolean = false) {
+        override fun toString(): String = if (isInfinity) "O" else "($x, $y)"
+    }
+
+    object ToyF17Curve {
+        const val P = 17
+        const val A = 2
+        const val B = 2
+        const val ORDER = 19
+        val G = ECPoint(5, 1)
+        val INFINITY = ECPoint(0, 0, isInfinity = true)
+
+        private fun modInv(n: Int, p: Int): Int {
+            val a = ((n % p) + p) % p
+            // Fermat's Little Theorem since p is prime: a^(p-2) mod p
+            var res = 1
+            var base = a
+            var exp = p - 2
+            while (exp > 0) {
+                if ((exp and 1) == 1) res = (res * base) % p
+                base = (base * base) % p
+                exp = exp shr 1
+            }
+            return res
+        }
+
+        fun isPointOnCurve(pt: ECPoint): Boolean {
+            if (pt.isInfinity) return true
+            val lhs = (pt.y * pt.y) % P
+            val rhs = ((pt.x * pt.x * pt.x) + A * pt.x + B) % P
+            return ((lhs % P) + P) % P == ((rhs % P) + P) % P
+        }
+
+        fun add(p1: ECPoint, p2: ECPoint): ECPoint {
+            if (p1.isInfinity) return p2
+            if (p2.isInfinity) return p1
+            if (p1.x == p2.x && (p1.y + p2.y) % P == 0) return INFINITY
+            if (p1 == p2) return double(p1)
+
+            val num = ((p2.y - p1.y) % P + P) % P
+            val den = ((p2.x - p1.x) % P + P) % P
+            val m = (num * modInv(den, P)) % P
+
+            val x3 = ((m * m - p1.x - p2.x) % P + P) % P
+            val y3 = ((m * (p1.x - x3) - p1.y) % P + P) % P
+            return ECPoint(x3, y3)
+        }
+
+        fun double(pt: ECPoint): ECPoint {
+            if (pt.isInfinity || pt.y == 0) return INFINITY
+            val num = ((3 * pt.x * pt.x + A) % P + P) % P
+            val den = ((2 * pt.y) % P + P) % P
+            val m = (num * modInv(den, P)) % P
+
+            val x3 = ((m * m - 2 * pt.x) % P + P) % P
+            val y3 = ((m * (pt.x - x3) - pt.y) % P + P) % P
+            return ECPoint(x3, y3)
+        }
+
+        fun multiply(k: Int, pt: ECPoint): ECPoint {
+            var scalar = k % ORDER
+            if (scalar < 0) scalar += ORDER
+            if (scalar == 0) return INFINITY
+            var res = INFINITY
+            var current = pt
+            while (scalar > 0) {
+                if ((scalar and 1) == 1) {
+                    res = add(res, current)
+                }
+                current = double(current)
+                scalar = scalar shr 1
+            }
+            return res
+        }
+    }
+
+    // =========================================================================
+    // 5. STATELESS SYN COOKIE GENERATOR (RFC 4987)
+    // =========================================================================
+
+    /**
+     * Generates a 32-bit Initial Sequence Number (ISN) SYN Cookie:
+     * - Bits [31..27]: 5 bits rolling time counter (1 tick = 60s, mod 32)
+     * - Bits [26..24]: 3 bits Maximum Segment Size (MSS) table index
+     * - Bits [23..0]: 24 bits truncated HMAC-SHA256(Secret, [SrcIP:SrcPort -> DstIP:DstPort:Time])
+     *
+     * Injected clockMs parameter enables reproducible deterministic unit testing.
+     */
+    fun computeSynCookie(
+        srcIp: String,
+        dstIp: String,
+        srcPort: Int,
+        dstPort: Int,
+        secretKey: ByteArray,
+        clockMs: Long = System.currentTimeMillis()
+    ): Long {
+        val timeIndex = (clockMs / (60 * 1000L)) and 0x1FL // 5 bits time
+        val mssIndex = 2L // 3 bits MSS table index (index 2 = standard 1460 bytes)
+        val input = "$srcIp:$srcPort->$dstIp:$dstPort:$timeIndex".toByteArray(Charsets.UTF_8)
+        val hmac = hmacSha256(secretKey, input)
+        val truncatedHmac = ((hmac[0].toInt() and 0xFF) shl 16 or
+                ((hmac[1].toInt() and 0xFF) shl 8) or
+                (hmac[2].toInt() and 0xFF)).toLong() and 0x00FFFFFFL // 24 bits
+        return (timeIndex shl 27) or (mssIndex shl 24) or truncatedHmac
+    }
+
+    fun verifySynCookie(
+        cookie: Long,
+        srcIp: String,
+        dstIp: String,
+        srcPort: Int,
+        dstPort: Int,
+        secretKey: ByteArray,
+        currentClockMs: Long = System.currentTimeMillis(),
+        maxAgeMinutes: Int = 4
+    ): Boolean {
+        val receivedTimeIndex = ((cookie ushr 27) and 0x1FL).toInt()
+        val receivedHmac = cookie and 0x00FFFFFFL
+
+        val currentTimeIndex = ((currentClockMs / (60 * 1000L)) and 0x1FL).toInt()
+        val delta = (currentTimeIndex - receivedTimeIndex + 32) % 32
+        if (delta > maxAgeMinutes) return false
+
+        val input = "$srcIp:$srcPort->$dstIp:$dstPort:$receivedTimeIndex".toByteArray(Charsets.UTF_8)
+        val hmac = hmacSha256(secretKey, input)
+        val expectedHmac = ((hmac[0].toInt() and 0xFF) shl 16 or
+                ((hmac[1].toInt() and 0xFF) shl 8) or
+                (hmac[2].toInt() and 0xFF)).toLong() and 0x00FFFFFFL
+
+        return receivedHmac == expectedHmac
     }
 
     /**

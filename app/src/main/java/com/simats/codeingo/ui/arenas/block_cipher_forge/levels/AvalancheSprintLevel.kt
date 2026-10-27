@@ -1,6 +1,7 @@
 package com.simats.codeingo.ui.arenas.block_cipher_forge.levels
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,10 +30,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 @Composable
@@ -46,21 +46,20 @@ fun AvalancheSprintLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
 
-    var currentRound by remember { mutableIntStateOf(0) }
-    val flippedBitsByRound = listOf(1, 5, 26, 64) // Strict diffusion: 64 of 128 = 50%
-
-    // 16 nodes representing byte states
-    val activeNodes = remember { mutableStateListOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) }
-
-    LaunchedEffect(currentRound) {
-        val count = when (currentRound) {
-            0 -> 1
-            1 -> 3
-            2 -> 8
-            else -> 16
-        }
-        repeat(16) { i -> activeNodes[i] = if (i < count) 1 else 0 }
+    // Compute dynamic AES diffusion rounds from ArenaCryptoEngine between two 16-byte blocks differing by 1 bit
+    val block1 = remember { ByteArray(16) { 0x00 } }
+    val block2 = remember {
+        val b = ByteArray(16) { 0x00 }
+        b[0] = 0x01 // 1-bit flip at index 0
+        b
     }
+    val diffusionRounds = remember {
+        ArenaCryptoEngine.computeAesDiffusionRounds(block1, block2)
+    }
+
+    var currentRoundIndex by remember { mutableIntStateOf(0) }
+    val currentRound = diffusionRounds.getOrElse(currentRoundIndex) { diffusionRounds.last() }
+    val diffusionPercentage = (currentRound.totalDifferingBits / 128f) * 100f
 
     Column(
         modifier = modifier
@@ -71,7 +70,7 @@ fun AvalancheSprintLevel(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "AVALANCHE DIFFUSION MATRIX",
+                text = "AES AVALANCHE DIFFUSION MATRIX",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 color = AmberGold,
@@ -79,49 +78,63 @@ fun AvalancheSprintLevel(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "AES Round $currentRound of 3 • Flipped bits: ${flippedBitsByRound[currentRound]} / 128",
+                text = "AES Round ${currentRound.round} of 3 • Flipped Bits: ${currentRound.totalDifferingBits} / 128",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = dynamicColors.textPrimary
             )
             Text(
-                text = "Standard: about 50% of output bits flip on average",
+                text = "Strict Avalanche: ${String.format("%.1f", diffusionPercentage)}% (Standard: ~50% on average)",
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
-                color = DuolingoGreen
+                color = if (diffusionPercentage >= 40.0) ArenaSuccessGreen else AmberGold
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 4x4 Diffusion Nodes
+        // 4x4 AES Byte State Heatmap (16 bytes = 128 bits)
         Column(
             modifier = Modifier
-                .size(160.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .size(200.dp)
+                .clip(RoundedCornerShape(14.dp))
                 .background(dynamicColors.cardBorder.copy(alpha = 0.25f))
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             repeat(4) { r ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     repeat(4) { c ->
-                        val idx = r * 4 + c
-                        val isActive = activeNodes[idx] == 1
+                        val byteIdx = r * 4 + c
+                        val bitsFlippedInByte = currentRound.byteDiffs.getOrElse(byteIdx) { 0 }
+                        val isFlipped = bitsFlippedInByte > 0
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(30.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(if (isActive) Color(0xFFFF2A6D) else dynamicColors.cardBorder.copy(alpha = 0.3f))
-                                .clickable {
-                                    activeNodes[idx] = 1 - activeNodes[idx]
-                                    onActionSuccess()
-                                }
-                        )
+                                .height(38.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (isFlipped) Color(0xFFFF2A6D)
+                                    else dynamicColors.cardBorder.copy(alpha = 0.35f)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (isFlipped) Color(0xFFFF2A6D) else dynamicColors.cardBorder,
+                                    RoundedCornerShape(6.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "B$byteIdx ($bitsFlippedInByte)",
+                                fontSize = 8.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFlipped) Color.White else dynamicColors.textSecondary
+                            )
+                        }
                     }
                 }
             }
@@ -132,26 +145,26 @@ fun AvalancheSprintLevel(
         // Round Advance Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Duolingo3DButton(
-                title = "Trigger 1-Bit Flip",
-                style = Duolingo3DButtonColor.BLUE,
-                onClick = { currentRound = 0 },
-                modifier = Modifier.weight(1f).padding(end = 4.dp)
+            Tactile3DButton(
+                title = "1-Bit Input Flip",
+                style = Tactile3DButtonColor.BLUE,
+                onClick = { currentRoundIndex = 0 },
+                modifier = Modifier.weight(1f)
             )
-            Duolingo3DButton(
-                title = if (currentRound < 3) "Next Round >>" else "✓ 50% Diffusion",
-                style = if (currentRound == 3) Duolingo3DButtonColor.GREEN else Duolingo3DButtonColor.AMBER,
+            Tactile3DButton(
+                title = if (currentRoundIndex < diffusionRounds.size - 1) "Next Round >>" else "✓ Confirm Diffusion",
+                style = if (currentRoundIndex >= diffusionRounds.size - 1) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
                 onClick = {
-                    if (currentRound < 3) {
-                        currentRound++
+                    if (currentRoundIndex < diffusionRounds.size - 1) {
+                        currentRoundIndex++
                         onActionSuccess()
                     } else {
                         onComplete()
                     }
                 },
-                modifier = Modifier.weight(1f).padding(start = 4.dp)
+                modifier = Modifier.weight(1f)
             )
         }
     }

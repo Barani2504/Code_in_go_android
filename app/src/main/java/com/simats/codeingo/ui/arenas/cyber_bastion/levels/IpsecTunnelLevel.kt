@@ -2,7 +2,6 @@ package com.simats.codeingo.ui.arenas.cyber_bastion.levels
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,12 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -32,18 +28,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
-import com.simats.codeingo.ui.theme.pressScale
 
 @Composable
 fun IpsecTunnelLevel(
@@ -55,11 +51,12 @@ fun IpsecTunnelLevel(
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
 
-    // Step 0: Raw Original IP Packet
-    // Step 1: Prepend ESP Header (SPI + Anti-Replay Sequence Number)
-    // Step 2: Encrypt Payload & Original IP with AES
-    // Step 3: Append ESP Trailer (Padding + Next Header)
-    // Step 4: Append ICV Authentication Tag & Prepend New Gateway IP
+    // RFC 4303 IPsec ESP Tunnel Mode Assembly:
+    // Step 0: Original Internal Packet (198.51.100.5 -> 203.0.113.10, RFC 5737 Doc IP)
+    // Step 1: Append ESP Trailer (Padding, Pad Length, Next Header=4 [IPv4])
+    // Step 2: Encrypt Payload [Inner IP + ESP Trailer] with AEAD (AES-256-GCM)
+    // Step 3: Prepend ESP Header (SPI + Anti-Replay Sequence Number) & Append ICV Auth Tag
+    // Step 4: Prepend Outer New Gateway IP Header (192.0.2.1 -> 192.0.2.2)
     var step by remember { mutableIntStateOf(0) }
 
     Column(
@@ -90,7 +87,7 @@ fun IpsecTunnelLevel(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "IPSEC ESP TUNNEL MODE DISSECTOR",
+                        text = "IPSEC ESP TUNNEL MODE DISSECTOR (RFC 4303)",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -99,16 +96,16 @@ fun IpsecTunnelLevel(
                 }
                 Text(
                     text = when (step) {
-                        0 -> "Step 1: Original internal IP packet (192.168.1.5 ➔ 192.168.2.10). In Tunnel Mode, the entire packet is encrypted!"
-                        1 -> "Step 2: Prepend ESP Header: SPI (Security Parameters Index) and Sequence Number (Anti-Replay protection)."
-                        2 -> "Step 3: Encrypt the Original IP Header + Payload with AES-256-CBC, shielding private routing topology."
-                        3 -> "Step 4: Append ESP Trailer: Variable padding byte alignment and Next Header protocol tag (4 = IPv4)."
-                        else -> "🎉 Tunnel Packet Complete! Appended ICV HMAC authentication tag and prepended outer New Gateway IP Header!"
+                        0 -> "Step 1: Original Internal Packet (198.51.100.5 ➔ 203.0.113.10). In ESP Tunnel Mode, the entire original IP packet becomes the encrypted inner payload!"
+                        1 -> "Step 2: Append ESP Trailer: Padding bytes + Pad Length + Next Header (4 = IPv4 encapsulation). The trailer is encrypted together with the payload!"
+                        2 -> "Step 3: AEAD Encrypt: AES-256-GCM shields the inner IP header and payload from intermediate surveillance."
+                        3 -> "Step 4: Prepend cleartext ESP Header (SPI + Sequence Number for Anti-Replay) and Append ICV Authentication Tag."
+                        else -> "🎉 Tunnel Packet Complete! Prepended Outer New Gateway IP Header (192.0.2.1 ➔ 192.0.2.2). The packet is ready for public transit!"
                     },
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
@@ -117,30 +114,30 @@ fun IpsecTunnelLevel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(if (isDark) Color(0xFF090E17) else Color(0xFFF8FAFC))
-                .border(1.5.dp, if (step >= 4) DuolingoGreen else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-                .padding(16.dp)
+                .border(1.5.dp, if (step >= 4) ArenaSuccessGreen else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "ESP TUNNEL PACKET STRUCTURE",
+                        text = "RFC 4303 PACKET BYTE STREAM",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
                         color = SubtextGray
                     )
                     Text(
-                        text = if (step >= 4) "TUNNEL SECURED 🔒" else "ASSEMBLING...",
-                        fontSize = 11.sp,
+                        text = if (step >= 4) "TUNNEL SEALED 🔒" else "STEP $step / 4",
+                        fontSize = 10.5.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = if (step >= 4) DuolingoGreen else AmberGold
+                        color = if (step >= 4) ArenaSuccessGreen else AmberGold
                     )
                 }
 
@@ -150,132 +147,91 @@ fun IpsecTunnelLevel(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // New Outer IP
+                    // Outer Gateway IP (Cleartext)
                     if (step >= 4) {
-                        PacketBlock("New IP", "Gateway IP", Color(0xFF3B82F6))
+                        PacketBlock("Outer New IP", "192.0.2.1 ➔ 192.0.2.2", Color(0xFF3B82F6), isEncrypted = false)
                     }
 
-                    // ESP Header
-                    if (step >= 1) {
-                        PacketBlock("ESP Header", "SPI & Seq# (Anti-Replay)", AmberGold)
+                    // ESP Header (Cleartext Authenticated)
+                    if (step >= 3) {
+                        PacketBlock("ESP Header", "SPI + Seq# (Anti-Replay)", AmberGold, isEncrypted = false)
                     }
 
-                    // Encrypted Section (Orig IP + Payload)
-                    if (step >= 2) {
-                        PacketBlock("🔒 Encrypted", "Orig IP + Data", DuolingoGreen)
-                    } else {
-                        PacketBlock("Cleartext", "Orig IP + Data", Color(0xFFEF4444))
-                    }
+                    // Encrypted Inner IP Packet
+                    val isPayloadEncrypted = step >= 2
+                    PacketBlock(
+                        if (isPayloadEncrypted) "CIPHERTEXT: Inner IP" else "PLAINTEXT: Inner IP",
+                        "198.51.100.5 ➔ 203.0.113.10",
+                        if (isPayloadEncrypted) Color(0xFFFF2A6D) else Color(0xFF10B981),
+                        isEncrypted = isPayloadEncrypted
+                    )
 
                     // ESP Trailer
-                    if (step >= 3) {
-                        PacketBlock("ESP Trailer", "Pad + NextHdr", Color(0xFFA855F7))
+                    if (step >= 1) {
+                        PacketBlock(
+                            if (isPayloadEncrypted) "CIPHERTEXT: Trailer" else "ESP Trailer",
+                            "Pad + NextHdr=4",
+                            if (isPayloadEncrypted) Color(0xFFFF2A6D) else AmberGold,
+                            isEncrypted = isPayloadEncrypted
+                        )
                     }
 
-                    // ICV Auth Tag
-                    if (step >= 4) {
-                        PacketBlock("ESP Auth", "ICV MAC", Color(0xFF10B981))
+                    // ICV Authentication Tag
+                    if (step >= 3) {
+                        PacketBlock("ICV Auth Tag", "AEAD GMAC Tag (16B)", ArenaSuccessGreen, isEncrypted = false)
                     }
+                }
+
+                // Legend
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "■ Blue/Gold: Cleartext Headers", fontSize = 9.5.sp, color = SubtextGray)
+                    Text(text = "■ Pink: Encrypted Payload", fontSize = 9.5.sp, color = Color(0xFFFF2A6D))
+                    Text(text = "■ Green: ICV Tag", fontSize = 9.5.sp, color = ArenaSuccessGreen)
                 }
             }
         }
 
-        // Feature Highlight Card
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (step >= 1) AmberGold.copy(alpha = 0.12f)
-                    else Color(0xFF3B82F6).copy(alpha = 0.12f)
-                )
-                .border(
-                    1.dp,
-                    if (step >= 1) AmberGold.copy(alpha = 0.4f)
-                    else Color(0xFF3B82F6).copy(alpha = 0.4f),
-                    RoundedCornerShape(16.dp)
-                )
-                .padding(14.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "ANTI-REPLAY WINDOW SECURITY:",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = AmberGold
-                )
-                Text(
-                    text = "The 32-bit Sequence Number in the ESP Header monotonically increments with every packet. The receiver maintains a 64-packet bitmap window to detect and drop duplicate packets injected by eavesdroppers!",
-                    fontSize = 12.sp,
-                    color = dynamicColors.textPrimary,
-                    lineHeight = 17.sp
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Action Stepper Button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (step >= 4) Brush.horizontalGradient(listOf(DuolingoGreen, Color(0xFF059669)))
-                    else Brush.horizontalGradient(listOf(AmberGold, Color(0xFFD97706)))
-                )
-                .pressScale(targetScale = 0.96f)
-                .clickable {
-                    if (step < 4) {
-                        step++
-                        onActionSuccess()
-                    } else {
-                        onComplete()
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = if (step >= 4) Icons.Default.Check else Icons.Default.Lock,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = when (step) {
-                        0 -> "1. ATTACH ESP HEADER (SPI + SEQ#) →"
-                        1 -> "2. ENCRYPT ENTIRE INNER PACKET →"
-                        2 -> "3. ATTACH ESP TRAILER (PAD + NEXT) →"
-                        3 -> "4. SEAL ICV & PREPEND NEW IP →"
-                        else -> "TUNNEL FORGED! ADVANCE BASTION →"
-                    },
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.Black,
-                    letterSpacing = 0.5.sp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+        Tactile3DButton(
+            title = when (step) {
+                0 -> "1. Append ESP Trailer (NextHdr=4) ➔"
+                1 -> "2. AEAD Encrypt [Inner IP + Trailer] 🔒"
+                2 -> "3. Add ESP Header (SPI/Seq) & ICV Tag ➔"
+                3 -> "4. Prepend Outer Gateway IP (192.0.2.1) ➔"
+                else -> "Deploy Encapsulated Tunnel Packet ➔"
+            },
+            style = if (step >= 4) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
+            onClick = {
+                if (step < 4) {
+                    step++
+                    onActionSuccess()
+                } else {
+                    onComplete()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Composable
-private fun PacketBlock(title: String, subtitle: String, color: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+private fun PacketBlock(title: String, subtitle: String, color: Color, isEncrypted: Boolean) {
+    Box(
         modifier = Modifier
+            .height(54.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(color.copy(alpha = 0.20f))
+            .background(color.copy(alpha = 0.18f))
             .border(1.2.dp, color, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = title, fontSize = 11.sp, fontWeight = FontWeight.Black, color = color)
-        Text(text = subtitle, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = title, fontSize = 10.sp, fontWeight = FontWeight.Black, color = color)
+            Text(text = subtitle, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+        }
     }
 }

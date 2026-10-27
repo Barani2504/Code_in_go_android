@@ -1,6 +1,5 @@
 package com.simats.codeingo.ui.arenas.cyber_bastion.levels
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,18 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,10 +30,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoRed
+import com.simats.codeingo.ui.theme.ArenaDangerRed
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
+
+enum class TlsSuite(
+    val token: String,
+    val aead: String,
+    val hkdfHash: String,
+    val isTls13Standard: Boolean,
+    val note: String
+) {
+    AES_128_GCM_SHA256("TLS_AES_128_GCM_SHA256", "AES-128-GCM", "SHA-256", true, "Standard TLS 1.3 AEAD"),
+    AES_256_GCM_SHA384("TLS_AES_256_GCM_SHA384", "AES-256-GCM", "SHA-384", true, "High-Security TLS 1.3 AEAD"),
+    CHACHA20_POLY1305_SHA256("TLS_CHACHA20_POLY1305_SHA256", "ChaCha20-Poly1305", "SHA-256", true, "Fast Mobile TLS 1.3 AEAD"),
+    LEGACY_RC4("TLS_RSA_WITH_RC4_128_SHA", "RC4-128", "SHA-1", false, "Broken stream cipher; forbidden in TLS 1.3"),
+    LEGACY_3DES("TLS_RSA_WITH_3DES_EDE_CBC_SHA", "3DES-CBC", "SHA-1", false, "Sweet32 64-bit block collision; forbidden")
+}
+
+enum class SupportedGroup(
+    val groupName: String,
+    val curveType: String,
+    val hasForwardSecrecy: Boolean
+) {
+    X25519("X25519", "Curve25519 ECDHE", true),
+    SECP256R1("secp256r1", "NIST P-256 ECDHE", true),
+    STATIC_RSA("Static RSA (Legacy)", "No Forward Secrecy", false)
+}
 
 @Composable
 fun CipherSuiteLabLevel(
@@ -54,40 +71,33 @@ fun CipherSuiteLabLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
 
-    // Interactive Slots for TLS 1.3 AEAD Suite Assembler
-    var selectedKex by remember { mutableStateOf("ECDHE (X25519)") }
-    var selectedCipher by remember { mutableStateOf("AES-256-GCM") }
-    var selectedHash by remember { mutableStateOf("SHA-384") }
+    var selectedSuite by remember { mutableStateOf(TlsSuite.AES_128_GCM_SHA256) }
+    var selectedGroup by remember { mutableStateOf(SupportedGroup.X25519) }
 
-    val isKexSecure = selectedKex == "ECDHE (X25519)"
-    val isCipherSecure = selectedCipher == "AES-256-GCM" || selectedCipher == "CHACHA20-POLY1305"
-    val isHashSecure = selectedHash == "SHA-384"
-    val isSuiteSecure = isKexSecure && isCipherSecure && isHashSecure
-
-    var hasAttemptedHandshake by remember { mutableStateOf(false) }
-
-    val sectionAccent = if (dynamicColors.isDark) AmberGold else Color(0xFFB45309)
+    val isSuiteSecure = selectedSuite.isTls13Standard
+    val isGroupSecure = selectedGroup.hasForwardSecrecy
+    val isHandshakeCompliant = isSuiteSecure && isGroupSecure
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "TLS 1.3 AEAD SUITE LAB",
+                text = "TLS 1.3 CIPHER SUITE & KEY EXCHANGE LAB",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
-                color = sectionAccent,
+                color = AmberGold,
                 letterSpacing = 1.sp
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Assemble Authenticated Encryption with Associated Data (AEAD)",
+                text = "RFC 8446: AEAD + HKDF Hash Suite & Supported Group Extension",
                 fontSize = 10.5.sp,
-                color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569),
+                color = dynamicColors.textSecondary,
                 textAlign = TextAlign.Center
             )
         }
@@ -96,239 +106,173 @@ fun CipherSuiteLabLevel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.85f) else Color.White)
-                .border(1.dp, if (dynamicColors.isDark) sectionAccent.copy(alpha = 0.4f) else Color(0xFFCBD5E1), RoundedCornerShape(12.dp))
-                .padding(10.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(dynamicColors.cardBorder.copy(alpha = 0.2f))
+                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                .padding(12.dp)
         ) {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "🔒 TLS 1.3 Pruning & AEAD Mandate",
-                    fontSize = 12.sp,
+                    text = "🔒 RFC 8446 Architecture:",
+                    fontSize = 11.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = sectionAccent
+                    color = AmberGold
                 )
-                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "TLS 1.3 removed legacy algorithms (Static RSA, RC4, 3DES, CBC mode, SHA-1). Only modern AEAD ciphers that combine confidentiality and integrity in a single cryptographic primitive are allowed!",
-                    fontSize = 11.sp,
-                    color = if (dynamicColors.isDark) dynamicColors.textPrimary else Color(0xFF334155),
-                    lineHeight = 15.sp
+                    text = "In TLS 1.3, the Cipher Suite specifies ONLY the AEAD encryption primitive and HKDF hash algorithm. Key exchange is negotiated independently via the Supported Groups extension! All suites must provide AEAD integrity; static RSA is forbidden.",
+                    fontSize = 11.5.sp,
+                    color = dynamicColors.textPrimary,
+                    lineHeight = 16.sp
                 )
             }
         }
 
-        // Live Generated Suite Token Badge
+        // Live Negotiated Suite Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(if (dynamicColors.isDark) dynamicColors.cardBackground else Color.White)
-                .border(
-                    1.5.dp,
-                    if (isSuiteSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed,
-                    RoundedCornerShape(12.dp)
-                )
-                .padding(10.dp)
+                .background(if (isHandshakeCompliant) ArenaSuccessGreen.copy(alpha = 0.12f) else ArenaDangerRed.copy(alpha = 0.12f))
+                .border(1.5.dp, if (isHandshakeCompliant) ArenaSuccessGreen else ArenaDangerRed, RoundedCornerShape(12.dp))
+                .padding(12.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "NEGOTIATED CIPHER SUITE TOKEN",
-                    fontSize = 9.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = dynamicColors.textSecondary
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "NEGOTIATED TLS 1.3 PARAMETERS", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "TLS_${selectedCipher.replace("-", "_")}_$selectedHash",
+                    text = selectedSuite.token,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = if (isSuiteSecure) DuolingoGreen else DuolingoRed,
-                    textAlign = TextAlign.Center
+                    fontWeight = FontWeight.Black,
+                    color = if (isSuiteSecure) ArenaSuccessGreen else ArenaDangerRed
+                )
+                Text(
+                    text = "Key Share Group: ${selectedGroup.groupName} (${selectedGroup.curveType})",
+                    fontSize = 10.5.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isGroupSecure) ArenaSuccessGreen else ArenaDangerRed
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = if (isSuiteSecure) "✓ AEAD Compliant • Forward Secrecy Guaranteed"
-                    else "⚠️ Insecure Primitives Present in Suite!",
+                    text = if (isHandshakeCompliant) "✓ Valid TLS 1.3 AEAD • Forward Secrecy Guaranteed" else "⚠️ Insecure / Forbidden in RFC 8446!",
                     fontSize = 10.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isSuiteSecure) DuolingoGreen else DuolingoRed
+                    color = if (isHandshakeCompliant) ArenaSuccessGreen else ArenaDangerRed
                 )
             }
         }
 
-        // Slot 1: Key Exchange Selector
+        // Section 1: TLS 1.3 Cipher Suite Selector (AEAD + HKDF Hash)
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "SLOT 1: KEY EXCHANGE (FORWARD SECRECY)",
-                fontSize = 10.5.sp,
+                text = "1. SELECT CIPHER SUITE (AEAD + HKDF HASH):",
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
-                color = sectionAccent
+                color = AmberGold
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("ECDHE (X25519)", "Static RSA (Legacy)").forEach { kex ->
-                    val isSelected = selectedKex == kex
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) (if (kex.contains("ECDHE")) DuolingoGreen.copy(alpha = 0.2f) else DuolingoRed.copy(alpha = 0.2f))
-                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
-                            )
-                            .border(
-                                if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (kex.contains("ECDHE")) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { selectedKex = kex }
-                            .padding(vertical = 10.dp, horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
+
+            TlsSuite.values().forEach { suite ->
+                val isSelected = selectedSuite == suite
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isSelected) {
+                                if (suite.isTls13Standard) ArenaSuccessGreen.copy(alpha = 0.2f) else ArenaDangerRed.copy(alpha = 0.2f)
+                            } else dynamicColors.cardBorder.copy(alpha = 0.2f)
+                        )
+                        .border(
+                            if (isSelected) 2.dp else 1.dp,
+                            if (isSelected) (if (suite.isTls13Standard) ArenaSuccessGreen else ArenaDangerRed) else dynamicColors.cardBorder,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .clickable { selectedSuite = suite }
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Column {
+                            Text(
+                                text = suite.token,
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = dynamicColors.textPrimary
+                            )
+                            Text(text = suite.note, fontSize = 9.sp, color = SubtextGray)
+                        }
                         Text(
-                            text = kex,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                            color = if (isSelected) (if (kex.contains("ECDHE")) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFFE2E8F0) else Color(0xFF0F172A)),
-                            textAlign = TextAlign.Center
+                            text = if (suite.isTls13Standard) "✓ TLS 1.3" else "FORBIDDEN",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (suite.isTls13Standard) ArenaSuccessGreen else ArenaDangerRed
                         )
                     }
                 }
             }
         }
 
-        // Slot 2: Bulk Cipher (AEAD vs Legacy) in a clean 2x2 grid
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        // Section 2: Key Share Supported Group
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "SLOT 2: ENCRYPTION & AUTHENTICATION (AEAD)",
+                text = "2. SUPPORTED GROUP (KEY EXCHANGE EXTENSION):",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
-                color = sectionAccent
+                color = AmberGold
             )
 
-            val cipherPairs = listOf(
-                Pair(Pair("AES-256-GCM", "Modern AEAD"), Pair("CHACHA20-POLY1305", "Fast AEAD")),
-                Pair(Pair("3DES-EDE-CBC", "Legacy 64-bit"), Pair("RC4-128", "Deprecated stream"))
-            )
-
-            cipherPairs.forEach { (c1, c2) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(c1, c2).forEach { (cipher, desc) ->
-                        val isSelected = selectedCipher == cipher
-                        val isSecure = cipher.contains("GCM") || cipher.contains("POLY1305")
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.15f) else DuolingoRed.copy(alpha = 0.15f))
-                                    else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
-                                )
-                                .border(
-                                    if (isSelected) 2.dp else 1.dp,
-                                    if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
-                                    RoundedCornerShape(10.dp)
-                                )
-                                .clickable { selectedCipher = cipher }
-                                .padding(horizontal = 8.dp, vertical = 8.dp)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    text = cipher,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color.White else Color(0xFF0F172A)),
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    text = desc,
-                                    fontSize = 9.5.sp,
-                                    color = if (dynamicColors.isDark) dynamicColors.textSecondary else Color(0xFF475569),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                SupportedGroup.values().forEach { group ->
+                    val isSelected = selectedGroup == group
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (isSelected) {
+                                    if (group.hasForwardSecrecy) ArenaSuccessGreen.copy(alpha = 0.2f) else ArenaDangerRed.copy(alpha = 0.2f)
+                                } else dynamicColors.cardBorder.copy(alpha = 0.2f)
+                            )
+                            .border(
+                                if (isSelected) 2.dp else 1.dp,
+                                if (isSelected) (if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed) else dynamicColors.cardBorder,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .clickable { selectedGroup = group }
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = group.groupName, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, textAlign = TextAlign.Center)
+                            Text(text = if (group.hasForwardSecrecy) "PFS ✓" else "NO PFS ❌", fontSize = 9.sp, fontWeight = FontWeight.Black, color = if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed)
                         }
                     }
                 }
             }
         }
 
-        // Slot 3: Hash Algorithm
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = "SLOT 3: HKDF PRF HASH",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                color = sectionAccent
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("SHA-384", "SHA-1 (Legacy Broken)").forEach { hash ->
-                    val isSelected = selectedHash == hash
-                    val isSecure = hash.startsWith("SHA-384")
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) (if (isSecure) DuolingoGreen.copy(alpha = 0.2f) else DuolingoRed.copy(alpha = 0.2f))
-                                else (if (dynamicColors.isDark) Color(0xFF0F172A).copy(alpha = 0.6f) else Color.White)
-                            )
-                            .border(
-                                if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFF334155) else Color(0xFFCBD5E1)),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { selectedHash = hash }
-                            .padding(vertical = 8.dp, horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = hash,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                            color = if (isSelected) (if (isSecure) (if (dynamicColors.isDark) DuolingoGreen else Color(0xFF059669)) else DuolingoRed) else (if (dynamicColors.isDark) Color(0xFFE2E8F0) else Color(0xFF0F172A)),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Handshake Execution Action Button
-        Button(
+        Tactile3DButton(
+            title = if (isHandshakeCompliant) "Authorize TLS 1.3 Handshake ✓" else "Select Secure RFC 8446 Suite & Group",
+            style = if (isHandshakeCompliant) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
             onClick = {
-                hasAttemptedHandshake = true
-                if (isSuiteSecure) {
+                if (isHandshakeCompliant) {
                     onActionSuccess()
                     onComplete()
                 } else {
                     onDeductHeart()
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(46.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (hasAttemptedHandshake && isSuiteSecure) DuolingoGreen
-                else if (hasAttemptedHandshake) DuolingoRed
-                else AmberGold
-            )
-        ) {
-            Text(
-                text = if (hasAttemptedHandshake && isSuiteSecure) "✓ TLS 1.3 HANDSHAKE ESTABLISHED"
-                else if (hasAttemptedHandshake) "✕ HANDSHAKE REJECTED (INSECURE SUITE)"
-                else "NEGOTIATE SECURE TLS 1.3 SESSION",
-                fontWeight = FontWeight.Black,
-                fontSize = 12.sp,
-                color = Color.Black
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

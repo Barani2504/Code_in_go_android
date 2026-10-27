@@ -163,4 +163,165 @@ class ArenaCryptoEngineTest {
         assertTrue("Scientific summary should contain exact expected phrase",
             result.scientificSummary.contains("about 50% of output bits flip on average"))
     }
+
+    @Test
+    fun testModPowEulerTheoremVectors() {
+        // 3^10 mod 1000 = 49
+        assertEquals(49L, ArenaCryptoEngine.modPow(3, 10, 1000))
+        // 3^2023 mod 1000 = 827 (Euler totient phi(1000) = 400; 3^400 = 1; 2023 = 5*400 + 23; 3^23 mod 1000 = 827)
+        assertEquals(827L, ArenaCryptoEngine.modPow(3, 2023, 1000))
+    }
+
+    @Test
+    fun testSphinxBossWordsCaesarShift() {
+        // Test that Caesar shift K=3 encrypts every boss word correctly
+        assertEquals("PDVWHU", ArenaCryptoEngine.caesarEncrypt("MASTER", 3))
+        assertEquals("VHFUHW", ArenaCryptoEngine.caesarEncrypt("SECRET", 3))
+        assertEquals("VKDGRZ", ArenaCryptoEngine.caesarEncrypt("SHADOW", 3))
+
+        // And verify round-trip decryption
+        assertEquals("MASTER", ArenaCryptoEngine.caesarDecrypt("PDVWHU", 3))
+        assertEquals("SECRET", ArenaCryptoEngine.caesarDecrypt("VHFUHW", 3))
+        assertEquals("SHADOW", ArenaCryptoEngine.caesarDecrypt("VKDGRZ", 3))
+    }
+
+    @Test
+    fun testRailFenceZigzagTestVector() {
+        val plaintext = "WEAREDISCOVEREDFLEEATONCE"
+        val expectedCipher = "WECRLTEERDSOEEFEAOCAIVDEN"
+        val encrypted = ArenaCryptoEngine.railFenceEncrypt(plaintext, rails = 3)
+        assertEquals(expectedCipher, encrypted)
+
+        val decrypted = ArenaCryptoEngine.railFenceDecrypt(encrypted, rails = 3)
+        assertEquals(plaintext, decrypted)
+    }
+
+    @Test
+    fun testToyF17EllipticCurveOperations() {
+        // G = (5, 1) on y^2 = x^3 + 2x + 2 mod 17
+        assertTrue(ArenaCryptoEngine.ToyF17Curve.isPointOnCurve(ArenaCryptoEngine.ToyF17Curve.G))
+
+        // 2G = (6, 3)
+        val twoG = ArenaCryptoEngine.ToyF17Curve.double(ArenaCryptoEngine.ToyF17Curve.G)
+        assertEquals(6, twoG.x)
+        assertEquals(3, twoG.y)
+        assertTrue(ArenaCryptoEngine.ToyF17Curve.isPointOnCurve(twoG))
+
+        // Multiply by group order 19 yields point at infinity O
+        val orderPoint = ArenaCryptoEngine.ToyF17Curve.multiply(19, ArenaCryptoEngine.ToyF17Curve.G)
+        assertTrue("19*G must be point at infinity", orderPoint.isInfinity)
+    }
+
+    @Test
+    fun testToyRSA5_11RoundTrip() {
+        val message = 9L
+        val cipher = ArenaCryptoEngine.ToyRSA5_11.encrypt(message)
+        val decrypted = ArenaCryptoEngine.ToyRSA5_11.decrypt(cipher)
+        assertEquals(message, decrypted)
+    }
+
+    @Test
+    fun testHmacStepsMatchesStandardHmac() {
+        val key = "SecretKey123".toByteArray(Charsets.UTF_8)
+        val message = "MessagePayload".toByteArray(Charsets.UTF_8)
+        val steps = ArenaCryptoEngine.computeHmacSteps(key, message)
+        val direct = ArenaCryptoEngine.bytesToHex(ArenaCryptoEngine.hmacSha256(key, message))
+        assertEquals(direct, steps.outerTagHex)
+    }
+
+    @Test
+    fun testSynCookieDeterministicClock() {
+        val secretKey = "SuperSecretKey99".toByteArray(Charsets.UTF_8)
+        val fixedClockMs = 1700000000000L // Fixed timestamp for determinism
+        val cookie = ArenaCryptoEngine.computeSynCookie(
+            srcIp = "192.0.2.10",
+            dstIp = "198.51.100.1",
+            srcPort = 54321,
+            dstPort = 443,
+            secretKey = secretKey,
+            clockMs = fixedClockMs
+        )
+        // Verify with same clock
+        assertTrue(
+            "SYN cookie must verify with same clock",
+            ArenaCryptoEngine.verifySynCookie(
+                cookie = cookie,
+                srcIp = "192.0.2.10",
+                dstIp = "198.51.100.1",
+                srcPort = 54321,
+                dstPort = 443,
+                secretKey = secretKey,
+                currentClockMs = fixedClockMs
+            )
+        )
+        // Verify that expired cookie (e.g. 10 minutes later) fails
+        val futureClockMs = fixedClockMs + 10 * 60 * 1000L
+        assertTrue(
+            "Expired SYN cookie must be rejected",
+            !ArenaCryptoEngine.verifySynCookie(
+                cookie = cookie,
+                srcIp = "192.0.2.10",
+                dstIp = "198.51.100.1",
+                srcPort = 54321,
+                dstPort = 443,
+                secretKey = secretKey,
+                currentClockMs = futureClockMs,
+                maxAgeMinutes = 4
+            )
+        )
+    }
+
+    @Test
+    fun testAesDiffusionRoundsMeasureRealBitDiffs() {
+        val in1 = ByteArray(16) { 0x00 }
+        val in2 = ByteArray(16) { 0x00 }
+        in2[0] = 0x01 // 1-bit input difference
+
+        val diffs = ArenaCryptoEngine.computeAesDiffusionRounds(in1, in2)
+        assertEquals(4, diffs.size) // Round 0, 1, 2, 3
+        assertEquals(1, diffs[0].totalDifferingBits) // Exactly 1 bit flipped initially
+        assertTrue("Round 1 must exhibit diffusion", diffs[1].totalDifferingBits > 1)
+        assertTrue("Round 2 must exhibit significant diffusion", diffs[2].totalDifferingBits > 15)
+        // Round 3 should reach ~50% of 128 bits (~40..85 bits)
+        assertTrue("Round 3 must diffuse to around 50% of 128 bits", diffs[3].totalDifferingBits in 35..90)
+    }
+
+    @Test
+    fun testAddRoundKeySelfInverseProperty() {
+        val stateByte = 0xA5
+        val targetCipher = 0xF9
+        // Self-inverse property: S ⊕ K = C  <=>  K = S ⊕ C
+        val keyByte = stateByte xor targetCipher
+        assertEquals(0x5C, keyByte)
+        assertEquals(targetCipher, stateByte xor keyByte)
+    }
+
+    @Test
+    fun testRailFenceDefendTheWallVector() {
+        val message = "DEFENDTHEWALLX"
+        val encrypted = ArenaCryptoEngine.railFenceEncrypt(message, 3)
+        assertEquals("DNELEEDHWLXFTA", encrypted)
+        val decrypted = ArenaCryptoEngine.railFenceDecrypt(encrypted, 3)
+        assertEquals(message, decrypted)
+    }
+
+    @Test
+    fun testToyRsaMathematicalConsistency() {
+        val p = ArenaCryptoEngine.ToyRSA5_11.P
+        val q = ArenaCryptoEngine.ToyRSA5_11.Q
+        val n = ArenaCryptoEngine.ToyRSA5_11.N
+        val phi = ArenaCryptoEngine.ToyRSA5_11.PHI
+        val e = ArenaCryptoEngine.ToyRSA5_11.E
+        val d = ArenaCryptoEngine.ToyRSA5_11.D
+
+        assertEquals(55L, n)
+        assertEquals(40L, phi)
+        assertEquals(1L, (e * d) % phi)
+
+        // Test with M = 2
+        val c = ArenaCryptoEngine.ToyRSA5_11.encrypt(2L)
+        assertEquals(8L, c) // 2^3 mod 55 = 8
+        val decrypted = ArenaCryptoEngine.ToyRSA5_11.decrypt(c)
+        assertEquals(2L, decrypted) // 8^27 mod 55 = 2
+    }
 }

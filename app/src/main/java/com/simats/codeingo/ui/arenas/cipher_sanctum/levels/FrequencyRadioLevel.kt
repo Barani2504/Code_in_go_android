@@ -1,10 +1,8 @@
 package com.simats.codeingo.ui.arenas.cipher_sanctum.levels
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,10 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -34,44 +30,63 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
-import com.simats.codeingo.ui.theme.pressScale
-import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 fun FrequencyRadioLevel(onComplete: () -> Unit) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
 
-    // Frequencies of top letters in English
-    val frequencyTable = listOf(
+    // Seeded English text (97 characters):
+    // E appears 14 times (~14.4%), T appears 11 times (~11.3%), A appears 7 times (~7.2%)
+    val originalPlaintext = "THE ANCIENT PHOENIX RISES FROM THE ASHES TO RESTORE THE CRYPTOGRAPHIC BALANCE AND PROTECT ALL REALMS"
+    val actualShift = 3
+    val ciphertext = remember { ArenaCryptoEngine.caesarEncrypt(originalPlaintext, actualShift) }
+
+    // Slider controls candidate decryption shift k (0..25)
+    var sliderShift by remember { mutableFloatStateOf(10f) }
+    val currentKey = sliderShift.roundToInt().coerceIn(0, 25)
+
+    // Decrypt ciphertext with current key
+    val candidatePlaintext = remember(currentKey) {
+        ArenaCryptoEngine.caesarDecrypt(ciphertext, currentKey)
+    }
+
+    // Top expected English letters and natural distribution percentages
+    val referenceEnglishFreq = listOf(
         'E' to 12.7f,
         'T' to 9.1f,
         'A' to 8.2f,
         'O' to 7.5f,
         'I' to 7.0f,
-        'N' to 6.7f,
-        'S' to 6.3f,
-        'H' to 6.1f,
-        'R' to 6.0f,
-        'D' to 4.3f
+        'N' to 6.7f
     )
 
-    // Target is tuning into letter 'E' (peak at 12.7 MHz)
-    var tunedFrequency by remember { mutableFloatStateOf(4.0f) }
-    val targetFreq = 12.7f
-    val delta = abs(tunedFrequency - targetFreq)
-    val isLocked = delta < 0.6f
+    // Compute frequency of letters in candidate plaintext
+    val candidateFrequencies = remember(candidatePlaintext) {
+        val letterOnly = candidatePlaintext.filter { it.isLetter() }
+        val total = letterOnly.length.toFloat().coerceAtLeast(1f)
+        val counts = letterOnly.groupingBy { it }.eachCount()
+        referenceEnglishFreq.map { (char, _) ->
+            val count = counts[char] ?: 0
+            char to (count / total) * 100f
+        }
+    }
+
+    val isLocked = currentKey == actualShift
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -99,7 +114,7 @@ fun FrequencyRadioLevel(onComplete: () -> Unit) {
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "RADIO SPECTRUM CRYPTANALYZER",
+                        text = "FREQUENCY ANALYSIS SPECTROGRAPH",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -107,37 +122,38 @@ fun FrequencyRadioLevel(onComplete: () -> Unit) {
                     )
                 }
                 Text(
-                    text = "Sweep the radio tuner to identify the highest natural English letter frequency (~12.7%). Lock onto the carrier spike to defeat substitution ciphers!",
-                    fontSize = 12.5.sp,
+                    text = "Substitution ciphers preserve letter frequency signatures. In English, 'E' accounts for ~12.7% of characters, 'T' ~9.1%. Shift the decryption key until the highest ciphertext frequency aligns with 'E'!",
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
 
-        // Oscilloscope / Spectrum Visualizer Canvas
+        // Letter Histogram Spectrum Visualizer
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .background(Color(0xFF090E17))
-                .border(1.5.dp, if (isLocked) DuolingoGreen else AmberGold.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+                .border(1.5.dp, if (isLocked) ArenaSuccessGreen else AmberGold.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
                 .padding(12.dp)
         ) {
             Canvas(modifier = Modifier.fillMaxWidth().height(100.dp)) {
-                val barWidth = size.width / (frequencyTable.size * 1.5f)
+                val count = candidateFrequencies.size
+                val barWidth = size.width / (count * 2f)
                 val maxHeight = size.height
 
-                frequencyTable.forEachIndexed { i, (letter, freq) ->
-                    val x = i * (barWidth * 1.5f) + 12f
-                    val barHeight = (freq / 14f) * (maxHeight * 0.85f)
+                candidateFrequencies.forEachIndexed { i, (letter, freq) ->
+                    val x = i * (barWidth * 2f) + barWidth * 0.5f
+                    val barHeight = ((freq / 16f) * (maxHeight * 0.85f)).coerceIn(4f, maxHeight)
                     val y = maxHeight - barHeight
 
-                    val isTargetBar = letter == 'E'
-                    val barColor = if (isTargetBar && isLocked) DuolingoGreen
-                    else if (isTargetBar) AmberGold
+                    val isTargetE = letter == 'E'
+                    val barColor = if (isTargetE && isLocked) ArenaSuccessGreen
+                    else if (isTargetE) AmberGold
                     else Color(0xFF334155)
 
                     drawRoundRect(
@@ -155,116 +171,86 @@ fun FrequencyRadioLevel(onComplete: () -> Unit) {
                     .align(Alignment.TopEnd)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (isLocked) DuolingoGreen.copy(alpha = 0.2f)
+                        if (isLocked) ArenaSuccessGreen.copy(alpha = 0.2f)
                         else Color.White.copy(alpha = 0.08f)
                     )
                     .border(
                         1.dp,
-                        if (isLocked) DuolingoGreen else SubtextGray.copy(alpha = 0.3f),
+                        if (isLocked) ArenaSuccessGreen else SubtextGray.copy(alpha = 0.3f),
                         RoundedCornerShape(10.dp)
                     )
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = if (isLocked) "CARRIER LOCKED: 'E' (~12.7%) ✓" else "TUNING SPECTRUM...",
+                    text = if (isLocked) "ALIGNED: 'E' PEAK IDENTIFIED ✓" else "ALIGNING CIPHERTEXT HISTOGRAM...",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = if (isLocked) DuolingoGreen else AmberGold
+                    color = if (isLocked) ArenaSuccessGreen else AmberGold
                 )
             }
         }
 
-        // Tuner Dial Control
+        // Shift Key Tuner Control
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(18.dp))
                 .background(if (isDark) Color(0xFF10192A) else Color(0xFFF8FAFC))
-                .border(1.2.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-                .padding(16.dp)
+                .border(1.2.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "SPECTRUM DEMODULATOR",
+                        text = "DECRYPTION SHIFT KEY (K)",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
                         color = SubtextGray
                     )
                     Text(
-                        text = "${String.format("%.1f", tunedFrequency)}% FREQ",
+                        text = "K = $currentKey",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = if (isLocked) DuolingoGreen else AmberGold
+                        color = if (isLocked) ArenaSuccessGreen else AmberGold
                     )
                 }
 
                 Slider(
-                    value = tunedFrequency,
-                    onValueChange = { tunedFrequency = it },
-                    valueRange = 1.0f..14.0f,
+                    value = sliderShift,
+                    onValueChange = { sliderShift = it },
+                    valueRange = 0f..25f,
+                    steps = 24,
                     colors = SliderDefaults.colors(
-                        thumbColor = if (isLocked) DuolingoGreen else AmberGold,
-                        activeTrackColor = if (isLocked) DuolingoGreen else AmberGold,
+                        thumbColor = if (isLocked) ArenaSuccessGreen else AmberGold,
+                        activeTrackColor = if (isLocked) ArenaSuccessGreen else AmberGold,
                         inactiveTrackColor = SubtextGray.copy(alpha = 0.3f)
                     )
                 )
 
-                // Frequency Legend
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Low Freq (Z, Q)", fontSize = 10.sp, color = SubtextGray)
-                    Text(text = "Target: Letter 'E' (12.7%)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AmberGold)
-                    Text(text = "14.0% Max", fontSize = 10.sp, color = SubtextGray)
-                }
+                // Decrypted Preview
+                Text(
+                    text = "DECRYPTED PREVIEW: \"${candidatePlaintext.take(38)}...\"",
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (isLocked) ArenaSuccessGreen else dynamicColors.textPrimary
+                )
             }
         }
 
-        // Demodulation Success Button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (isLocked) Brush.horizontalGradient(listOf(DuolingoGreen, Color(0xFF059669)))
-                    else Brush.horizontalGradient(listOf(Color(0xFF64748B), Color(0xFF475569)))
-                )
-                .pressScale(targetScale = 0.96f)
-                .clickable(enabled = isLocked) {
-                    onComplete()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = if (isLocked) "DEMODULATE & DECRYPT →" else "TUNE CARRIER TO 12.7%",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White,
-                    letterSpacing = 0.6.sp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+        Tactile3DButton(
+            title = if (isLocked) "Break Substitution Ward →" else "Align 'E' Peak (K=3)",
+            style = if (isLocked) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
+            isEnabled = isLocked,
+            onClick = onComplete,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

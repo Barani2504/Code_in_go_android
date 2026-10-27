@@ -38,12 +38,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoRed
+import com.simats.codeingo.ui.theme.ArenaDangerRed
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+
+enum class AesRoundOp(val displayName: String, val purpose: String) {
+    SUB_BYTES("SubBytes", "Non-linear byte substitution (Confusion via S-Box)"),
+    SHIFT_ROWS("ShiftRows", "Cyclic row shifting (Diffusion across columns)"),
+    MIX_COLUMNS("MixColumns", "Matrix multiplication in GF(2^8) (Column Diffusion)"),
+    ADD_ROUND_KEY("AddRoundKey", "Bitwise XOR with round subkey (Key mixing)")
+}
 
 @Composable
 fun BlockOverlordBossLevel(
@@ -59,9 +66,21 @@ fun BlockOverlordBossLevel(
     var currentPhase by remember { mutableIntStateOf(1) }
     var feedback by remember { mutableStateOf("The Block Overlord shields the AES Citadel! Break its cipher defenses!") }
 
-    // Phase 1: Round operations sequence assembly
-    val p1Sequence = remember { mutableStateListOf("MixColumns", "SubBytes", "AddRoundKey", "ShiftRows") }
-    val p1CorrectSequence = listOf("SubBytes", "ShiftRows", "MixColumns", "AddRoundKey")
+    // Phase 1: Round operations sequence assembly (typed enum matching)
+    val p1Sequence = remember {
+        mutableStateListOf(
+            AesRoundOp.MIX_COLUMNS,
+            AesRoundOp.SUB_BYTES,
+            AesRoundOp.ADD_ROUND_KEY,
+            AesRoundOp.SHIFT_ROWS
+        )
+    }
+    val p1CorrectSequence = listOf(
+        AesRoundOp.SUB_BYTES,
+        AesRoundOp.SHIFT_ROWS,
+        AesRoundOp.MIX_COLUMNS,
+        AesRoundOp.ADD_ROUND_KEY
+    )
 
     // Phase 2: Disarm Round 10 MixColumns trap
     var p2Round10MixColumnsDisabled by remember { mutableStateOf(false) }
@@ -87,7 +106,7 @@ fun BlockOverlordBossLevel(
                     text = "👾 THE BLOCK OVERLORD",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Black,
-                    color = DuolingoRed
+                    color = ArenaDangerRed
                 )
                 Text(
                     text = "PHASE $currentPhase OF 3",
@@ -114,7 +133,7 @@ fun BlockOverlordBossLevel(
                         .clip(RoundedCornerShape(7.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(DuolingoRed, Color(0xFFFF6D00))
+                                listOf(ArenaDangerRed, Color(0xFFFF6D00))
                             )
                         )
                 )
@@ -142,7 +161,7 @@ fun BlockOverlordBossLevel(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Tap any operation to swap with the first to arrange:\nSubBytes → ShiftRows → MixColumns → AddRoundKey",
+                        text = "Tap any operation to swap cyclically to arrange:\nSubBytes → ShiftRows → MixColumns → AddRoundKey",
                         fontSize = 10.sp,
                         color = dynamicColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -151,52 +170,60 @@ fun BlockOverlordBossLevel(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     p1Sequence.forEachIndexed { index, op ->
+                        val isCorrectPos = p1CorrectSequence[index] == op
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 3.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .height(50.dp)
+                                .padding(vertical = 2.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (p1CorrectSequence[index] == op) DuolingoGreen.copy(alpha = 0.15f)
+                                    if (isCorrectPos) ArenaSuccessGreen.copy(alpha = 0.15f)
                                     else dynamicColors.cardBorder.copy(alpha = 0.25f)
                                 )
                                 .border(
                                     1.dp,
-                                    if (p1CorrectSequence[index] == op) DuolingoGreen else dynamicColors.cardBorder,
-                                    RoundedCornerShape(8.dp)
+                                    if (isCorrectPos) ArenaSuccessGreen else dynamicColors.cardBorder,
+                                    RoundedCornerShape(10.dp)
                                 )
                                 .clickable {
-                                    // Swap with next position cyclically
                                     val nextPos = (index + 1) % 4
                                     val tmp = p1Sequence[index]
                                     p1Sequence[index] = p1Sequence[nextPos]
                                     p1Sequence[nextPos] = tmp
                                 }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(horizontal = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Column {
+                                Text(
+                                    text = "Step ${index + 1}: ${op.displayName}",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = dynamicColors.textPrimary
+                                )
+                                Text(
+                                    text = op.purpose,
+                                    fontSize = 9.sp,
+                                    color = dynamicColors.textSecondary
+                                )
+                            }
                             Text(
-                                text = "Step ${index + 1}: $op",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = dynamicColors.textPrimary
-                            )
-                            Text(
-                                text = if (p1CorrectSequence[index] == op) "✓ LOCKED" else "SWAP ⟳",
+                                text = if (isCorrectPos) "✓ LOCKED" else "SWAP ⟳",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (p1CorrectSequence[index] == op) DuolingoGreen else AmberGold
+                                color = if (isCorrectPos) ArenaSuccessGreen else AmberGold
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    val p1Solved = p1Sequence == p1CorrectSequence
-                    Duolingo3DButton(
+                    val p1Solved = p1Sequence.toList() == p1CorrectSequence
+                    Tactile3DButton(
                         title = if (p1Solved) "Strike Overlord (-35 HP)" else "Align Round Sequence",
-                        style = if (p1Solved) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.BLUE,
+                        style = if (p1Solved) Tactile3DButtonColor.AMBER else Tactile3DButtonColor.BLUE,
                         onClick = {
                             if (p1Solved) {
                                 bossHP = 65
@@ -235,9 +262,9 @@ fun BlockOverlordBossLevel(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (p2Round10MixColumnsDisabled) DuolingoGreen.copy(alpha = 0.15f) else DuolingoRed.copy(alpha = 0.15f))
-                            .border(1.dp, if (p2Round10MixColumnsDisabled) DuolingoGreen else DuolingoRed, RoundedCornerShape(12.dp))
-                            .padding(12.dp),
+                            .background(if (p2Round10MixColumnsDisabled) ArenaSuccessGreen.copy(alpha = 0.15f) else ArenaDangerRed.copy(alpha = 0.15f))
+                            .border(1.dp, if (p2Round10MixColumnsDisabled) ArenaSuccessGreen else ArenaDangerRed, RoundedCornerShape(12.dp))
+                            .padding(14.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -256,16 +283,16 @@ fun BlockOverlordBossLevel(
                                 fontSize = 11.sp,
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
-                                color = if (p2Round10MixColumnsDisabled) DuolingoGreen else DuolingoRed
+                                color = if (p2Round10MixColumnsDisabled) ArenaSuccessGreen else ArenaDangerRed
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Duolingo3DButton(
+                    Tactile3DButton(
                         title = if (p2Round10MixColumnsDisabled) "Reflect Round 10 Blast (-35 HP)" else "DISARM MIXCOLUMNS IN ROUND 10",
-                        style = if (p2Round10MixColumnsDisabled) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.GREEN,
+                        style = if (p2Round10MixColumnsDisabled) Tactile3DButtonColor.AMBER else Tactile3DButtonColor.GREEN,
                         onClick = {
                             if (!p2Round10MixColumnsDisabled) {
                                 p2Round10MixColumnsDisabled = true
@@ -300,22 +327,22 @@ fun BlockOverlordBossLevel(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Node Grid
+                    // Node Grid (48dp touch targets)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         repeat(4) { col ->
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 repeat(2) { row ->
                                     val idx = col * 2 + row
                                     val isNodeTapped = idx < p3NodesStabilized
                                     Box(
                                         modifier = Modifier
-                                            .size(46.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(if (isNodeTapped) DuolingoGreen else Color(0xFFFF2A6D).copy(alpha = 0.3f))
-                                            .border(1.dp, if (isNodeTapped) DuolingoGreen else Color(0xFFFF2A6D), RoundedCornerShape(8.dp))
+                                            .size(50.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(if (isNodeTapped) ArenaSuccessGreen else Color(0xFFFF2A6D).copy(alpha = 0.3f))
+                                            .border(1.dp, if (isNodeTapped) ArenaSuccessGreen else Color(0xFFFF2A6D), RoundedCornerShape(10.dp))
                                             .clickable(enabled = !isNodeTapped) {
                                                 p3NodesStabilized++
                                                 onActionSuccess()
@@ -326,7 +353,7 @@ fun BlockOverlordBossLevel(
                                             imageVector = if (isNodeTapped) Icons.Default.Check else Icons.Default.Bolt,
                                             contentDescription = null,
                                             tint = if (isNodeTapped) Color.Black else Color(0xFFFF2A6D),
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(22.dp)
                                         )
                                     }
                                 }
@@ -337,9 +364,9 @@ fun BlockOverlordBossLevel(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     val p3Solved = p3NodesStabilized >= 8
-                    Duolingo3DButton(
+                    Tactile3DButton(
                         title = if (p3Solved) "Deliver Final Citadel Strike (-30 HP)" else "Stabilize Surge ($p3NodesStabilized / 8)",
-                        style = if (p3Solved) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.BLUE,
+                        style = if (p3Solved) Tactile3DButtonColor.AMBER else Tactile3DButtonColor.BLUE,
                         onClick = {
                             if (p3Solved) {
                                 bossHP = 0

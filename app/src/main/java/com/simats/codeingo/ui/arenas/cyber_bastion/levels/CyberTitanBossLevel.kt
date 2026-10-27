@@ -31,9 +31,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoRed
+import com.simats.codeingo.ui.theme.ArenaDangerRed
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+
+enum class TitanPhase(val phaseNumber: Int) {
+    PHASE_1(1),
+    PHASE_2(2),
+    PHASE_3(3)
+}
+
+data class TitanChoice(
+    val id: String,
+    val text: String,
+    val isCorrect: Boolean,
+    val explanation: String
+)
+
+data class TitanChallenge(
+    val phase: TitanPhase,
+    val scenario: String,
+    val choices: List<TitanChoice>
+)
 
 @Composable
 fun CyberTitanBossLevel(
@@ -44,26 +63,48 @@ fun CyberTitanBossLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     var bossHP by remember { mutableIntStateOf(100) }
-    var currentPhase by remember { mutableIntStateOf(1) }
-    var selectedAnswer by remember { mutableStateOf<String?>(null) }
+    var currentPhase by remember { mutableStateOf(TitanPhase.PHASE_1) }
+    var selectedChoiceId by remember { mutableStateOf<String?>(null) }
     var feedback by remember { mutableStateOf("The Cyber Titan launches multi-vector network assaults! Defend the Cyber Bastion!") }
 
-    val phaseData = when (currentPhase) {
-        1 -> Triple(
-            "SYN Flood: Inbound half-open connection backlog saturated! Deploy countermeasure!",
-            "Deploy SYN Cookies (Stateless Handshake)",
-            listOf("Deploy SYN Cookies (Stateless Handshake)", "Disable Ingress Firewall", "Accept all half-open sockets", "Send ICMP Redirect")
+    val challenges = remember {
+        listOf(
+            TitanChallenge(
+                phase = TitanPhase.PHASE_1,
+                scenario = "SYN Flood Assault: Inbound TCP connection backlog is saturated with spoofed half-open handshakes! Deploy countermeasure:",
+                choices = listOf(
+                    TitanChoice("t1_correct", "Deploy SYN Cookies (Stateless Handshake)", true, "Correct: SYN Cookies allocate zero kernel memory until the final client ACK arrives!"),
+                    TitanChoice("t1_d1", "Disable Ingress Firewall", false, "Misconception: Disabling the firewall exposes all services to direct saturation."),
+                    TitanChoice("t1_d2", "Accept all half-open sockets", false, "Misconception: Accepting half-open sockets exhausts RAM in seconds."),
+                    TitanChoice("t1_d3", "Send ICMP Redirects", false, "Misconception: ICMP Redirects do not solve socket table memory exhaustion.")
+                )
+            ),
+            TitanChallenge(
+                phase = TitanPhase.PHASE_2,
+                scenario = "MITM Rogue Certificate: A compromised intermediate CA in the network path issued a fake certificate! Deploy defense:",
+                choices = listOf(
+                    TitanChoice("t2_correct", "Enforce Certificate Transparency & Pinning", true, "Correct: CT logs expose rogue intermediate CAs and public key pinning blocks fraudulent certs!"),
+                    TitanChoice("t2_d1", "Accept Self-Signed Certificate", false, "Misconception: Blindly accepting certificates eliminates all cryptographic authenticity."),
+                    TitanChoice("t2_d2", "Disable TLS Verification", false, "Misconception: Disabling verification opens plaintext eavesdropping to any MITM actor."),
+                    TitanChoice("t2_d3", "Downgrade to HTTP", false, "Misconception: Downgrading to cleartext HTTP removes all encryption entirely.")
+                )
+            ),
+            TitanChallenge(
+                phase = TitanPhase.PHASE_3,
+                scenario = "Perimeter Port Scanning: The Titan scans open TCP ports across the corporate perimeter! Deploy network perimeter policy:",
+                choices = listOf(
+                    TitanChoice("t3_correct", "Default-Deny Ingress Stateful Firewall", true, "Correct: Default-deny drops all unsolicited inbound port probes while allowing established sessions!"),
+                    TitanChoice("t3_d1", "Allow Any-Any Ingress Traffic", false, "Misconception: Any-Any ingress grants the attacker access to all internal open ports."),
+                    TitanChoice("t3_d2", "Disable WAF and IDS Rules", false, "Misconception: Disabling inspection blinds defenders to network probing."),
+                    TitanChoice("t3_d3", "Forward all traffic directly to DMZ", false, "Misconception: Unfiltered port forwarding exposes DMZ hosts to direct exploitation.")
+                )
+            )
         )
-        2 -> Triple(
-            "MITM Rogue Certificate: Compromised intermediate CA detected in path! Deploy defense!",
-            "Enforce Certificate Transparency & OCSP",
-            listOf("Enforce Certificate Transparency & OCSP", "Accept Self-Signed Certificate", "Disable TLS Verification", "Downgrade to HTTP")
-        )
-        else -> Triple(
-            "Data Exfiltration: Attacker probes open ports on perimeter! Deploy network policy!",
-            "Stateful Deep Packet Inspection (DPI)",
-            listOf("Stateful Deep Packet Inspection (DPI)", "Allow Any Any Traffic", "Disable WAF Rules", "Forward all traffic to DMZ")
-        )
+    }
+
+    val currentChallenge = challenges.first { it.phase == currentPhase }
+    val shuffledChoices = remember(currentPhase) {
+        currentChallenge.choices.shuffled()
     }
 
     Column(
@@ -78,10 +119,11 @@ fun CyberTitanBossLevel(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "👾 THE CYBER TITAN", fontSize = 16.sp, color = DuolingoRed, fontWeight = FontWeight.Black)
-            Text(text = "PHASE $currentPhase / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+            Text(text = "👾 THE CYBER TITAN", fontSize = 16.sp, color = ArenaDangerRed, fontWeight = FontWeight.Black)
+            Text(text = "PHASE ${currentPhase.phaseNumber} / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
         }
 
+        // Boss Health Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
@@ -94,11 +136,12 @@ fun CyberTitanBossLevel(
                     .fillMaxWidth(bossHP / 100f)
                     .height(14.dp)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(DuolingoRed)
+                    .background(ArenaDangerRed)
             )
         }
         Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textSecondary)
 
+        // Scenario Card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -109,52 +152,56 @@ fun CyberTitanBossLevel(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = phaseData.first, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, textAlign = TextAlign.Center)
+                Text(text = currentChallenge.scenario, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, textAlign = TextAlign.Center)
                 Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
             }
         }
 
+        // Choices Grid (48dp+ touch target)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            phaseData.third.chunked(2).forEach { rowOptions ->
+            shuffledChoices.chunked(2).forEach { rowOptions ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    rowOptions.forEach { opt ->
-                        val isCorrect = opt == phaseData.second
-                        val isSelected = selectedAnswer == opt
+                    rowOptions.forEach { choice ->
+                        val isSelected = selectedChoiceId == choice.id
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp)
+                                .height(56.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (isSelected) (if (isCorrect) DuolingoGreen else DuolingoRed)
+                                    if (isSelected) (if (choice.isCorrect) ArenaSuccessGreen else ArenaDangerRed)
                                     else dynamicColors.cardBorder.copy(alpha = 0.25f)
                                 )
                                 .border(1.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                                 .clickable {
-                                    selectedAnswer = opt
-                                    if (isCorrect) {
+                                    selectedChoiceId = choice.id
+                                    if (choice.isCorrect) {
                                         onActionSuccess()
                                         val newHP = maxOf(0, bossHP - 35)
                                         bossHP = newHP
-                                        if (newHP <= 0 || currentPhase >= 3) {
+                                        if (newHP <= 0 || currentPhase == TitanPhase.PHASE_3) {
                                             onDefeatBoss()
                                         } else {
-                                            currentPhase++
-                                            selectedAnswer = null
-                                            feedback = "💥 Attack neutralized! The Cyber Titan switches exploit vectors!"
+                                            currentPhase = when (currentPhase) {
+                                                TitanPhase.PHASE_1 -> TitanPhase.PHASE_2
+                                                TitanPhase.PHASE_2 -> TitanPhase.PHASE_3
+                                                TitanPhase.PHASE_3 -> TitanPhase.PHASE_3
+                                            }
+                                            selectedChoiceId = null
+                                            feedback = "💥 Titan assault deflected! ${choice.explanation}"
                                         }
                                     } else {
                                         onDeductHeart()
-                                        feedback = "❌ Network breached! Deploy standard cyber security countermeasures."
+                                        feedback = "❌ Network defense breached: ${choice.explanation}"
                                     }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = opt,
+                                text = choice.text,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (isSelected) Color.White else dynamicColors.textPrimary,
+                                color = if (isSelected && choice.isCorrect) Color.Black else dynamicColors.textPrimary,
                                 textAlign = TextAlign.Center
                             )
                         }

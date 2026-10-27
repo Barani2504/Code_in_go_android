@@ -1,10 +1,7 @@
 package com.simats.codeingo.ui.arenas.integrity_foundry.levels
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,26 +12,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,11 +33,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
 import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
-import com.simats.codeingo.ui.theme.DuolingoRed
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
-import kotlin.math.roundToInt
+import com.simats.codeingo.ui.theme.SubtextGray
 
 @Composable
 fun SignatureSealLevel(
@@ -61,16 +50,19 @@ fun SignatureSealLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
 
-    // Interactive state: Calibrating the Birthday Bound collision resistance
-    // User adjusts hash bit-length n and trial search space
-    var bitLengthIndex by remember { mutableIntStateOf(4) } // 0: 16b, 1: 32b, 2: 64b, 3: 128b, 4: 256b
-    val bitLengths = listOf(16, 32, 64, 128, 256)
-    val currentN = bitLengths[bitLengthIndex]
-    val birthdayBoundExponent = currentN / 2
+    // Hash-Then-Sign Verification (ToyRSA5_11: n=55, e=3, d=27):
+    // Digest h = 8 (from H(Message) mod 55)
+    // Signature s = h^d mod n = 8^27 mod 55 = 2
+    // Verification: s^e mod n = 2^3 mod 55 = 8 == h (Valid!)
+    val digestH = 8L
+    val privateD = 27L
+    val publicE = 3L
+    val modulusN = 55L
 
-    var calibratedTargetExponent by remember { mutableIntStateOf(64) }
-    var simulationTested by remember { mutableStateOf(false) }
-    var isCorrectMatch by remember { mutableStateOf(false) }
+    val signatureS = remember { ArenaCryptoEngine.modPow(digestH, privateD, modulusN) } // 2L
+    val verifiedDigest = remember { ArenaCryptoEngine.modPow(signatureS, publicE, modulusN) } // 8L
+
+    var step by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = modifier
@@ -81,7 +73,7 @@ fun SignatureSealLevel(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "BIRTHDAY BOUND RADAR",
+                text = "ASYMMETRIC DIGITAL SIGNATURE SEAL",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 color = AmberGold,
@@ -89,14 +81,14 @@ fun SignatureSealLevel(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Square-root collision search complexity: O(2^(n/2))",
+                text = "Hash-Then-Sign: Sign with Private Key d • Verify with Public Key e",
                 fontSize = 11.sp,
                 color = dynamicColors.textSecondary,
                 textAlign = TextAlign.Center
             )
         }
 
-        // Educational premise box
+        // Explanatory Card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,16 +97,13 @@ fun SignatureSealLevel(
                 .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                 .padding(14.dp)
         ) {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(imageVector = Icons.Default.VpnKey, contentDescription = null, tint = AmberGold, modifier = Modifier.size(16.dp))
+                    Text(text = "Non-Repudiation & Integrity:", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+                }
                 Text(
-                    text = "🎯 Birthday Paradox Collision Calibrator",
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AmberGold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Finding ANY two messages m₁ ≠ m₂ such that H(m₁) = H(m₂) requires only ~√(2ⁿ) = 2^(n/2) hash evaluations with 50% probability, halving nominal security!",
+                    text = "A digital signature hashes message M ➔ h, then encrypts h with the signer's secret private key d: s = hᵈ mod n. Anyone with public key (e, n) computes sᵉ mod n and checks if it matches h!",
                     fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     lineHeight = 16.sp
@@ -122,241 +111,94 @@ fun SignatureSealLevel(
             }
         }
 
-        // Hash Bit Length Selector Tabs
-        Text(
-            text = "SELECT HASH DIGEST SIZE (n BITS)",
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = dynamicColors.textSecondary
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            bitLengths.forEachIndexed { idx, bits ->
-                val isSelected = bitLengthIndex == idx
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            if (isSelected) AmberGold.copy(alpha = 0.2f)
-                            else dynamicColors.cardBorder.copy(alpha = 0.2f)
-                        )
-                        .border(
-                            if (isSelected) 2.dp else 1.dp,
-                            if (isSelected) AmberGold else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                            RoundedCornerShape(10.dp)
-                        )
-                        .clickable {
-                            bitLengthIndex = idx
-                            simulationTested = false
-                        }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "$bits b",
-                        fontSize = 12.sp,
-                        fontWeight = if (isSelected) FontWeight.Black else FontWeight.Medium,
-                        color = if (isSelected) AmberGold else dynamicColors.textPrimary
-                    )
-                }
-            }
-        }
-
-        // Comparative Search Space Visualizer Card
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(dynamicColors.cardBackground)
-                .border(1.dp, dynamicColors.cardBorder.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                .padding(16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Brute Force Preimage (Single Target)",
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = dynamicColors.textSecondary
-                    )
-                    Text(
-                        text = "2^$currentN trials",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = dynamicColors.textPrimary
-                    )
-                }
-                LinearProgressIndicator(
-                    progress = { 1.0f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = Color(0xFF00C3FF),
-                    trackColor = dynamicColors.cardBorder.copy(alpha = 0.3f)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Birthday Collision Bound √(2ⁿ)",
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AmberGold
-                    )
-                    Text(
-                        text = "2^$birthdayBoundExponent trials",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
-                    )
-                }
-                LinearProgressIndicator(
-                    progress = { 0.5f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = AmberGold,
-                    trackColor = dynamicColors.cardBorder.copy(alpha = 0.3f)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(dynamicColors.cardBorder.copy(alpha = 0.15f))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "For SHA-$currentN, attacker needs only ~2^$birthdayBoundExponent operations to forge a collision!",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = dynamicColors.textPrimary,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
-        // Interactive Target Dial: Calibrate defense against 256-bit collision attack
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(dynamicColors.cardBackground)
-                .border(1.dp, dynamicColors.cardBorder.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                .padding(16.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+        // Signature Pipeline Status Cards
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            // Card 1: Message Digest
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (step >= 1) AmberGold.copy(alpha = 0.15f) else dynamicColors.cardBorder.copy(alpha = 0.2f))
+                    .border(1.dp, if (step >= 1) AmberGold else dynamicColors.cardBorder, RoundedCornerShape(12.dp))
+                    .padding(12.dp)
             ) {
-                Text(
-                    text = "DEFENSIVE BOUND SPECIFICATION",
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Black,
-                    color = AmberGold,
-                    letterSpacing = 1.sp
-                )
-                Text(
-                    text = "What is the birthday bound trial space for a 256-bit hash (SHA-256)?",
-                    fontSize = 12.5.sp,
-                    color = dynamicColors.textPrimary,
-                    textAlign = TextAlign.Center
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    listOf(16, 64, 128, 256).forEach { exp ->
-                        val isChosen = calibratedTargetExponent == exp
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (isChosen) AmberGold.copy(alpha = 0.25f)
-                                    else dynamicColors.cardBorder.copy(alpha = 0.2f)
-                                )
-                                .border(
-                                    if (isChosen) 2.dp else 1.dp,
-                                    if (isChosen) AmberGold else dynamicColors.cardBorder.copy(alpha = 0.3f),
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
-                                    calibratedTargetExponent = exp
-                                    simulationTested = false
-                                }
-                                .padding(horizontal = 14.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = "2^$exp",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = if (isChosen) AmberGold else dynamicColors.textPrimary
-                            )
-                        }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(text = "1. MESSAGE HASH DIGEST (h):", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
+                        Text(text = "h = H(\"Transfer 1000 Coins\") mod 55 = $digestH", fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
                     }
+                    Text(text = if (step >= 1) "✓ HASHED" else "READY", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (step >= 1) AmberGold else SubtextGray)
+                }
+            }
+
+            // Card 2: Private Key Signature Generation
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (step >= 2) Color(0xFF3B82F6).copy(alpha = 0.15f) else dynamicColors.cardBorder.copy(alpha = 0.2f))
+                    .border(1.dp, if (step >= 2) Color(0xFF3B82F6) else dynamicColors.cardBorder, RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(text = "2. SIGN WITH PRIVATE KEY (d = 27):", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color(0xFF60A5FA))
+                        Text(
+                            text = if (step >= 2) "s = hᵈ mod 55 = 8²⁷ mod 55 = $signatureS" else "s = hᵈ mod n (Private)",
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = dynamicColors.textPrimary
+                        )
+                    }
+                    Text(text = if (step >= 2) "✓ SIGNED" else "PENDING", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (step >= 2) Color(0xFF60A5FA) else SubtextGray)
+                }
+            }
+
+            // Card 3: Public Key Signature Verification
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (step >= 3) ArenaSuccessGreen.copy(alpha = 0.15f) else dynamicColors.cardBorder.copy(alpha = 0.2f))
+                    .border(1.dp, if (step >= 3) ArenaSuccessGreen else dynamicColors.cardBorder, RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(text = "3. VERIFY WITH PUBLIC KEY (e = 3):", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (step >= 3) ArenaSuccessGreen else SubtextGray)
+                        Text(
+                            text = if (step >= 3) "sᵉ mod 55 = 2³ mod 55 = $verifiedDigest == h ✓" else "sᵉ mod n ≟ h (Public Verify)",
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = if (step >= 3) ArenaSuccessGreen else dynamicColors.textPrimary
+                        )
+                    }
+                    Text(text = if (step >= 3) "✓ VALID" else "UNVERIFIED", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (step >= 3) ArenaSuccessGreen else SubtextGray)
                 }
             }
         }
 
-        // Action Probe Button
-        Button(
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Tactile3DButton(
+            title = when (step) {
+                0 -> "1. Compute Hash Digest h=8 ➔"
+                1 -> "2. Sign Digest with Private Key (d=27) ✍️"
+                2 -> "3. Verify Signature with Public Key (e=3) 🔍"
+                else -> "Digital Signature Validated! Advance ➔"
+            },
+            style = if (step >= 3) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
             onClick = {
-                simulationTested = true
-                if (calibratedTargetExponent == 128) {
-                    isCorrectMatch = true
+                if (step < 3) {
+                    step++
                     onActionSuccess()
-                    onComplete()
                 } else {
-                    isCorrectMatch = false
-                    onDeductHeart()
+                    onComplete()
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (simulationTested && isCorrectMatch) DuolingoGreen
-                else if (simulationTested) DuolingoRed
-                else AmberGold
-            )
-        ) {
-            Text(
-                text = if (simulationTested && isCorrectMatch) "✓ BOUND VERIFIED (2^128 SECURITY)"
-                else if (simulationTested) "✕ MISALIGNED BOUND (RETRY)"
-                else "PROBE BIRTHDAY BOUND COLLISION",
-                fontWeight = FontWeight.Black,
-                fontSize = 13.sp,
-                color = Color.Black
-            )
-        }
-
-        if (simulationTested && isCorrectMatch) {
-            Text(
-                text = "Security Proof: Even with birthday bound halving, 2^128 operations exceeds 10^38 calculations, making SHA-256 collision infeasible on classical supercomputers!",
-                fontSize = 11.5.sp,
-                color = DuolingoGreen,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-        }
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
