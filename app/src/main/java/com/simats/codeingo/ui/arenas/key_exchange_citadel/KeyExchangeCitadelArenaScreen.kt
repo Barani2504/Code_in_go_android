@@ -3,7 +3,6 @@ package com.simats.codeingo.ui.arenas.key_exchange_citadel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +52,12 @@ import com.simats.codeingo.ui.arenas.common.ArenaComboHUD
 import com.simats.codeingo.ui.arenas.common.ArenaDebriefView
 import com.simats.codeingo.ui.arenas.common.ArenaGameSpeed
 import com.simats.codeingo.ui.arenas.common.ArenaLoadoutSheet
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaParticleBurst
+import com.simats.codeingo.ui.arenas.common.ArenaShockwaveEffect
 import com.simats.codeingo.ui.arenas.common.ArenaTacticalTool
+import com.simats.codeingo.ui.arenas.common.arenaShake
+import com.simats.codeingo.ui.arenas.common.rememberArenaShakeController
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.ClockArithmeticLevel
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.CurveWalkerLevel
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.KeyPairForgeLevel
@@ -61,7 +65,6 @@ import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.KeySizeGauntlet
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.PaintMixHandshakeLevel
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.QuantumCryptanalystBossLevel
 import com.simats.codeingo.ui.arenas.key_exchange_citadel.levels.TrapdoorLabLevel
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.LocalReduceMotion
@@ -75,6 +78,14 @@ fun KeyExchangeCitadelArenaScreen(
     val gameManager = GameManager.instance
     val dynamicColors = LocalDynamicThemeColors.current
     val reduceMotion = LocalReduceMotion.current
+
+    val primary = ArenaPalettes.Arena3Primary
+    val accent = ArenaPalettes.Arena3Accent
+
+    // Screen Shake & Motion State
+    val shakeController = rememberArenaShakeController()
+    var shockwaveTrigger by remember { mutableStateOf<Any?>(null) }
+    var particleTrigger by remember { mutableStateOf<Any?>(null) }
 
     // Hearts economy strictly observes GameManager (Max 10)
     val heartsCount by gameManager.heartsCount.collectAsState()
@@ -111,6 +122,7 @@ fun KeyExchangeCitadelArenaScreen(
         } else {
             gameManager.loseHeart()
             comboCount = 0
+            shakeController.shake()
             if (heartsCount <= 1) {
                 debriefIsVictory = false
                 showDebrief = true
@@ -138,6 +150,9 @@ fun KeyExchangeCitadelArenaScreen(
         gameManager.addXP(lvl.xpReward)
         gameManager.addGems(lvl.coinReward)
 
+        particleTrigger = System.currentTimeMillis()
+        shockwaveTrigger = System.currentTimeMillis()
+
         debriefIsVictory = true
         showDebrief = true
     }
@@ -147,10 +162,12 @@ fun KeyExchangeCitadelArenaScreen(
             .fillMaxSize()
             .statusBarsPadding()
     ) {
-        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = Color(0xFF6C5CE7))
+        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = primary)
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .arenaShake(shakeController)
         ) {
             Column(
                 modifier = Modifier
@@ -159,205 +176,205 @@ fun KeyExchangeCitadelArenaScreen(
                     .padding(horizontal = 12.dp, vertical = 2.dp)
             ) {
                 // Top HUD Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Exit",
-                            tint = dynamicColors.textPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Column {
-                        Text(
-                            text = "KEY EXCHANGE CITADEL",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black,
-                            color = dynamicColors.textPrimary,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = currentLevel.title,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AmberGold
-                        )
-                    }
-                }
-
-                // Economy Badges
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Tactical Tool Icon
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                equippedTool?.accentColor?.copy(alpha = 0.15f)
-                                    ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
-                            )
-                            .border(
-                                1.dp,
-                                equippedTool?.accentColor ?: dynamicColors.cardBorder,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clickable { showLoadoutSheet = true }
-                            .padding(horizontal = 7.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
+                        ) {
                             Icon(
-                                imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
-                                contentDescription = "Tool",
-                                tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
-                                modifier = Modifier.size(13.dp)
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Exit",
+                                tint = dynamicColors.textPrimary,
+                                modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column {
                             Text(
-                                text = if (toolUsedInLevel) "USED" else "READY",
-                                fontSize = 9.sp,
+                                text = "KEY EXCHANGE CITADEL",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = dynamicColors.textPrimary,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = currentLevel.title,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                color = accent
                             )
                         }
                     }
 
-                    // Hearts HUD
+                    // Economy Badges
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(DuolingoRed.copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Hearts",
-                            tint = DuolingoRed,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$heartsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = DuolingoRed
-                        )
-                    }
+                        // Tactical Tool Icon
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    equippedTool?.accentColor?.copy(alpha = 0.15f)
+                                        ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
+                                )
+                                .border(
+                                    1.dp,
+                                    equippedTool?.accentColor ?: dynamicColors.cardBorder,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { showLoadoutSheet = true }
+                                .padding(horizontal = 7.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
+                                    contentDescription = "Tool",
+                                    tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = if (toolUsedInLevel) "USED" else "READY",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                )
+                            }
+                        }
 
-                    // Gems HUD
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Diamond,
-                            contentDescription = "Gems",
-                            tint = Color(0xFF00C3FF),
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$gemsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFF00C3FF)
-                        )
-                    }
+                        // Hearts HUD
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(DuolingoRed.copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Hearts",
+                                tint = DuolingoRed,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$heartsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = DuolingoRed
+                            )
+                        }
 
-                    // Codex Button
-                    IconButton(
-                        onClick = { showTheoryCodex = true },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Theory",
-                            tint = dynamicColors.textSecondary,
-                            modifier = Modifier.size(18.dp)
+                        // Gems HUD
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Diamond,
+                                contentDescription = "Gems",
+                                tint = Color(0xFF00C3FF),
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$gemsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFF00C3FF)
+                            )
+                        }
+
+                        // Codex Button
+                        IconButton(
+                            onClick = { showTheoryCodex = true },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.HelpOutline,
+                                contentDescription = "Theory",
+                                tint = dynamicColors.textSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Enhanced Cyber Level Selector Ribbon
+                val citadelStations = remember {
+                    KeyExchangeCitadelLevel.values().map { lvl ->
+                        com.simats.codeingo.ui.arenas.common.ArenaStationNode(
+                            id = lvl.id,
+                            title = lvl.title,
+                            shortName = when (lvl.id) {
+                                1 -> "Clock"
+                                2 -> "PaintMix"
+                                3 -> "Trapdoor"
+                                4 -> "KeyPair"
+                                5 -> "ECC Curve"
+                                6 -> "Gauntlet"
+                                else -> "Quantum"
+                            },
+                            iconEmoji = lvl.iconEmoji,
+                            isBoss = lvl == KeyExchangeCitadelLevel.BOSS_BATTLE
                         )
                     }
                 }
-            }
 
-            // Enhanced Cyber Level Selector Ribbon
-            val citadelStations = remember {
-                KeyExchangeCitadelLevel.values().map { lvl ->
-                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
-                        id = lvl.id,
-                        title = lvl.title,
-                        shortName = when (lvl.id) {
-                            1 -> "Clock"
-                            2 -> "PaintMix"
-                            3 -> "Trapdoor"
-                            4 -> "KeyPair"
-                            5 -> "ECC Curve"
-                            6 -> "Gauntlet"
-                            else -> "Quantum"
-                        },
-                        iconEmoji = lvl.iconEmoji,
-                        isBoss = lvl == KeyExchangeCitadelLevel.BOSS_BATTLE
-                    )
-                }
-            }
+                com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
+                    stations = citadelStations,
+                    currentLevelId = currentLevel.id,
+                    unlockedLevels = unlockedLevels,
+                    levelStars = levelStars,
+                    accentColor = primary,
+                    onSelectLevel = { id ->
+                        currentLevel = KeyExchangeCitadelLevel.fromId(id)
+                    }
+                )
 
-            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
-                stations = citadelStations,
-                currentLevelId = currentLevel.id,
-                unlockedLevels = unlockedLevels,
-                levelStars = levelStars,
-                accentColor = Color(0xFF6C5CE7),
-                onSelectLevel = { id ->
-                    currentLevel = KeyExchangeCitadelLevel.fromId(id)
-                }
-            )
+                // Combo & Tactical HUD
+                ArenaComboHUD(
+                    comboCount = comboCount,
+                    score = score,
+                    equippedTool = equippedTool,
+                    toolUsed = toolUsedInLevel,
+                    onActivateTool = {
+                        toolUsedInLevel = true
+                    },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
 
-            // Combo & Tactical HUD
-            ArenaComboHUD(
-                comboCount = comboCount,
-                score = score,
-                equippedTool = equippedTool,
-                toolUsed = toolUsedInLevel,
-                onActivateTool = {
-                    toolUsedInLevel = true
-                },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Main Level Canvas
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(dynamicColors.cardBackground)
-                    .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                when (currentLevel) {
+                // Main Level Canvas
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(dynamicColors.cardBackground)
+                        .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    when (currentLevel) {
                         KeyExchangeCitadelLevel.LEVEL_1 -> ClockArithmeticLevel(
                             onComplete = { handleLevelCompleted(KeyExchangeCitadelLevel.LEVEL_1) },
                             onDeductHeart = { onDeductHeart() },
@@ -391,10 +408,12 @@ fun KeyExchangeCitadelArenaScreen(
                         KeyExchangeCitadelLevel.BOSS_BATTLE -> QuantumCryptanalystBossLevel(
                             onDefeatBoss = { handleLevelCompleted(KeyExchangeCitadelLevel.BOSS_BATTLE) },
                             onDeductHeart = { onDeductHeart() },
-                            onActionSuccess = { onActionSuccess(300) }
+                            onActionSuccess = { onActionSuccess(300) },
+                            onTriggerShake = { shakeController.shake() },
+                            onTriggerShockwave = { shockwaveTrigger = System.currentTimeMillis() }
                         )
                     }
-            }
+                }
 
             } // Close inner weighted column
 
@@ -412,6 +431,13 @@ fun KeyExchangeCitadelArenaScreen(
                 }
             )
         }
+
+        // Motion FX Overlays
+        ArenaShockwaveEffect(trigger = shockwaveTrigger, color = accent)
+        ArenaParticleBurst(
+            trigger = particleTrigger,
+            colors = listOf(primary, accent, Color.White)
+        )
 
         // Cinematic Briefing Overlay
         if (showBriefing) {
@@ -523,7 +549,7 @@ fun KeyExchangeCitadelArenaScreen(
                             text = "THEORY CODEX • ASYMMETRIC CRYPTOGRAPHY",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
-                            color = AmberGold
+                            color = accent
                         )
                         IconButton(onClick = { showTheoryCodex = false }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = dynamicColors.textSecondary)

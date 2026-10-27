@@ -21,8 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,16 +33,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.DuolingoGreen
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
+import com.simats.codeingo.ui.components.Tactile3DButton
+import com.simats.codeingo.ui.components.Tactile3DButtonColor
+import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.pressScale
 import kotlin.math.cos
@@ -59,6 +64,11 @@ fun ClockArithmeticLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
+
+    val primary = ArenaPalettes.Arena3Primary
+    val accent = ArenaPalettes.Arena3Accent
 
     // Base = 3, Modulo = 7. Exponents: 3^1=3, 3^2=2, 3^3=6
     var currentExponent by remember { mutableIntStateOf(1) }
@@ -75,43 +85,61 @@ fun ClockArithmeticLevel(
 
     val isTargetReached = currentExponent >= 3 && remainder == 6
 
+    val animatedRemainder by animateFloatAsState(
+        targetValue = remainder.toFloat(),
+        animationSpec = if (reduceMotion) spring(stiffness = 500f) else spring(dampingRatio = 0.7f, stiffness = 200f),
+        label = "clockHandAnim"
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Mission Briefing
+        // Mission Briefing & Status Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(if (isDark) Color(0xFF10192A) else dynamicColors.cardBackground)
-                .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
-                .padding(12.dp)
+                .background(if (isDark) ArenaPalettes.Arena3CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.RotateRight,
-                        contentDescription = null,
-                        tint = AmberGold,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "MODULAR ARITHMETIC CLOCK LAB",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.RotateRight,
+                            contentDescription = null,
+                            tint = accent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "MODULAR CLOCK ARITHMETIC",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = primary
+                        )
+                    }
+
+                    ArenaStatusBadge(
+                        type = if (isTargetReached) ArenaBadgeType.SUCCESS else ArenaBadgeType.INFO,
+                        label = if (isTargetReached) "RESIDUE 3³ ≡ 6 ✓" else "EXP 3^$currentExponent mod 7"
                     )
                 }
+
                 Text(
-                    text = "Step through powers of Base 3 in finite field ℤ/7ℤ. Watch the clock hand cycle around the 7-node ring: 3¹ ➔ 3² ➔ 3³ mod 7.",
+                    text = "Observe modular exponentiation over finite ring ℤ/7ℤ. In Diffie-Hellman and RSA, discrete exponentiation wraps values cyclically, creating a hard-to-invert trapdoor.",
                     fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
@@ -123,17 +151,17 @@ fun ClockArithmeticLevel(
         // Circular Modular Clock Canvas (Mod 7)
         Box(
             modifier = Modifier
-                .size(190.dp)
+                .size(200.dp)
                 .clip(CircleShape)
-                .background(if (isDark) Color(0xFF090E17) else Color(0xFFF8FAFC))
-                .border(2.dp, AmberGold.copy(alpha = 0.5f), CircleShape),
+                .background(if (isDark) ArenaPalettes.Arena3BackgroundDark else Color(0xFFF1F5F9))
+                .border(2.dp, primary.copy(alpha = 0.5f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.size(210.dp)) {
+            Canvas(modifier = Modifier.size(200.dp)) {
                 val centerOffset = Offset(size.width / 2f, size.height / 2f)
-                val radius = size.width * 0.40f
+                val radius = size.width * 0.38f
 
-                // Draw 7 clock positions around circle
+                // Draw 7 clock positions around circle (0..6)
                 for (i in 0 until 7) {
                     val angle = (2 * Math.PI / 7 * i) - (Math.PI / 2)
                     val x = centerOffset.x + (radius * cos(angle)).toFloat()
@@ -141,33 +169,33 @@ fun ClockArithmeticLevel(
 
                     val isCurrentPosition = i == remainder
                     val nodeColor = if (isCurrentPosition) {
-                        if (isTargetReached) DuolingoGreen else AmberGold
+                        if (isTargetReached) ArenaSuccessGreen else accent
                     } else {
-                        Color(0xFF64748B).copy(alpha = 0.4f)
+                        primary.copy(alpha = 0.35f)
                     }
 
                     drawCircle(
                         color = nodeColor,
-                        radius = if (isCurrentPosition) 16f else 10f,
+                        radius = if (isCurrentPosition) 16f else 9f,
                         center = Offset(x, y)
                     )
                 }
 
-                // Draw clock hand to current remainder position
-                val handAngle = (2 * Math.PI / 7 * remainder) - (Math.PI / 2)
-                val handX = centerOffset.x + (radius * 0.75f * cos(handAngle)).toFloat()
-                val handY = centerOffset.y + (radius * 0.75f * sin(handAngle)).toFloat()
+                // Draw animated clock hand to current remainder position
+                val handAngle = (2 * Math.PI / 7 * animatedRemainder) - (Math.PI / 2)
+                val handX = centerOffset.x + (radius * 0.72f * cos(handAngle)).toFloat()
+                val handY = centerOffset.y + (radius * 0.72f * sin(handAngle)).toFloat()
 
                 drawLine(
-                    color = if (isTargetReached) DuolingoGreen else AmberGold,
+                    color = if (isTargetReached) ArenaSuccessGreen else accent,
                     start = centerOffset,
                     end = Offset(handX, handY),
                     strokeWidth = 6f
                 )
 
                 drawCircle(
-                    color = if (isTargetReached) DuolingoGreen else AmberGold,
-                    radius = 8f,
+                    color = if (isTargetReached) ArenaSuccessGreen else primary,
+                    radius = 9f,
                     center = centerOffset
                 )
             }
@@ -176,17 +204,17 @@ fun ClockArithmeticLevel(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "3^$currentExponent mod 7",
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
                     color = SubtextGray
                 )
                 Text(
                     text = "= $remainder",
-                    fontSize = 26.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = if (isTargetReached) DuolingoGreen else AmberGold
+                    color = if (isTargetReached) ArenaSuccessGreen else accent
                 )
             }
         }
@@ -194,9 +222,10 @@ fun ClockArithmeticLevel(
         // Modular Equivalence Step Ribbon
         Box(
             modifier = Modifier
+                .fillMaxWidth(0.95f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(if (isDark) Color(0xFF131D33) else Color(0xFFF1F5F9))
-                .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                .background(if (isDark) ArenaPalettes.Arena3CardDark else Color(0xFFF1F5F9))
+                .border(1.dp, primary.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Text(
@@ -208,13 +237,15 @@ fun ClockArithmeticLevel(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.Monospace,
-                color = if (isTargetReached) DuolingoGreen else AmberGold
+                color = if (isTargetReached) ArenaSuccessGreen else accent,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
-        // Interactive Stepper Controls
+        // Interactive Stepper Controls (Enforced 48dp+ touch targets)
         Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
+            modifier = Modifier.fillMaxWidth(0.95f),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             listOf(1 to "3¹ = 3", 2 to "3² = 2", 3 to "3³ = 6").forEach { (exp, label) ->
@@ -222,20 +253,26 @@ fun ClockArithmeticLevel(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp)
+                        .minTouchTarget48()
+                        .height(50.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(
-                            if (isSelected) AmberGold.copy(alpha = 0.25f)
+                            if (isSelected) primary.copy(alpha = 0.25f)
                             else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
                         )
                         .border(
                             1.5.dp,
-                            if (isSelected) AmberGold else Color.Transparent,
+                            if (isSelected) accent else Color.Transparent,
                             RoundedCornerShape(12.dp)
                         )
                         .pressScale()
                         .clickable {
                             currentExponent = exp
+                            if (exp == 3) {
+                                ArenaHaptics.criticalStrike(view, reduceMotion)
+                            } else {
+                                ArenaHaptics.success(view, reduceMotion)
+                            }
                             onActionSuccess()
                         },
                     contentAlignment = Alignment.Center
@@ -245,48 +282,32 @@ fun ClockArithmeticLevel(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = if (isSelected) AmberGold else dynamicColors.textPrimary
+                        color = if (isSelected) accent else dynamicColors.textPrimary
                     )
                 }
             }
         }
 
-        // Advance Completion Button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (isTargetReached) Brush.horizontalGradient(listOf(DuolingoGreen, Color(0xFF059669)))
-                    else Brush.horizontalGradient(listOf(Color(0xFF64748B), Color(0xFF475569)))
-                )
-                .pressScale(targetScale = 0.96f)
-                .clickable(enabled = isTargetReached) {
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Advance Completion 3D Tactile Button
+        Tactile3DButton(
+            title = if (isTargetReached) "CLOCK CYCLED (3³ ≡ 6)! ADVANCE ➔" else "STEP TO EXPONENT 3³",
+            style = if (isTargetReached) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.DISABLED,
+            isEnabled = isTargetReached,
+            onClick = {
+                if (isTargetReached) {
+                    ArenaHaptics.success(view, reduceMotion)
                     onComplete()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = if (isTargetReached) "CLOCK CYCLED (3³ ≡ 6)! ADVANCE →" else "STEP TO EXPONENT 3³",
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.Black,
-                    letterSpacing = 0.5.sp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    ArenaHaptics.tap(view, reduceMotion)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .minTouchTarget48()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }

@@ -17,33 +17,38 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.components.Tactile3DButton
 import com.simats.codeingo.ui.components.Tactile3DButtonColor
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.ArenaDangerRed
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 
 @Composable
 fun TrapdoorLabLevel(
@@ -54,74 +59,101 @@ fun TrapdoorLabLevel(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
 
-    // Unified RSA Parameters (ArenaCryptoEngine.ToyRSA5_11):
-    // p = 5, q = 11, n = 55, phi(n) = (5-1)*(11-1) = 40, e = 3, d = 27 (3*27 = 81 = 2*40 + 1)
-    // Stage 0: Forward encryption easy (M=2 -> C = 2^3 mod 55 = 8)
-    // Stage 1: Brute force reverse is hard (factoring n=55 without factors takes trial division O(sqrt(n)))
-    // Stage 2: Trapdoor unlocked via phi(n) = 40 -> d = 27! Invert C=8: 8^27 mod 55 = 2!
+    val primary = ArenaPalettes.Arena3Primary
+    val accent = ArenaPalettes.Arena3Accent
+
+    // Unified RSA Parameters: p = 5, q = 11, n = 55, phi = 40, e = 3, d = 27
+    // Stage 0: Forward Encryption (M=2 -> C = 2^3 mod 55 = 8)
+    // Stage 1: Totient Trapdoor (Calculate phi(n) = (5-1)*(11-1) = 40)
+    // Stage 2: Trapdoor Decryption Verification (8^27 mod 55 = 2)
     var stage by remember { mutableIntStateOf(0) }
+    var selectedCiphertext by remember { mutableStateOf<Int?>(null) }
+    var selectedTotient by remember { mutableStateOf<Int?>(null) }
+    var feedbackMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Mission Briefing
+        // Mission Briefing & Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(18.dp))
-                .background(if (isDark) Color(0xFF10192A) else dynamicColors.cardBackground)
-                .border(1.2.dp, AmberGold.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena3CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
                 .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Shuffle,
-                        contentDescription = null,
-                        tint = AmberGold,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "ONE-WAY TRAPDOOR PERMUTATION LAB",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shuffle,
+                            contentDescription = null,
+                            tint = accent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "TRAPDOOR ONE-WAY LAB",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = primary
+                        )
+                    }
+
+                    ArenaStatusBadge(
+                        type = when (stage) {
+                            2 -> ArenaBadgeType.SUCCESS
+                            1 -> ArenaBadgeType.WARNING
+                            else -> ArenaBadgeType.ENCRYPTED
+                        },
+                        label = when (stage) {
+                            0 -> "STAGE 1: FORWARD"
+                            1 -> "STAGE 2: TOTIENT"
+                            else -> "TRAPDOOR OPEN"
+                        }
                     )
                 }
+
                 Text(
                     text = when (stage) {
-                        0 -> "A trapdoor one-way function is easy to compute forward (C ≡ Mᵉ mod n), but computationally infeasible to invert without the mathematical trapdoor."
-                        1 -> "Adversary Dilemma: Factoring modulus n=55 requires trial division (O(√n) arithmetic steps, exponential in bit-length k=log₂ n; GNFS is sub-exponential)."
-                        else -> "🎉 Trapdoor Activated! Knowing prime factors p=5 & q=11 yields Euler's Totient φ(n)=(5-1)(11-1)=40, granting instant inverse d ≡ 3⁻¹ mod 40 = 27!"
+                        0 -> "Trapdoor functions are easy to compute in the forward direction (C ≡ Mᵉ mod n), but intractable to invert without the mathematical secret trapdoor."
+                        1 -> "Adversary dilemma: Inverting C without factors requires trial division (O(√n)). But you know p=5 and q=11! Compute Euler's Totient φ(n)."
+                        else -> "🎉 Trapdoor Activated! Knowing φ(n)=40 grants inverse d ≡ 3⁻¹ mod 40 = 27, inverting C=8 back to M=2 instantly!"
                     },
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }
 
-        // Forward vs Reverse Interactive Valve
+        // Forward vs Reverse Interactive Comparison Card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(if (isDark) Color(0xFF090E17) else Color(0xFFF8FAFC))
-                .border(1.5.dp, if (stage >= 2) ArenaSuccessGreen else AmberGold.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                .background(if (isDark) ArenaPalettes.Arena3BackgroundDark else Color(0xFFF8FAFC))
+                .border(1.5.dp, if (stage >= 2) ArenaSuccessGreen else primary.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
                 .padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Forward Lane (Easy)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Forward Lane
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -129,7 +161,13 @@ fun TrapdoorLabLevel(
                 ) {
                     Column {
                         Text(text = "FORWARD DIRECTION (ENCRYPT)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = ArenaSuccessGreen)
-                        Text(text = "C = M³ mod 55 (e.g. 2³ = 8)", fontSize = 13.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        Text(
+                            text = if (stage >= 1) "C = 2³ mod 55 = 8" else "C = Mᵉ mod n (M=2, e=3, n=55)",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            color = dynamicColors.textPrimary
+                        )
                     }
                     Box(
                         modifier = Modifier
@@ -137,19 +175,18 @@ fun TrapdoorLabLevel(
                             .background(ArenaSuccessGreen.copy(alpha = 0.2f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Text(text = "EASY: O(log e)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = ArenaSuccessGreen)
+                        Text(text = "EASY: O(log e)", fontSize = 9.5.sp, fontWeight = FontWeight.Black, color = ArenaSuccessGreen)
                     }
                 }
 
-                // Middle Trapdoor Divider
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(SubtextGray.copy(alpha = 0.3f))
+                        .background(SubtextGray.copy(alpha = 0.25f))
                 )
 
-                // Reverse Lane (Adversary vs Trapdoor)
+                // Reverse Lane
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -163,8 +200,8 @@ fun TrapdoorLabLevel(
                             color = if (stage >= 2) ArenaSuccessGreen else ArenaDangerRed
                         )
                         Text(
-                            text = if (stage >= 2) "d ≡ 3⁻¹ mod 40 = 27 (8²⁷ mod 55 = 2)" else "Factoring n=55: O(√n) trial",
-                            fontSize = 13.sp,
+                            text = if (stage >= 2) "d = 27 ➔ 8²⁷ mod 55 = 2" else "Adversary: Factoring n=55 (O(√n))",
+                            fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
                             color = dynamicColors.textPrimary
@@ -180,8 +217,8 @@ fun TrapdoorLabLevel(
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (stage >= 2) "TRAPDOOR OPEN" else "HARD: O(√n)",
-                            fontSize = 10.sp,
+                            text = if (stage >= 2) "TRAPDOOR UNLOCKED" else "HARD: O(√n)",
+                            fontSize = 9.5.sp,
                             fontWeight = FontWeight.Black,
                             color = if (stage >= 2) ArenaSuccessGreen else ArenaDangerRed
                         )
@@ -190,58 +227,155 @@ fun TrapdoorLabLevel(
             }
         }
 
-        // Totient Derivation Card
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (stage >= 2) ArenaSuccessGreen.copy(alpha = 0.12f)
-                    else Color(0xFF3B82F6).copy(alpha = 0.12f)
-                )
-                .border(
-                    1.dp,
-                    if (stage >= 2) ArenaSuccessGreen.copy(alpha = 0.5f)
-                    else Color(0xFF3B82F6).copy(alpha = 0.4f),
-                    RoundedCornerShape(16.dp)
-                )
-                .padding(14.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "THE MATHEMATICAL SECRET TRAPDOOR:",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = if (stage >= 2) ArenaSuccessGreen else Color(0xFF60A5FA)
-                )
-                Text(
-                    text = "φ(n) = (p - 1) × (q - 1) = (5 - 1) × (11 - 1) = 4 × 10 = 40. Knowing φ(n)=40 allows the owner to solve 3 × d ≡ 1 mod 40 ➔ d = 27 using the Extended Euclidean Algorithm!",
-                    fontSize = 12.sp,
-                    color = dynamicColors.textPrimary,
-                    lineHeight = 17.sp
+        // Interactive Stage Controls
+        when (stage) {
+            0 -> {
+                // Forward encrypt choice
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.95f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "COMPUTE CIPHERTEXT C = 2³ mod 55:",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = accent
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(6, 8, 16, 24).forEach { candidate ->
+                            val isSelected = selectedCiphertext == candidate
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .minTouchTarget48()
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) {
+                                            if (candidate == 8) ArenaSuccessGreen else ArenaDangerRed
+                                        } else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                    )
+                                    .border(1.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(12.dp))
+                                    .pressScale()
+                                    .clickable {
+                                        selectedCiphertext = candidate
+                                        if (candidate == 8) {
+                                            ArenaHaptics.success(view, reduceMotion)
+                                            stage = 1
+                                            feedbackMessage = "✓ C = 2³ mod 55 = 8! Easy forward encryption complete."
+                                            onActionSuccess()
+                                        } else {
+                                            ArenaHaptics.error(view, reduceMotion)
+                                            onDeductHeart()
+                                            feedbackMessage = "❌ 2³ = 8, and 8 mod 55 = 8."
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "C = $candidate",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = if (isSelected && candidate == 8) Color.Black else dynamicColors.textPrimary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            1 -> {
+                // Totient calculation choice
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.95f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "SOLVE φ(55) = (p - 1)(q - 1) = (5 - 1)(11 - 1):",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = accent
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(36, 40, 50, 54).forEach { candidate ->
+                            val isSelected = selectedTotient == candidate
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .minTouchTarget48()
+                                    .height(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) {
+                                            if (candidate == 40) ArenaSuccessGreen else ArenaDangerRed
+                                        } else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+                                    )
+                                    .border(1.dp, if (isSelected) Color.White else Color.Transparent, RoundedCornerShape(12.dp))
+                                    .pressScale()
+                                    .clickable {
+                                        selectedTotient = candidate
+                                        if (candidate == 40) {
+                                            ArenaHaptics.criticalStrike(view, reduceMotion)
+                                            stage = 2
+                                            feedbackMessage = "🎉 Correct! φ(55) = 4 × 10 = 40! Trapdoor inverse d=27 unlocked."
+                                            onActionSuccess()
+                                        } else {
+                                            ArenaHaptics.error(view, reduceMotion)
+                                            onDeductHeart()
+                                            feedbackMessage = "❌ Compute (5-1) × (11-1) = 4 × 10 = 40."
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "φ = $candidate",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = if (isSelected && candidate == 40) Color.Black else dynamicColors.textPrimary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            else -> {
+                // Stage 2: Advance
+                Tactile3DButton(
+                    title = "TRAPDOOR MASTERED! ADVANCE CITADEL ➔",
+                    style = Tactile3DButtonColor.GREEN,
+                    onClick = {
+                        ArenaHaptics.success(view, reduceMotion)
+                        onComplete()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .minTouchTarget48()
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        if (feedbackMessage != null) {
+            Text(
+                text = feedbackMessage!!,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (feedbackMessage!!.startsWith("✓") || feedbackMessage!!.startsWith("🎉")) ArenaSuccessGreen else ArenaDangerRed,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+        }
 
-        Tactile3DButton(
-            title = when (stage) {
-                0 -> "1. Test Forward Computation (C = Mᵉ mod n) →"
-                1 -> "2. Unlock Trapdoor via φ(n)=40 🔓"
-                else -> "Trapdoor Mastered! Advance →"
-            },
-            style = if (stage >= 2) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
-            onClick = {
-                if (stage < 2) {
-                    stage++
-                    onActionSuccess()
-                } else {
-                    onComplete()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }

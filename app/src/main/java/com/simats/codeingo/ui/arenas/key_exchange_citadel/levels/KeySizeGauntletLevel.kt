@@ -26,17 +26,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.components.Tactile3DButton
 import com.simats.codeingo.ui.components.Tactile3DButtonColor
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.ArenaDangerRed
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
+import com.simats.codeingo.ui.theme.pressScale
 
 data class KeySizeQuestion(
     val prompt: String,
@@ -54,16 +61,22 @@ fun KeySizeGauntletLevel(
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
+
+    val primary = ArenaPalettes.Arena3Primary
+    val accent = ArenaPalettes.Arena3Accent
 
     // NIST SP 800-57 Key Size Equivalences Gauntlet
     val questions = remember {
         listOf(
             KeySizeQuestion(
-                prompt = "For AES-128 (128-bit security), what minimum RSA key size does NIST SP 800-57 mandate?",
+                prompt = "For AES-128 (128-bit security tier), what minimum RSA key size does NIST SP 800-57 mandate?",
                 securityLevel = "128-bit Security Tier",
                 correctKey = "RSA-3072",
                 options = listOf("RSA-3072", "RSA-2048", "RSA-1024", "RSA-512"),
-                explanation = "NIST SP 800-57 requires RSA-3072 to match 128-bit symmetric security. RSA-2048 only offers 112 bits!"
+                explanation = "NIST mandates RSA-3072 for 128-bit symmetric security. RSA-2048 offers only 112 bits of security!"
             ),
             KeySizeQuestion(
                 prompt = "To achieve 128-bit security equivalent to RSA-3072, what ECC key size is required?",
@@ -87,30 +100,51 @@ fun KeySizeGauntletLevel(
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
 
     val currentQ = questions.getOrNull(roundIndex)
-    val isFinished = roundIndex >= questions.size
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "NIST SP 800-57 KEY-SIZE GAUNTLET",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
-                color = AmberGold,
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Symmetric vs Asymmetric Security Bit Equivalency",
-                fontSize = 11.sp,
-                color = dynamicColors.textSecondary,
-                textAlign = TextAlign.Center
-            )
+        // Mission Briefing & Status Badge
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena3CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "NIST SP 800-57 GAUNTLET",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary
+                    )
+
+                    ArenaStatusBadge(
+                        type = if (currentQ != null) ArenaBadgeType.INFO else ArenaBadgeType.SUCCESS,
+                        label = currentQ?.securityLevel ?: "GAUNTLET CLEARED"
+                    )
+                }
+
+                Text(
+                    text = "Symmetric vs Asymmetric Security Bit Equivalency. Match appropriate asymmetric key lengths to the desired symmetric protection tier.",
+                    fontSize = 12.sp,
+                    color = dynamicColors.textPrimary,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 16.sp
+                )
+            }
         }
 
         if (currentQ != null) {
@@ -118,17 +152,17 @@ fun KeySizeGauntletLevel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(dynamicColors.cardBorder.copy(alpha = 0.2f))
-                    .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .background(if (isDark) ArenaPalettes.Arena3BackgroundDark else Color(0xFFF8FAFC))
+                    .border(1.5.dp, primary.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                     .padding(14.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        text = "GAUNTLET ROUND ${roundIndex + 1} / 3: ${currentQ.securityLevel}",
+                        text = "ROUND ${roundIndex + 1} / 3: ${currentQ.securityLevel}",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
-                        color = AmberGold
+                        color = accent
                     )
                     Text(
                         text = currentQ.prompt,
@@ -140,8 +174,8 @@ fun KeySizeGauntletLevel(
                 }
             }
 
-            // Options (48dp touch targets)
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            // Options (48dp+ touch targets enforced)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth(0.95f)) {
                 currentQ.options.chunked(2).forEach { rowOpts ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         rowOpts.forEach { opt ->
@@ -151,25 +185,29 @@ fun KeySizeGauntletLevel(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(50.dp)
+                                    .minTouchTarget48()
+                                    .height(52.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
                                         if (isSelected) {
                                             if (isCorrect) ArenaSuccessGreen else ArenaDangerRed
-                                        } else dynamicColors.cardBorder.copy(alpha = 0.25f)
+                                        } else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
                                     )
                                     .border(
                                         1.5.dp,
-                                        if (isSelected) Color.White else AmberGold.copy(alpha = 0.4f),
+                                        if (isSelected) Color.White else primary.copy(alpha = 0.4f),
                                         RoundedCornerShape(12.dp)
                                     )
+                                    .pressScale()
                                     .clickable {
                                         selectedOption = opt
                                         if (isCorrect) {
+                                            ArenaHaptics.success(view, reduceMotion)
                                             onActionSuccess()
                                             feedbackMessage = "✓ Correct! ${currentQ.explanation}"
                                             val nextRound = roundIndex + 1
                                             if (nextRound >= questions.size) {
+                                                ArenaHaptics.criticalStrike(view, reduceMotion)
                                                 roundIndex = nextRound
                                                 onComplete()
                                             } else {
@@ -177,6 +215,7 @@ fun KeySizeGauntletLevel(
                                                 selectedOption = null
                                             }
                                         } else {
+                                            ArenaHaptics.error(view, reduceMotion)
                                             onDeductHeart()
                                             feedbackMessage = "❌ Incorrect size: ${currentQ.explanation}"
                                         }
@@ -202,14 +241,15 @@ fun KeySizeGauntletLevel(
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (feedbackMessage!!.startsWith("✓")) ArenaSuccessGreen else ArenaDangerRed,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 12.dp)
                 )
             }
         } else {
             // All cleared
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.95f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(ArenaSuccessGreen.copy(alpha = 0.15f))
                     .border(1.dp, ArenaSuccessGreen, RoundedCornerShape(14.dp))
@@ -227,11 +267,18 @@ fun KeySizeGauntletLevel(
             Spacer(modifier = Modifier.height(4.dp))
 
             Tactile3DButton(
-                title = "Proceed to Boss Chamber ➔",
+                title = "PROCEED TO QUANTUM BOSS CHAMBER ➔",
                 style = Tactile3DButtonColor.GREEN,
-                onClick = onComplete,
-                modifier = Modifier.fillMaxWidth()
+                onClick = {
+                    ArenaHaptics.success(view, reduceMotion)
+                    onComplete()
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .minTouchTarget48()
             )
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }

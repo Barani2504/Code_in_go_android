@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.arenas.key_exchange_citadel.levels
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,15 +28,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.theme.ArenaDangerRed
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
+import com.simats.codeingo.ui.theme.pressScale
 
 enum class QuantumPhase(val phaseNumber: Int) {
     PHASE_1(1),
@@ -60,13 +69,28 @@ fun QuantumCryptanalystBossLevel(
     onDefeatBoss: () -> Unit,
     onDeductHeart: () -> Unit,
     onActionSuccess: () -> Unit = {},
+    onTriggerShake: () -> Unit = {},
+    onTriggerShockwave: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
+
+    val primary = ArenaPalettes.Arena3Primary
+    val accent = ArenaPalettes.Arena3Accent
+
     var bossHP by remember { mutableIntStateOf(100) }
     var currentPhase by remember { mutableStateOf(QuantumPhase.PHASE_1) }
     var selectedChoiceId by remember { mutableStateOf<String?>(null) }
     var feedback by remember { mutableStateOf("The Quantum Cryptanalyst prepares Shor's algorithm! Deploy quantum-safe defenses!") }
+
+    val animatedHpFraction by animateFloatAsState(
+        targetValue = (bossHP / 100f).coerceIn(0f, 1f),
+        animationSpec = spring(dampingRatio = 0.65f, stiffness = 180f),
+        label = "bossHpAnim"
+    )
 
     val challenges = remember {
         listOf(
@@ -113,53 +137,97 @@ fun QuantumCryptanalystBossLevel(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        // Boss Title & Status Badge
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "👾 THE QUANTUM CRYPTANALYST", fontSize = 15.sp, color = ArenaDangerRed, fontWeight = FontWeight.Black)
-            Text(text = "PHASE ${currentPhase.phaseNumber} / 3", fontSize = 12.sp, fontWeight = FontWeight.Black, color = AmberGold)
+            Column {
+                Text(
+                    text = "👾 THE QUANTUM CRYPTANALYST",
+                    fontSize = 14.sp,
+                    color = ArenaDangerRed,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 0.5.sp
+                )
+                Text(
+                    text = "LATTICE-BASED POST-QUANTUM SHOWDOWN",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = accent
+                )
+            }
+
+            ArenaStatusBadge(
+                type = ArenaBadgeType.DANGER,
+                label = "PHASE ${currentPhase.phaseNumber} / 3"
+            )
         }
 
-        // Boss HP Gauge
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(14.dp)
-                .clip(RoundedCornerShape(7.dp))
-                .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
+        // Boss Animated HP Gauge
+        Column(
+            modifier = Modifier.fillMaxWidth(0.95f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(bossHP / 100f)
+                    .fillMaxWidth()
                     .height(14.dp)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(ArenaDangerRed)
+                    .background(if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(animatedHpFraction)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(ArenaDangerRed)
+                )
+            }
+            Text(
+                text = "$bossHP / 100 HP",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Monospace,
+                color = ArenaDangerRed
             )
         }
-        Text(text = "$bossHP / 100 HP", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textSecondary)
 
-        // Challenge Box
+        // Challenge Question Box
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(dynamicColors.cardBorder.copy(alpha = 0.2f))
-                .border(1.5.dp, AmberGold.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (isDark) ArenaPalettes.Arena3CardDark else dynamicColors.cardBackground)
+                .border(1.5.dp, primary.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
                 .padding(14.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = currentChallenge.question, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, textAlign = TextAlign.Center)
-                Text(text = feedback, fontSize = 11.sp, color = AmberGold, textAlign = TextAlign.Center)
+                Text(
+                    text = currentChallenge.question,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = dynamicColors.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = feedback,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = accent,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
-        // Choices (48dp+ touch target)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        // Choices (48dp+ touch target enforced, 2-column responsive layout)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth(0.95f)) {
             shuffledChoices.chunked(2).forEach { rowOptions ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     rowOptions.forEach { choice ->
@@ -167,20 +235,33 @@ fun QuantumCryptanalystBossLevel(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(52.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .minTouchTarget48()
+                                .height(54.dp)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(
-                                    if (isSelected) (if (choice.isCorrect) ArenaSuccessGreen else ArenaDangerRed)
-                                    else dynamicColors.cardBorder.copy(alpha = 0.25f)
+                                    if (isSelected) {
+                                        if (choice.isCorrect) ArenaSuccessGreen else ArenaDangerRed
+                                    } else if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
                                 )
-                                .border(1.dp, if (isSelected) Color.White else AmberGold.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .border(
+                                    1.dp,
+                                    if (isSelected) Color.White else primary.copy(alpha = 0.5f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .pressScale()
                                 .clickable {
                                     selectedChoiceId = choice.id
                                     if (choice.isCorrect) {
+                                        ArenaHaptics.criticalStrike(view, reduceMotion)
+                                        onTriggerShake()
+                                        onTriggerShockwave()
                                         onActionSuccess()
+
                                         val newHP = maxOf(0, bossHP - 35)
                                         bossHP = newHP
+
                                         if (newHP <= 0 || currentPhase == QuantumPhase.PHASE_3) {
+                                            feedback = "🎉 Quantum Cryptanalyst neutralized by ML-KEM lattice cryptography!"
                                             onDefeatBoss()
                                         } else {
                                             currentPhase = when (currentPhase) {
@@ -192,8 +273,9 @@ fun QuantumCryptanalystBossLevel(
                                             feedback = "💥 Qubit decoherence achieved! ${choice.explanation}"
                                         }
                                     } else {
+                                        ArenaHaptics.error(view, reduceMotion)
                                         onDeductHeart()
-                                        feedback = "❌ Counterattack: ${choice.explanation}"
+                                        feedback = "❌ Quantum Counterattack: ${choice.explanation}"
                                     }
                                 },
                             contentAlignment = Alignment.Center
@@ -203,12 +285,15 @@ fun QuantumCryptanalystBossLevel(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
                                 color = if (isSelected && choice.isCorrect) Color.Black else dynamicColors.textPrimary,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 4.dp)
                             )
                         }
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
