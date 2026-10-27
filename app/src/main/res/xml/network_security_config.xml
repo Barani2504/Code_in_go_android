@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Strictly disallow any cleartext HTTP traffic across the app -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

@@ -10,11 +10,14 @@ import com.simats.codeingo.data.repository.ChapterRegistry
 import com.simats.codeingo.data.repository.QuizQuestion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -27,6 +30,10 @@ class GameManager private constructor() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var prefs: UserPreferences? = null
+    private var persistJob: Job? = null
+
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
     // ── Core stats ────────────────────────────────────────────────────────────
 
@@ -150,98 +157,85 @@ class GameManager private constructor() {
         val p = UserPreferences(context)
         prefs = p
         scope.launch {
-            // Seed StateFlows from persisted DataStore values (one-shot first())
-            _totalXP.value = p.totalXP.first()
-            _gemsCount.value = p.gemsCount.first()
-            _heartsCount.value = p.heartsCount.first()
-            _streakDays.value = p.streakDays.first()
-            _activePhoenixStage.value = p.activePhoenixStage.first()
-            _highestCombo.value = p.highestCombo.first()
-            _eggCrackLevel.value = p.eggCrackLevel.first()
-            _completedLessonIds.value = p.completedLessons.first()
-            _completedBossIds.value = p.completedBosses.first()
-            _unlockedLevelIndices.value = p.unlockedLevels.first().mapNotNull { it.toIntOrNull() }.toSet()
-                .ifEmpty { setOf(1) }
-            _completedChapters.value = p.completedChapters.first().mapNotNull { it.toIntOrNull() }.toSet()
-            _completedLevelIndices.value = p.completedLevelIndices.first().mapNotNull { it.toIntOrNull() }.toSet()
+            // Load full immutable GameStateSnapshot in ONE single DataStore pass
+            val snapshot = p.gameStateSnapshot.first()
 
-            val storedMaxChap = p.maxUnlockedChapter.first()
-            val completedLevels = _completedLevelIndices.value
-            val completedChaps = _completedChapters.value
+            // Atomically publish all state values in a single coherent step
+            _totalXP.value = snapshot.totalXP
+            _gemsCount.value = snapshot.gemsCount
+            _heartsCount.value = snapshot.heartsCount
+            _streakDays.value = snapshot.streakDays
+            _activePhoenixStage.value = snapshot.activePhoenixStage
+            _highestCombo.value = snapshot.highestCombo
+            _eggCrackLevel.value = snapshot.eggCrackLevel
+            _completedLessonIds.value = snapshot.completedLessons
+            _completedBossIds.value = snapshot.completedBosses
+            _unlockedLevelIndices.value = snapshot.unlockedLevels
+            _completedChapters.value = snapshot.completedChapters
+            _completedLevelIndices.value = snapshot.completedLevelIndices
+            _maxUnlockedChapter.value = snapshot.maxUnlockedChapter
+            _activeLevelIndex.value = snapshot.activeLevelIndex
+            _basecampCompletedLevels.value = snapshot.basecampCompletedLevels
+            _diagnosticTaken.value = snapshot.diagnosticTaken
+            _diagnosticRecommendedChapter.value = snapshot.diagnosticRecommendedChapter
 
-            // Sanitize maxUnlockedChapter if it was erroneously set to 5 on a fresh or early profile
-            val legitimateMaxChapter = when {
-                completedLevels.contains(25) || completedChaps.contains(5) -> maxOf(6, storedMaxChap)
-                completedLevels.contains(20) || completedChaps.contains(4) -> maxOf(5, storedMaxChap.coerceAtMost(5))
-                completedLevels.contains(15) || completedChaps.contains(3) -> maxOf(4, storedMaxChap.coerceAtMost(4))
-                completedLevels.contains(10) || completedChaps.contains(2) -> maxOf(3, storedMaxChap.coerceAtMost(3))
-                completedLevels.contains(5) || completedChaps.contains(1) -> maxOf(2, storedMaxChap.coerceAtMost(2))
-                else -> 1
+            if (snapshot.lastPracticedTimestampMs > 0L) {
+                _lastPracticedTimestamp.value = snapshot.lastPracticedTimestampMs / 1000.0
             }
-            _maxUnlockedChapter.value = legitimateMaxChapter
-            if (storedMaxChap != legitimateMaxChapter && storedMaxChap >= 5 && legitimateMaxChapter == 1) {
-                p.setMaxUnlockedChapter(legitimateMaxChapter)
-            }
-
-            val savedActive = p.activeLevelIndex.first()
-            if (legitimateMaxChapter == 1 && savedActive !in 1..5) {
-                _activeLevelIndex.value = 1
-                p.setActiveLevelIndex(1)
-            } else {
-                _activeLevelIndex.value = savedActive
-            }
-            _basecampCompletedLevels.value = p.basecampCompletedLevels.first()
-            _diagnosticTaken.value = p.diagnosticTaken.first()
-            _diagnosticRecommendedChapter.value = p.diagnosticRecommendedChapter.first()
-
-            val savedPracticedMs = p.lastPracticedTimestampMs.first()
-            if (savedPracticedMs > 0L) {
-                _lastPracticedTimestamp.value = savedPracticedMs / 1000.0
-            }
-            val savedPlayedMs = p.lastPlayedDateMs.first()
-            if (savedPlayedMs > 0L) {
-                _lastPlayedDateUnix.value = savedPlayedMs / 1000.0
+            if (snapshot.lastPlayedDateMs > 0L) {
+                _lastPlayedDateUnix.value = snapshot.lastPlayedDateMs / 1000.0
             }
 
             // Re-evaluate streak with restored persisted timestamp
             evaluateStreakOnLaunch()
+
+            // Mark snapshot ready and trigger emotion evaluation
+            _isInitialized.value = true
+            PhoenixEmotionManager.instance.evaluateEmotionRules(forceIconUpdate = false)
         }
     }
 
     // ── Persistence helpers ───────────────────────────────────────────────────
 
-    private fun persistStats() {
+    fun persistStats(immediate: Boolean = false) {
         val p = prefs ?: return
-        scope.launch {
-            p.updateGameState(
+        persistJob?.cancel()
+        val task = suspend {
+            p.batchUpdateGameState(
                 xp = _totalXP.value,
                 gems = _gemsCount.value,
                 hearts = _heartsCount.value,
                 streak = _streakDays.value,
                 phoenixStage = _activePhoenixStage.value,
                 highestCombo = _highestCombo.value,
-                eggCrack = _eggCrackLevel.value
-            )
-            p.updatePracticeTimestamps(
+                eggCrack = _eggCrackLevel.value,
                 lastPracticedMs = (_lastPracticedTimestamp.value * 1000).toLong(),
                 lastPlayedMs = (_lastPlayedDateUnix.value * 1000).toLong()
             )
+        }
+        if (immediate) {
+            scope.launch { task() }
+        } else {
+            persistJob = scope.launch {
+                delay(300L) // 300ms debounce
+                task()
+            }
         }
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
 
     fun addStars(count: Int) {
-        _totalStars.value += count
+        _totalStars.update { it + count }
     }
 
     fun addXP(amount: Int) {
-        _totalXP.value += amount
+        _totalXP.update { it + amount }
         persistStats()
     }
 
     fun addGems(count: Int) {
-        _gemsCount.value += count
+        _gemsCount.update { it + count }
         persistStats()
     }
 
@@ -330,13 +324,13 @@ class GameManager private constructor() {
     fun isChapterCompleted(chapterId: Int): Boolean = _completedChapters.value.contains(chapterId)
 
     fun markChapterCompleted(chapterId: Int) {
-        _completedChapters.value = _completedChapters.value + chapterId
+        _completedChapters.update { it + chapterId }
         val p = prefs ?: return
         scope.launch { p.markChapterCompleted(chapterId) }
     }
 
     fun unlockNextChapter(nextId: Int) {
-        _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, nextId)
+        _maxUnlockedChapter.update { maxOf(it, nextId) }
         val p = prefs ?: return
         scope.launch { p.setMaxUnlockedChapter(nextId) }
     }
@@ -348,13 +342,13 @@ class GameManager private constructor() {
     }
 
     fun markLevelCompleted(level: Int) {
-        _completedLevelIndices.value = _completedLevelIndices.value + level
+        _completedLevelIndices.update { it + level }
         val p = prefs ?: return
         scope.launch { p.markLevelCompleted(level) }
     }
 
     fun markBasecampLevelCompleted(levelId: String) {
-        _basecampCompletedLevels.value = _basecampCompletedLevels.value + levelId
+        _basecampCompletedLevels.update { it + levelId }
         val p = prefs ?: return
         scope.launch { p.markBasecampLevelCompleted(levelId) }
     }
@@ -394,7 +388,7 @@ class GameManager private constructor() {
             val isToday = nowYear == lastYear && nowDay == lastDay
 
             if (isYesterday) {
-                _streakDays.value += 1
+                _streakDays.update { it + 1 }
             } else if (!isToday) {
                 if (_isStreakLostPendingRestore.value) {
                     _isStreakLostPendingRestore.value = false
@@ -409,8 +403,8 @@ class GameManager private constructor() {
     }
 
     fun awardStageCompletion(xp: Int = 12, diamonds: Int = 5) {
-        _totalXP.value += xp
-        _gemsCount.value += diamonds
+        _totalXP.update { it + xp }
+        _gemsCount.update { it + diamonds }
         _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
         persistStats()
     }
@@ -436,8 +430,8 @@ class GameManager private constructor() {
             earned += 2
         }
         earned = minOf(earned, 18)
-        _totalXP.value += earned
-        _gemsCount.value += 5
+        _totalXP.update { it + earned }
+        _gemsCount.update { it + 5 }
         _lastPracticedTimestamp.value = System.currentTimeMillis() / 1000.0
         incrementDailyQuest("lessons")
         persistStats()
@@ -452,15 +446,13 @@ class GameManager private constructor() {
 
     fun loseHeart() {
         _currentCombo.value = 0
-        if (_heartsCount.value > 0) {
-            _heartsCount.value -= 1
-        }
+        _heartsCount.update { maxOf(0, it - 1) }
         persistStats()
     }
 
     fun refillHearts() {
         _heartsCount.value = 10
-        persistStats()
+        persistStats(immediate = true)
         PhoenixEmotionManager.instance.handleHeartsRefilled()
     }
 
@@ -472,25 +464,25 @@ class GameManager private constructor() {
             val needed = price - _gemsCount.value
             return Pair(false, "Not enough diamonds! You need $needed more 💎.")
         }
-        _gemsCount.value -= price
-        _heartsCount.value = minOf(10, _heartsCount.value + amount)
-        persistStats()
+        _gemsCount.update { maxOf(0, it - price) }
+        _heartsCount.update { minOf(10, it + amount) }
+        persistStats(immediate = true)
         PhoenixEmotionManager.instance.handleHeartsRefilled()
         return Pair(true, "Restored +$amount life hearts! ❤️ (${_heartsCount.value}/10)")
     }
 
     fun deductGems(amount: Int): Boolean {
         if (_gemsCount.value < amount) return false
-        _gemsCount.value -= amount
+        _gemsCount.update { maxOf(0, it - amount) }
         persistStats()
         return true
     }
 
     fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {
         val bossXP = 25
-        _totalXP.value += bossXP
-        _gemsCount.value += 15
-        _completedBossIds.value = _completedBossIds.value + boss.id
+        _totalXP.update { it + bossXP }
+        _gemsCount.update { it + 15 }
+        _completedBossIds.update { it + boss.id }
         triggerEvolution(boss.targetPhoenixStageAwarded)
         persistStats()
         val p = prefs ?: return
@@ -499,19 +491,15 @@ class GameManager private constructor() {
     }
 
     fun recordCorrectAnswer() {
-        _currentCombo.value += 1
-        if (_currentCombo.value > _highestCombo.value) {
-            _highestCombo.value = _currentCombo.value
-            persistStats()
-        }
+        _currentCombo.update { it + 1 }
+        _highestCombo.update { maxOf(it, _currentCombo.value) }
+        persistStats()
         incrementDailyQuest("combo")
     }
 
     fun recordWrongAnswer(exercise: DSAExerciseItem, userAnswer: String) {
         _currentCombo.value = 0
-        if (_heartsCount.value > 0) {
-            _heartsCount.value -= 1
-        }
+        _heartsCount.update { maxOf(0, it - 1) }
 
         val correctAnswer = exercise.correctAnswers.firstOrNull()
             ?: exercise.options.getOrNull(exercise.correctIndex ?: -1)
@@ -525,7 +513,7 @@ class GameManager private constructor() {
             correctAnswer = correctAnswer,
             explanation = exercise.explanation
         )
-        _mistakeVault.value = _mistakeVault.value + mistake
+        _mistakeVault.update { it + mistake }
         persistStats()
     }
 
@@ -536,9 +524,7 @@ class GameManager private constructor() {
         chapterId: Int = 1
     ) {
         _currentCombo.value = 0
-        if (_heartsCount.value > 0) {
-            _heartsCount.value -= 1
-        }
+        _heartsCount.update { maxOf(0, it - 1) }
 
         val mistake = MistakeVaultItem(
             id = UUID.randomUUID().toString(),
@@ -551,7 +537,7 @@ class GameManager private constructor() {
             misconceptionTag = question.misconceptionTag,
             chapterId = chapterId
         )
-        _mistakeVault.value = _mistakeVault.value + mistake
+        _mistakeVault.update { it + mistake }
         persistStats()
     }
 
@@ -650,25 +636,39 @@ class GameManager private constructor() {
     }
 
     fun repairMistake(id: String) {
-        _mistakeVault.value = _mistakeVault.value.map {
-            if (it.id == id) {
-                _totalXP.value += 10
-                _gemsCount.value += 5
-                it.copy(isRepaired = true)
-            } else it
+        var found = false
+        _mistakeVault.update { list ->
+            list.map {
+                if (it.id == id && !it.isRepaired) {
+                    found = true
+                    it.copy(isRepaired = true)
+                } else it
+            }
         }
-        persistStats()
+        if (found) {
+            _totalXP.update { it + 10 }
+            _gemsCount.update { it + 5 }
+            persistStats()
+        }
     }
 
     fun claimQuest(questId: String) {
-        _dailyQuests.value = _dailyQuests.value.map { quest ->
-            if (quest.id == questId && quest.isCompleted && !quest.isClaimed) {
-                _totalXP.value += quest.xpReward
-                _gemsCount.value += quest.gemReward
-                quest.copy(isClaimed = true)
-            } else quest
+        var xpGain = 0
+        var gemGain = 0
+        _dailyQuests.update { list ->
+            list.map { quest ->
+                if (quest.id == questId && quest.isCompleted && !quest.isClaimed) {
+                    xpGain = quest.xpReward
+                    gemGain = quest.gemReward
+                    quest.copy(isClaimed = true)
+                } else quest
+            }
         }
-        persistStats()
+        if (xpGain > 0 || gemGain > 0) {
+            _totalXP.update { it + xpGain }
+            _gemsCount.update { it + gemGain }
+            persistStats()
+        }
     }
 
     fun incrementDailyQuest(type: String) {

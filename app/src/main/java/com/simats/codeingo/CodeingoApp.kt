@@ -14,6 +14,26 @@ import com.simats.codeingo.domain.ThemeManager
 class CodeingoApp : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
+
+        // StrictMode: detect disk reads and leaked closables on main in debug builds
+        if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            android.os.StrictMode.setThreadPolicy(
+                android.os.StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()
+                    .penaltyLog()
+                    .build()
+            )
+            android.os.StrictMode.setVmPolicy(
+                android.os.StrictMode.VmPolicy.Builder()
+                    .detectLeakedClosableObjects()
+                    .detectLeakedSqlLiteObjects()
+                    .penaltyLog()
+                    .build()
+            )
+        }
+
         PhoenixEmotionManager.instance.initialize(this)
         ThemeManager.instance.initialize(this)
         LocalizationManager.instance.initialize(this)

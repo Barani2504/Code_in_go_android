@@ -15,6 +15,28 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ashcrypt_prefs")
 
+data class GameStateSnapshot(
+    val totalXP: Int,
+    val gemsCount: Int,
+    val heartsCount: Int,
+    val streakDays: Int,
+    val activePhoenixStage: Int,
+    val highestCombo: Int,
+    val eggCrackLevel: Int,
+    val lastPracticedTimestampMs: Long,
+    val lastPlayedDateMs: Long,
+    val completedLessons: Set<String>,
+    val completedBosses: Set<String>,
+    val unlockedLevels: Set<Int>,
+    val maxUnlockedChapter: Int,
+    val completedChapters: Set<Int>,
+    val completedLevelIndices: Set<Int>,
+    val activeLevelIndex: Int,
+    val basecampCompletedLevels: Set<String>,
+    val diagnosticTaken: Boolean,
+    val diagnosticRecommendedChapter: Int
+)
+
 class UserPreferences(private val context: Context) {
 
     companion object {
@@ -95,6 +117,46 @@ class UserPreferences(private val context: Context) {
         it[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1
     }
 
+    val gameStateSnapshot: Flow<GameStateSnapshot> = context.dataStore.data.map { prefs ->
+        val completedLevels = (prefs[KEY_COMPLETED_LEVEL_INDICES] ?: emptySet()).mapNotNull { it.toIntOrNull() }.toSet()
+        val completedChaps = (prefs[KEY_COMPLETED_CHAPTERS] ?: emptySet()).mapNotNull { it.toIntOrNull() }.toSet()
+        val storedMaxChap = prefs[KEY_MAX_UNLOCKED_CHAPTER] ?: 1
+
+        val legitimateMaxChapter = when {
+            completedLevels.contains(25) || completedChaps.contains(5) -> maxOf(6, storedMaxChap)
+            completedLevels.contains(20) || completedChaps.contains(4) -> maxOf(5, storedMaxChap.coerceAtMost(5))
+            completedLevels.contains(15) || completedChaps.contains(3) -> maxOf(4, storedMaxChap.coerceAtMost(4))
+            completedLevels.contains(10) || completedChaps.contains(2) -> maxOf(3, storedMaxChap.coerceAtMost(3))
+            completedLevels.contains(5) || completedChaps.contains(1) -> maxOf(2, storedMaxChap.coerceAtMost(2))
+            else -> 1
+        }
+
+        val savedActive = prefs[KEY_ACTIVE_LEVEL_INDEX] ?: 1
+        val resolvedActive = if (legitimateMaxChapter == 1 && savedActive !in 1..5) 1 else savedActive
+
+        GameStateSnapshot(
+            totalXP = prefs[KEY_TOTAL_XP] ?: 120,
+            gemsCount = prefs[KEY_GEMS] ?: 450,
+            heartsCount = prefs[KEY_HEARTS] ?: 10,
+            streakDays = prefs[KEY_STREAK] ?: 3,
+            activePhoenixStage = prefs[KEY_PHOENIX_STAGE] ?: 1,
+            highestCombo = prefs[KEY_HIGHEST_COMBO] ?: 5,
+            eggCrackLevel = prefs[KEY_EGG_CRACK] ?: 0,
+            lastPracticedTimestampMs = prefs[KEY_LAST_PRACTICED_MS] ?: 0L,
+            lastPlayedDateMs = prefs[KEY_LAST_PLAYED_MS] ?: 0L,
+            completedLessons = prefs[KEY_COMPLETED_LESSONS] ?: setOf("u1_l1_what_is_ds"),
+            completedBosses = prefs[KEY_COMPLETED_BOSSES] ?: emptySet(),
+            unlockedLevels = (prefs[KEY_UNLOCKED_LEVELS] ?: setOf("1")).mapNotNull { it.toIntOrNull() }.toSet().ifEmpty { setOf(1) },
+            maxUnlockedChapter = legitimateMaxChapter,
+            completedChapters = completedChaps,
+            completedLevelIndices = completedLevels,
+            activeLevelIndex = resolvedActive,
+            basecampCompletedLevels = prefs[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet(),
+            diagnosticTaken = prefs[KEY_DIAGNOSTIC_TAKEN] ?: false,
+            diagnosticRecommendedChapter = prefs[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1
+        )
+    }
+
     suspend fun markBasecampLevelCompleted(levelId: String) {
         context.dataStore.edit {
             val current = (it[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet()).toMutableSet()
@@ -120,6 +182,30 @@ class UserPreferences(private val context: Context) {
 
     suspend fun setSelectedLanguage(code: String) {
         context.dataStore.edit { it[KEY_SELECTED_LANGUAGE] = code }
+    }
+
+    suspend fun batchUpdateGameState(
+        xp: Int,
+        gems: Int,
+        hearts: Int,
+        streak: Int,
+        phoenixStage: Int,
+        highestCombo: Int,
+        eggCrack: Int,
+        lastPracticedMs: Long,
+        lastPlayedMs: Long
+    ) {
+        context.dataStore.edit {
+            it[KEY_TOTAL_XP] = xp
+            it[KEY_GEMS] = gems
+            it[KEY_HEARTS] = hearts
+            it[KEY_STREAK] = streak
+            it[KEY_PHOENIX_STAGE] = phoenixStage
+            it[KEY_HIGHEST_COMBO] = highestCombo
+            it[KEY_EGG_CRACK] = eggCrack
+            if (lastPracticedMs > 0L) it[KEY_LAST_PRACTICED_MS] = lastPracticedMs
+            if (lastPlayedMs > 0L) it[KEY_LAST_PLAYED_MS] = lastPlayedMs
+        }
     }
 
     suspend fun updateGameState(

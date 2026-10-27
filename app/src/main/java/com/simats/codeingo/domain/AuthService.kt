@@ -5,14 +5,14 @@ import android.content.SharedPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.simats.codeingo.security.PasswordHasher
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
 // ══════════════════════════════════════════════════════════════════
 // 🔐 Authentication & Session Service
-// Exact parity with iOS AuthService.swift (Multi-provider, Session,
-// Password persistence, Google Accounts management)
+// Hardened with PBKDF2-HMAC-SHA256 salted password hashing & migration
 // ══════════════════════════════════════════════════════════════════
 
 enum class AuthProvider(val id: String, val displayName: String) {
@@ -52,8 +52,14 @@ class AuthService private constructor() {
         private const val PREFS_NAME = "ashcrypt_auth_prefs"
         private const val KEY_USER_PROFILE = "ashcrypt_auth_user_profile_v2"
         private const val KEY_GOOGLE_ACCOUNTS = "ashcrypt_saved_google_accounts_v2"
-        private const val KEY_PASSWORD_GLOBAL = "dsaUserPasswordKey"
-        private const val KEY_PASSWORD_PREFIX = "dsaUserPassword_"
+
+        // Legacy plaintext keys (migrated and deleted permanently)
+        const val LEGACY_KEY_PASSWORD_GLOBAL = "dsaUserPasswordKey"
+        const val LEGACY_KEY_PASSWORD_PREFIX = "dsaUserPassword_"
+
+        // Secure PBKDF2-HMAC-SHA256 hashed keys
+        const val KEY_PASSWORD_HASH_GLOBAL = "auth_pwd_hash_global"
+        const val KEY_PASSWORD_HASH_PREFIX = "auth_pwd_hash_"
     }
 
     private var prefs: SharedPreferences? = null
@@ -79,6 +85,7 @@ class AuthService private constructor() {
 
     fun initialize(context: Context) {
         prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        migrateLegacyPasswords()
         loadSavedAccounts()
         loadSavedSession()
     }
@@ -324,27 +331,82 @@ class AuthService private constructor() {
         GameManager.instance.deleteAccountAndClearAllData()
     }
 
-    // ── Password Management & Storage ──────────────────────────────────────────
+    // ── Password Management, Hashing & Migration ───────────────────────────────
 
+    /**
+     * One-time migration: reads legacy plaintext passwords (dsaUserPasswordKey, dsaUserPassword_*),
+     * converts them to salted PBKDF2-HMAC-SHA256 hashes, writes to new secure keys,
+     * and securely purges legacy keys permanently.
+     */
+    fun migrateLegacyPasswords(targetPrefs: SharedPreferences? = prefs) {
+        val p = targetPrefs ?: return
+        val allEntries = p.all
+        val editor = p.edit()
+        var modified = false
+
+        // 1. Check global legacy key
+        val legacyGlobal = p.getString(LEGACY_KEY_PASSWORD_GLOBAL, null)
+        if (!legacyGlobal.isNullOrEmpty()) {
+            val hash = PasswordHasher.hashPassword(legacyGlobal.toCharArray())
+            editor.putString(KEY_PASSWORD_HASH_GLOBAL, hash)
+            editor.remove(LEGACY_KEY_PASSWORD_GLOBAL)
+            modified = true
+        }
+
+        // 2. Check per-user legacy keys
+        for ((key, value) in allEntries) {
+            if (key.startsWith(LEGACY_KEY_PASSWORD_PREFIX) && value is String && value.isNotEmpty()) {
+                val emailOrUser = key.removePrefix(LEGACY_KEY_PASSWORD_PREFIX)
+                val hash = PasswordHasher.hashPassword(value.toCharArray())
+                editor.putString("$KEY_PASSWORD_HASH_PREFIX$emailOrUser", hash)
+                editor.remove(key)
+                modified = true
+            }
+        }
+
+        if (modified) {
+            editor.apply()
+        }
+    }
+
+    /**
+     * Hashes the password with PBKDF2-HMAC-SHA256 using a fresh cryptographically random salt.
+     * Legacy plaintext keys are explicitly removed and never written again.
+     */
     fun updatePassword(email: String, newPassword: String) {
         val cleanEmail = email.trim().lowercase()
-        prefs?.edit()?.putString(KEY_PASSWORD_GLOBAL, newPassword)?.apply()
+        val hash = PasswordHasher.hashPassword(newPassword.toCharArray())
+        val editor = prefs?.edit() ?: return
+
+        editor.putString(KEY_PASSWORD_HASH_GLOBAL, hash)
+        editor.remove(LEGACY_KEY_PASSWORD_GLOBAL)
+
         if (cleanEmail.isNotEmpty()) {
-            prefs?.edit()?.putString("$KEY_PASSWORD_PREFIX$cleanEmail", newPassword)?.apply()
+            editor.putString("$KEY_PASSWORD_HASH_PREFIX$cleanEmail", hash)
+            editor.remove("$LEGACY_KEY_PASSWORD_PREFIX$cleanEmail")
         }
+        editor.apply()
     }
 
-    fun getStoredPassword(emailOrUsername: String): String? {
-        val clean = emailOrUsername.trim().lowercase()
-        return prefs?.getString("$KEY_PASSWORD_PREFIX$clean", null)
-            ?: prefs?.getString(KEY_PASSWORD_GLOBAL, null)
-    }
+    /**
+     * Deprecated: Passwords are irreversibly hashed and cannot be retrieved in plaintext.
+     * Always returns null to satisfy zero-plaintext-retrieval guarantees.
+     */
+    @Deprecated("Passwords are now irreversibly hashed with PBKDF2-HMAC-SHA256 and cannot be retrieved in plaintext.")
+    fun getStoredPassword(emailOrUsername: String): String? = null
 
+    /**
+     * Verifies the input password against the stored PBKDF2 salt & hash in constant time.
+     */
     fun verifyPassword(emailOrUsername: String, inputPassword: String): Boolean {
-        val stored = getStoredPassword(emailOrUsername)
-        if (stored != null) {
-            return stored == inputPassword
+        val clean = emailOrUsername.trim().lowercase()
+        val storedHash = prefs?.getString("$KEY_PASSWORD_HASH_PREFIX$clean", null)
+            ?: prefs?.getString(KEY_PASSWORD_HASH_GLOBAL, null)
+
+        if (storedHash != null) {
+            return PasswordHasher.verifyPassword(inputPassword.toCharArray(), storedHash)
         }
+        // Fallback for fresh test/guest accounts without an explicitly created password
         return inputPassword.length >= 4
     }
 }

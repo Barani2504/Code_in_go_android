@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Codeingo"
 include(":app")
+include(":macrobenchmark")
  

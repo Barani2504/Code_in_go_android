@@ -203,11 +203,13 @@ class PhoenixEmotionManager private constructor() {
     init {
         startInAppIdleMonitor()
         startLivingCompanionEngine()
-        evaluateEmotionRules(forceIconUpdate = true)
     }
 
     // MARK: - 👑 CORE EMOTION-BASED RULE ENGINE
     fun evaluateEmotionRules(forceIconUpdate: Boolean = true): Pair<PhoenixEmotion, EmotionRule> {
+        if (!GameManager.instance.isInitialized.value) {
+            return Pair(_currentEmotion.value, EmotionRule.MANUAL_CUSTOM)
+        }
         if (!_isAutoEmotionEnabled.value) {
             return Pair(_currentEmotion.value, EmotionRule.MANUAL_CUSTOM)
         }
