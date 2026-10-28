@@ -1,5 +1,8 @@
 package com.simats.codeingo.ui.arenas.cipher_sanctum.levels
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,11 +11,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,17 +35,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.components.Tactile3DButton
 import com.simats.codeingo.ui.components.Tactile3DButtonColor
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.ArenaDangerRed
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
+import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.delay
 
 data class SprintProblem(
@@ -46,8 +62,20 @@ data class SprintProblem(
 )
 
 @Composable
-fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) {
+fun CryptanalysisSprintLevel(
+    onComplete: () -> Unit,
+    onDeductHeart: () -> Unit,
+    onActionSuccess: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val view = LocalView.current
+    val reduceMotion = LocalReduceMotion.current
+    val isDark = dynamicColors.isDark
+
+    val primary = ArenaPalettes.Arena1Primary
+    val accent = ArenaPalettes.Arena1Accent
+    val cardBg = if (isDark) ArenaPalettes.Arena1CardDark else dynamicColors.cardBackground
 
     val problems = remember {
         listOf(
@@ -63,6 +91,7 @@ fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) 
     var hasTimerDeductedHeart by remember { mutableStateOf(false) }
     var lastPenaltyTimestamp by remember { mutableLongStateOf(0L) }
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
+    var lastCheckSuccess by remember { mutableStateOf<Boolean?>(null) }
 
     // Monotonic timer loop
     LaunchedEffect(isTimerRunning, secondsLeft) {
@@ -73,31 +102,51 @@ fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) 
             isTimerRunning = false
             if (!hasTimerDeductedHeart) {
                 hasTimerDeductedHeart = true
+                ArenaHaptics.error(view, reduceMotion)
                 onDeductHeart()
-                feedbackMessage = "⏱️ Time expired! -1 Heart. Tap Retry to restart sprint."
+                feedbackMessage = "⏱️ Time expired! -1 Heart. Tap Restart to try again."
             }
         }
     }
 
     val currentProblem = problems.getOrNull(solvedIndex)
+    val isFinished = solvedIndex >= problems.size
 
     Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Timer Banner
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (secondsLeft < 5) ArenaDangerRed else AmberGold)
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+        // Mission Header with Badge
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "⏱️ $secondsLeft SECONDS REMAINING (${solvedIndex}/${problems.size})",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.Black
+            Column {
+                Text(
+                    text = "CRYPTANALYSIS SPEED SPRINT",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = primary,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "High-Pressure Modular Arithmetic",
+                    fontSize = 10.sp,
+                    color = dynamicColors.textSecondary
+                )
+            }
+            ArenaStatusBadge(
+                type = when {
+                    isFinished -> ArenaBadgeType.SUCCESS
+                    secondsLeft <= 5 -> ArenaBadgeType.DANGER
+                    else -> ArenaBadgeType.WARNING
+                },
+                label = if (isFinished) "SPRINT CLEARED" else "⏱️ ${secondsLeft}s LEFT"
             )
         }
 
@@ -105,23 +154,34 @@ fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (dynamicColors.isDark) Color(0xFF0F1A2E) else dynamicColors.cardBackground)
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                .padding(16.dp),
+                .clip(RoundedCornerShape(14.dp))
+                .background(cardBg)
+                .border(1.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
+                .padding(14.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = null,
+                        tint = primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "QUESTION ${minOf(solvedIndex + 1, problems.size)} OF ${problems.size}",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary
+                    )
+                }
                 Text(
-                    text = "RAPID MODULAR SPRINT",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = AmberGold
-                )
-                Text(
-                    text = currentProblem?.prompt ?: "All puzzles cleared!",
-                    fontSize = 16.sp,
+                    text = currentProblem?.prompt ?: "All sprint challenges cleared!",
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = dynamicColors.textPrimary,
                     textAlign = TextAlign.Center
@@ -129,41 +189,46 @@ fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) 
             }
         }
 
-        // Interactive Options (with dynamic options per problem and 48dp+ touch target)
+        // Interactive Options (minTouchTarget48 compliant)
         if (currentProblem != null && secondsLeft > 0) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 currentProblem.options.forEach { opt ->
+                    val isCorrect = opt == currentProblem.targetLetter
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(if (dynamicColors.isDark) Color(0xFF14243C) else dynamicColors.inputBackground)
-                            .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .minTouchTarget48()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(cardBg)
+                            .border(1.2.dp, primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                             .clickable {
-                                val now = System.currentTimeMillis()
-                                if (opt == currentProblem.targetLetter) {
-                                    feedbackMessage = "✓ Correct! Next sprint puzzle!"
-                                    val nextIndex = solvedIndex + 1
-                                    if (nextIndex >= problems.size) {
-                                        solvedIndex = nextIndex
+                                ArenaHaptics.tap(view, reduceMotion)
+                                if (isCorrect) {
+                                    ArenaHaptics.success(view, reduceMotion)
+                                    lastCheckSuccess = true
+                                    onActionSuccess()
+                                    solvedIndex++
+                                    feedbackMessage = "✓ Correct! Shifted backwards: $opt"
+                                    if (solvedIndex >= problems.size) {
                                         isTimerRunning = false
                                         onComplete()
-                                    } else {
-                                        solvedIndex = nextIndex
                                     }
                                 } else {
-                                    // Debounce penalty (800ms) to prevent rapid accidental taps from draining all hearts
-                                    if (now - lastPenaltyTimestamp > 800L) {
+                                    val now = System.currentTimeMillis()
+                                    if (now - lastPenaltyTimestamp > 1500) {
                                         lastPenaltyTimestamp = now
+                                        ArenaHaptics.error(view, reduceMotion)
+                                        lastCheckSuccess = false
                                         onDeductHeart()
-                                        feedbackMessage = "❌ Incorrect letter: '$opt'. Shift backwards by 3!"
+                                        feedbackMessage = "❌ Incorrect choice '$opt'! Modular shift: C - 3."
                                     }
                                 }
-                            },
+                            }
+                            .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -171,37 +236,56 @@ fun CryptanalysisSprintLevel(onComplete: () -> Unit, onDeductHeart: () -> Unit) 
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
-                            color = dynamicColors.textPrimary
+                            color = primary
                         )
                     }
                 }
             }
         }
 
-        if (feedbackMessage != null) {
-            Text(
-                text = feedbackMessage!!,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (feedbackMessage!!.startsWith("✓")) ArenaSuccessGreen else ArenaDangerRed,
-                textAlign = TextAlign.Center
-            )
+        // Live Feedback Message
+        AnimatedVisibility(visible = feedbackMessage != null, enter = fadeIn(), exit = fadeOut()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(
+                        if (lastCheckSuccess == true) ArenaSuccessGreen.copy(alpha = 0.12f)
+                        else ArenaDangerRed.copy(alpha = 0.12f)
+                    )
+                    .border(
+                        1.dp,
+                        if (lastCheckSuccess == true) ArenaSuccessGreen else ArenaDangerRed,
+                        RoundedCornerShape(10.dp)
+                    )
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = feedbackMessage ?: "",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (lastCheckSuccess == true) ArenaSuccessGreen else ArenaDangerRed,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
-        // Retry button if timer ran out
-        if (secondsLeft == 0 && solvedIndex < problems.size) {
-            Spacer(modifier = Modifier.height(4.dp))
+        // Restart button if time ran out
+        if (secondsLeft == 0 && !isFinished) {
             Tactile3DButton(
-                title = "🔄 Retry Sprint (20s)",
+                title = "Restart Speed Sprint ↺",
                 style = Tactile3DButtonColor.AMBER,
                 onClick = {
                     secondsLeft = 20
                     solvedIndex = 0
-                    hasTimerDeductedHeart = false
                     isTimerRunning = true
-                    feedbackMessage = "Sprint restarted! Move quickly!"
+                    hasTimerDeductedHeart = false
+                    feedbackMessage = null
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .minTouchTarget48()
             )
         }
     }
