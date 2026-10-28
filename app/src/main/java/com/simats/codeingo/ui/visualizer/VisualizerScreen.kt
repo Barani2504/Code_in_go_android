@@ -88,6 +88,8 @@ import com.simats.codeingo.data.model.DSAVisualizerType
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
+import com.simats.codeingo.ui.visualizer.CNSLabModeTabBar
+import com.simats.codeingo.ui.visualizer.model.CNSLabMode
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
@@ -919,6 +921,8 @@ private fun TopicDetailView(
     onBackToList: () -> Unit,
     currentLanguageName: String
 ) {
+    var activeLabMode by remember(selectedType) { mutableStateOf(CNSLabMode.EXPLORE) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Horizontal Quick Switcher Carousel
         LazyRow(
@@ -936,7 +940,10 @@ private fun TopicDetailView(
                         .clip(shape)
                         .background(if (isSelected) type.color else CardBackground.copy(alpha = 0.7f))
                         .border(1.5.dp, if (isSelected) type.color else InputBorder, shape)
-                        .clickable { onSelectType(type) }
+                        .clickable {
+                            activeLabMode = CNSLabMode.EXPLORE
+                            onSelectType(type)
+                        }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Row(
@@ -970,28 +977,39 @@ private fun TopicDetailView(
             // 1. Structure Deep Dive Header Card
             DSATopicDeepDiveHeaderCard(type = selectedType)
 
+            // 1.5 Unified Four-Mode Lab Navigation (Explore · Attack / Break · Code & Test · Challenge)
+            CNSLabModeTabBar(
+                selectedMode = activeLabMode,
+                onSelectMode = { activeLabMode = it },
+                accentColor = selectedType.color
+            )
+
             // 2. Interactive CNS Visualizer Engine (10 Flagship Cryptographic Labs)
             when (selectedType) {
-                DSAVisualizerType.ARRAY -> CaesarCipherVisualizer()
-                DSAVisualizerType.STACK -> DESFeistelVisualizer()
-                DSAVisualizerType.QUEUE -> AESMatrixVisualizer()
-                DSAVisualizerType.LINKED_LIST -> VigenereCipherVisualizer()
-                DSAVisualizerType.BINARY_TREE -> DiffieHellmanVisualizer()
-                DSAVisualizerType.AVL_TREE -> RSAPublicKeyVisualizer()
-                DSAVisualizerType.TRIE -> ECCPointVisualizer()
-                DSAVisualizerType.GRAPH -> SHA256Visualizer()
-                DSAVisualizerType.SORTING -> HMACCollisionVisualizer()
-                DSAVisualizerType.STEP_RECORDER -> TLS13HandshakeVisualizer()
+                DSAVisualizerType.ARRAY -> CaesarCipherVisualizer(mode = activeLabMode)
+                DSAVisualizerType.STACK -> DESFeistelVisualizer(mode = activeLabMode)
+                DSAVisualizerType.QUEUE -> AESMatrixVisualizer(mode = activeLabMode)
+                DSAVisualizerType.LINKED_LIST -> VigenereCipherVisualizer(mode = activeLabMode)
+                DSAVisualizerType.BINARY_TREE -> DiffieHellmanVisualizer(mode = activeLabMode)
+                DSAVisualizerType.AVL_TREE -> RSAPublicKeyVisualizer(mode = activeLabMode)
+                DSAVisualizerType.TRIE -> ECCPointVisualizer(mode = activeLabMode)
+                DSAVisualizerType.GRAPH -> SHA256Visualizer(mode = activeLabMode)
+                DSAVisualizerType.SORTING -> HMACCollisionVisualizer(mode = activeLabMode)
+                DSAVisualizerType.STEP_RECORDER -> TLS13HandshakeVisualizer(mode = activeLabMode)
             }
 
-            // 3. Real World Applications Card
-            DSARealWorldApplicationsCard(type = selectedType)
+            // 3. Real World Applications Card (Contextual in Explore mode)
+            if (activeLabMode == CNSLabMode.EXPLORE) {
+                DSARealWorldApplicationsCard(type = selectedType)
+            }
 
-            // 4. Idiomatic Code Implementation Card in Chosen Language (All 10 Labs)
-            CNSLanguageImplementationCardView(
-                structureName = selectedType.title,
-                initialLanguage = currentLanguageName
-            )
+            // 4. Idiomatic Code Implementation Card in Chosen Language (Explore mode; Code & Test has integrated test vectors + code)
+            if (activeLabMode == CNSLabMode.EXPLORE) {
+                CNSLanguageImplementationCardView(
+                    structureName = selectedType.title,
+                    initialLanguage = currentLanguageName
+                )
+            }
 
             // 5. Navigation Buttons: Up Next & Back to Topics
             Column(
@@ -1006,7 +1024,10 @@ private fun TopicDetailView(
                         .clip(nextShape)
                         .background(CardBackground)
                         .border(1.5.dp, next.color.copy(alpha = 0.45f), nextShape)
-                        .clickable { onSelectType(next) }
+                        .clickable {
+                            activeLabMode = CNSLabMode.EXPLORE
+                            onSelectType(next)
+                        }
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
