@@ -3,7 +3,6 @@ package com.simats.codeingo.ui.arenas.block_cipher_forge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,13 +54,21 @@ import com.simats.codeingo.ui.arenas.block_cipher_forge.levels.MixColumnsMixerLe
 import com.simats.codeingo.ui.arenas.block_cipher_forge.levels.ModeDetectiveLevel
 import com.simats.codeingo.ui.arenas.block_cipher_forge.levels.SBoxForgeLevel
 import com.simats.codeingo.ui.arenas.block_cipher_forge.levels.ShiftRowsSliderLevel
+import com.simats.codeingo.ui.arenas.common.ArenaBottomBar
 import com.simats.codeingo.ui.arenas.common.ArenaBriefingView
 import com.simats.codeingo.ui.arenas.common.ArenaComboHUD
 import com.simats.codeingo.ui.arenas.common.ArenaDebriefView
+import com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground
 import com.simats.codeingo.ui.arenas.common.ArenaGameSpeed
+import com.simats.codeingo.ui.arenas.common.ArenaLevelTrack
 import com.simats.codeingo.ui.arenas.common.ArenaLoadoutSheet
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaParticleBurst
+import com.simats.codeingo.ui.arenas.common.ArenaShockwaveEffect
+import com.simats.codeingo.ui.arenas.common.ArenaStationNode
 import com.simats.codeingo.ui.arenas.common.ArenaTacticalTool
-import com.simats.codeingo.ui.theme.AmberGold
+import com.simats.codeingo.ui.arenas.common.arenaShake
+import com.simats.codeingo.ui.arenas.common.rememberArenaShakeController
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.LocalReduceMotion
@@ -75,6 +82,10 @@ fun BlockCipherForgeArenaScreen(
     val gameManager = GameManager.instance
     val dynamicColors = LocalDynamicThemeColors.current
     val reduceMotion = LocalReduceMotion.current
+    val isDark = dynamicColors.isDark
+
+    val primary = ArenaPalettes.Arena2Primary
+    val accent = ArenaPalettes.Arena2Accent
 
     // Hearts economy strictly observes GameManager (Max 10)
     val heartsCount by gameManager.heartsCount.collectAsState()
@@ -88,6 +99,11 @@ fun BlockCipherForgeArenaScreen(
     var score by remember { mutableIntStateOf(0) }
     var comboCount by remember { mutableIntStateOf(0) }
     var speed by remember { mutableStateOf(ArenaGameSpeed.NORMAL) }
+
+    // Screen Shake & Motion FX
+    val shakeController = rememberArenaShakeController()
+    var shockwaveTrigger by remember { mutableStateOf(0L) }
+    var particleTrigger by remember { mutableStateOf(0L) }
 
     // Tactical Loadout & Tool State
     var equippedTool by remember { mutableStateOf<ArenaTacticalTool?>(ArenaTacticalTool.HINT_LENS) }
@@ -105,7 +121,7 @@ fun BlockCipherForgeArenaScreen(
         toolUsedInLevel = false
     }
 
-    // Deduction with Second Chance support
+    // Deduction with Second Chance support and screen shake
     fun onDeductHeart() {
         if (equippedTool == ArenaTacticalTool.SECOND_CHANCE && !toolUsedInLevel) {
             toolUsedInLevel = true
@@ -113,6 +129,7 @@ fun BlockCipherForgeArenaScreen(
         } else {
             gameManager.loseHeart()
             comboCount = 0
+            shakeController.shake()
             if (heartsCount <= 1) { // Will reach 0
                 debriefIsVictory = false
                 showDebrief = true
@@ -140,6 +157,9 @@ fun BlockCipherForgeArenaScreen(
         gameManager.addXP(lvl.xpReward)
         gameManager.addGems(lvl.coinReward)
 
+        particleTrigger = System.currentTimeMillis()
+        shockwaveTrigger = System.currentTimeMillis()
+
         debriefIsVictory = true
         showDebrief = true
     }
@@ -149,10 +169,12 @@ fun BlockCipherForgeArenaScreen(
             .fillMaxSize()
             .statusBarsPadding()
     ) {
-        com.simats.codeingo.ui.arenas.common.ArenaEnvironmentBackground(accentColor = AmberGold)
+        ArenaEnvironmentBackground(accentColor = primary)
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .arenaShake(shakeController)
         ) {
             Column(
                 modifier = Modifier
@@ -161,205 +183,205 @@ fun BlockCipherForgeArenaScreen(
                     .padding(horizontal = 12.dp, vertical = 2.dp)
             ) {
                 // Top HUD Bar: Back, Arena Title, Hearts, Gems, Speed, Loadout
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Exit",
-                            tint = dynamicColors.textPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Column {
-                        Text(
-                            text = "BLOCK CIPHER FORGE",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black,
-                            color = dynamicColors.textPrimary,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = currentLevel.title,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AmberGold
-                        )
-                    }
-                }
-
-                // Economy Badges: Hearts, Gems, Tool
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Tactical Tool Icon
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                equippedTool?.accentColor?.copy(alpha = 0.15f)
-                                    ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
-                            )
-                            .border(
-                                1.dp,
-                                equippedTool?.accentColor ?: dynamicColors.cardBorder,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clickable { showLoadoutSheet = true }
-                            .padding(horizontal = 7.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(dynamicColors.cardBorder.copy(alpha = 0.3f))
+                        ) {
                             Icon(
-                                imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
-                                contentDescription = "Tool",
-                                tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
-                                modifier = Modifier.size(13.dp)
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Exit",
+                                tint = dynamicColors.textPrimary,
+                                modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column {
                             Text(
-                                text = if (toolUsedInLevel) "USED" else "READY",
-                                fontSize = 9.sp,
+                                text = "BLOCK CIPHER FORGE",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = dynamicColors.textPrimary,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = currentLevel.title,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                color = primary
                             )
                         }
                     }
 
-                    // Hearts HUD (Observes GameManager max 10)
+                    // Economy Badges: Hearts, Gems, Tool
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(DuolingoRed.copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Hearts",
-                            tint = DuolingoRed,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$heartsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = DuolingoRed
-                        )
-                    }
+                        // Tactical Tool Icon
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    equippedTool?.accentColor?.copy(alpha = 0.15f)
+                                        ?: dynamicColors.cardBorder.copy(alpha = 0.2f)
+                                )
+                                .border(
+                                    1.dp,
+                                    equippedTool?.accentColor ?: dynamicColors.cardBorder,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { showLoadoutSheet = true }
+                                .padding(horizontal = 7.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = equippedTool?.icon ?: Icons.Default.MilitaryTech,
+                                    contentDescription = "Tool",
+                                    tint = equippedTool?.accentColor ?: dynamicColors.textSecondary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = if (toolUsedInLevel) "USED" else "READY",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (toolUsedInLevel) dynamicColors.textSecondary else (equippedTool?.accentColor ?: dynamicColors.textPrimary)
+                                )
+                            }
+                        }
 
-                    // Gems HUD
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Diamond,
-                            contentDescription = "Gems",
-                            tint = Color(0xFF00C3FF),
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "$gemsCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFF00C3FF)
-                        )
-                    }
+                        // Hearts HUD (Observes GameManager max 10)
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(DuolingoRed.copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Hearts",
+                                tint = DuolingoRed,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$heartsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = DuolingoRed
+                            )
+                        }
 
-                    // Theory Codex Button
-                    IconButton(
-                        onClick = { showTheoryCodex = true },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Theory",
-                            tint = dynamicColors.textSecondary,
-                            modifier = Modifier.size(18.dp)
+                        // Gems HUD
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF00C3FF).copy(alpha = 0.12f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Diamond,
+                                contentDescription = "Gems",
+                                tint = Color(0xFF00C3FF),
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "$gemsCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFF00C3FF)
+                            )
+                        }
+
+                        // Theory Codex Button
+                        IconButton(
+                            onClick = { showTheoryCodex = true },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.HelpOutline,
+                                contentDescription = "Theory",
+                                tint = dynamicColors.textSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Enhanced Cyber Level Selector Ribbon
+                val forgeStations = remember {
+                    BlockCipherForgeLevel.values().map { lvl ->
+                        ArenaStationNode(
+                            id = lvl.id,
+                            title = lvl.title,
+                            shortName = when (lvl.id) {
+                                1 -> "S-Box"
+                                2 -> "ShiftRows"
+                                3 -> "MixCols"
+                                4 -> "RoundKey"
+                                5 -> "Modes"
+                                6 -> "Avalanche"
+                                else -> "Overlord"
+                            },
+                            iconEmoji = lvl.iconEmoji,
+                            isBoss = lvl == BlockCipherForgeLevel.BOSS_BATTLE
                         )
                     }
                 }
-            }
 
-            // Enhanced Cyber Level Selector Ribbon
-            val forgeStations = remember {
-                BlockCipherForgeLevel.values().map { lvl ->
-                    com.simats.codeingo.ui.arenas.common.ArenaStationNode(
-                        id = lvl.id,
-                        title = lvl.title,
-                        shortName = when (lvl.id) {
-                            1 -> "S-Box"
-                            2 -> "ShiftRows"
-                            3 -> "MixCols"
-                            4 -> "RoundKey"
-                            5 -> "Modes"
-                            6 -> "Avalanche"
-                            else -> "Overlord"
-                        },
-                        iconEmoji = lvl.iconEmoji,
-                        isBoss = lvl == BlockCipherForgeLevel.BOSS_BATTLE
-                    )
-                }
-            }
+                ArenaLevelTrack(
+                    stations = forgeStations,
+                    currentLevelId = currentLevel.id,
+                    unlockedLevels = unlockedLevels,
+                    levelStars = levelStars,
+                    accentColor = primary,
+                    onSelectLevel = { id ->
+                        currentLevel = BlockCipherForgeLevel.fromId(id)
+                    }
+                )
 
-            com.simats.codeingo.ui.arenas.common.ArenaLevelTrack(
-                stations = forgeStations,
-                currentLevelId = currentLevel.id,
-                unlockedLevels = unlockedLevels,
-                levelStars = levelStars,
-                accentColor = AmberGold,
-                onSelectLevel = { id ->
-                    currentLevel = BlockCipherForgeLevel.fromId(id)
-                }
-            )
+                // Combo & Tactical HUD
+                ArenaComboHUD(
+                    comboCount = comboCount,
+                    score = score,
+                    equippedTool = equippedTool,
+                    toolUsed = toolUsedInLevel,
+                    onActivateTool = {
+                        toolUsedInLevel = true
+                    },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
 
-            // Combo & Tactical HUD
-            ArenaComboHUD(
-                comboCount = comboCount,
-                score = score,
-                equippedTool = equippedTool,
-                toolUsed = toolUsedInLevel,
-                onActivateTool = {
-                    toolUsedInLevel = true
-                },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Main Mini-Game Canvas Container
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(dynamicColors.cardBackground)
-                    .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                when (currentLevel) {
+                // Main Mini-Game Canvas Container
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isDark) ArenaPalettes.Arena2BackgroundDark else dynamicColors.cardBackground)
+                        .border(1.dp, dynamicColors.cardBorder, RoundedCornerShape(16.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    when (currentLevel) {
                         BlockCipherForgeLevel.LEVEL_1 -> SBoxForgeLevel(
                             toolActive = equippedTool == ArenaTacticalTool.HINT_LENS && !toolUsedInLevel,
                             onComplete = { handleLevelCompleted(BlockCipherForgeLevel.LEVEL_1) },
@@ -393,16 +415,18 @@ fun BlockCipherForgeArenaScreen(
                         )
                         BlockCipherForgeLevel.BOSS_BATTLE -> BlockOverlordBossLevel(
                             timeFreezeActive = equippedTool == ArenaTacticalTool.TIME_FREEZE && toolUsedInLevel,
+                            onTriggerShake = { shakeController.shake() },
+                            onTriggerShockwave = { shockwaveTrigger = System.currentTimeMillis() },
                             onComplete = { handleLevelCompleted(BlockCipherForgeLevel.BOSS_BATTLE) },
                             onDeductHeart = { onDeductHeart() },
                             onActionSuccess = { onActionSuccess(300) }
                         )
                     }
-            }
+                }
 
             } // Close inner weighted column
 
-            com.simats.codeingo.ui.arenas.common.ArenaBottomBar(
+            ArenaBottomBar(
                 onOpenCodex = { showTheoryCodex = true },
                 onResetLevel = {
                     val lvl = currentLevel
@@ -417,6 +441,10 @@ fun BlockCipherForgeArenaScreen(
             )
         }
 
+        // Particle Burst and Shockwave overlays
+        ArenaParticleBurst(trigger = particleTrigger, colors = listOf(primary, accent, Color.White))
+        ArenaShockwaveEffect(trigger = shockwaveTrigger, color = primary)
+
         // Cinematic Briefing Overlay
         if (showBriefing) {
             val objective = when (currentLevel) {
@@ -424,17 +452,17 @@ fun BlockCipherForgeArenaScreen(
                 BlockCipherForgeLevel.LEVEL_2 -> "Permute the 4x4 state matrix by cyclically shifting rows 0, 1, 2, and 3 left by their respective row offsets."
                 BlockCipherForgeLevel.LEVEL_3 -> "Mix columns via matrix multiplication over Galois Field GF(2^8) with reduction polynomial 0x11B to attain maximum distance separability."
                 BlockCipherForgeLevel.LEVEL_4 -> "Perform bitwise XOR between the cipher state and round key words. Verify the self-inverting property (S ⊕ K ⊕ K = S)."
-                BlockCipherForgeLevel.LEVEL_5 -> "Examine ciphertext patterns across ECB, CBC, and CTR modes. Identify the ECB structural leak and prevent CTR keystream reuse."
-                BlockCipherForgeLevel.LEVEL_6 -> "Flip a single bit and observe complete diffusion. Confirm that about 50% of output bits flip on average by round 3."
+                BlockCipherForgeLevel.LEVEL_5 -> "Examine ciphertext patterns across ECB, CBC, and CTR modes. Identify the ECB structural leak, CBC malleability, and CTR keystream reuse."
+                BlockCipherForgeLevel.LEVEL_6 -> "Flip a single bit and observe complete diffusion. Confirm that about 50% of output bits flip on average under SAC."
                 BlockCipherForgeLevel.BOSS_BATTLE -> "Infiltrate the Block Overlord's citadel! Reconstruct the AES round loop, disarm the Round 10 MixColumns trap, and contain the avalanche surge!"
             }
             val mechanic = when (currentLevel) {
                 BlockCipherForgeLevel.LEVEL_1 -> "Adjust Row and Col hex dials to pinpoint the exact FIPS-197 S-Box coordinate, then forge the substituted byte."
-                BlockCipherForgeLevel.LEVEL_2 -> "Swipe or tap shift arrows to cyclically rotate row bytes left until all 4 rows lock into alignment."
-                BlockCipherForgeLevel.LEVEL_3 -> "Blend the Galois Field coefficients (2, 3, 1, 1) and pull the reactor lever to execute modular reduction."
+                BlockCipherForgeLevel.LEVEL_2 -> "Tap shift arrows to cyclically rotate row bytes left until all 4 rows lock into alignment."
+                BlockCipherForgeLevel.LEVEL_3 -> "Blend the Galois Field coefficients (2, 3, 1, 1) and engage the reactor to execute modular reduction."
                 BlockCipherForgeLevel.LEVEL_4 -> "Toggle bit switches to calculate byte XOR outputs and unlock the master cryptographic vault."
-                BlockCipherForgeLevel.LEVEL_5 -> "Tap the leaked pixel zones in ECB mode and calculate the XOR plaintext recovery from reused CTR nonces."
-                BlockCipherForgeLevel.LEVEL_6 -> "Measure bit diffusion round by round and tap unstable nodes to prevent entropy collapse."
+                BlockCipherForgeLevel.LEVEL_5 -> "Flag ECB bitmap leakage, inject 1-bit CBC tampering, and demonstrate CTR keystream cancellation."
+                BlockCipherForgeLevel.LEVEL_6 -> "Inject bit flips into state blocks, analyze diffusion rounds, and solve the Strict Avalanche Criterion challenge."
                 BlockCipherForgeLevel.BOSS_BATTLE -> "Phase 1: Arrange operations. Phase 2: Disarm Round 10 MixColumns trap. Phase 3: Stabilize avalanche surge."
             }
 
@@ -520,6 +548,7 @@ private fun BlockCipherForgeTheoryCodexSheet(
     onDismiss: () -> Unit
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val primary = ArenaPalettes.Arena2Primary
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -543,7 +572,7 @@ private fun BlockCipherForgeTheoryCodexSheet(
                     text = "THEORY CODEX • ${level.title.uppercase()}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Black,
-                    color = AmberGold
+                    color = primary
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = dynamicColors.textSecondary)
