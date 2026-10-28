@@ -460,7 +460,7 @@ private fun TopicListView(
                     decorationBox = { innerTextField ->
                         if (searchQuery.isEmpty()) {
                             Text(
-                                text = "Search topics, operations, complexity...",
+                                text = "Search ciphers, hashing, keys, protocols...",
                                 color = SubtextGray,
                                 fontSize = 13.sp
                             )
