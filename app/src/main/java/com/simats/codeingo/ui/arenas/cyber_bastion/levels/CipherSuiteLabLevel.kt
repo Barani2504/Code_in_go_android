@@ -25,18 +25,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.common.ArenaBadgeType
+import com.simats.codeingo.ui.arenas.common.ArenaHaptics
+import com.simats.codeingo.ui.arenas.common.ArenaPalettes
+import com.simats.codeingo.ui.arenas.common.ArenaStatusBadge
+import com.simats.codeingo.ui.arenas.common.minTouchTarget48
 import com.simats.codeingo.ui.components.Tactile3DButton
 import com.simats.codeingo.ui.components.Tactile3DButtonColor
-import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.ArenaDangerRed
 import com.simats.codeingo.ui.theme.ArenaSuccessGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.LocalReduceMotion
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.theme.pressScale
 
 enum class TlsSuite(
     val token: String,
@@ -70,6 +77,12 @@ fun CipherSuiteLabLevel(
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val reduceMotion = LocalReduceMotion.current
+    val view = LocalView.current
+
+    val primary = ArenaPalettes.Arena5Primary
+    val accent = ArenaPalettes.Arena5Accent
 
     var selectedSuite by remember { mutableStateOf(TlsSuite.AES_128_GCM_SHA256) }
     var selectedGroup by remember { mutableStateOf(SupportedGroup.X25519) }
@@ -85,43 +98,40 @@ fun CipherSuiteLabLevel(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "TLS 1.3 CIPHER SUITE & KEY EXCHANGE LAB",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
-                color = AmberGold,
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "RFC 8446: AEAD + HKDF Hash Suite & Supported Group Extension",
-                fontSize = 10.5.sp,
-                color = dynamicColors.textSecondary,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        // Explanatory Card
+        // Mission Briefing & Status Badge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(dynamicColors.cardBorder.copy(alpha = 0.2f))
-                .border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-                .padding(12.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(if (isDark) ArenaPalettes.Arena5CardDark else dynamicColors.cardBackground)
+                .border(1.2.dp, primary.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+                .padding(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "TLS 1.3 CIPHER SUITE & GROUPS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = primary
+                    )
+
+                    ArenaStatusBadge(
+                        type = if (isHandshakeCompliant) ArenaBadgeType.SUCCESS else ArenaBadgeType.DANGER,
+                        label = if (isHandshakeCompliant) "RFC 8446 COMPLIANT ✓" else "INSECURE SUITE"
+                    )
+                }
+
                 Text(
-                    text = "🔒 RFC 8446 Architecture:",
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AmberGold
-                )
-                Text(
-                    text = "In TLS 1.3, the Cipher Suite specifies ONLY the AEAD encryption primitive and HKDF hash algorithm. Key exchange is negotiated independently via the Supported Groups extension! All suites must provide AEAD integrity; static RSA is forbidden.",
-                    fontSize = 11.5.sp,
+                    text = "In TLS 1.3 (RFC 8446), the cipher suite specifies ONLY the AEAD encryption and HKDF hash. Key exchange is negotiated separately via Supported Groups! Obsolete ciphers (RC4, 3DES, static RSA) are completely banned.",
+                    fontSize = 12.sp,
                     color = dynamicColors.textPrimary,
+                    textAlign = TextAlign.Center,
                     lineHeight = 16.sp
                 )
             }
@@ -130,10 +140,10 @@ fun CipherSuiteLabLevel(
         // Live Negotiated Suite Badge
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .fillMaxWidth(0.95f)
+                .clip(RoundedCornerShape(14.dp))
                 .background(if (isHandshakeCompliant) ArenaSuccessGreen.copy(alpha = 0.12f) else ArenaDangerRed.copy(alpha = 0.12f))
-                .border(1.5.dp, if (isHandshakeCompliant) ArenaSuccessGreen else ArenaDangerRed, RoundedCornerShape(12.dp))
+                .border(1.5.dp, if (isHandshakeCompliant) ArenaSuccessGreen else ArenaDangerRed, RoundedCornerShape(14.dp))
                 .padding(12.dp)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -163,13 +173,13 @@ fun CipherSuiteLabLevel(
             }
         }
 
-        // Section 1: TLS 1.3 Cipher Suite Selector (AEAD + HKDF Hash)
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Suite Selector (Enforce 48dp+ touch target per row)
+        Column(modifier = Modifier.fillMaxWidth(0.95f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "1. SELECT CIPHER SUITE (AEAD + HKDF HASH):",
-                fontSize = 10.sp,
+                text = "1. SELECT AEAD CIPHER SUITE:",
+                fontSize = 10.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = primary
             )
 
             TlsSuite.values().forEach { suite ->
@@ -177,21 +187,29 @@ fun CipherSuiteLabLevel(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .minTouchTarget48()
                         .clip(RoundedCornerShape(10.dp))
                         .background(
                             if (isSelected) {
                                 if (suite.isTls13Standard) ArenaSuccessGreen.copy(alpha = 0.2f) else ArenaDangerRed.copy(alpha = 0.2f)
-                            } else dynamicColors.cardBorder.copy(alpha = 0.2f)
+                            } else dynamicColors.cardBorder.copy(alpha = 0.15f)
                         )
                         .border(
-                            if (isSelected) 2.dp else 1.dp,
-                            if (isSelected) (if (suite.isTls13Standard) ArenaSuccessGreen else ArenaDangerRed) else dynamicColors.cardBorder,
+                            1.dp,
+                            if (isSelected) (if (suite.isTls13Standard) ArenaSuccessGreen else ArenaDangerRed) else Color.Transparent,
                             RoundedCornerShape(10.dp)
                         )
-                        .clickable { selectedSuite = suite }
-                        .padding(horizontal = 12.dp),
-                    contentAlignment = Alignment.CenterStart
+                        .pressScale()
+                        .clickable {
+                            selectedSuite = suite
+                            if (!suite.isTls13Standard) {
+                                ArenaHaptics.error(view, reduceMotion)
+                                onDeductHeart()
+                            } else {
+                                ArenaHaptics.tap(view, reduceMotion)
+                            }
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -199,18 +217,12 @@ fun CipherSuiteLabLevel(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text(
-                                text = suite.token,
-                                fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = dynamicColors.textPrimary
-                            )
-                            Text(text = suite.note, fontSize = 9.sp, color = SubtextGray)
+                            Text(text = suite.token, fontSize = 11.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary)
+                            Text(text = suite.note, fontSize = 9.5.sp, color = if (suite.isTls13Standard) SubtextGray else ArenaDangerRed)
                         }
                         Text(
-                            text = if (suite.isTls13Standard) "✓ TLS 1.3" else "FORBIDDEN",
-                            fontSize = 9.5.sp,
+                            text = if (suite.isTls13Standard) "TLS 1.3" else "FORBIDDEN",
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
                             color = if (suite.isTls13Standard) ArenaSuccessGreen else ArenaDangerRed
                         )
@@ -219,41 +231,59 @@ fun CipherSuiteLabLevel(
             }
         }
 
-        // Section 2: Key Share Supported Group
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Supported Groups Selector (Enforce 48dp+ touch target)
+        Column(modifier = Modifier.fillMaxWidth(0.95f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "2. SUPPORTED GROUP (KEY EXCHANGE EXTENSION):",
-                fontSize = 10.sp,
+                text = "2. SELECT SUPPORTED GROUP (KEY EXCHANGE EXTENSION):",
+                fontSize = 10.5.sp,
                 fontWeight = FontWeight.Black,
-                color = AmberGold
+                color = accent
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                SupportedGroup.values().forEach { group ->
-                    val isSelected = selectedGroup == group
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) {
-                                    if (group.hasForwardSecrecy) ArenaSuccessGreen.copy(alpha = 0.2f) else ArenaDangerRed.copy(alpha = 0.2f)
-                                } else dynamicColors.cardBorder.copy(alpha = 0.2f)
-                            )
-                            .border(
-                                if (isSelected) 2.dp else 1.dp,
-                                if (isSelected) (if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed) else dynamicColors.cardBorder,
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { selectedGroup = group }
-                            .padding(4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = group.groupName, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, textAlign = TextAlign.Center)
-                            Text(text = if (group.hasForwardSecrecy) "PFS ✓" else "NO PFS ❌", fontSize = 9.sp, fontWeight = FontWeight.Black, color = if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed)
+            SupportedGroup.values().forEach { group ->
+                val isSelected = selectedGroup == group
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .minTouchTarget48()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isSelected) {
+                                if (group.hasForwardSecrecy) ArenaSuccessGreen.copy(alpha = 0.2f) else ArenaDangerRed.copy(alpha = 0.2f)
+                            } else dynamicColors.cardBorder.copy(alpha = 0.15f)
+                        )
+                        .border(
+                            1.dp,
+                            if (isSelected) (if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed) else Color.Transparent,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .pressScale()
+                        .clickable {
+                            selectedGroup = group
+                            if (!group.hasForwardSecrecy) {
+                                ArenaHaptics.error(view, reduceMotion)
+                                onDeductHeart()
+                            } else {
+                                ArenaHaptics.tap(view, reduceMotion)
+                            }
                         }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(text = group.groupName, fontSize = 11.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary)
+                            Text(text = group.curveType, fontSize = 9.5.sp, color = SubtextGray)
+                        }
+                        Text(
+                            text = if (group.hasForwardSecrecy) "FORWARD SECRECY ✓" else "NO PFS ❌",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (group.hasForwardSecrecy) ArenaSuccessGreen else ArenaDangerRed
+                        )
                     }
                 }
             }
@@ -262,17 +292,21 @@ fun CipherSuiteLabLevel(
         Spacer(modifier = Modifier.height(4.dp))
 
         Tactile3DButton(
-            title = if (isHandshakeCompliant) "Authorize TLS 1.3 Handshake ✓" else "Select Secure RFC 8446 Suite & Group",
-            style = if (isHandshakeCompliant) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.AMBER,
+            title = if (isHandshakeCompliant) "LOCK TLS 1.3 SUITE & ADVANCE ➔" else "SELECT SECURE AEAD & ECDHE GROUP",
+            style = if (isHandshakeCompliant) Tactile3DButtonColor.GREEN else Tactile3DButtonColor.DISABLED,
+            isEnabled = isHandshakeCompliant,
             onClick = {
                 if (isHandshakeCompliant) {
+                    ArenaHaptics.success(view, reduceMotion)
                     onActionSuccess()
                     onComplete()
-                } else {
-                    onDeductHeart()
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .minTouchTarget48()
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
