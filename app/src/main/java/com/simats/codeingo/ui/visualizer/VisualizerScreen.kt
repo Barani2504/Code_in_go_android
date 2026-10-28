@@ -146,10 +146,10 @@ fun VisualizerScreen(
         else -> "Python"
     }
 
-    val categories = listOf("All", "Ciphers", "Symmetric", "Asymmetric", "Protocols")
+    val categories = listOf("All", "Classical", "Symmetric", "Asymmetric", "Hashing & Protocols")
 
     val filteredStructures = remember(searchQuery, selectedCategory) {
-        DSAVisualizerType.entries.filter { type ->
+        DSAVisualizerType.PEDAGOGICAL_ORDER.filter { type ->
             val matchesCategory = selectedCategory == "All" || type.filterCategory == selectedCategory
             val query = searchQuery.trim().lowercase()
             val matchesSearch = query.isEmpty() ||
@@ -928,7 +928,7 @@ private fun TopicDetailView(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(DSAVisualizerType.entries) { type ->
+            items(DSAVisualizerType.PEDAGOGICAL_ORDER) { type ->
                 val isSelected = selectedType == type
                 val shape = RoundedCornerShape(20.dp)
                 Box(
@@ -987,13 +987,11 @@ private fun TopicDetailView(
             // 3. Real World Applications Card
             DSARealWorldApplicationsCard(type = selectedType)
 
-            // 4. Idiomatic Code Implementation Card in Chosen Language
-            if (selectedType != DSAVisualizerType.STEP_RECORDER) {
-                DSALanguageImplementationCardView(
-                    structureName = selectedType.title,
-                    initialLanguage = currentLanguageName
-                )
-            }
+            // 4. Idiomatic Code Implementation Card in Chosen Language (All 10 Labs)
+            CNSLanguageImplementationCardView(
+                structureName = selectedType.title,
+                initialLanguage = currentLanguageName
+            )
 
             // 5. Navigation Buttons: Up Next & Back to Topics
             Column(

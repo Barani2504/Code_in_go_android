@@ -190,10 +190,10 @@ enum class DSAVisualizerType(val title: String, val iconName: String) {
 
     val filterCategory: String
         get() = when (this) {
-            ARRAY, LINKED_LIST -> "Ciphers"
+            ARRAY, LINKED_LIST -> "Classical"
             STACK, QUEUE -> "Symmetric"
             BINARY_TREE, AVL_TREE, TRIE -> "Asymmetric"
-            GRAPH, SORTING, STEP_RECORDER -> "Protocols"
+            GRAPH, SORTING, STEP_RECORDER -> "Hashing & Protocols"
         }
 
     val tagline: String
@@ -346,8 +346,23 @@ enum class DSAVisualizerType(val title: String, val iconName: String) {
 
     val nextType: DSAVisualizerType
         get() {
-            val all = entries
+            val all = PEDAGOGICAL_ORDER
             val idx = all.indexOf(this)
             return if (idx >= 0) all[(idx + 1) % all.size] else STACK
         }
+
+    companion object {
+        val PEDAGOGICAL_ORDER = listOf(
+            ARRAY,
+            LINKED_LIST,
+            STACK,
+            QUEUE,
+            BINARY_TREE,
+            AVL_TREE,
+            TRIE,
+            GRAPH,
+            SORTING,
+            STEP_RECORDER
+        )
+    }
 }

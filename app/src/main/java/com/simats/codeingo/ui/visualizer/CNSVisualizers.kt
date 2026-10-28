@@ -26,13 +26,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -66,6 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.arenas.crypto.ArenaCryptoEngine
 import com.simats.codeingo.ui.components.DuolingoButton
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
@@ -80,22 +84,27 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
-import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.visualizer.engine.AesEngine
+import com.simats.codeingo.ui.visualizer.engine.DesEngine
+import com.simats.codeingo.ui.visualizer.engine.DhEngine
+import com.simats.codeingo.ui.visualizer.engine.HmacPasswordEngine
+import com.simats.codeingo.ui.visualizer.engine.KasiskiEngine
+import com.simats.codeingo.ui.visualizer.engine.RsaEngine
+import com.simats.codeingo.ui.visualizer.engine.Sha256Engine
+import com.simats.codeingo.ui.visualizer.engine.TlsEngine
+import java.math.BigInteger
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import kotlin.math.exp
-import kotlin.math.pow
 import kotlin.math.roundToInt
-import kotlin.math.sin
 
 // ══════════════════════════════════════════════════════════════════
 // 🛡️ CNS VISUALIZER ENGINES (10 Flagship Cryptography & NetSec Labs)
-// Full Light / Dark Theme Adaptive Compatibility
+// Powered by Rigorous NIST / RFC Mathematical Engines
 // ══════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────
-// 1. Caesar & Shift Cipher Visualizer
+// 1. Caesar & Shift Cipher Visualizer (ARRAY)
 // ──────────────────────────────────────────────
 @Composable
 fun CaesarCipherVisualizer() {
@@ -106,14 +115,13 @@ fun CaesarCipherVisualizer() {
     val greenColor = if (isDark) DsaGreen else Color(0xFF15803D)
     val cyanColor = if (isDark) Color.Cyan else Color(0xFF0284C7)
 
-    var textInput by remember { mutableStateOf("CRYPTO LAB") }
+    var textInput by remember { mutableStateOf("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG") }
     var shift by remember { mutableIntStateOf(3) }
     var isDecryptMode by remember { mutableStateOf(false) }
-    var showBruteForce by remember { mutableStateOf(false) }
+    var activeSubTab by remember { mutableIntStateOf(0) } // 0: Live Wheel, 1: 26-Letter Frequency, 2: Chi-Squared Solver
     val clipboard = LocalClipboardManager.current
     var isCopied by remember { mutableStateOf(false) }
 
-    val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     val effectiveShift = if (isDecryptMode) (26 - (shift % 26)) % 26 else shift % 26
 
     val outputText = remember(textInput, effectiveShift) {
@@ -126,14 +134,12 @@ fun CaesarCipherVisualizer() {
         }.joinToString("")
     }
 
-    val letterCounts = remember(outputText) {
-        val upper = outputText.uppercase()
-        val counts = mutableMapOf<Char, Int>()
-        for (c in alphabet) counts[c] = 0
-        for (c in upper) {
-            if (c in 'A'..'Z') counts[c] = (counts[c] ?: 0) + 1
-        }
-        counts
+    val letterFrequencies = remember(outputText) {
+        KasiskiEngine.computeLetterFrequencies(outputText)
+    }
+
+    val chiSquaredScores = remember(outputText) {
+        KasiskiEngine.analyzeCaesarShifts(outputText)
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -145,9 +151,26 @@ fun CaesarCipherVisualizer() {
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "⚠️ HISTORICAL TOY CIPHER — Key space = 26. Insecure: trivial to break via exhaustive search or single-letter frequency analysis.",
+                text = "⚠️ MONOALPHABETIC TOY CIPHER — Keyspace = 26 shifts (4.7 bits). Trivial to break via frequency analysis or exhaustive search in <1ms.",
                 fontSize = 10.5.sp, color = amberColor, lineHeight = 14.sp, fontWeight = FontWeight.Bold
             )
+        }
+
+        // SubTab Selector
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("SHIFT WHEEL", "26-LETTER FREQUENCY", "CHI-SQUARED SOLVER").forEachIndexed { index, label ->
+                val selected = activeSubTab == index
+                Box(
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        .background(if (selected) DsaGreen else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
+                        .border(1.dp, if (selected) DsaGreen else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
+                        .clickable { activeSubTab = index }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = label, fontSize = 9.5.sp, fontWeight = FontWeight.Black, color = if (selected) Color.Black else SubtextGray)
+                }
+            }
         }
 
         // Direction Toggle
@@ -160,7 +183,7 @@ fun CaesarCipherVisualizer() {
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "ENCRYPT (P + K)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (!isDecryptMode) Color.Black else SubtextGray)
+                Text(text = "ENCRYPT (P + K mod 26)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (!isDecryptMode) Color.Black else SubtextGray)
             }
             Box(
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
@@ -170,7 +193,7 @@ fun CaesarCipherVisualizer() {
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "DECRYPT (C - K)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDecryptMode) Color.Black else SubtextGray)
+                Text(text = "DECRYPT (C - K mod 26)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDecryptMode) Color.Black else SubtextGray)
             }
         }
 
@@ -187,86 +210,59 @@ fun CaesarCipherVisualizer() {
                 )
                 BasicTextField(
                     value = textInput,
-                    onValueChange = { if (it.length <= 25) textInput = it },
+                    onValueChange = { if (it.length <= 60) textInput = it },
                     textStyle = TextStyle(
                         color = dynamicColors.textPrimary,
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
                     ),
                     cursorBrush = SolidColor(if (isDecryptMode) AmberGold else DsaGreen),
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text(
-                    text = if (isDecryptMode) "Formula: P = (C - K) mod 26" else "Formula: C = (P + K) mod 26",
-                    fontSize = 11.sp, color = SubtextGray
-                )
             }
         }
 
-        // Shift Key Slider Card
+        // Key Shift Slider
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, InputBorder, RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "SHIFT KEY (K)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                    Text(text = "+$shift MOD 26", fontSize = 14.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = "MODULAR SHIFT KEY (K)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = SubtextGray)
+                    Text(text = "K = $shift (${('A'.code + shift).toChar()})", fontSize = 14.sp, fontWeight = FontWeight.Black, color = greenColor, fontFamily = FontFamily.Monospace)
                 }
-
                 Slider(
                     value = shift.toFloat(),
                     onValueChange = { shift = it.roundToInt() },
                     valueRange = 0f..25f,
                     steps = 24,
-                    colors = SliderDefaults.colors(thumbColor = AmberGold, activeTrackColor = AmberGold, inactiveTrackColor = AmberGold.copy(alpha = 0.2f))
+                    colors = SliderDefaults.colors(thumbColor = DsaGreen, activeTrackColor = DsaGreen)
                 )
-
-                // Alphabet Shift Ribbon
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    alphabet.forEachIndexed { i, ch ->
-                        val targetChar = alphabet[(i + effectiveShift) % 26]
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                                .background(if (i == shift) AmberGold.copy(alpha = if (isDark) 0.25f else 0.18f) else (if (isDark) Color.White.copy(alpha = 0.04f) else Color.Black.copy(alpha = 0.04f)))
-                                .border(1.dp, if (i == shift) AmberGold else Color.Transparent, RoundedCornerShape(8.dp))
-                                .padding(horizontal = 6.dp, vertical = 4.dp)
-                        ) {
-                            Text(text = "$ch", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-                            Text(text = "↓", fontSize = 9.sp, color = amberColor)
-                            Text(text = "$targetChar", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDecryptMode) amberColor else greenColor)
-                        }
-                    }
-                }
             }
         }
 
-        // Output Card
+        // Output Display Card
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
-                .border(1.5.dp, (if (isDecryptMode) AmberGold else DsaGreen).copy(alpha = 0.6f), RoundedCornerShape(16.dp)).padding(16.dp)
+                .border(1.5.dp, if (isDecryptMode) AmberGold.copy(alpha = 0.6f) else DsaGreen.copy(alpha = 0.6f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = if (isDecryptMode) "DECRYPTED PLAINTEXT" else "CIPHERTEXT (OUTPUT)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDecryptMode) amberColor else greenColor)
+                    Text(
+                        text = if (isDecryptMode) "RECOVERED PLAINTEXT" else "GENERATED CIPHERTEXT",
+                        fontSize = 11.sp, fontWeight = FontWeight.Black,
+                        color = if (isDecryptMode) amberColor else greenColor
+                    )
                     Row(
-                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background((if (isDecryptMode) AmberGold else DsaGreen).copy(alpha = if (isDark) 0.15f else 0.10f))
-                            .clickable {
-                                clipboard.setText(AnnotatedString(outputText))
-                                isCopied = true
-                            }.padding(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.clickable {
+                            clipboard.setText(AnnotatedString(outputText))
+                            isCopied = true
+                        },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = if (isCopied) Icons.Default.Check else Icons.Default.ContentCopy, contentDescription = null, tint = if (isDecryptMode) amberColor else greenColor, modifier = Modifier.size(14.dp))
+                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copy", tint = if (isDecryptMode) amberColor else greenColor, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = if (isCopied) "Copied!" else "Copy", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (isDecryptMode) amberColor else greenColor)
                     }
@@ -274,61 +270,89 @@ fun CaesarCipherVisualizer() {
 
                 Text(
                     text = outputText.ifEmpty { "(empty)" },
-                    fontSize = 20.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace,
-                    color = if (isDecryptMode) amberColor else greenColor, letterSpacing = 2.sp
+                    fontSize = 16.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace,
+                    color = if (isDecryptMode) amberColor else greenColor, letterSpacing = 1.sp
                 )
             }
         }
 
-        // Frequency Bar Chart Card
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
-                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(14.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "📊 OUTPUT FREQUENCY ANALYSIS", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    val maxVal = letterCounts.values.maxOrNull()?.coerceAtLeast(1) ?: 1
-                    listOf('E', 'T', 'A', 'O', 'I', 'N', 'S', 'H', 'R').forEach { letter ->
-                        val count = letterCounts[letter] ?: 0
-                        val barHeight = (count.toFloat() / maxVal * 32).coerceIn(4f, 32f)
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Box(modifier = Modifier.width(16.dp).height(barHeight.dp).clip(RoundedCornerShape(4.dp)).background(if (count > 0) DsaGreen else SubtextGray.copy(alpha = 0.2f)))
-                            Text(text = "$letter", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+        // Conditional Tab Contents
+        when (activeSubTab) {
+            1 -> {
+                // Full 26-Letter Frequency Histogram with English overlay
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
+                        .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(14.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "📊 FULL 26-LETTER FREQUENCY DISTRIBUTION", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
+                            Text(text = "Green: Actual | Gray: English Expected", fontSize = 9.sp, color = SubtextGray)
                         }
-                    }
-                }
-                Text(text = "Frequency distributions are shifted without alteration in monoalphabetic ciphers.", fontSize = 10.sp, color = SubtextGray)
-            }
-        }
 
-        // Brute Force Tab
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground)
-                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(12.dp)).clickable { showBruteForce = !showBruteForce }.padding(12.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "🔓 BRUTE-FORCE ALL 26 SHIFTS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
-                    Text(text = if (showBruteForce) "Hide ▲" else "View All 26 ▼", fontSize = 11.sp, color = SubtextGray)
-                }
-                if (showBruteForce) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        (0..25).take(10).forEach { k ->
-                            val shifted = textInput.map { c ->
-                                if (c.isLetter()) {
-                                    val base = if (c.isUpperCase()) 'A' else 'a'
-                                    ((c.code - base.code - k).mod(26) + base.code).toChar()
-                                } else c
-                            }.joinToString("")
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(text = "K = %02d:".format(k), fontSize = 10.sp, color = amberColor, fontFamily = FontFamily.Monospace)
-                                Text(text = shifted.take(20), fontSize = 10.sp, color = if (k == shift) cyanColor else dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            letterFrequencies.forEach { item ->
+                                val actualHeight = (item.percentage * 2.5f).coerceIn(2f, 40f)
+                                val expectedHeight = (item.expectedPercentage * 2.5f).coerceIn(2f, 40f)
+
+                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                                        Box(modifier = Modifier.width(6.dp).height(actualHeight.dp).clip(RoundedCornerShape(2.dp)).background(DsaGreen))
+                                        Box(modifier = Modifier.width(4.dp).height(expectedHeight.dp).clip(RoundedCornerShape(2.dp)).background(Color.Gray.copy(alpha = 0.4f)))
+                                    }
+                                    Text(text = "${item.char}", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                                }
                             }
                         }
-                        Text(text = "...and 16 more shifts. Exhaustive search takes milliseconds.", fontSize = 9.5.sp, color = SubtextGray)
+                        Text(text = "Notice how the entire frequency profile shifts rigidly by K positions without flattening peaks (E, T, A).", fontSize = 10.sp, color = SubtextGray)
                     }
+                }
+            }
+            2 -> {
+                // Chi-Squared Automatic Solver
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
+                        .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(14.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(text = "⚡ CHI-SQUARED AUTOMATIC CRACKER (χ² GOODNESS OF FIT)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = amberColor)
+                        val best = chiSquaredScores.firstOrNull()
+                        if (best != null) {
+                            Text(
+                                text = "🏆 Most Likely Shift: K = ${best.shift} (χ² = ${"%.1f".format(best.chiSquared)})",
+                                fontSize = 12.sp, fontWeight = FontWeight.Black, color = greenColor
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            chiSquaredScores.take(5).forEachIndexed { rank, candidate ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(if (rank == 0) DsaGreen.copy(alpha = 0.15f) else Color.Transparent)
+                                        .clickable { shift = candidate.shift }
+                                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = "#${rank + 1} Shift K=${candidate.shift}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (rank == 0) greenColor else dynamicColors.textPrimary)
+                                    Text(text = candidate.decryptedPreview.take(18) + "...", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = SubtextGray)
+                                    Text(text = "χ²=${"%.1f".format(candidate.chiSquared)}", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else -> {
+                // Shift Wheel Summary
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).padding(10.dp)
+                ) {
+                    Text(
+                        text = "Formula: C = (P + K) mod 26  |  Decryption: P = (C - K + 26) mod 26. Try dragging the shift slider above or check the Chi-Squared Solver tab to see cryptanalysis in action.",
+                        fontSize = 10.5.sp, color = SubtextGray, lineHeight = 14.sp
+                    )
                 }
             }
         }
@@ -336,7 +360,7 @@ fun CaesarCipherVisualizer() {
 }
 
 // ──────────────────────────────────────────────
-// 2. DES Feistel Network Visualizer
+// 2. DES Feistel Network Visualizer (STACK)
 // ──────────────────────────────────────────────
 @Composable
 fun DESFeistelVisualizer() {
@@ -346,22 +370,23 @@ fun DESFeistelVisualizer() {
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
     val tealColor = if (isDark) DsaTeal else Color(0xFF0D9488)
+    val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
 
-    var round by remember { mutableIntStateOf(1) }
-    var leftHalf by remember { mutableStateOf("0x3554474B") }
-    var rightHalf by remember { mutableStateOf("0x6E616C69") }
+    // NIST FIPS 46-3 Verified Test Vector default:
+    // Key: 0x133457799BBCDFF1, Plaintext: 0x0123456789ABCDEF -> Ciphertext: 0x85E813540F0AB405
+    val defaultKey = 0x133457799BBCDFF1L
+    val defaultPt = 0x0123456789ABCDEFL
 
-    fun stepRound() {
-        if (round < 16) {
-            val oldLeft = leftHalf
-            val oldRight = rightHalf
-            val subkey = (round * 0x1F2E3D4C).toInt()
-            val fOut = "0x" + ((oldRight.removePrefix("0x").toLong(16) * 31 xor subkey.toLong()) and 0xFFFFFFFFL).toString(16).uppercase().padStart(8, '0')
-            val newRight = "0x" + (oldLeft.removePrefix("0x").toLong(16) xor fOut.removePrefix("0x").toLong(16)).toString(16).uppercase().padStart(8, '0')
-            leftHalf = oldRight
-            rightHalf = newRight
-            round += 1
-        }
+    var currentKey by remember { mutableStateOf(defaultKey) }
+    var currentPt by remember { mutableStateOf(defaultPt) }
+    var roundIndex by remember { mutableIntStateOf(1) } // 1..16
+
+    val desTrace = remember(currentPt, currentKey) {
+        DesEngine.encrypt(currentPt, currentKey)
+    }
+
+    val currentRoundState = remember(desTrace, roundIndex) {
+        desTrace.rounds.getOrElse(roundIndex - 1) { desTrace.rounds.first() }
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -373,82 +398,139 @@ fun DESFeistelVisualizer() {
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "⚠️ DEPRECATED — 56-bit DES key space (2^56) cracked in 1998 by EFF Deep Crack ($250k, 56 hours). Replaced by AES-128/256.",
+                text = "⚠️ DEPRECATED NIST STANDARD (FIPS 46-3) — Effective key length is only 56 bits. Exhaustively broken in 1998 by EFF Deep Crack in 56 hours. Replaced globally by AES.",
                 fontSize = 10.5.sp, color = redColor, lineHeight = 14.sp, fontWeight = FontWeight.Bold
             )
         }
 
+        // Round Scrubbing & Stepper Control Hub
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, DsaBlue.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "FEISTEL ROUND $round / 16", fontSize = 12.sp, fontWeight = FontWeight.Black, color = DsaBlue)
-                    Text(text = "64-BIT BLOCK", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                    Text(text = "16-ROUND FEISTEL SWAP TRACER", fontSize = 12.sp, fontWeight = FontWeight.Black, color = DsaBlue)
+                    Text(text = "ROUND $roundIndex / 16", fontSize = 13.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
                 }
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(DsaBlue.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.5.dp, DsaBlue, RoundedCornerShape(12.dp)).padding(12.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "L[$round] (32-bit)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DsaBlue)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = leftHalf, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                        }
-                    }
+                Slider(
+                    value = roundIndex.toFloat(),
+                    onValueChange = { roundIndex = it.roundToInt().coerceIn(1, 16) },
+                    valueRange = 1f..16f,
+                    steps = 14,
+                    colors = SliderDefaults.colors(thumbColor = DsaBlue, activeTrackColor = DsaBlue)
+                )
 
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(DsaPurple.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.5.dp, DsaPurple, RoundedCornerShape(12.dp)).padding(12.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "R[$round] (32-bit)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DsaPurple)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = rightHalf, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                        }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp))
+                            .background(dynamicColors.inputBackground)
+                            .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(8.dp))
+                            .clickable { if (roundIndex > 1) roundIndex-- }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "◀ STEP BACK", fontSize = 10.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary)
                     }
-                }
-
-                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(12.dp)).padding(12.dp)) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "🔑 Round Subkey K[$round]:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                            Text(text = "0x" + ((round * 0x1F2E3D4C).toLong() and 0xFFFFFFFFFFL).toString(16).uppercase().take(12), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = amberColor)
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "⚙️ Non-linear F(R, K):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                            Text(text = "Expansion E(32➔48) ➔ 8 S-Boxes ➔ P-Permutation", fontSize = 10.sp, color = tealColor, fontWeight = FontWeight.Bold)
-                        }
+                    Box(
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp))
+                            .background(DsaBlue)
+                            .clickable { if (roundIndex < 16) roundIndex++ }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "STEP FORWARD ▶", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White)
                     }
-                }
-
-                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(dynamicColors.inputBackground.copy(alpha = 0.7f)).padding(10.dp), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "L[i+1] = R[i]   |   R[i+1] = L[i] ⊕ F(R[i], K[i])",
-                        fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor, fontFamily = FontFamily.Monospace
-                    )
                 }
             }
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DuolingoButton(
-                text = if (round < 16) "STEP ROUND ($round/16)" else "16 ROUNDS COMPLETED",
-                faceColor = DsaBlue, shadowColor = Color(0xFF1899D6),
-                onClick = { stepRound() }, modifier = Modifier.weight(1f)
-            )
-            DuolingoButton(
-                text = "RESET",
-                faceColor = DsaRed, shadowColor = Color(0xFFCC3B3B),
-                onClick = {
-                    round = 1
-                    leftHalf = "0x3554474B"
-                    rightHalf = "0x6E616C69"
-                }, modifier = Modifier.weight(0.7f)
-            )
+        // Active Feistel Halves & Swap Diagram
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                .border(1.5.dp, InputBorder, RoundedCornerShape(16.dp)).padding(16.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Left Half
+                    Box(
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
+                            .background(DsaBlue.copy(alpha = if (isDark) 0.15f else 0.08f))
+                            .border(1.dp, DsaBlue, RoundedCornerShape(12.dp)).padding(10.dp)
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "LEFT HALF (L_${roundIndex - 1})", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DsaBlue)
+                            Text(
+                                text = "0x%08X".format(currentRoundState.left),
+                                fontSize = 13.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace
+                            )
+                            Text(text = "32 Bits", fontSize = 9.sp, color = SubtextGray)
+                        }
+                    }
+
+                    // Right Half
+                    Box(
+                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
+                            .background(AmberGold.copy(alpha = if (isDark) 0.15f else 0.08f))
+                            .border(1.dp, AmberGold, RoundedCornerShape(12.dp)).padding(10.dp)
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "RIGHT HALF (R_${roundIndex - 1})", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = amberColor)
+                            Text(
+                                text = "0x%08X".format(currentRoundState.right),
+                                fontSize = 13.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace
+                            )
+                            Text(text = "32 Bits", fontSize = 9.sp, color = SubtextGray)
+                        }
+                    }
+                }
+
+                // Subkey and F-Function Detail Box
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+                        .background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)).padding(10.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "PC-2 Round Subkey (K_$roundIndex):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                            Text(text = "0x%012X".format(currentRoundState.subkey), fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "Expansion E(R_${roundIndex - 1}) [48b]:", fontSize = 10.sp, color = SubtextGray)
+                            Text(text = "0x%012X".format(currentRoundState.expandedR), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "8 S-Boxes Output [32b]:", fontSize = 10.sp, color = SubtextGray)
+                            Text(text = "0x%08X".format(currentRoundState.sBoxOutput), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = tealColor)
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "F-Function Output (after P):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                            Text(text = "0x%08X".format(currentRoundState.fOutput), fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                // Final Ciphertext Result
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+                        .background(DsaBlue.copy(alpha = if (isDark) 0.15f else 0.08f)).padding(8.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "NIST Verified Ciphertext:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DsaBlue)
+                        Text(
+                            text = "0x%016X".format(desTrace.ciphertext),
+                            fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 // ──────────────────────────────────────────────
-// 3. AES 128-Bit State Matrix & Modes Visualizer
+// 3. AES 128-Bit State Matrix & Modes Visualizer (QUEUE)
 // ──────────────────────────────────────────────
 @Composable
 fun AESMatrixVisualizer() {
@@ -459,18 +541,44 @@ fun AESMatrixVisualizer() {
     val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
     val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
 
-    var mainTab by remember { mutableIntStateOf(0) } // 0: State Matrix Rounds, 1: Block Cipher Modes
-    var stageIndex by remember { mutableIntStateOf(0) }
+    var mainTab by remember { mutableIntStateOf(0) } // 0: State Matrix Rounds, 1: Modes & Attacks
+    var selectedRound by remember { mutableIntStateOf(1) } // 1..10
+    var selectedStep by remember { mutableStateOf("SubBytes") } // "Start", "SubBytes", "ShiftRows", "MixColumns", "AddRoundKey"
     var selectedMode by remember { mutableStateOf("ECB") }
-    val stages = listOf("Plaintext", "SubBytes", "ShiftRows", "MixColumns", "AddRoundKey")
 
-    val stateMatrices = listOf(
-        listOf(listOf("32", "88", "31", "E0"), listOf("43", "5A", "31", "37"), listOf("F6", "30", "98", "07"), listOf("A8", "8D", "A2", "34")),
-        listOf(listOf("23", "C4", "C7", "E1"), listOf("1A", "BE", "C7", "9A"), listOf("42", "04", "46", "C5"), listOf("C2", "5D", "3A", "18")),
-        listOf(listOf("23", "C4", "C7", "E1"), listOf("BE", "C7", "9A", "1A"), listOf("46", "C5", "42", "04"), listOf("18", "C2", "5D", "3A")),
-        listOf(listOf("BA", "84", "E8", "1B"), listOf("75", "A4", "8D", "40"), listOf("F4", "8D", "06", "7D"), listOf("7A", "32", "0E", "5D")),
-        listOf(listOf("D4", "E0", "B8", "1E"), listOf("27", "BF", "B4", "41"), listOf("11", "98", "5D", "52"), listOf("AE", "F1", "E5", "30"))
-    )
+    // FIPS-197 Appendix B Test Vector
+    val fipsKey = remember { AesEngine.hexToBytes("2b7e151628aed2a6abf7158809cf4f3c") }
+    val fipsPt = remember { AesEngine.hexToBytes("3243f6a8885a308d313198a2e0370734") }
+
+    val trace = remember(fipsPt, fipsKey) {
+        AesEngine.encryptBlockWithTrace(fipsPt, fipsKey)
+    }
+
+    val currentRoundState = remember(trace, selectedRound) {
+        trace.rounds[selectedRound - 1]
+    }
+
+    val currentMatrix = remember(currentRoundState, selectedStep) {
+        when (selectedStep) {
+            "Start" -> currentRoundState.startState
+            "SubBytes" -> currentRoundState.afterSubBytes
+            "ShiftRows" -> currentRoundState.afterShiftRows
+            "MixColumns" -> currentRoundState.afterMixColumns ?: currentRoundState.afterShiftRows
+            else -> currentRoundState.afterAddRoundKey
+        }
+    }
+
+    // Attacks & Mode states
+    var ctrMsg1 by remember { mutableStateOf("Transfer $500") }
+    var ctrMsg2 by remember { mutableStateOf("Attack At Dawn") }
+    val ctrResult = remember(ctrMsg1, ctrMsg2) {
+        AesEngine.simulateCtrNonceReuse(ctrMsg1, ctrMsg2)
+    }
+
+    var gcmTamperIdx by remember { mutableIntStateOf(2) }
+    val gcmResult = remember(gcmTamperIdx) {
+        AesEngine.testGcmTamper("Confidential Payloads", gcmTamperIdx)
+    }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // Mode Tabs Header
@@ -482,7 +590,7 @@ fun AESMatrixVisualizer() {
                     .clickable { mainTab = 0 }.padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "STATE MATRIX ROUNDS", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (mainTab == 0) Color.White else SubtextGray)
+                Text(text = "10-ROUND STATE TRACER", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (mainTab == 0) Color.White else SubtextGray)
             }
             Box(
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
@@ -491,37 +599,73 @@ fun AESMatrixVisualizer() {
                     .clickable { mainTab = 1 }.padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "BLOCK CIPHER MODES", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (mainTab == 1) Color.White else SubtextGray)
+                Text(text = "MODES & ATTACK DEMOS", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (mainTab == 1) Color.White else SubtextGray)
             }
         }
 
         if (mainTab == 0) {
-            val currentMatrix = stateMatrices[stageIndex]
+            // State Matrix Tracer
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                     .border(1.5.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "AES 4×4 BYTE STATE MATRIX", fontSize = 12.sp, fontWeight = FontWeight.Black, color = DsaPurple)
-                        Text(text = "STAGE: ${stages[stageIndex]}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor)
+                        Text(text = "FIPS-197 AES-128 STATE (ROUND $selectedRound/10)", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = DsaPurple)
+                        Text(text = selectedStep, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor)
                     }
 
+                    // Round Slider (1..10)
+                    Slider(
+                        value = selectedRound.toFloat(),
+                        onValueChange = { selectedRound = it.roundToInt().coerceIn(1, 10) },
+                        valueRange = 1f..10f,
+                        steps = 8,
+                        colors = SliderDefaults.colors(thumbColor = DsaPurple, activeTrackColor = DsaPurple)
+                    )
+
+                    // Step Pills
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        listOf("Start", "SubBytes", "ShiftRows", "MixColumns", "AddRoundKey").forEach { stepName ->
+                            val isChosen = selectedStep == stepName
+                            val isOmitted = selectedRound == 10 && stepName == "MixColumns"
+                            Box(
+                                modifier = Modifier.weight(1f).clip(RoundedCornerShape(6.dp))
+                                    .background(if (isChosen) DsaPurple else dynamicColors.inputBackground)
+                                    .clickable(enabled = !isOmitted) { selectedStep = stepName }
+                                    .padding(vertical = 5.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isOmitted) "(Skip)" else stepName.take(5),
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isOmitted) Color.Gray else if (isChosen) Color.White else SubtextGray
+                                )
+                            }
+                        }
+                    }
+
+                    // 4x4 Byte State Matrix Grid
                     Column(
-                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        currentMatrix.forEachIndexed { r, row ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                row.forEachIndexed { c, byteStr ->
-                                    val isShifted = stageIndex == 2 && r > 0
+                        for (r in 0..3) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for (c in 0..3) {
+                                    val byteVal = currentMatrix[r][c]
                                     Box(
-                                        modifier = Modifier.size(54.dp, 42.dp).clip(RoundedCornerShape(8.dp))
-                                            .background(if (isShifted) DsaPurple.copy(alpha = if (isDark) 0.35f else 0.18f) else DsaBlue.copy(alpha = if (isDark) 0.15f else 0.08f))
-                                            .border(1.dp, if (isShifted) DsaPurple else dynamicColors.inputBorder, RoundedCornerShape(8.dp)),
+                                        modifier = Modifier.size(48.dp, 36.dp).clip(RoundedCornerShape(6.dp))
+                                            .background(DsaPurple.copy(alpha = if (isDark) 0.25f else 0.12f))
+                                            .border(1.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(6.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(text = byteStr, fontSize = 14.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = if (isShifted) (if (isDark) Color(0xFFD8B4FE) else Color(0xFF6B21A8)) else dynamicColors.textPrimary)
+                                        Text(
+                                            text = "%02X".format(byteVal),
+                                            fontSize = 13.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace,
+                                            color = dynamicColors.textPrimary
+                                        )
                                     }
                                 }
                             }
@@ -529,91 +673,73 @@ fun AESMatrixVisualizer() {
                     }
 
                     Text(
-                        text = when (stageIndex) {
-                            0 -> "Initial 16-byte input block arranged into a 4x4 column-major matrix."
-                            1 -> "SubBytes: Each byte replaced with multiplicative inverse in GF(2^8) S-box + affine transformation."
-                            2 -> "ShiftRows: Row 0 shifted 0, Row 1 shifted 1, Row 2 shifted 2, Row 3 shifted 3 bytes left."
-                            3 -> "MixColumns: Columns multiplied by fixed polynomial matrix c(x) modulo x^4 + 1 for diffusion."
-                            4 -> "AddRoundKey: State matrix XORed with expanded 128-bit round key."
-                            else -> ""
-                        },
-                        fontSize = 11.5.sp, color = SubtextGray, lineHeight = 16.sp
+                        text = "FIPS-197 Appendix B Test Vector. Final Ciphertext: ${AesEngine.bytesToHex(trace.ciphertext)}",
+                        fontSize = 9.5.sp, color = SubtextGray, fontFamily = FontFamily.Monospace
                     )
                 }
             }
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                stages.forEachIndexed { idx, name ->
-                    Box(
-                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                            .background(if (stageIndex == idx) DsaPurple else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
-                            .border(1.dp, if (stageIndex == idx) DsaPurple else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                            .clickable { stageIndex = idx }.padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = name.take(5), fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (stageIndex == idx) Color.White else SubtextGray)
-                    }
-                }
-            }
         } else {
-            // Block Cipher Modes Comparison (ECB, CBC, CTR, GCM)
+            // Modes & Attacks Tab
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                     .border(1.5.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(text = "BLOCK CIPHER OPERATING MODES", fontSize = 12.sp, fontWeight = FontWeight.Black, color = DsaPurple)
+                    Text(text = "BLOCK CIPHER SECURITY EXPERIMENTS", fontSize = 12.sp, fontWeight = FontWeight.Black, color = DsaPurple)
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         listOf("ECB", "CBC", "CTR", "GCM").forEach { mode ->
+                            val isSel = selectedMode == mode
                             Box(
                                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp))
-                                    .background(if (selectedMode == mode) AmberGold else (if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f)))
-                                    .border(1.dp, if (selectedMode == mode) AmberGold else dynamicColors.inputBorder, RoundedCornerShape(8.dp))
+                                    .background(if (isSel) AmberGold else dynamicColors.inputBackground)
                                     .clickable { selectedMode = mode }.padding(vertical = 6.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = mode, fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (selectedMode == mode) Color.Black else dynamicColors.textPrimary)
+                                Text(text = mode, fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isSel) Color.Black else dynamicColors.textPrimary)
                             }
                         }
                     }
 
                     when (selectedMode) {
                         "ECB" -> {
-                            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DsaRed.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, DsaRed.copy(alpha = 0.5f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(text = "⚠️ INSECURE: ECB (ELECTRONIC CODEBOOK)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor)
-                                    Text(text = "Each 128-bit block is encrypted independently with key K: C_i = E_K(P_i). Identical plaintext blocks produce identical ciphertext blocks!", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
-                                    Text(text = "🐧 ECB Penguin Effect: Pattern leaks through encryption. NEVER use ECB for messages > 16 bytes.", fontSize = 10.5.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                        "CBC" -> {
-                            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DsaBlue.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, DsaBlue.copy(alpha = 0.5f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(text = "🔒 CBC (CIPHER BLOCK CHAINING)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = DsaBlue)
-                                    Text(text = "C_0 = E_K(P_0 ⊕ IV), C_i = E_K(P_i ⊕ C_{i-1}). Random Initial Vector (IV) ensures distinct ciphertexts for repeated plaintexts.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
-                                    Text(text = "⚠️ Vulnerable to padding oracle attacks if not combined with HMAC (Encrypt-then-MAC).", fontSize = 10.5.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                                }
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(text = "⚠️ ECB (Electronic Codebook) Flaw — Pattern Leakage", fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor)
+                                Text(text = "Identical 16-byte plaintext blocks encrypt to identical ciphertext blocks. The visual silhouette of the input data remains fully visible in the ciphertext output.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
                             }
                         }
                         "CTR" -> {
-                            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFF00CD9C).copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, Color(0xFF00CD9C).copy(alpha = 0.5f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(text = "⚡ CTR (COUNTER MODE)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDark) Color(0xFF00CD9C) else Color(0xFF047857))
-                                    Text(text = "Converts block cipher into a stream cipher: C_i = P_i ⊕ E_K(Nonce ∥ Counter). Fully parallelizable encryption & decryption.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
-                                    Text(text = "⚠️ FATAL IF NONCE REUSED: C1 ⊕ C2 = P1 ⊕ P2 (two-time pad leakage).", fontSize = 10.5.sp, color = redColor, fontWeight = FontWeight.Bold)
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(text = "⚡ CTR Nonce Reuse Attack Demo", fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor)
+                                Text(text = "C1 ⊕ C2 = P1 ⊕ P2. When a nonce is reused, the keystream completely cancels out!", fontSize = 10.sp, color = SubtextGray)
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(text = "C1 ⊕ C2 Hex:", fontSize = 10.sp, color = SubtextGray)
+                                    Text(text = AesEngine.bytesToHex(ctrResult.c1XorC2).take(18) + "...", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = amberColor)
                                 }
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(text = "P1 ⊕ P2 Hex:", fontSize = 10.sp, color = SubtextGray)
+                                    Text(text = AesEngine.bytesToHex(ctrResult.p1XorP2).take(18) + "...", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = greenColor)
+                                }
+                                Text(text = "Verified Match: Keystream cancelled out!", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = greenColor)
                             }
                         }
                         "GCM" -> {
-                            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, DuolingoGreen.copy(alpha = 0.5f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(text = "🛡️ GCM (GALOIS/COUNTER MODE) — GOLD STANDARD", fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor)
-                                    Text(text = "Modern AEAD: combines CTR mode encryption with GHASH polynomial MAC over GF(2^128). Provides both Confidentiality and Authenticity in one pass.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
-                                    Text(text = "Mandatory cipher mode for TLS 1.3 and modern secure communications.", fontSize = 10.5.sp, color = greenColor, fontWeight = FontWeight.Bold)
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(text = "🛡️ GCM Tamper & Authentication Verification", fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor)
+                                Text(text = "Tampering byte at index $gcmTamperIdx in transit triggers AEADBadTagException:", fontSize = 10.sp, color = SubtextGray)
+                                Slider(
+                                    value = gcmTamperIdx.toFloat(),
+                                    onValueChange = { gcmTamperIdx = it.roundToInt() },
+                                    valueRange = 0f..10f,
+                                    colors = SliderDefaults.colors(thumbColor = greenColor, activeTrackColor = greenColor)
+                                )
+                                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(DsaRed.copy(alpha = 0.15f)).padding(8.dp)) {
+                                    Text(text = gcmResult.errorMessage ?: "Valid", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = redColor)
                                 }
                             }
+                        }
+                        else -> {
+                            Text(text = "CBC: Cipher Block Chaining uses random IV. Vulnerable to padding oracle if MAC is not verified first.", fontSize = 10.5.sp, color = SubtextGray)
                         }
                     }
                 }
@@ -623,7 +749,7 @@ fun AESMatrixVisualizer() {
 }
 
 // ──────────────────────────────────────────────
-// 4. Vigenère Polyalphabetic Cipher Visualizer
+// 4. Vigenère Polyalphabetic Cipher Visualizer (LINKED_LIST)
 // ──────────────────────────────────────────────
 @Composable
 fun VigenereCipherVisualizer() {
@@ -632,10 +758,12 @@ fun VigenereCipherVisualizer() {
 
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val tealColor = if (isDark) DsaTeal else Color(0xFF0D9488)
+    val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
 
-    var plaintext by remember { mutableStateOf("DEFEND THE EAST WALL") }
+    var plaintext by remember { mutableStateOf("DEFEND THE EAST WALL OF THE CASTLE FROM THE ENEMY") }
     var key by remember { mutableStateOf("FORT") }
     var isDecryptMode by remember { mutableStateOf(false) }
+    var activeSubTab by remember { mutableIntStateOf(0) } // 0: Alignment, 1: Kasiski Cracker
 
     val cleanPlain = plaintext.uppercase().filter { it in 'A'..'Z' }
     val cleanKey = key.uppercase().filter { it in 'A'..'Z' }.ifEmpty { "A" }
@@ -650,26 +778,32 @@ fun VigenereCipherVisualizer() {
         }.joinToString("")
     }
 
+    val kasiskiResult = remember(resultText) {
+        KasiskiEngine.kasiskiExamination(resultText, ngramLen = 3)
+    }
+
+    val ioc = remember(resultText) {
+        KasiskiEngine.indexOfCoincidence(resultText)
+    }
+
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // Mode Switch
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                    .background(if (!isDecryptMode) DsaTeal else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
-                    .border(1.dp, if (!isDecryptMode) DsaTeal else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { isDecryptMode = false }.padding(vertical = 8.dp),
+                    .background(if (activeSubTab == 0) DsaTeal else dynamicColors.inputBackground)
+                    .clickable { activeSubTab = 0 }.padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "ENCRYPT (P + K mod 26)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (!isDecryptMode) Color.Black else SubtextGray)
+                Text(text = "KEYSTREAM ALIGNMENT", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (activeSubTab == 0) Color.White else SubtextGray)
             }
             Box(
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                    .background(if (isDecryptMode) AmberGold else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
-                    .border(1.dp, if (isDecryptMode) AmberGold else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { isDecryptMode = true }.padding(vertical = 8.dp),
+                    .background(if (activeSubTab == 1) DsaTeal else dynamicColors.inputBackground)
+                    .clickable { activeSubTab = 1 }.padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "DECRYPT (C - K mod 26)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (isDecryptMode) Color.Black else SubtextGray)
+                Text(text = "KASISKI & IOC CRACKER", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (activeSubTab == 1) Color.White else SubtextGray)
             }
         }
 
@@ -678,61 +812,75 @@ fun VigenereCipherVisualizer() {
                 .border(1.5.dp, DsaTeal.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = if (isDecryptMode) "CIPHERTEXT" else "PLAINTEXT", fontSize = 11.sp, fontWeight = FontWeight.Black, color = tealColor)
+                Text(text = "PLAINTEXT", fontSize = 11.sp, fontWeight = FontWeight.Black, color = tealColor)
                 BasicTextField(
-                    value = plaintext, onValueChange = { if (it.length <= 25) plaintext = it },
-                    textStyle = TextStyle(color = dynamicColors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
+                    value = plaintext, onValueChange = { if (it.length <= 60) plaintext = it },
+                    textStyle = TextStyle(color = dynamicColors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
                     cursorBrush = SolidColor(DsaTeal), modifier = Modifier.fillMaxWidth()
                 )
                 Text(text = "SECRET KEYWORD", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
                 BasicTextField(
-                    value = key, onValueChange = { if (it.length <= 10) key = it },
-                    textStyle = TextStyle(color = amberColor, fontSize = 16.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace),
+                    value = key, onValueChange = { if (it.length <= 12) key = it },
+                    textStyle = TextStyle(color = amberColor, fontSize = 15.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace),
                     cursorBrush = SolidColor(AmberGold), modifier = Modifier.fillMaxWidth()
                 )
             }
         }
 
-        // Tabula Recta Keystream Mapping Strip
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
-                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "REPEATED KEYSTREAM ALIGNMENT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    cleanPlain.forEachIndexed { i, pChar ->
-                        val kChar = cleanKey[i % cleanKey.length]
-                        val rChar = resultText.getOrElse(i) { '?' }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 6.dp)
-                        ) {
-                            Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-                            Text(text = "⊕", fontSize = 10.sp, color = SubtextGray)
-                            Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                            Text(text = "=", fontSize = 10.sp, color = SubtextGray)
-                            Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+        if (activeSubTab == 0) {
+            // Tabula Recta Keystream Mapping Strip
+            Box(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
+                    .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "REPEATED KEYSTREAM ALIGNMENT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        cleanPlain.take(25).forEachIndexed { i, pChar ->
+                            val kChar = cleanKey[i % cleanKey.length]
+                            val rChar = resultText.getOrElse(i) { '?' }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
+                            ) {
+                                Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                                Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
+                                Text(text = "=", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                            }
                         }
                     }
                 }
             }
-        }
+        } else {
+            // Kasiski Examination Card
+            Box(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
+                    .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(text = "🔍 KASISKI EXAMINATION & INDEX OF COINCIDENCE", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
+                    Text(text = "Measured IoC: ${"%.4f".format(ioc)} (English ≈ 0.0667, Random ≈ 0.0385)", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
 
-        // Cryptanalysis Note
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(12.dp)).padding(12.dp)
-        ) {
-            Text(
-                text = "💡 Cryptanalysis: Vigenère flattens monoalphabetic frequency spikes, but repeated key patterns allow Kasiski Examination and Index of Coincidence (IC) analysis to deduce key length and break each Caesar slice.",
-                fontSize = 11.sp, color = SubtextGray, lineHeight = 15.sp
-            )
+                    Text(text = "Repeated 3-grams found: ${kasiskiResult.repeatedNgrams.size}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                    kasiskiResult.repeatedNgrams.take(3).forEach { ng ->
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "3-gram \"${ng.ngram}\"", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = tealColor)
+                            Text(text = "Distances: ${ng.distances.joinToString(", ")}", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = SubtextGray)
+                        }
+                    }
+
+                    val candidateLen = kasiskiResult.mostLikelyKeyLength
+                    Text(text = "Most likely keyword length by distance GCD factors: $candidateLen", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = greenColor)
+                }
+            }
         }
     }
 }
 
 // ──────────────────────────────────────────────
-// 5. Diffie-Hellman Key Agreement Visualizer
+// 5. Diffie-Hellman Key Agreement Visualizer (BINARY_TREE)
 // ──────────────────────────────────────────────
 @Composable
 fun DiffieHellmanVisualizer() {
@@ -742,101 +890,105 @@ fun DiffieHellmanVisualizer() {
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val tealColor = if (isDark) Color(0xFF00CD9C) else Color(0xFF047857)
     val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
+    val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
 
-    val p = 23
-    val g = 5
+    var selectedDomainIdx by remember { mutableIntStateOf(0) }
+    val domain = DhEngine.PRESET_DOMAINS[selectedDomainIdx]
+    val p = domain.p
+    val g = domain.g
 
     var aSecret by remember { mutableIntStateOf(6) }
     var bSecret by remember { mutableIntStateOf(15) }
+    var mitmEnabled by remember { mutableStateOf(false) }
+    var mallorySecret by remember { mutableIntStateOf(9) }
 
-    val alicePub = remember(aSecret) {
-        var res = 1
-        repeat(aSecret) { res = (res * g) % p }
-        res
+    val honestState = remember(p, g, aSecret, bSecret) {
+        DhEngine.computeHonestExchange(p, g, aSecret.toLong(), bSecret.toLong())
     }
 
-    val bobPub = remember(bSecret) {
-        var res = 1
-        repeat(bSecret) { res = (res * g) % p }
-        res
-    }
-
-    val aliceShared = remember(alicePub, bobPub, aSecret) {
-        var res = 1
-        repeat(aSecret) { res = (res * bobPub) % p }
-        res
+    val mitmState = remember(p, g, aSecret, bSecret, mallorySecret) {
+        DhEngine.computeMitmExchange(p, g, aSecret.toLong(), bSecret.toLong(), mallorySecret.toLong())
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                 .background(DsaOrange.copy(alpha = if (isDark) 0.15f else 0.08f))
-                .border(1.dp, DsaOrange.copy(alpha = if (isDark) 0.5f else 0.35f), RoundedCornerShape(10.dp))
+                .border(1.dp, DsaOrange.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
-            Text(text = "⚠️ TOY PARAMETERS — p=23, g=5 (educational toy; real DH uses 2048+ bit primes or Curve25519)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (isDark) DsaOrange else Color(0xFFC2410C))
+            Text(text = "⚠️ TOY FINITE FIELD PARAMETERS — Prime p=$p, Base g=$g (Production uses 2048+ bit FFDH or Curve25519)", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = if (isDark) DsaOrange else Color(0xFFC2410C))
+        }
+
+        // Domain Selector & MITM Toggle
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(
+                modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                    .background(dynamicColors.inputBackground)
+                    .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp))
+                    .clickable { selectedDomainIdx = (selectedDomainIdx + 1) % DhEngine.PRESET_DOMAINS.size }
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = domain.name, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+            }
+
+            Box(
+                modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                    .background(if (mitmEnabled) DsaRed else dynamicColors.inputBackground)
+                    .clickable { mitmEnabled = !mitmEnabled }
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = if (mitmEnabled) "😈 MITM ACTIVE" else "🛡️ HONEST CHANNEL", fontSize = 10.sp, fontWeight = FontWeight.Black, color = if (mitmEnabled) Color.White else SubtextGray)
+            }
         }
 
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, Color(0xFF00CD9C).copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(text = "PUBLIC PARAMETERS: Prime p = $p  |  Base g = $g", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor)
-
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "👩 Alice private secret a", fontSize = 11.sp, color = tealColor, fontWeight = FontWeight.Bold)
-                        Text(text = "a = $aSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor, fontFamily = FontFamily.Monospace)
-                    }
-                    Slider(
-                        value = aSecret.toFloat(), onValueChange = { aSecret = it.roundToInt() }, valueRange = 2f..20f,
-                        colors = SliderDefaults.colors(thumbColor = Color(0xFF00CD9C), activeTrackColor = Color(0xFF00CD9C), inactiveTrackColor = Color(0xFF00CD9C).copy(alpha = 0.2f))
-                    )
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Alice Slider
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = "👩 Alice private a", fontSize = 11.sp, color = tealColor, fontWeight = FontWeight.Bold)
+                    Text(text = "a = $aSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor, fontFamily = FontFamily.Monospace)
                 }
+                Slider(
+                    value = aSecret.toFloat(), onValueChange = { aSecret = it.roundToInt().coerceIn(2, (p - 2).toInt()) }, valueRange = 2f..(p - 2).toFloat(),
+                    colors = SliderDefaults.colors(thumbColor = Color(0xFF00CD9C), activeTrackColor = Color(0xFF00CD9C))
+                )
 
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "👨 Bob private secret b", fontSize = 11.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                        Text(text = "b = $bSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
-                    }
-                    Slider(
-                        value = bSecret.toFloat(), onValueChange = { bSecret = it.roundToInt() }, valueRange = 2f..20f,
-                        colors = SliderDefaults.colors(thumbColor = AmberGold, activeTrackColor = AmberGold, inactiveTrackColor = AmberGold.copy(alpha = 0.2f))
-                    )
+                // Bob Slider
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = "👨 Bob private b", fontSize = 11.sp, color = amberColor, fontWeight = FontWeight.Bold)
+                    Text(text = "b = $bSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
                 }
+                Slider(
+                    value = bSecret.toFloat(), onValueChange = { bSecret = it.roundToInt().coerceIn(2, (p - 2).toInt()) }, valueRange = 2f..(p - 2).toFloat(),
+                    colors = SliderDefaults.colors(thumbColor = AmberGold, activeTrackColor = AmberGold)
+                )
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(Color(0xFF00CD9C).copy(alpha = if (isDark) 0.12f else 0.08f)).border(1.dp, Color(0xFF00CD9C), RoundedCornerShape(12.dp)).padding(12.dp)) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(text = "👩 ALICE", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor)
-                            Text(text = "A = g^a mod p", fontSize = 10.sp, color = SubtextGray, fontFamily = FontFamily.Monospace)
-                            Text(text = "Sends A = $alicePub", fontSize = 14.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                if (mitmEnabled) {
+                    // Mallory Injection
+                    Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DsaRed.copy(alpha = 0.15f)).padding(10.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "😈 Mallory Injects Public Key M = g^m mod p = ${mitmState.malloryPublic}", fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor)
+                            Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}  |  Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                            Text(text = "Notice Alice & Bob have completely different secrets! Mallory reads and alters all traffic.", fontSize = 9.5.sp, color = redColor)
                         }
                     }
-
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(AmberGold.copy(alpha = if (isDark) 0.12f else 0.08f)).border(1.dp, AmberGold, RoundedCornerShape(12.dp)).padding(12.dp)) {
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                            .background(DuolingoGreen.copy(alpha = 0.15f)).border(1.5.dp, DuolingoGreen, RoundedCornerShape(12.dp)).padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(text = "👨 BOB", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                            Text(text = "B = g^b mod p", fontSize = 10.sp, color = SubtextGray, fontFamily = FontFamily.Monospace)
-                            Text(text = "Sends B = $bobPub", fontSize = 14.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                            Text(text = "✨ MATCHED SHARED SECRET", fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor)
+                            Text(text = "K = ${honestState.aliceSharedSecret}", fontSize = 22.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                            Text(text = "Alice: B^a mod p = ${honestState.aliceSharedSecret}  |  Bob: A^b mod p = ${honestState.bobSharedSecret}", fontSize = 10.sp, color = SubtextGray, fontFamily = FontFamily.Monospace)
                         }
-                    }
-                }
-
-                Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(dynamicColors.inputBackground).padding(8.dp), contentAlignment = Alignment.Center) {
-                    Text(text = "⚠️ Eve sees p=$p, g=$g, A=$alicePub, B=$bobPub — solving DLOG to find a or b is hard", fontSize = 10.sp, color = SubtextGray)
-                }
-
-                Box(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
-                        .background(DuolingoGreen.copy(alpha = if (isDark) 0.18f else 0.10f)).border(1.5.dp, DuolingoGreen, RoundedCornerShape(12.dp)).padding(12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(text = "✨ MATCHED SHARED SECRET", fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor)
-                        Text(text = "K = $aliceShared", fontSize = 22.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                        Text(text = "Alice: B^a mod p  |  Bob: A^b mod p  =  $aliceShared", fontSize = 10.sp, color = SubtextGray, fontFamily = FontFamily.Monospace)
                     }
                 }
             }
@@ -845,7 +997,7 @@ fun DiffieHellmanVisualizer() {
 }
 
 // ──────────────────────────────────────────────
-// 6. RSA Public-Key & Digital Signature Visualizer
+// 6. RSA Public-Key & Digital Signature Visualizer (AVL_TREE)
 // ──────────────────────────────────────────────
 @Composable
 fun RSAPublicKeyVisualizer() {
@@ -855,86 +1007,50 @@ fun RSAPublicKeyVisualizer() {
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val tealColor = if (isDark) DsaTeal else Color(0xFF0D9488)
     val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
+    val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
 
-    val p = 61
-    val q = 53
-    val n = p * q // 3233
-    val phi = (p - 1) * (q - 1) // 3120
-    val e = 17
-    val d = 2753 // d * e = 1 mod phi
+    var pIndex by remember { mutableIntStateOf(10) } // 41
+    var qIndex by remember { mutableIntStateOf(13) } // 53
+    val pVal = RsaEngine.RECOMMENDED_PRIMES[pIndex].toLong()
+    val qVal = RsaEngine.RECOMMENDED_PRIMES[qIndex].toLong()
 
-    var rsaMode by remember { mutableIntStateOf(0) } // 0: Encryption/Decryption, 1: Digital Signature
+    val rsaKey = remember(pVal, qVal) {
+        RsaEngine.generateKeys(pVal, qVal, preferredE = 17)
+    }
+
     var messageNum by remember { mutableIntStateOf(65) } // 'A'
+    var activeTab by remember { mutableIntStateOf(0) } // 0: Encrypt/Decrypt, 1: ModExp Trace, 2: Malleability Attack
 
-    // c = m^e mod n
-    val ciphertextNum = remember(messageNum) {
-        var res = 1L
-        repeat(e) { res = (res * messageNum) % n }
-        res.toInt()
+    val modExpTrace = remember(messageNum, rsaKey) {
+        RsaEngine.traceModExp(BigInteger.valueOf(messageNum.toLong()), rsaKey.e, rsaKey.n)
     }
 
-    // Decrypt: m = c^d mod n
-    val decryptedNum = remember(ciphertextNum) {
-        var res = 1L
-        var base = ciphertextNum.toLong()
-        var exp = d
-        while (exp > 0) {
-            if (exp % 2 == 1) res = (res * base) % n
-            base = (base * base) % n
-            exp /= 2
-        }
-        res.toInt()
-    }
-
-    // Signature: s = m^d mod n
-    val signatureNum = remember(messageNum) {
-        var res = 1L
-        var base = messageNum.toLong()
-        var exp = d
-        while (exp > 0) {
-            if (exp % 2 == 1) res = (res * base) % n
-            base = (base * base) % n
-            exp /= 2
-        }
-        res.toInt()
-    }
-
-    // Verify signature: m' = s^e mod n
-    val verifiedNum = remember(signatureNum) {
-        var res = 1L
-        repeat(e) { res = (res * signatureNum) % n }
-        res.toInt()
+    val malleability = remember(rsaKey) {
+        RsaEngine.testMalleability(15, 20, rsaKey.e, rsaKey.d, rsaKey.n)
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                 .background(DsaOrange.copy(alpha = if (isDark) 0.15f else 0.08f))
-                .border(1.dp, DsaOrange.copy(alpha = if (isDark) 0.5f else 0.35f), RoundedCornerShape(10.dp))
+                .border(1.dp, DsaOrange.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
-            Text(text = "⚠️ TOY RSA (p=61, q=53, n=3233) — For learning only. Real RSA uses ≥2048-bit primes.", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (isDark) DsaOrange else Color(0xFFC2410C))
+            Text(text = "⚠️ TOY RSA KEYGEN (p=$pVal, q=$qVal, n=${rsaKey.n}) — For educational inspection. Production requires ≥2048-bit primes.", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = if (isDark) DsaOrange else Color(0xFFC2410C))
         }
 
-        // Mode Selector: Encrypt vs Sign
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(
-                modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                    .background(if (rsaMode == 0) DsaTeal else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
-                    .border(1.dp, if (rsaMode == 0) DsaTeal else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { rsaMode = 0 }.padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "ENCRYPTION (m^e mod n)", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (rsaMode == 0) Color.Black else SubtextGray)
-            }
-            Box(
-                modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                    .background(if (rsaMode == 1) AmberGold else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
-                    .border(1.dp, if (rsaMode == 1) AmberGold else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { rsaMode = 1 }.padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "SIGNATURE (s = m^d mod n)", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = if (rsaMode == 1) Color.Black else SubtextGray)
+        // Tab Selector
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("ENCRYPT/DECRYPT", "MODEXP TRACE", "HOMOMORPHIC ATTACK").forEachIndexed { idx, label ->
+                val sel = activeTab == idx
+                Box(
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        .background(if (sel) DsaTeal else dynamicColors.inputBackground)
+                        .clickable { activeTab = idx }.padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = label, fontSize = 9.sp, fontWeight = FontWeight.Black, color = if (sel) Color.White else SubtextGray)
+                }
             }
         }
 
@@ -942,83 +1058,95 @@ fun RSAPublicKeyVisualizer() {
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, DsaTeal.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = "RSA KEY PAIR MATH", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "RSA KEYPAIR PARAMETERS", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Primes: p=$p, q=$q", fontSize = 11.sp, color = SubtextGray)
-                    Text(text = "Modulus n = p×q = $n", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                    Text(text = "Modulus n = p×q: ${rsaKey.n}", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                    Text(text = "φ(n): ${rsaKey.phi}", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = SubtextGray)
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Euler Totient φ(n) = $phi", fontSize = 11.sp, color = SubtextGray)
-                    Text(text = "Public e=$e | Private d=$d", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = amberColor, fontFamily = FontFamily.Monospace)
+                    Text(text = "Public Exponent e: ${rsaKey.e}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor, fontFamily = FontFamily.Monospace)
+                    Text(text = "Private Exponent d: ${rsaKey.d}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = greenColor, fontFamily = FontFamily.Monospace)
                 }
             }
         }
 
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
-                .border(1.5.dp, InputBorder, RoundedCornerShape(16.dp)).padding(16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "MESSAGE SYMBOL (m)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = tealColor)
-                    Text(text = "$messageNum ('${messageNum.toChar()}')", fontSize = 14.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                }
-
-                Slider(
-                    value = messageNum.toFloat(), onValueChange = { messageNum = it.roundToInt() }, valueRange = 2f..100f,
-                    colors = SliderDefaults.colors(thumbColor = DsaTeal, activeTrackColor = DsaTeal)
-                )
-
-                if (rsaMode == 0) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(AmberGold.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                            Column {
-                                Text(text = "CIPHERTEXT (c)", fontSize = 10.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                                Text(text = "$ciphertextNum", fontSize = 16.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                                Text(text = "c = m^e mod n", fontSize = 9.sp, color = SubtextGray)
-                            }
+        when (activeTab) {
+            0 -> {
+                // Encryption & Decryption
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, InputBorder, RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "MESSAGE SYMBOL (m)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = tealColor)
+                            Text(text = "$messageNum ('${messageNum.toChar()}')", fontSize = 13.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
                         }
+                        Slider(
+                            value = messageNum.toFloat(), onValueChange = { messageNum = it.roundToInt() }, valueRange = 2f..100f,
+                            colors = SliderDefaults.colors(thumbColor = DsaTeal, activeTrackColor = DsaTeal)
+                        )
 
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, DuolingoGreen.copy(alpha = 0.4f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                            Column {
-                                Text(text = "DECRYPTED (m)", fontSize = 10.sp, color = greenColor, fontWeight = FontWeight.Bold)
-                                Text(text = "$decryptedNum", fontSize = 16.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                                Text(text = "m = c^d mod n", fontSize = 9.sp, color = SubtextGray)
-                            }
-                        }
-                    }
-                } else {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(AmberGold.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, AmberGold.copy(alpha = 0.4f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                            Column {
-                                Text(text = "SIGNATURE (s)", fontSize = 10.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                                Text(text = "$signatureNum", fontSize = 16.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                                Text(text = "s = m^d mod n (private key)", fontSize = 9.sp, color = SubtextGray)
-                            }
-                        }
+                        val ciphertext = modExpTrace.result
+                        val decrypted = BigInteger.valueOf(ciphertext.toLong()).modPow(rsaKey.d, rsaKey.n)
 
-                        Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = if (isDark) 0.15f else 0.08f)).border(1.dp, DuolingoGreen.copy(alpha = 0.4f), RoundedCornerShape(10.dp)).padding(10.dp)) {
-                            Column {
-                                Text(text = "VERIFIED DIGEST", fontSize = 10.sp, color = greenColor, fontWeight = FontWeight.Bold)
-                                Text(text = "$verifiedNum", fontSize = 16.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                                Text(text = "m' = s^e mod n (public key)", fontSize = 9.sp, color = SubtextGray)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(AmberGold.copy(alpha = 0.15f)).padding(10.dp)) {
+                                Column {
+                                    Text(text = "CIPHERTEXT (c)", fontSize = 10.sp, color = amberColor, fontWeight = FontWeight.Bold)
+                                    Text(text = "$ciphertext", fontSize = 15.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                                    Text(text = "c = m^e mod n", fontSize = 9.sp, color = SubtextGray)
+                                }
+                            }
+                            Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = 0.15f)).padding(10.dp)) {
+                                Column {
+                                    Text(text = "DECRYPTED (m)", fontSize = 10.sp, color = greenColor, fontWeight = FontWeight.Bold)
+                                    Text(text = "$decrypted", fontSize = 15.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                                    Text(text = "m = c^d mod n", fontSize = 9.sp, color = SubtextGray)
+                                }
                             }
                         }
                     }
                 }
-
-                Text(
-                    text = "⚠️ Real-world RSA requires randomized padding (RSA-OAEP for encryption, RSA-PSS for signatures) to eliminate padding oracle attacks (Bleichenbacher attack).",
-                    fontSize = 10.sp, color = SubtextGray, lineHeight = 14.sp
-                )
+            }
+            1 -> {
+                // Square-and-Multiply Trace
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
+                        .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(text = "⚡ SQUARE-AND-MULTIPLY MODEXP TRACE (${rsaKey.e.toString(2)}₂)", fontSize = 10.5.sp, fontWeight = FontWeight.Black, color = amberColor)
+                        modExpTrace.steps.take(6).forEach { st ->
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(text = "Bit ${st.bitIndex} (${st.bitValue}):", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = SubtextGray)
+                                Text(text = "Square -> ${st.afterSquare} ${if (st.afterMultiply != null) "| Mult -> ${st.afterMultiply}" else ""}", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                            }
+                        }
+                    }
+                }
+            }
+            else -> {
+                // Textbook RSA Malleability Demonstration
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(DsaRed.copy(alpha = 0.12f))
+                        .border(1.dp, DsaRed.copy(alpha = 0.5f), RoundedCornerShape(14.dp)).padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(text = "⚠️ HOMOMORPHIC MALLEABILITY ATTACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor)
+                        Text(text = "In textbook RSA without OAEP padding, multiplying two ciphertexts (c1 * c2 mod n) produces a ciphertext that decrypts directly to (m1 * m2 mod n)!", fontSize = 10.sp, color = dynamicColors.textPrimary)
+                        Text(text = "c1=${malleability.c1}, c2=${malleability.c2}  =>  cProduct=${malleability.cProductModN}", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                        Text(text = "Decrypted Product: ${malleability.decryptedProduct} == Expected (m1*m2): ${malleability.expectedProductModN}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = greenColor)
+                    }
+                }
             }
         }
     }
 }
 
 // ──────────────────────────────────────────────
-// 7. ECC Elliptic Curve Visualizer
+// 7. ECC Elliptic Curve Visualizer (TRIE)
 // ──────────────────────────────────────────────
 @Composable
 fun ECCPointVisualizer() {
@@ -1026,23 +1154,24 @@ fun ECCPointVisualizer() {
     val isDark = dynamicColors.isDark
 
     val cyanColor = if (isDark) Color.Cyan else Color(0xFF0284C7)
+    val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
 
     var kScalar by remember { mutableIntStateOf(3) }
 
-    // Toy finite field F17: y^2 = x^3 + x + 6 mod 17
-    val toyPoints = remember {
-        val pts = mutableListOf<Pair<Int, Int>>()
-        for (x in 0..16) {
-            val rhs = ((x.toLong() * x * x + x + 6) % 17).toInt()
-            for (y in 0..16) { if ((y * y) % 17 == rhs) pts.add(Pair(x, y)) }
-        }
-        pts
+    // Connect real ArenaCryptoEngine.ToyF17Curve: y² ≡ x³ + 2x + 2 (mod 17), G = (5, 1)
+    val G = ArenaCryptoEngine.ToyF17Curve.G
+    val computedPoint = remember(kScalar) {
+        ArenaCryptoEngine.ToyF17Curve.multiply(kScalar, G)
     }
-    val kPoint = remember(kScalar) {
-        if (toyPoints.isEmpty()) "—" else {
-            val pt = toyPoints[(kScalar - 1) % toyPoints.size]
-            "(${pt.first}, ${pt.second})"
+
+    // Step-by-step additions from 1G to kG
+    val stepPoints = remember(kScalar) {
+        val list = mutableListOf<Pair<Int, String>>()
+        for (i in 1..kScalar) {
+            val pt = ArenaCryptoEngine.ToyF17Curve.multiply(i, G)
+            list.add(i to pt.toString())
         }
+        list
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1052,7 +1181,7 @@ fun ECCPointVisualizer() {
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "📐 ILLUSTRATION ON ℝ — This canvas shows the real-number curve shape only. Real ECC uses points over a prime finite field F_p. Educational toy only.",
+                text = "📐 RIGOROUS FINITE FIELD F₁₇ — Curve: y² ≡ x³ + 2x + 2 (mod 17). Base generator G = (5, 1). Order = 19 points.",
                 fontSize = 10.5.sp, color = cyanColor, lineHeight = 14.sp, fontWeight = FontWeight.Bold
             )
         }
@@ -1062,84 +1191,49 @@ fun ECCPointVisualizer() {
                 .border(1.5.dp, cyanColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = "ELLIPTIC CURVE: y² = x³ + ax + b (ℝ illustration)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = cyanColor)
-                Text(text = "Chord-and-Tangent Point Addition & Scalar Multiplication kP", fontSize = 11.sp, color = SubtextGray)
-
-                // Visual Canvas Curve (Theme Adaptive)
-                Canvas(
-                    modifier = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground)
-                        .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(12.dp))
-                ) {
-                    val w = size.width
-                    val h = size.height
-                    val originX = w / 2f
-                    val originY = h / 2f
-
-                    val axisColor = if (isDark) Color.White.copy(alpha = 0.18f) else Color.Black.copy(alpha = 0.15f)
-                    drawLine(color = axisColor, start = Offset(0f, originY), end = Offset(w, originY), strokeWidth = 1.dp.toPx())
-                    drawLine(color = axisColor, start = Offset(originX, 0f), end = Offset(originX, h), strokeWidth = 1.dp.toPx())
-
-                    val upperPath = Path()
-                    val lowerPath = Path()
-                    var first = true
-
-                    val scale = 25f
-                    for (pixelX in 0..w.toInt()) {
-                        val mathX = (pixelX - originX) / scale
-                        val rhs = mathX * mathX * mathX - 3 * mathX + 3
-                        if (rhs >= 0) {
-                            val mathY = kotlin.math.sqrt(rhs)
-                            val canvasY1 = originY - mathY * scale
-                            val canvasY2 = originY + mathY * scale
-                            if (first) {
-                                upperPath.moveTo(pixelX.toFloat(), canvasY1)
-                                lowerPath.moveTo(pixelX.toFloat(), canvasY2)
-                                first = false
-                            } else {
-                                upperPath.lineTo(pixelX.toFloat(), canvasY1)
-                                lowerPath.lineTo(pixelX.toFloat(), canvasY2)
-                            }
-                        }
-                    }
-
-                    drawPath(upperPath, color = cyanColor, style = Stroke(width = 2.dp.toPx()))
-                    drawPath(lowerPath, color = cyanColor, style = Stroke(width = 2.dp.toPx()))
-
-                    val pCanvasX = originX + 1.2f * scale
-                    val pCanvasY = originY - 1.5f * scale
-                    drawCircle(color = AmberGold, radius = 5.dp.toPx(), center = Offset(pCanvasX, pCanvasY))
-
-                    val qCanvasX = originX + 2.5f * scale
-                    val qCanvasY = originY - 3.2f * scale
-                    drawCircle(color = DsaGreen, radius = 5.dp.toPx(), center = Offset(qCanvasX, qCanvasY))
-
-                    val chordColor = if (isDark) Color.White.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.35f)
-                    drawLine(
-                        color = chordColor,
-                        start = Offset(pCanvasX - 30f, pCanvasY + 35f),
-                        end = Offset(qCanvasX + 30f, qCanvasY - 35f),
-                        strokeWidth = 1.5.dp.toPx()
-                    )
-                }
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "SCALAR MULTIPLIER (k)", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                    Text(text = "$kScalar × P", fontSize = 14.sp, fontWeight = FontWeight.Black, color = cyanColor, fontFamily = FontFamily.Monospace)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "SCALAR MULTIPLIER (k)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = cyanColor)
+                    Text(text = "k = $kScalar  (Q = $kScalar · G)", fontSize = 14.sp, fontWeight = FontWeight.Black, color = cyanColor, fontFamily = FontFamily.Monospace)
                 }
 
                 Slider(
-                    value = kScalar.toFloat(), onValueChange = { kScalar = it.roundToInt() }, valueRange = 1f..10f,
+                    value = kScalar.toFloat(),
+                    onValueChange = { kScalar = it.roundToInt().coerceIn(1, 19) },
+                    valueRange = 1f..19f,
+                    steps = 17,
                     colors = SliderDefaults.colors(thumbColor = cyanColor, activeTrackColor = cyanColor)
                 )
 
+                // Result Box
                 Box(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
-                        .background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)).padding(10.dp)
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                        .background(cyanColor.copy(alpha = 0.15f)).border(1.dp, cyanColor, RoundedCornerShape(12.dp)).padding(12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(text = "🔢 TOY FINITE FIELD F₁₇: y² = x³ + x + 6 mod 17", fontSize = 10.sp, fontWeight = FontWeight.Black, color = cyanColor)
-                        Text(text = "k×P → index point $kPoint  (${toyPoints.size} points on curve)", fontSize = 12.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
-                        Text(text = "ECDLP Hardness: Given P and Q = kP, finding k is computationally intractable in real F_p with p ≈ 2²⁵⁶.", fontSize = 10.5.sp, color = SubtextGray, lineHeight = 14.sp)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(text = "POINT ON CURVE Q = $kScalar · (5, 1)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = cyanColor)
+                        Text(text = "$computedPoint", fontSize = 24.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
+                        Text(text = if (kScalar == 19) "Point at Infinity 𝒪 (Identity Element)" else "Group addition via chord-and-tangent slope m in F₁₇", fontSize = 10.sp, color = SubtextGray)
+                    }
+                }
+
+                // Intermediate Scalar Multiplications
+                Text(text = "GENERATED SUBGROUP SEQUENCE:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    stepPoints.forEach { (stepK, ptStr) ->
+                        Box(
+                            modifier = Modifier.clip(RoundedCornerShape(6.dp))
+                                .background(if (stepK == kScalar) cyanColor else dynamicColors.inputBackground)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "${stepK}G: $ptStr",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (stepK == kScalar) Color.Black else dynamicColors.textPrimary,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
             }
@@ -1148,7 +1242,7 @@ fun ECCPointVisualizer() {
 }
 
 // ──────────────────────────────────────────────
-// 8. SHA-256 Hash Construction & Avalanche Visualizer
+// 8. SHA-256 Hash Construction & Avalanche Visualizer (GRAPH)
 // ──────────────────────────────────────────────
 @Composable
 fun SHA256Visualizer() {
@@ -1157,112 +1251,115 @@ fun SHA256Visualizer() {
 
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val purpleColor = if (isDark) Color(0xFFA05AFF) else Color(0xFF7E22CE)
-    val digestColor = if (isDark) Color(0xFFD8B4FE) else Color(0xFF6B21A8)
     val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
 
-    var message by remember { mutableStateOf("Integrity Check") }
-    var compareMode by remember { mutableStateOf(false) }
-    var messageB by remember { mutableStateOf("integrity check") }
+    var messageA by remember { mutableStateOf("Integrity Check A") }
+    var messageB by remember { mutableStateOf("Integrity Check B") }
+    var selectedRoundStep by remember { mutableIntStateOf(0) } // 0..63
 
-    val hashA = remember(message) {
-        val md = MessageDigest.getInstance("SHA-256")
-        val bytes = md.digest(message.toByteArray(Charsets.UTF_8))
-        bytes.joinToString("") { "%02x".format(it) }
+    val traceA = remember(messageA) {
+        Sha256Engine.hashWithTrace(messageA.toByteArray(Charsets.UTF_8))
     }
 
-    val hashB = remember(messageB) {
-        val md = MessageDigest.getInstance("SHA-256")
-        val bytes = md.digest(messageB.toByteArray(Charsets.UTF_8))
-        bytes.joinToString("") { "%02x".format(it) }
+    val traceB = remember(messageB) {
+        Sha256Engine.hashWithTrace(messageB.toByteArray(Charsets.UTF_8))
     }
 
-    val differingNibbles = remember(hashA, hashB) {
-        var diff = 0
-        for (i in 0 until minOf(hashA.length, hashB.length)) {
-            if (hashA[i] != hashB[i]) diff++
-        }
-        diff
+    val avalanche = remember(traceA.finalHash, traceB.finalHash) {
+        Sha256Engine.computeAvalanche(traceA.finalHash, traceB.finalHash)
     }
+
+    val currentBlockTrace = traceA.blocks.firstOrNull()
+    val activeRoundState = currentBlockTrace?.steps?.getOrElse(selectedRoundStep) { currentBlockTrace.steps.first() }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, purpleColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = "INPUT MESSAGE A", fontSize = 11.sp, fontWeight = FontWeight.Black, color = purpleColor)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "INPUT MESSAGE", fontSize = 11.sp, fontWeight = FontWeight.Black, color = purpleColor)
                 BasicTextField(
-                    value = message, onValueChange = { message = it },
-                    textStyle = TextStyle(color = dynamicColors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
+                    value = messageA, onValueChange = { messageA = it },
+                    textStyle = TextStyle(color = dynamicColors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
                     cursorBrush = SolidColor(purpleColor), modifier = Modifier.fillMaxWidth()
                 )
-                Text(text = "Padded to 512-bit blocks (message + 1-bit + zeros + 64-bit length)", fontSize = 10.5.sp, color = SubtextGray)
+                Text(
+                    text = "Padded 512-bit block length: ${traceA.paddedData.size} bytes (${traceA.blocks.size} blocks)",
+                    fontSize = 10.sp, color = SubtextGray
+                )
             }
         }
 
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
-                .border(1.5.dp, purpleColor.copy(alpha = 0.6f), RoundedCornerShape(16.dp)).padding(16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "SHA-256 HASH DIGEST A (256-BIT)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = purpleColor)
-                Text(
-                    text = hashA.chunked(8).joinToString(" "),
-                    fontSize = 12.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace,
-                    color = digestColor, lineHeight = 18.sp
-                )
+        // 64-Round Intermediate Register Inspector
+        if (activeRoundState != null) {
+            Box(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                    .border(1.5.dp, purpleColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(text = "COMPRESSION ROUND STEP: ${activeRoundState.step}/63", fontSize = 11.sp, fontWeight = FontWeight.Black, color = purpleColor)
+                        Text(text = "W[t]: 0x%08X".format(activeRoundState.w), fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                    }
 
-                // 8 Working Registers
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    listOf("A", "B", "C", "D", "E", "F", "G", "H").forEachIndexed { i, reg ->
-                        val chunk = hashA.chunked(4).getOrElse(i) { "0000" }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = reg, fontSize = 10.sp, fontWeight = FontWeight.Black, color = purpleColor)
-                            Text(text = chunk, fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                    Slider(
+                        value = selectedRoundStep.toFloat(),
+                        onValueChange = { selectedRoundStep = it.roundToInt().coerceIn(0, 63) },
+                        valueRange = 0f..63f,
+                        steps = 62,
+                        colors = SliderDefaults.colors(thumbColor = purpleColor, activeTrackColor = purpleColor)
+                    )
+
+                    // Real Working Registers A..H
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        listOf(
+                            "A" to activeRoundState.a, "B" to activeRoundState.b,
+                            "C" to activeRoundState.c, "D" to activeRoundState.d,
+                            "E" to activeRoundState.e, "F" to activeRoundState.f,
+                            "G" to activeRoundState.g, "H" to activeRoundState.h
+                        ).forEach { (reg, valInt) ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = reg, fontSize = 10.sp, fontWeight = FontWeight.Black, color = purpleColor)
+                                Text(text = "%04X".format((valInt ushr 16) and 0xFFFF), fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                            }
                         }
                     }
+
+                    Text(
+                        text = "Final 256-bit Digest: ${traceA.finalHex}",
+                        fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = purpleColor
+                    )
                 }
             }
         }
 
-        // Avalanche Effect Demo Card
+        // Bit-Level Avalanche Analysis Card
         Box(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
                 .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "⚡ AVALANCHE EFFECT COMPARISON", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
-                    Text(
-                        text = if (compareMode) "Close ▲" else "Compare 2 Inputs ▼",
-                        fontSize = 11.sp, color = purpleColor, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { compareMode = !compareMode }
-                    )
-                }
-
-                if (compareMode) {
-                    Text(text = "INPUT MESSAGE B (single character difference):", fontSize = 10.sp, color = SubtextGray)
-                    BasicTextField(
-                        value = messageB, onValueChange = { messageB = it },
-                        textStyle = TextStyle(color = amberColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
-                        cursorBrush = SolidColor(AmberGold), modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(text = "HASH B: " + hashB.chunked(8).joinToString(" "), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = amberColor)
-
-                    val pctDiff = (differingNibbles * 100f / 64f).roundToInt()
-                    Text(
-                        text = "Diff: $differingNibbles / 64 hex nibbles changed (~$pctDiff% output change). Strict Avalanche Criterion satisfied!",
-                        fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = greenColor
-                    )
-                } else {
-                    Text(text = "One-way & Pre-image resistance: Flipping a single bit in the input flips ~50% of all output bits in a pseudo-random avalanche.", fontSize = 10.5.sp, color = SubtextGray)
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(text = "⚡ BIT-LEVEL HAMMING AVALANCHE ANALYSIS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
+                Text(
+                    text = "Single Character Difference: '${messageA.lastOrNull()}' vs '${messageB.lastOrNull()}'",
+                    fontSize = 10.sp, color = SubtextGray
+                )
+                Text(
+                    text = "Bits Flipped: ${avalanche.flippedBitsCount} / 256 (${"%.1f".format(avalanche.percentage)}%)",
+                    fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (avalanche.percentage in 40f..60f) greenColor else amberColor
+                )
+                Text(
+                    text = "Strict Avalanche Criterion (SAC): High cryptographic quality requires flipping ~50% of output bits.",
+                    fontSize = 10.sp, color = SubtextGray
+                )
             }
         }
     }
 }
 
 // ──────────────────────────────────────────────
-// 9. Real HMAC & Password Salting Visualizer
+// 9. Real HMAC & Password Salting Visualizer (SORTING)
 // ──────────────────────────────────────────────
 @Composable
 fun HMACCollisionVisualizer() {
@@ -1271,87 +1368,114 @@ fun HMACCollisionVisualizer() {
 
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
     val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
+    val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
 
-    var key by remember { mutableStateOf("secretKey123") }
-    var msg by remember { mutableStateOf("Transfer $500 to Alice") }
+    var keyInput by remember { mutableStateOf("SecretPasswordKey") }
+    var msgInput by remember { mutableStateOf("Transfer $500 to Bob") }
+    var activeTab by remember { mutableIntStateOf(0) } // 0: HMAC Step Trace, 1: Birthday Collision, 2: PBKDF2 Benchmark
 
-    // Real Java HmacSHA256
-    val realHmac = remember(key, msg) {
-        try {
-            val mac = Mac.getInstance("HmacSHA256")
-            val keySpec = SecretKeySpec(key.toByteArray(Charsets.UTF_8), "HmacSHA256")
-            mac.init(keySpec)
-            val bytes = mac.doFinal(msg.toByteArray(Charsets.UTF_8))
-            bytes.joinToString("") { "%02x".format(it) }
-        } catch (e: Exception) {
-            "Error computing HMAC"
-        }
+    val hmacTrace = remember(keyInput, msgInput) {
+        HmacPasswordEngine.computeHmacTrace(keyInput.toByteArray(Charsets.UTF_8), msgInput.toByteArray(Charsets.UTF_8))
+    }
+
+    var collisionBits by remember { mutableIntStateOf(12) }
+    val collisionResult = remember(collisionBits) {
+        HmacPasswordEngine.findTruncatedCollision(collisionBits)
+    }
+
+    var pbkdf2Iterations by remember { mutableIntStateOf(10000) }
+    val pbkdf2Result = remember(pbkdf2Iterations) {
+        HmacPasswordEngine.benchmarkPbkdf2("UserPassword123!", ByteArray(16) { 0x11.toByte() }, pbkdf2Iterations)
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
-                .border(1.5.dp, redColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = "RFC 2104 HMAC-SHA256 (GENUINE MAC)", fontSize = 12.sp, fontWeight = FontWeight.Black, color = redColor)
-                Text(text = "HMAC(K, m) = H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ m))", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor, fontFamily = FontFamily.Monospace)
-
-                Text(text = "SECRET KEY (K)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                BasicTextField(
-                    value = key, onValueChange = { key = it },
-                    textStyle = TextStyle(color = amberColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
-                    cursorBrush = SolidColor(AmberGold), modifier = Modifier.fillMaxWidth()
-                )
-
-                Text(text = "AUTHENTICATED MESSAGE (m)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                BasicTextField(
-                    value = msg, onValueChange = { msg = it },
-                    textStyle = TextStyle(color = dynamicColors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace),
-                    cursorBrush = SolidColor(DsaRed), modifier = Modifier.fillMaxWidth()
-                )
-
-                // Visual Pads
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(8.dp)).padding(8.dp)) {
-                        Column {
-                            Text(text = "Inner Pad (0x36)", fontSize = 10.sp, color = amberColor, fontWeight = FontWeight.Bold)
-                            Text(text = "512-bit K ⊕ 0x36 ∥ m", fontSize = 10.sp, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                        }
-                    }
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(8.dp)).padding(8.dp)) {
-                        Column {
-                            Text(text = "Outer Pad (0x5C)", fontSize = 10.sp, color = redColor, fontWeight = FontWeight.Bold)
-                            Text(text = "512-bit K ⊕ 0x5C ∥ inner", fontSize = 10.sp, color = dynamicColors.textPrimary, fontFamily = FontFamily.Monospace)
-                        }
-                    }
+        // Tab Selector
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("HMAC PAD TRACE", "BIRTHDAY COLLISION", "PBKDF2 BENCHMARK").forEachIndexed { idx, label ->
+                val sel = activeTab == idx
+                Box(
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        .background(if (sel) DsaRed else dynamicColors.inputBackground)
+                        .clickable { activeTab = idx }.padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = label, fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = if (sel) Color.White else SubtextGray)
                 }
-
-                Text(text = "AUTHENTICATION TAG (256-BIT):", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                Text(text = realHmac.chunked(8).joinToString(" "), fontSize = 11.sp, fontWeight = FontWeight.Black, color = redColor, fontFamily = FontFamily.Monospace, lineHeight = 16.sp)
             }
         }
 
-        // Password Hashing & Salting Education Card
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(dynamicColors.inputBackground)
-                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(14.dp)).padding(12.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = "🧂 PASSWORD HASHING & SALTING (KDFs)", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
-                Text(
-                    text = "• Raw MD5/SHA-256 for passwords is DEAD (GPUs test billions/sec; vulnerable to Rainbow Tables).\n" +
-                           "• Cryptographic Salt: Unique random value per user stops precomputed rainbow table lookups.\n" +
-                           "• Memory-Hard KDFs: Argon2id (PHC winner), bcrypt, scrypt defeat ASIC/GPU parallel cracking.",
-                    fontSize = 10.5.sp, color = SubtextGray, lineHeight = 15.sp
-                )
+        when (activeTab) {
+            0 -> {
+                // RFC 2104 HMAC Step Trace
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, redColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "RFC 2104 HMAC-SHA256 NESTED HASH", fontSize = 12.sp, fontWeight = FontWeight.Black, color = redColor)
+                        Text(text = "H((K ⊕ opad) ∥ H((K ⊕ ipad) ∥ m))", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+
+                        Text(text = "Inner Pad (K ⊕ 0x36): 64 bytes", fontSize = 10.sp, color = SubtextGray)
+                        Text(text = "Inner Hash: ${hmacTrace.innerHashHex.take(24)}...", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+
+                        Text(text = "Outer Pad (K ⊕ 0x5C): 64 bytes", fontSize = 10.sp, color = SubtextGray)
+                        Text(text = "Final MAC Tag: ${hmacTrace.finalMacHex}", fontSize = 11.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = redColor)
+
+                        Text(text = "🛡️ Prevents Length Extension Attacks: Even if an attacker knows H(m), they cannot append data without knowing K.", fontSize = 9.5.sp, color = greenColor)
+                    }
+                }
+            }
+            1 -> {
+                // Birthday Collision Simulator
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, redColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "BIRTHDAY BOUND COLLISION SEARCH ($collisionBits BITS)", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = redColor)
+                        Slider(
+                            value = collisionBits.toFloat(),
+                            onValueChange = { collisionBits = it.roundToInt().coerceIn(8, 16) },
+                            valueRange = 8f..16f,
+                            steps = 7,
+                            colors = SliderDefaults.colors(thumbColor = DsaRed, activeTrackColor = DsaRed)
+                        )
+
+                        Text(text = "Theoretical Bound ≈ 1.25 × 2^(k/2) = ${collisionResult.expectedSteps} trials", fontSize = 10.5.sp, color = SubtextGray)
+                        Text(text = "Actual steps until collision: ${collisionResult.actualSteps}", fontSize = 13.sp, fontWeight = FontWeight.Black, color = amberColor)
+                        Text(text = "Input 1: \"${collisionResult.input1}\"  !=  Input 2: \"${collisionResult.input2}\"", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        Text(text = "Matched Truncated Hash: 0x${collisionResult.matchedHashTruncatedHex}", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = greenColor)
+                    }
+                }
+            }
+            else -> {
+                // PBKDF2 On-Device Benchmark
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, redColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "PBKDF2-HMAC-SHA256 BENCHMARK", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = redColor)
+                        Text(text = "Iterations: $pbkdf2Iterations", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = amberColor)
+                        Slider(
+                            value = pbkdf2Iterations.toFloat(),
+                            onValueChange = { pbkdf2Iterations = it.roundToInt() },
+                            valueRange = 1000f..50000f,
+                            steps = 4,
+                            colors = SliderDefaults.colors(thumbColor = DsaRed, activeTrackColor = DsaRed)
+                        )
+
+                        Text(text = "Device Computation Time: ${pbkdf2Result.elapsedMs} ms", fontSize = 15.sp, fontWeight = FontWeight.Black, color = greenColor)
+                        Text(text = "Estimated Cost for 10M offline guesses: ${"%.1f".format(pbkdf2Result.crackingCostEstimateSec)} seconds", fontSize = 10.sp, color = SubtextGray)
+                    }
+                }
             }
         }
     }
 }
 
 // ──────────────────────────────────────────────
-// 10. TLS 1.3 Handshake Swim-Lane Visualizer
+// 10. TLS 1.3 Handshake & Protocol Lab (STEP_RECORDER)
 // ──────────────────────────────────────────────
 @Composable
 fun TLS13HandshakeVisualizer() {
@@ -1362,96 +1486,141 @@ fun TLS13HandshakeVisualizer() {
     val tealColor = if (isDark) DsaTeal else Color(0xFF0D9488)
     val orangeColor = if (isDark) Color(0xFFFF9600) else Color(0xFFEA580C)
     val greenColor = if (isDark) DuolingoGreen else Color(0xFF15803D)
+    val redColor = if (isDark) DsaRed else Color(0xFFDC2626)
 
-    var step by remember { mutableIntStateOf(0) }
-    var viewComparison by remember { mutableStateOf(false) }
+    var flightIndex by remember { mutableIntStateOf(0) }
+    var activeLabTab by remember { mutableIntStateOf(0) } // 0: Swim-Lane & Inspector, 1: Record Tamper, 2: X.509 Chain
+    val packets = remember { TlsEngine.getHandshakePackets() }
+    val currentPacket = packets.getOrElse(flightIndex) { packets.first() }
 
-    data class TLSPacket(val title: String, val sender: String, val detail: String, val keyDerived: String?)
+    var tamperByte by remember { mutableIntStateOf(5) }
+    val tamperResult = remember(tamperByte) {
+        TlsEngine.testRecordTamper(tamperByteIndex = tamperByte)
+    }
 
-    val packets = listOf(
-        TLSPacket("ClientHello + KeyShare", "CLIENT ➔ SERVER", "Supported ciphers (e.g. TLS_AES_256_GCM_SHA384) + Client ECDH ephemeral share g^a", null),
-        TLSPacket("ServerHello + KeyShare", "SERVER ➔ CLIENT", "Chosen cipher + Server ECDH share g^b.", "⚡ Ephemeral Handshake Keys Derived!"),
-        TLSPacket("EncryptedExtensions & Cert", "SERVER ➔ CLIENT", "Server X.509 certificate chain transmitted encrypted under Handshake Key.", null),
-        TLSPacket("CertificateVerify & Finished", "SERVER ➔ CLIENT", "Server signs handshake transcript with private key; HMAC Finished tag sent.", null),
-        TLSPacket("Client Finished & AEAD", "CLIENT ➔ SERVER", "Client validates cert chain; sends Finished tag. Symmetric application traffic begins!", "🔒 1-RTT Application Keys Active!")
-    )
+    val chain = remember {
+        listOf(
+            TlsEngine.X509Cert("CN=codeingo.simats.com", "CN=Simats Secure CA G2", false, 2024, 2028, true),
+            TlsEngine.X509Cert("CN=Simats Secure CA G2", "CN=GlobalTrust Root CA", false, 2020, 2030, true),
+            TlsEngine.X509Cert("CN=GlobalTrust Root CA", "CN=GlobalTrust Root CA", true, 2015, 2035, true)
+        )
+    }
+    val chainValidation = remember {
+        TlsEngine.validateCertificateChain(chain, "codeingo.simats.com", 2026)
+    }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
-                .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "TLS 1.3 1-RTT HANDSHAKE SWIM-LANE", fontSize = 12.sp, fontWeight = FontWeight.Black, color = orangeColor)
-                    Text(text = "STEP ${step + 1} / 5", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = amberColor)
-                }
-
-                // Swim Lane Headers
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(6.dp)).background(AmberGold.copy(alpha = if (isDark) 0.18f else 0.10f)).border(1.dp, AmberGold.copy(alpha = 0.3f), RoundedCornerShape(6.dp)).padding(6.dp), contentAlignment = Alignment.Center) {
-                        Text(text = "💻 CLIENT (BROWSER)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = amberColor)
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(6.dp)).background(DsaTeal.copy(alpha = if (isDark) 0.18f else 0.10f)).border(1.dp, DsaTeal.copy(alpha = 0.3f), RoundedCornerShape(6.dp)).padding(6.dp), contentAlignment = Alignment.Center) {
-                        Text(text = "🖥️ SERVER (NGINX/EDGE)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = tealColor)
-                    }
-                }
-
-                // Swim lane packet rows
-                packets.forEachIndexed { idx, p ->
-                    val isPast = idx < step
-                    val isCurrent = idx == step
-                    val isClientSender = p.sender.startsWith("CLIENT")
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
-                            .background(if (isCurrent) orangeColor.copy(alpha = if (isDark) 0.15f else 0.10f) else dynamicColors.inputBackground.copy(alpha = 0.5f))
-                            .border(1.dp, if (isCurrent) orangeColor else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                            .padding(8.dp)
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "${idx + 1}. ${p.title}", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = if (isCurrent) dynamicColors.textPrimary else SubtextGray)
-                            Text(text = if (isClientSender) "➔ [SEND]" else "⬅ [RECV]", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (isClientSender) amberColor else tealColor)
-                        }
-                        Text(text = p.detail, fontSize = 10.sp, color = SubtextGray, lineHeight = 13.sp)
-                        if (p.keyDerived != null && (isCurrent || isPast)) {
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(text = p.keyDerived, fontSize = 10.sp, fontWeight = FontWeight.Black, color = greenColor)
-                        }
-                    }
+        // Tab Selector
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("PACKET INSPECTOR", "RECORD TAMPER", "X.509 CERT CHAIN").forEachIndexed { idx, label ->
+                val sel = activeLabTab == idx
+                Box(
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        .background(if (sel) orangeColor else dynamicColors.inputBackground)
+                        .clickable { activeLabTab = idx }.padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = label, fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = if (sel) Color.White else SubtextGray)
                 }
             }
         }
 
-        // TLS 1.2 vs 1.3 Comparison Sheet
-        Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground)
-                .border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(12.dp)).clickable { viewComparison = !viewComparison }.padding(12.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "⚡ TLS 1.2 VS TLS 1.3 ARCHITECTURE", fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor)
-                    Text(text = if (viewComparison) "Hide ▲" else "Compare ▼", fontSize = 11.sp, color = SubtextGray)
-                }
-                if (viewComparison) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "• Latency: TLS 1.3 requires only 1-RTT (down from 2-RTT in TLS 1.2). Supports 0-RTT PSK resumption.\n" +
-                               "• Perfect Forward Secrecy: Static RSA key transport completely removed. If server private key leaks in the future, past recorded traffic remains secure.\n" +
-                               "• Pruned Obsolete Ciphers: Removed RC4, 3DES, MD5, SHA-1, and CBC-mode ciphers vulnerable to POODLE and Lucky13.",
-                        fontSize = 10.5.sp, color = SubtextGray, lineHeight = 15.sp
-                    )
+        when (activeLabTab) {
+            0 -> {
+                // Swim Lane & Packet Inspector
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}", fontSize = 12.sp, fontWeight = FontWeight.Black, color = orangeColor)
+                            Text(text = currentPacket.sender, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = tealColor)
+                        }
+
+                        Text(text = currentPacket.description, fontSize = 10.5.sp, color = SubtextGray)
+
+                        // Packet Headers & Fields Table
+                        Column(
+                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(dynamicColors.inputBackground).padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            currentPacket.fields.forEach { (k, v) ->
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(text = "$k:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                                    Text(text = v, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                                }
+                            }
+                        }
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Box(
+                                modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).background(dynamicColors.inputBackground)
+                                    .clickable { if (flightIndex > 0) flightIndex-- }.padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "◀ PREV PACKET", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                            }
+                            Box(
+                                modifier = Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).background(orangeColor)
+                                    .clickable { if (flightIndex < packets.size - 1) flightIndex++ else flightIndex = 0 }.padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "NEXT PACKET ▶", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            }
+                        }
+                    }
                 }
             }
-        }
+            1 -> {
+                // Interactive Record Tamper Demo
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, redColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "INTERACTIVE RECORD TAMPER DEMO", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = redColor)
+                        Text(text = "Slide to flip 1 bit in the encrypted TLS 1.3 record body:", fontSize = 10.sp, color = SubtextGray)
+                        Slider(
+                            value = tamperByte.toFloat(),
+                            onValueChange = { tamperByte = it.roundToInt() },
+                            valueRange = 0f..10f,
+                            colors = SliderDefaults.colors(thumbColor = DsaRed, activeTrackColor = DsaRed)
+                        )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DuolingoButton(
-                text = if (step < 4) "NEXT PACKET ➔" else "RESTART HANDSHAKE",
-                faceColor = Color(0xFFFF9600), shadowColor = Color(0xFFD27800),
-                onClick = { step = (step + 1) % 5 }, modifier = Modifier.weight(1f)
-            )
+                        Text(text = "Original Record: ${tamperResult.originalRecordHex.take(24)}...", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = SubtextGray)
+                        Text(text = "Tampered Record: ${tamperResult.tamperedRecordHex.take(24)}...", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = redColor)
+
+                        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(DsaRed.copy(alpha = 0.15f)).padding(8.dp)) {
+                            Text(text = tamperResult.errorDetail ?: "Verified", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = redColor)
+                        }
+                    }
+                }
+            }
+            else -> {
+                // X.509 Certificate Chain Validator
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                        .border(1.5.dp, greenColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "X.509 PKI TRUST CHAIN VALIDATOR", fontSize = 11.5.sp, fontWeight = FontWeight.Black, color = greenColor)
+                        chain.forEachIndexed { i, cert ->
+                            Column(
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(dynamicColors.inputBackground).padding(8.dp)
+                            ) {
+                                Text(text = "${i + 1}. ${cert.subject}", fontSize = 11.sp, fontWeight = FontWeight.Black, color = dynamicColors.textPrimary)
+                                Text(text = "Issuer: ${cert.issuer}  |  Validity: ${cert.validFromYear}-${cert.validToYear}", fontSize = 9.5.sp, color = SubtextGray)
+                            }
+                        }
+
+                        Text(
+                            text = if (chainValidation.isValid) "✅ Certificate Chain Validated to Trusted Root Anchor" else "❌ Chain Rejected: ${chainValidation.failureReason}",
+                            fontSize = 11.sp, fontWeight = FontWeight.Black, color = if (chainValidation.isValid) greenColor else redColor
+                        )
+                    }
+                }
+            }
         }
     }
 }
