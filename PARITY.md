@@ -172,16 +172,57 @@ For future package clean-up (e.g., standardizing `com.simats.codeingo.data.model
 The 10 interactive visualizer engines and 5 standalone 3D battle arena modules have been fully migrated to Cryptography & Network Security, maintaining exact enum keys (`DSAVisualizerType`) and route identifiers:
 
 #### A. 10 Interactive CNS Visualizers (`CNSVisualizers.kt`)
-1. **Caesar & Substitution Cipher (`ARRAY`):** Modular alphabet shift wheel $C = (P + K) \pmod{26}$, direction toggle (Encrypt $P+K$ vs Decrypt $C-K$), brute-force drawer exploring all 26 shifts, live frequency distribution bar chart analysis, and educational toy security warnings.
-2. **DES Feistel Network (`STACK`):** 16-round interactive Feistel engine, 32-bit $L_i, R_i$ register swaps, round subkeys $K_i$, $F(R_i, K_i)$ expansion preview, and EFF Deep Crack deprecation advisory.
-3. **AES 128-Bit State Matrix & Modes (`QUEUE`):** Multi-mode studio containing (1) $4\times 4$ byte state matrix in hex with interactive tabs for `SubBytes` (GF($2^8$) S-Box), `ShiftRows`, `MixColumns`, and `AddRoundKey`; and (2) Block Cipher Operating Modes tab comparing ECB (penguin duplicate block pattern leakage), CBC (with IV chaining), CTR (stream mode), and GCM (AEAD with GMAC authentication).
-4. **Vigenère Polyalphabetic Cipher (`LINKED_LIST`):** Secret keyword repeating keystream alignment ribbon, bidirectional Encrypt/Decrypt modes, Tabula Recta coordinate intersection lookup, and Kasiski / Index of Coincidence cryptanalysis notes.
-5. **Diffie-Hellman Key Agreement (`BINARY_TREE`):** Public prime $p=23$ and generator $g=5$, interactive private secret sliders for Alice ($a$) and Bob ($b$), insecure eavesdropper channel, and shared secret $g^{ab} \pmod p$ matching verification.
-6. **RSA Public Key Cryptosystem & Signatures (`AVL_TREE`):** Primes $(p=61, q=53)$, modulus $n=3233$, Euler's totient $\phi(n)=3120$, public key $(e=17, n)$, private key $(d=2753, n)$, dual modes for Confidentiality ($c = m^e \bmod n, m = c^d \bmod n$) and Digital Signatures ($s = m^d \bmod n, m = s^e \bmod n$), with Bleichenbacher padding oracle / RSA-PSS advisories.
-7. **Elliptic Curve Points (`TRIE`):** Explicit real-number $\mathbb{R}$ curve canvas illustration with secant chord line through $P$ and $Q$ and scalar slider $kP$, coupled with a toy finite field $\mathbb{F}_{17}$ arithmetic engine ($y^2 = x^3 + x + 6 \bmod 17$) computing discrete point coordinates and explaining ECDLP hardness.
-8. **SHA-256 Hash Construction & Avalanche (`GRAPH`):** Live plaintext input, 512-bit block padding breakdown, 8 working registers $(A..H)$, real-time 256-bit hexadecimal digest calculation, and an interactive Avalanche comparison engine comparing two inputs with 1-character difference to demonstrate $\sim 50\%$ bit diffusion.
-9. **Real HMAC-SHA256 & Password Salting (`SORTING`):** Genuine RFC 2104 nested hashing using Java `Mac.getInstance("HmacSHA256")` with editable key and message, coupled with an interactive Birthday Paradox $2^{n/2}$ collision bound simulator and a dedicated Password Hashing & Salting card (Argon2id, bcrypt, cryptographic salts vs GPU rainbow tables).
-10. **TLS 1.3 Handshake Swim-Lane Tracer (`STEP_RECORDER`):** Client-to-server and server-to-client swim-lane packet inspector (ClientHello, ServerHello, EncryptedExtensions, CertificateVerify, Finished, AEAD application traffic) with key derivation indicators and a TLS 1.2 vs TLS 1.3 architectural comparison matrix.
+Each of the 10 labs implements the unified **Four-Mode Architecture** (`EXPLORE`, `ATTACK`, `CODE_TEST`, `CHALLENGE`), backed by 8 formal mathematical cryptographic engines (`DesEngine`, `AesEngine`, `Sha256Engine`, `RsaEngine`, `DhEngine`, `KasiskiEngine`, `HmacPasswordEngine`, `TlsEngine`):
+1. **Caesar & Substitution Cipher (`ARRAY`):**
+   - *Explore:* Modular alphabet shift wheel $C = (P + K) \pmod{26}$, direction toggle (Encrypt $P+K$ vs Decrypt $C-K$), live 26-letter frequency distribution comparison against standard English.
+   - *Attack / Break:* Automated Chi-Squared ($\chi^2$) goodness-of-fit cryptanalysis testing all 26 candidate keys to automatically break the cipher.
+   - *Code & Test:* NIST/standard test vectors and idiomatic implementations in 7 languages (Python, Java, C++, Go, JavaScript, Kotlin, Swift).
+   - *Challenge:* Interactive micro-quizzes testing shift algebra and frequency analysis concepts.
+2. **DES Feistel Network (`STACK`):**
+   - *Explore:* FIPS 46-3 compliant 16-round interactive Feistel engine, 64-bit to 32-bit $L_i, R_i$ register splits, 48-bit PC-1/PC-2 subkeys, 8 S-Boxes, and round swaps.
+   - *Attack / Break:* Verified Key Complementation Property ($\text{DES}(\bar{P}, \bar{K}) = \overline{\text{DES}(P, K)}$) halving exhaustive search work factor, plus EFF Deep Crack 56-bit brute force deprecation notes.
+   - *Code & Test:* NIST CAVP DES test vectors (`0x133457799BBCDFF1` + `0x0123456789ABCDEF` $\to$ `0x85E813540F0AB405`) and 7-language reference implementations.
+   - *Challenge:* S-Box non-linearity and Feistel invertibility challenges.
+3. **AES 128-Bit State Matrix & Modes (`QUEUE`):**
+   - *Explore:* FIPS 197 compliant 10-round $4\times 4$ byte state matrix in hex with interactive round scrubber and stage inspectors: `SubBytes` (GF($2^8$) S-Box), `ShiftRows`, `MixColumns`, and `AddRoundKey`.
+   - *Attack / Break:* Block cipher modes analysis: ECB duplicate block pattern leakage, CTR nonce-reuse keystream cancellation ($C_1 \oplus C_2 = P_1 \oplus P_2$), and GCM ciphertext bit tampering triggering `AEADBadTagException`.
+   - *Code & Test:* FIPS 197 Appendix B test vectors and 7-language reference code.
+   - *Challenge:* Galois Field inversion and diffusion layer challenges.
+4. **Vigenère Polyalphabetic Cipher (`LINKED_LIST`):**
+   - *Explore:* Keyword keystream ribbon alignment, bidirectional Encrypt/Decrypt, and Tabula Recta coordinate intersection lookup.
+   - *Attack / Break:* Kasiski Examination finding repeated 3-grams and GCD factor candidates, combined with Index of Coincidence (IoC) formula $\approx 0.0667$ for English vs $0.0385$ for flat distribution.
+   - *Code & Test:* Test vectors and 7-language code.
+   - *Challenge:* Polyalphabetic period detection and one-time pad (OTP) perfection questions.
+5. **Diffie-Hellman Key Agreement (`BINARY_TREE`):**
+   - *Explore:* Safe prime domain presets ($p=23, g=5$ and RFC 3526 MODP groups), Alice and Bob private secret sliders, and shared secret $g^{ab} \pmod p$ matching.
+   - *Attack / Break:* Active Man-in-the-Middle (Mallory) key substitution attack ($g^m \pmod p$) establishing dual disjoint secrets, plus Discrete Logarithm (DLOG) exhaustive brute-force step counter.
+   - *Code & Test:* RFC test vectors and 7-language code.
+   - *Challenge:* Ephemeral keys, Forward Secrecy, and authenticated DH protocols.
+6. **RSA Public Key Cryptosystem & Signatures (`AVL_TREE`):**
+   - *Explore:* Prime selection $(p, q)$, modulus $n=pq$, Euler's totient $\phi(n)$, Extended Euclidean Algorithm table solving $e \cdot d \equiv 1 \pmod{\phi(n)}$, and Square-and-Multiply modexp trace.
+   - *Attack / Break:* Textbook unpadded RSA homomorphic malleability tampering ($c_1 \cdot c_2 \bmod n = (m_1 \cdot m_2)^e \bmod n$) and OAEP defense necessity.
+   - *Code & Test:* Test vectors and 7-language code.
+   - *Challenge:* Factorization work factors and padding oracle mitigations.
+7. **Elliptic Curve Points (`TRIE`):**
+   - *Explore:* Real-number $\mathbb{R}$ curve canvas illustration with secant chord line through $P$ and $Q$, and toy finite field $\mathbb{F}_{17}$ arithmetic engine ($y^2 = x^3 + x + 6 \bmod 17$) computing discrete point coordinates.
+   - *Attack / Break:* Invalid curve injection attack (points off-curve on weak twists) and small subgroup confinement.
+   - *Code & Test:* secp256k1 standard test vectors and 7-language code.
+   - *Challenge:* Point at infinity $\mathcal{O}$, point doubling chord-and-tangent rule, and ECDLP hardness.
+8. **SHA-256 Hash Construction & Avalanche (`GRAPH`):**
+   - *Explore:* FIPS 180-4 padding breakdown, $W[0..63]$ message schedule, 8 working registers $(A..H)$, and 64-round compression state scrubber.
+   - *Attack / Break:* Bit-level Hamming distance Avalanche comparison showing $\sim 50\%$ bit flip cascade on 1-character difference, plus Merkle-Damgård length extension attack mechanics.
+   - *Code & Test:* NIST CAVP SHA-256 test vectors and 7-language code.
+   - *Challenge:* Pre-image, second pre-image, and collision resistance bounds.
+9. **HMAC & Collision Bound (`SORTING`):**
+   - *Explore:* RFC 2104 nested hashing $(H((K \oplus opad) \parallel H((K \oplus ipad) \parallel m)))$ step-by-step trace with outer/inner pad calculation.
+   - *Attack / Break:* Birthday Paradox collision bound search ($8$–$16$ bits) demonstrating $\approx 1.25 \times 2^{n/2}$ step convergence, plus on-device PBKDF2 hash stretching benchmark calculating cracking work factors.
+   - *Code & Test:* RFC 2202 HMAC test vectors and 7-language code.
+   - *Challenge:* Salt uniqueness, rainbow table defense, and memory-hard KDFs (Argon2id).
+10. **TLS 1.3 Handshake Swim-Lane Tracer (`STEP_RECORDER`):**
+   - *Explore:* Client-to-server and server-to-client swim-lane flight packet inspector (ClientHello, ServerHello, EncryptedExtensions, CertificateVerify, Finished, 1-RTT AEAD application traffic).
+   - *Attack / Break:* In-flight encrypted AEAD record byte tampering triggering record authentication failures, plus X.509 Certificate Chain of Trust hierarchical validator.
+   - *Code & Test:* TLS 1.3 RFC 8446 flight test vectors and 7-language code.
+   - *Challenge:* 1-RTT vs 2-RTT round trips, forward secrecy, and obsolete cipher suite deprecation.
 
 #### B. 5 Flagship 3D Battle Arenas
 1. **The Cipher Sanctum Arena (`ArrayKingdomArenaScreen`):** Caesar shift ring, modular offset cryptanalysis, frequency analysis hunt, Vigenère keystream alignment, unscrambled columnar transposition grid, 20s cryptanalysis sprint, and 3-phase Sphinx of Shadows Boss battle with Caesar decryption challenges and heart deductions on incorrect answers.
