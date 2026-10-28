@@ -82,51 +82,62 @@ fun CNSChallengeCardView(
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Header Card with Progress
-        Box(
+        // Compact Challenge Banner Header Card with Progress
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .background(CardBackground)
-                .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                .padding(16.dp)
+                .border(1.2.dp, amberColor.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
+                .padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = "🎯 INTERACTIVE CHALLENGES",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        color = amberColor
-                    )
-                    Text(
-                        text = "Test your cryptographic intuition on ${labType.title}",
-                        fontSize = 11.sp,
-                        color = SubtextGray
-                    )
-                }
-
-                // Score Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (correctCount == questions.size && questions.isNotEmpty()) greenColor.copy(alpha = 0.2f) else dynamicColors.inputBackground)
-                        .border(1.dp, if (correctCount == questions.size && questions.isNotEmpty()) greenColor else InputBorder, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    Text(text = "🎯", fontSize = 13.sp)
                     Text(
-                        text = "$correctCount / ${questions.size} Solved",
-                        fontSize = 12.sp,
+                        text = "INTERACTIVE CHALLENGES",
+                        fontSize = 11.5.sp,
                         fontWeight = FontWeight.Black,
-                        color = if (correctCount == questions.size && questions.isNotEmpty()) greenColor else dynamicColors.textPrimary
+                        fontFamily = com.simats.codeingo.ui.theme.AppFontFamily,
+                        color = amberColor,
+                        letterSpacing = 0.5.sp
                     )
                 }
+                Text(
+                    text = "Test intuition on ${labType.title}",
+                    fontSize = 10.5.sp,
+                    color = SubtextGray,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Score Badge Pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (correctCount == questions.size && questions.isNotEmpty()) greenColor.copy(alpha = 0.16f) else dynamicColors.inputBackground)
+                    .border(1.dp, if (correctCount == questions.size && questions.isNotEmpty()) greenColor else InputBorder, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = "$correctCount / ${questions.size} Solved",
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Black,
+                    color = if (correctCount == questions.size && questions.isNotEmpty()) greenColor else dynamicColors.textPrimary
+                )
             }
         }
 
@@ -140,20 +151,20 @@ fun CNSChallengeCardView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(CardBackground)
                     .border(
-                        1.5.dp,
+                        1.2.dp,
                         when {
                             isCorrect -> greenColor.copy(alpha = 0.6f)
                             isAnswered -> redColor.copy(alpha = 0.5f)
                             else -> InputBorder
                         },
-                        RoundedCornerShape(16.dp)
+                        RoundedCornerShape(14.dp)
                     )
-                    .padding(16.dp)
+                    .padding(14.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     // Question Header
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -164,6 +175,7 @@ fun CNSChallengeCardView(
                             text = "CHALLENGE #${qIdx + 1}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
+                            fontFamily = com.simats.codeingo.ui.theme.AppFontFamily,
                             color = if (isCorrect) greenColor else amberColor
                         )
 
