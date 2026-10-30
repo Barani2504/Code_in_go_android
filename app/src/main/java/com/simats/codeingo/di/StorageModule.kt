@@ -18,4 +18,10 @@ object StorageModule {
     fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
         return UserPreferences(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideUserProgressSource(userPreferences: UserPreferences): com.simats.codeingo.data.local.UserProgressSource {
+        return userPreferences
+    }
 }

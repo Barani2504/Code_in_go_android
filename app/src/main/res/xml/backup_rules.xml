@@ -2,4 +2,6 @@
 <full-backup-content>
     <!-- Exclude sensitive authentication storage from legacy auto-backup -->
     <exclude domain="sharedpref" path="ashcrypt_auth_prefs.xml" />
+    <exclude domain="sharedpref" path="codeingo_secure_tokens.xml" />
+    <exclude domain="root" path="files/datastore/codeingo_auth_tokens.preferences_pb" />
 </full-backup-content>

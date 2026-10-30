@@ -34,10 +34,11 @@ data class GameStateSnapshot(
     val activeLevelIndex: Int,
     val basecampCompletedLevels: Set<String>,
     val diagnosticTaken: Boolean,
-    val diagnosticRecommendedChapter: Int
+    val diagnosticRecommendedChapter: Int,
+    val lastSyncedServerGems: Int = 0
 )
 
-class UserPreferences(private val context: Context) {
+class UserPreferences(private val context: Context) : UserProgressSource {
 
     companion object {
         val KEY_IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
@@ -67,6 +68,9 @@ class UserPreferences(private val context: Context) {
         val KEY_BASECAMP_COMPLETED_LEVELS = stringSetPreferencesKey("basecamp_completed_levels")
         val KEY_DIAGNOSTIC_TAKEN = booleanPreferencesKey("diagnostic_taken")
         val KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER = intPreferencesKey("diagnostic_recommended_chapter")
+
+        // ── Currency Reconciliation Key ───────────────────────────
+        val KEY_LAST_SYNCED_SERVER_GEMS = intPreferencesKey("last_synced_server_gems")
     }
 
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { it[KEY_IS_LOGGED_IN] ?: false }
@@ -100,14 +104,14 @@ class UserPreferences(private val context: Context) {
     val completedChapters: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_COMPLETED_CHAPTERS] ?: emptySet()
     }
-    val completedLevelIndices: Flow<Set<String>> = context.dataStore.data.map {
+    override val completedLevelIndices: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_COMPLETED_LEVEL_INDICES] ?: emptySet()
     }
     val activeLevelIndex: Flow<Int> = context.dataStore.data.map {
         it[KEY_ACTIVE_LEVEL_INDEX] ?: 1
     }
 
-    val basecampCompletedLevels: Flow<Set<String>> = context.dataStore.data.map {
+    override val basecampCompletedLevels: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet()
     }
     val diagnosticTaken: Flow<Boolean> = context.dataStore.data.map {
@@ -115,6 +119,9 @@ class UserPreferences(private val context: Context) {
     }
     val diagnosticRecommendedChapter: Flow<Int> = context.dataStore.data.map {
         it[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1
+    }
+    val lastSyncedServerGems: Flow<Int> = context.dataStore.data.map {
+        it[KEY_LAST_SYNCED_SERVER_GEMS] ?: 0
     }
 
     val gameStateSnapshot: Flow<GameStateSnapshot> = context.dataStore.data.map { prefs ->
@@ -153,8 +160,15 @@ class UserPreferences(private val context: Context) {
             activeLevelIndex = resolvedActive,
             basecampCompletedLevels = prefs[KEY_BASECAMP_COMPLETED_LEVELS] ?: emptySet(),
             diagnosticTaken = prefs[KEY_DIAGNOSTIC_TAKEN] ?: false,
-            diagnosticRecommendedChapter = prefs[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1
+            diagnosticRecommendedChapter = prefs[KEY_DIAGNOSTIC_RECOMMENDED_CHAPTER] ?: 1,
+            lastSyncedServerGems = prefs[KEY_LAST_SYNCED_SERVER_GEMS] ?: 0
         )
+    }
+
+    suspend fun setLastSyncedServerGems(gems: Int) {
+        context.dataStore.edit {
+            it[KEY_LAST_SYNCED_SERVER_GEMS] = gems
+        }
     }
 
     suspend fun markBasecampLevelCompleted(levelId: String) {
@@ -286,6 +300,7 @@ class UserPreferences(private val context: Context) {
             it[KEY_COMPLETED_LEVEL_INDICES] = emptySet()
             it[KEY_ACTIVE_LEVEL_INDEX] = 1
             it[KEY_UNLOCKED_LEVELS] = setOf("1")
+            it[KEY_LAST_SYNCED_SERVER_GEMS] = 0
         }
     }
 

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -45,8 +48,42 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    val localProperties = Properties()
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        localFile.inputStream().use { stream ->
+            localProperties.load(stream)
+        }
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            val devUrl = localProperties.getProperty("API_BASE_URL_DEV")
+                ?: (project.findProperty("API_BASE_URL_DEV") as? String)
+                ?: "http://10.0.2.2:8080/"
+            buildConfigField("String", "API_BASE_URL", "\"$devUrl\"")
+        }
+        create("staging") {
+            dimension = "environment"
+            val stagingUrl = localProperties.getProperty("API_BASE_URL_STAGING")
+                ?: (project.findProperty("API_BASE_URL_STAGING") as? String)
+                ?: "https://qkc9q70m-8080.inc1.devtunnels.ms/"
+            buildConfigField("String", "API_BASE_URL", "\"$stagingUrl\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            val prodUrl = localProperties.getProperty("API_BASE_URL_PROD")
+                ?: (project.findProperty("API_BASE_URL_PROD") as? String)
+                ?: "https://api.codeingo.com/"
+            buildConfigField("String", "API_BASE_URL", "\"$prodUrl\"")
+        }
+    }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     lint {
         checkReleaseBuilds = false
@@ -96,10 +133,20 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // Network Stack
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.kotlinx)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.logging)
+    implementation(libs.tink.android)
+
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // WorkManager (Background Outbox Synchronization)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
@@ -108,10 +155,16 @@ dependencies {
 
     // Test
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.androidx.room.testing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

@@ -3,6 +3,7 @@ package com.simats.codeingo.di
 import android.content.Context
 import com.simats.codeingo.data.db.CodeingoDatabase
 import com.simats.codeingo.data.db.MistakeVaultDao
+import com.simats.codeingo.data.db.OfflineSyncDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,5 +25,11 @@ object DatabaseModule {
     @Singleton
     fun provideMistakeVaultDao(database: CodeingoDatabase): MistakeVaultDao {
         return database.mistakeVaultDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOfflineSyncDao(database: CodeingoDatabase): OfflineSyncDao {
+        return database.offlineSyncDao()
     }
 }

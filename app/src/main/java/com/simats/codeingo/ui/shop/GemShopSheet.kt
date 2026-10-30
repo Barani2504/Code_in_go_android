@@ -432,7 +432,7 @@ fun GemShopSheet(
         if (gemsCount < item.price) {
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             alertTitle = "Not Enough Gems"
-            alertMessage = "You need ${item.price - gemsCount} more gems to buy ${item.name}. Complete Data Structure lessons to earn gems!"
+            alertMessage = "You need ${item.price - gemsCount} more gems to buy ${item.name}. Complete Cryptography stages to earn gems!"
             showAlert = true
             return
         }

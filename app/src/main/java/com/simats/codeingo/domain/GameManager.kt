@@ -22,6 +22,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.simats.codeingo.data.network.repository.ProgressOutboxRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface GameManagerEntryPoint {
+    fun progressOutboxRepository(): ProgressOutboxRepository
+}
 
 class GameManager private constructor() {
 
@@ -33,7 +44,12 @@ class GameManager private constructor() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var prefs: UserPreferences? = null
     private var database: CodeingoDatabase? = null
+    private var progressOutboxRepository: ProgressOutboxRepository? = null
     private var persistJob: Job? = null
+
+    fun setProgressOutboxRepository(repository: ProgressOutboxRepository?) {
+        this.progressOutboxRepository = repository
+    }
 
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
@@ -45,6 +61,9 @@ class GameManager private constructor() {
 
     private val _gemsCount = MutableStateFlow(450)
     val gemsCount: StateFlow<Int> = _gemsCount.asStateFlow()
+
+    private val _lastSyncedServerGems = MutableStateFlow(0)
+    val lastSyncedServerGems: StateFlow<Int> = _lastSyncedServerGems.asStateFlow()
 
     private val _heartsCount = MutableStateFlow(10)
     val heartsCount: StateFlow<Int> = _heartsCount.asStateFlow()
@@ -163,6 +182,14 @@ class GameManager private constructor() {
         val db = CodeingoDatabase.getDatabase(context)
         database = db
 
+        runCatching {
+            val entryPoint = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                GameManagerEntryPoint::class.java
+            )
+            progressOutboxRepository = entryPoint.progressOutboxRepository()
+        }
+
         // Observe Room mistakes and mirror into reactive state flow
         scope.launch {
             db.mistakeVaultDao().getAllMistakesFlow().collect { entities ->
@@ -181,6 +208,7 @@ class GameManager private constructor() {
             // Atomically publish all state values in a single coherent step
             _totalXP.value = snapshot.totalXP
             _gemsCount.value = snapshot.gemsCount
+            _lastSyncedServerGems.value = snapshot.lastSyncedServerGems
             _heartsCount.value = snapshot.heartsCount
             _streakDays.value = snapshot.streakDays
             _activePhoenixStage.value = snapshot.activePhoenixStage
@@ -303,6 +331,7 @@ class GameManager private constructor() {
     /** Resets all unlocked levels and XP — used by Settings → Courses → RESET. */
     fun resetAllProgress() {
         _totalXP.value = 0
+        _lastSyncedServerGems.value = 0
         _unlockedLevelIndices.value = setOf(1)
         _maxUnlockedChapter.value = 1
         _completedChapters.value = emptySet()
@@ -317,9 +346,14 @@ class GameManager private constructor() {
         if (p != null) {
             scope.launch { 
                 p.resetChapterProgression() 
+                p.setLastSyncedServerGems(0)
                 p.updatePracticeTimestamps(0L, 0L)
             }
         }
+    }
+
+    fun setLastSyncedServerGemsForTesting(gems: Int) {
+        _lastSyncedServerGems.value = gems
     }
 
     /** Purges all local user game data upon account deletion (Play Store Account Deletion Rule) */
@@ -386,6 +420,94 @@ class GameManager private constructor() {
         _unlockedLevelIndices.value = setOf(1)
         val p = prefs ?: return
         scope.launch { p.resetChapterProgression() }
+    }
+
+    /**
+     * Non-destructively reconciles remote progress snapshot into reactive state flows.
+     * Guaranteed ZERO echo loop: does NOT invoke completeLevel(), animations, dialogs, or outbox inserts.
+     * Enforces Hearts Sovereignty: remote hearts never overwrite local 10/10 capacity or local regen timer.
+     * Uses Gems Delta Ledger Algorithm to preserve local spend and prevent double-counting.
+     */
+    fun applyRemoteSnapshot(
+        remoteTotalXP: Int?,
+        remoteGems: Int?,
+        remoteStreak: Int?,
+        remoteCompletedIndices: Set<Int> = emptySet(),
+        remotePhoenixStage: Int? = null,
+        isLessonUploadResponse: Boolean = false
+    ) {
+        if (remoteTotalXP != null && remoteTotalXP > _totalXP.value) {
+            _totalXP.value = remoteTotalXP
+        }
+
+        if (remoteGems != null) {
+            if (isLessonUploadResponse) {
+                if (_lastSyncedServerGems.value <= 0) {
+                    // Uninitialized watermark on first upload: adopt remote if greater and establish watermark
+                    if (remoteGems > _gemsCount.value) {
+                        _gemsCount.value = remoteGems
+                    }
+                    _lastSyncedServerGems.value = maxOf(remoteGems, _gemsCount.value)
+                } else {
+                    // Lesson completion was already credited locally (+5 gems) in UI.
+                    // Advance server watermark so the new remote balance is not double-credited later.
+                    _lastSyncedServerGems.value = maxOf(_lastSyncedServerGems.value, remoteGems)
+                }
+                val p = prefs
+                if (p != null) {
+                    val w = _lastSyncedServerGems.value
+                    scope.launch { p.setLastSyncedServerGems(w) }
+                }
+            } else {
+                if (_lastSyncedServerGems.value <= 0) {
+                    // First sync: adopt remote if greater, and set watermark
+                    if (remoteGems > _gemsCount.value) {
+                        _gemsCount.value = remoteGems
+                    }
+                    _lastSyncedServerGems.value = maxOf(remoteGems, _gemsCount.value)
+                    val p = prefs
+                    if (p != null) {
+                        val w = _lastSyncedServerGems.value
+                        scope.launch { p.setLastSyncedServerGems(w) }
+                    }
+                } else {
+                    // Subsequent syncs: add positive remote delta if server advanced
+                    if (remoteGems > _lastSyncedServerGems.value) {
+                        val delta = remoteGems - _lastSyncedServerGems.value
+                        _gemsCount.value += delta
+                        _lastSyncedServerGems.value = remoteGems
+                        val p = prefs
+                        if (p != null) {
+                            val w = _lastSyncedServerGems.value
+                            scope.launch { p.setLastSyncedServerGems(w) }
+                        }
+                    }
+                    // If remoteGems <= _lastSyncedServerGems.value, do NOT reduce local gems, preserving local purchases
+                }
+            }
+        }
+
+        if (remoteStreak != null && remoteStreak > _streakDays.value) {
+            _streakDays.value = remoteStreak
+        }
+
+        if (remotePhoenixStage != null && remotePhoenixStage in 1..18 && remotePhoenixStage > _activePhoenixStage.value) {
+            _activePhoenixStage.value = remotePhoenixStage
+        }
+
+        // HEARTS SOVEREIGNTY: Remote hearts are strictly ignored to preserve Android's 10-heart capacity & local timer.
+
+        if (remoteCompletedIndices.isNotEmpty()) {
+            val union = _completedLevelIndices.value + remoteCompletedIndices
+            _completedLevelIndices.value = union
+            val maxChapter = union.filter { it in 1..50 }.maxOfOrNull {
+                if (it <= 25) ((it - 1) / 5) + 1 else ((it - 26) / 5) + 6
+            } ?: 1
+            _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, maxChapter)
+            val unlockedNext = union.map { if (it in 101..104) it + 1 else it + 1 }.toSet()
+            _unlockedLevelIndices.value = _unlockedLevelIndices.value + unlockedNext
+        }
+        persistStats()
     }
 
     fun completeLessonAndExtendStreak() {
@@ -632,7 +754,8 @@ class GameManager private constructor() {
     fun unlockNextLevel(
         currentLevelIndex: Int,
         isBoss: Boolean = false,
-        nextUnitFirstLevelIndex: Int? = null
+        nextUnitFirstLevelIndex: Int? = null,
+        accuracy: Int = 100
     ) {
         if (ChapterRegistry.isBasecampLevel(currentLevelIndex)) {
             val levelId = "c0_l${currentLevelIndex - 100}"
@@ -645,6 +768,11 @@ class GameManager private constructor() {
                 triggerEvolution(targetStage)
             }
             persistStats()
+            scope.launch {
+                runCatching {
+                    progressOutboxRepository?.enqueueLessonCompletion(currentLevelIndex, accuracy)
+                }
+            }
             return
         }
 
@@ -676,6 +804,9 @@ class GameManager private constructor() {
         val p = prefs ?: return
         scope.launch {
             p.completeLesson("level_$currentLevelIndex", nextLevel)
+            runCatching {
+                progressOutboxRepository?.enqueueLessonCompletion(currentLevelIndex, accuracy)
+            }
         }
     }
 

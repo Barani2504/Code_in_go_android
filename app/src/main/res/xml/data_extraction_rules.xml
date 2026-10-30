@@ -3,9 +3,13 @@
     <cloud-backup>
         <!-- Exclude authentication storage and credentials from cloud backup -->
         <exclude domain="sharedpref" path="ashcrypt_auth_prefs.xml" />
+        <exclude domain="sharedpref" path="codeingo_secure_tokens.xml" />
+        <exclude domain="root" path="files/datastore/codeingo_auth_tokens.preferences_pb" />
     </cloud-backup>
     <device-transfer>
         <!-- Exclude authentication storage from device-to-device migration -->
         <exclude domain="sharedpref" path="ashcrypt_auth_prefs.xml" />
+        <exclude domain="sharedpref" path="codeingo_secure_tokens.xml" />
+        <exclude domain="root" path="files/datastore/codeingo_auth_tokens.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>
