@@ -41,18 +41,34 @@ object NetworkModule {
             .addInterceptor(authHeaderInterceptor)
 
         if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor { message ->
-                // Ensure passwords and tokens are never printed in cleartext in logcat
+            val bodyLoggingInterceptor = HttpLoggingInterceptor { message ->
                 val sanitized = message
                     .replace(Regex("(?i)(\"password\"\\s*:\\s*\")[^\"]+(\")"), "$1[REDACTED]$2")
                     .replace(Regex("(?i)(\"token\"\\s*:\\s*\")[^\"]+(\")"), "$1[REDACTED]$2")
+                    .replace(Regex("(?i)(\"refreshToken\"\\s*:\\s*\")[^\"]+(\")"), "$1[REDACTED]$2")
                 android.util.Log.d("CodeingoHttp", sanitized)
             }.apply {
                 level = HttpLoggingInterceptor.Level.BODY
                 redactHeader("Authorization")
                 redactHeader("Cookie")
             }
-            builder.addInterceptor(loggingInterceptor)
+
+            val headersLoggingInterceptor = HttpLoggingInterceptor { message ->
+                android.util.Log.d("CodeingoHttp", message)
+            }.apply {
+                level = HttpLoggingInterceptor.Level.HEADERS
+                redactHeader("Authorization")
+                redactHeader("Cookie")
+            }
+
+            builder.addInterceptor { chain ->
+                val path = chain.request().url.encodedPath
+                if (path.startsWith("/api/auth/")) {
+                    headersLoggingInterceptor.intercept(chain)
+                } else {
+                    bodyLoggingInterceptor.intercept(chain)
+                }
+            }
         }
 
         return builder.build()

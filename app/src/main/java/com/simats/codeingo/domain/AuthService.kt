@@ -2,6 +2,11 @@ package com.simats.codeingo.domain
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.simats.codeingo.data.network.security.TokenStorage
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +19,12 @@ import java.util.UUID
 // 🔐 Authentication & Session Service
 // Hardened with PBKDF2-HMAC-SHA256 salted password hashing & migration
 // ══════════════════════════════════════════════════════════════════
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface AuthServiceEntryPoint {
+    fun tokenStorage(): TokenStorage
+}
 
 enum class AuthProvider(val id: String, val displayName: String) {
     GOOGLE("google", "Google"),
@@ -63,6 +74,11 @@ class AuthService private constructor() {
     }
 
     private var prefs: SharedPreferences? = null
+    private var tokenStorage: TokenStorage? = null
+
+    fun setTokenStorage(storage: TokenStorage?) {
+        this.tokenStorage = storage
+    }
 
     private val _currentUser = MutableStateFlow<UserAuthProfile?>(null)
     val currentUser: StateFlow<UserAuthProfile?> = _currentUser.asStateFlow()
@@ -85,6 +101,13 @@ class AuthService private constructor() {
 
     fun initialize(context: Context) {
         prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        runCatching {
+            val entryPoint = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                AuthServiceEntryPoint::class.java
+            )
+            tokenStorage = entryPoint.tokenStorage()
+        }
         migrateLegacyPasswords()
         loadSavedAccounts()
         loadSavedSession()
@@ -320,11 +343,13 @@ class AuthService private constructor() {
     }
 
     fun signOut() {
+        tokenStorage?.clearTokens()
         saveSession(null)
     }
 
     /** Permanently deletes the user account and purges local storage (Google Play User Data Deletion Policy) */
     fun deleteAccount() {
+        tokenStorage?.clearTokens()
         signOut()
         prefs?.edit()?.clear()?.apply()
         LocalizationManager.shared.resetProfileData()

@@ -1,5 +1,7 @@
 package com.simats.codeingo.data.network.security
 
+import com.simats.codeingo.BuildConfig
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -12,7 +14,8 @@ class AuthHeaderInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
-        val path = original.url.encodedPath
+        val requestUrl = original.url
+        val path = requestUrl.encodedPath
 
         val builder = original.newBuilder()
             .header("Accept", "application/json")
@@ -20,7 +23,12 @@ class AuthHeaderInterceptor @Inject constructor(
 
         // Exclude authentication endpoints from Bearer injection
         val isAuthEndpoint = path.startsWith("/api/auth/")
-        if (!isAuthEndpoint && original.header("Authorization") == null) {
+
+        // Attach Bearer token ONLY to API host, never to external hosts
+        val configuredHost = BuildConfig.API_BASE_URL.toHttpUrlOrNull()?.host
+        val isTargetHost = configuredHost == null || requestUrl.host.equals(configuredHost, ignoreCase = true)
+
+        if (isTargetHost && !isAuthEndpoint && original.header("Authorization") == null) {
             val token = tokenManager.getAccessToken()
             if (!token.isNullOrEmpty()) {
                 builder.header("Authorization", "Bearer $token")
