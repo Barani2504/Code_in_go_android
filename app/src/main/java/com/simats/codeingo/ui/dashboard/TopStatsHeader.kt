@@ -1,3 +1,4 @@
+
 package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.AnimatedContent
@@ -50,6 +51,7 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.liquidGlassIsland
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.pulse
+import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
 
 /**
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
@@ -281,10 +283,11 @@ private fun HeartPill(
     } else null
 
     val isHeartLow = heartsCount <= 3
+    val isCritical = heartsCount <= 1
     Row(
         modifier = Modifier
             .pressScale(0.92f)
-            .then(if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
+            .then(if (isCritical) Modifier.dangerHeartbeatShake(true) else if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
             .clip(CircleShape)
             .background(pillBg)
             .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)

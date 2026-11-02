@@ -80,6 +80,7 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.PhoenixMotion
 import com.simats.codeingo.ui.theme.liquidGlassCard
 import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 
 /**
  * LessonNodeButton — 3D Bevel Pushable Node Button Component.
@@ -207,12 +208,13 @@ fun LessonNodeButton(
                         .background(shadowColor)
                 )
 
-                // 3D Top Surface Button Face with glossy top-rim highlight
+                // 3D Top Surface Button Face with glossy top-rim highlight & active shimmer sweep
                 Box(
                     modifier = Modifier
                         .offset(y = animatedFaceOffset)
                         .size(size)
                         .clip(CircleShape)
+                        .then(if (isActiveTarget) Modifier.shimmerGlossSweep() else Modifier)
                         .background(faceColor)
                         .drawBehind {
                             if (isUnlocked) {

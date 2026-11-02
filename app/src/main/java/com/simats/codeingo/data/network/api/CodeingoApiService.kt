@@ -4,10 +4,13 @@ import com.simats.codeingo.data.network.model.AuthRequest
 import com.simats.codeingo.data.network.model.AuthResponse
 import com.simats.codeingo.data.network.model.BackendLessonCompleteRequest
 import com.simats.codeingo.data.network.model.BackendLessonCompleteResponse
+import com.simats.codeingo.data.network.model.EmotionEventRequest
 import com.simats.codeingo.data.network.model.ForgotPasswordRequest
 import com.simats.codeingo.data.network.model.GenericApiResponse
 import com.simats.codeingo.data.network.model.GuestStartRequest
 import com.simats.codeingo.data.network.model.LeaderboardEntryDTO
+import com.simats.codeingo.data.network.model.MascotConfigResponse
+import com.simats.codeingo.data.network.model.MascotStageDTO
 import com.simats.codeingo.data.network.model.ProgressStatusDTO
 import com.simats.codeingo.data.network.model.RegisterRequest
 import com.simats.codeingo.data.network.model.ResetPasswordRequest
@@ -18,6 +21,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
+import retrofit2.http.Path
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -89,4 +93,16 @@ interface CodeingoApiService {
         @Query("league") league: String = "BRONZE",
         @Query("courseId") courseId: String? = "cns_defense"
     ): Response<List<LeaderboardEntryDTO>>
+
+    // ── 5. Mascot & Emotion Endpoints ────────────────────────────────────────
+
+    @POST("api/mascot/equip/{stageNumber}")
+    suspend fun equipMascotStage(
+        @Path("stageNumber") stageNumber: Int
+    ): Response<GenericApiResponse>
+
+    @POST("api/mascot/emotion")
+    suspend fun recordEmotion(
+        @Body request: EmotionEventRequest
+    ): Response<GenericApiResponse>
 }

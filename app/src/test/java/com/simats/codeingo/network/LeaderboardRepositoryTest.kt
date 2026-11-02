@@ -192,4 +192,48 @@ class LeaderboardRepositoryTest {
         assertTrue("Fallback must provide non-empty roster", results.isNotEmpty())
         assertTrue("Must include user entry in fallback", results.any { it.isUser })
     }
+
+    @Test
+    fun testUnauthorizedFallback_returnsBenchmarkRosterWhen401() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(401)
+                .setBody("""{"error": "Unauthorized"}""")
+        )
+
+        val results = repository.getRankings(league = "BRONZE", courseId = "cns_defense", forceRefresh = true)
+
+        assertTrue("401 must fallback to benchmark roster", results.isNotEmpty())
+        assertTrue("Must include user entry in fallback", results.any { it.isUser })
+    }
+
+    @Test
+    fun testEmptyListFallback_returnsBenchmarkRosterWhenRemoteIsEmpty() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("[]")
+        )
+
+        val results = repository.getRankings(league = "BRONZE", courseId = "cns_defense", forceRefresh = true)
+
+        assertTrue("Empty list response must fallback to benchmark roster", results.isNotEmpty())
+        assertTrue("Must include user entry in fallback", results.any { it.isUser })
+    }
+
+    @Test
+    fun testMalformedJsonFallback_returnsBenchmarkRosterWithoutCrash() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("""{ "corrupted": true }""")
+        )
+
+        val results = repository.getRankings(league = "BRONZE", courseId = "cns_defense", forceRefresh = true)
+
+        assertTrue("Malformed JSON must gracefully fallback to benchmark roster", results.isNotEmpty())
+        assertTrue("Must include user entry in fallback", results.any { it.isUser })
+    }
 }

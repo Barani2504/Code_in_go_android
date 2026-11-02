@@ -21,9 +21,20 @@ import android.widget.Toast
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.simats.codeingo.data.network.repository.MascotRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface PhoenixEmotionManagerEntryPoint {
+    fun mascotRepository(): MascotRepository
+}
 
 // ══════════════════════════════════════════════════════════════════
 // 📜 Emotion-Based App Icon & Mascot Rules (Exact Parity with iOS)
@@ -125,6 +136,7 @@ class PhoenixEmotionManager private constructor() {
 
     // Optional application context for icon alias switching
     private var appContext: Context? = null
+    var mascotRepository: MascotRepository? = null
 
     // Dynamic icon deferred state & rate limiting
     private var pendingTargetAlias: String? = null
@@ -160,6 +172,13 @@ class PhoenixEmotionManager private constructor() {
 
     fun initialize(context: Context) {
         this.appContext = context.applicationContext
+        runCatching {
+            val entryPoint = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                PhoenixEmotionManagerEntryPoint::class.java
+            )
+            mascotRepository = entryPoint.mascotRepository()
+        }
         try {
             val prefs = this.appContext?.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
             val savedEmotionId = prefs?.getInt("active_emotion_id", -1) ?: -1
@@ -492,6 +511,13 @@ class PhoenixEmotionManager private constructor() {
                 _showReactionToast.value = true
             }
 
+            // Gated Telemetry: Dispatches only if explicit user consent is granted
+            mascotRepository?.let { repo ->
+                scope.launch(Dispatchers.IO) {
+                    repo.recordEmotionTelemetry(emotion.title, reason)
+                }
+            }
+
             // Auto dismiss toast after 3.2s
             toastDismissJob?.cancel()
             if (showToast) {
@@ -618,17 +644,21 @@ class PhoenixEmotionManager private constructor() {
                     return@launch
                 }
 
-                // 3. Disable ONLY the previously active alias
+                // 3. Disable ONLY the previously active alias (preserving default alias in debug builds for IDE tooling)
                 if (previousActiveAlias != targetAlias) {
-                    val prevComponent = ComponentName(pkgName, "$pkgName.$previousActiveAlias")
-                    try {
-                        pm.setComponentEnabledSetting(
-                            prevComponent,
-                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                            PackageManager.DONT_KILL_APP
-                        )
-                    } catch (e: Exception) {
-                        safeLogW("Failed to disable previous alias $previousActiveAlias: ${e.message}")
+                    if (com.simats.codeingo.BuildConfig.DEBUG && previousActiveAlias == "MainActivityAliasDefault") {
+                        safeLog("Debug build: Preserving MainActivityAliasDefault enabled state for Android Studio IDE launch.")
+                    } else {
+                        val prevComponent = ComponentName(pkgName, "$pkgName.$previousActiveAlias")
+                        try {
+                            pm.setComponentEnabledSetting(
+                                prevComponent,
+                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                                PackageManager.DONT_KILL_APP
+                            )
+                        } catch (e: Exception) {
+                            safeLogW("Failed to disable previous alias $previousActiveAlias: ${e.message}")
+                        }
                     }
                 }
 

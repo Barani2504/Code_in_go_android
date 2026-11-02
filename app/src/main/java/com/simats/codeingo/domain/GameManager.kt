@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.simats.codeingo.data.network.repository.MascotRepository
 import com.simats.codeingo.data.network.repository.ProgressOutboxRepository
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -32,6 +33,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 interface GameManagerEntryPoint {
     fun progressOutboxRepository(): ProgressOutboxRepository
+    fun mascotRepository(): MascotRepository
 }
 
 class GameManager private constructor() {
@@ -45,6 +47,7 @@ class GameManager private constructor() {
     private var prefs: UserPreferences? = null
     private var database: CodeingoDatabase? = null
     private var progressOutboxRepository: ProgressOutboxRepository? = null
+    private var mascotRepository: MascotRepository? = null
     private var persistJob: Job? = null
 
     fun setProgressOutboxRepository(repository: ProgressOutboxRepository?) {
@@ -188,6 +191,7 @@ class GameManager private constructor() {
                 GameManagerEntryPoint::class.java
             )
             progressOutboxRepository = entryPoint.progressOutboxRepository()
+            mascotRepository = entryPoint.mascotRepository()
         }
 
         // Observe Room mistakes and mirror into reactive state flow
@@ -724,6 +728,11 @@ class GameManager private constructor() {
             _activePhoenixStage.value = toStage
             _showEvolutionModal.value = true
             persistStats()
+            mascotRepository?.let { repo ->
+                scope.launch {
+                    repo.equipStage(toStage)
+                }
+            }
         }
     }
 
@@ -732,8 +741,14 @@ class GameManager private constructor() {
     }
 
     fun setActivePhoenixStage(stageId: Int) {
-        _activePhoenixStage.value = stageId.coerceIn(1, 18)
+        val clamped = stageId.coerceIn(1, 18)
+        _activePhoenixStage.value = clamped
         persistStats()
+        mascotRepository?.let { repo ->
+            scope.launch {
+                repo.equipStage(clamped)
+            }
+        }
     }
 
     fun completeLesson(lessonId: String, nextLevelIndex: Int? = null) {

@@ -130,6 +130,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
 
+    // Motion & Animation UI Libraries (Lottie & MotionLayout)
+    implementation(libs.lottie.compose)
+    implementation(libs.androidx.constraintlayout.compose)
+
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
