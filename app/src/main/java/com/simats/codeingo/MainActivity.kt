@@ -1,3 +1,4 @@
+
 package com.simats.codeingo
 
 import android.os.Bundle
@@ -54,5 +55,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        com.simats.codeingo.data.network.worker.ProgressSyncWorker.enqueue(this)
     }
 }

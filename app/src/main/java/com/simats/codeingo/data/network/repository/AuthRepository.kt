@@ -20,12 +20,14 @@ import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor(
     private val apiService: CodeingoApiService,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val progressOutboxRepositoryProvider: Provider<ProgressOutboxRepository>
 ) {
     suspend fun authenticate(email: String, password: String): ApiResult<UserDTO> {
         return safeApiCall {
@@ -127,7 +129,7 @@ class AuthRepository @Inject constructor(
         AuthService.shared.signOut()
     }
 
-    private fun handleAuthResponse(response: Response<AuthResponse>): ApiResult<UserDTO> {
+    private suspend fun handleAuthResponse(response: Response<AuthResponse>): ApiResult<UserDTO> {
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null && body.token.isNotEmpty()) {
@@ -153,6 +155,13 @@ class AuthRepository @Inject constructor(
                     remoteCompletedIndices = localIndices,
                     isLessonUploadResponse = false
                 )
+
+                // D5: First-login upload of pre-existing local completions via outbox
+                runCatching {
+                    val uid = user.id?.toString() ?: user.email.ifEmpty { "user_authenticated" }
+                    progressOutboxRepositoryProvider.get().uploadInitialLocalProgress(uid)
+                }
+
                 return ApiResult.Success(user)
             }
         }

@@ -139,8 +139,11 @@ class ProgressOutboxRepository @Inject constructor(
                         return false
                     }
                     429 -> {
-                        offlineSyncDao.updateSyncState(item.id, SyncState.PENDING, "Rate limited (429)")
-                        throw IOException("Rate limited (429) on ${item.lessonId}")
+                        val retryAfterHeader = response.headers()["Retry-After"]
+                        val retryAfterSeconds = retryAfterHeader?.toLongOrNull() ?: 10L
+                        val errorMsg = "Rate limited (429), Retry-After: ${retryAfterSeconds}s"
+                        offlineSyncDao.updateSyncState(item.id, SyncState.PENDING, errorMsg)
+                        throw IOException("$errorMsg on ${item.lessonId}")
                     }
                     in 400..499 -> {
                         // Permanent client error (e.g., malformed ID rejected by backend)
@@ -213,4 +216,18 @@ class ProgressOutboxRepository @Inject constructor(
      * Exposes a reactive count of pending items waiting to be synced.
      */
     fun getPendingCountFlow(): Flow<Int> = offlineSyncDao.getPendingCountFlow()
+
+    /**
+     * Clears pending outbox items for a specific user (e.g. on account deletion or reset).
+     */
+    suspend fun clearOutboxForUser(userId: String) {
+        offlineSyncDao.clearForUser(userId)
+    }
+
+    /**
+     * Clears all items in the outbox.
+     */
+    suspend fun clearAll() {
+        offlineSyncDao.clearAll()
+    }
 }
