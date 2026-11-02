@@ -68,19 +68,14 @@ import com.simats.codeingo.ui.theme.PhoenixGreen
 import com.simats.codeingo.ui.theme.floating
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.staggeredAppear
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.simats.codeingo.data.network.model.LeagueTier
+import com.simats.codeingo.data.network.model.RankEntry
 
 // ══════════════════════════════════════════════════════════════════
 // 🏆 LeaderboardsScreen — 3D Metallic Podium & League Ranks
-// Exact parity with iOS LeaderboardsView.swift
+// Exact parity with iOS LeaderboardsView.swift & Backend Leaderboard API
 // ══════════════════════════════════════════════════════════════════
-
-private data class RankEntry(
-    val rank: Int,
-    val name: String,
-    val xp: Int,
-    val avatar: String,
-    val isUser: Boolean = false
-)
 
 private val staticRankings = listOf(
     RankEntry(1, "Vikram S.",      540, "🦊"),
@@ -97,10 +92,16 @@ private val staticRankings = listOf(
 fun LeaderboardsScreen(
     completedLessons: Int = 0,
     onStartLesson: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LeaderboardViewModel = hiltViewModel()
 ) {
     val isUnlocked = completedLessons >= 3
-    val isDark = LocalDynamicThemeColors.current.isDark
+    val rankings by viewModel.rankings.collectAsState()
+    val league by viewModel.currentLeague.collectAsState()
+    val currentUserRank by viewModel.currentUserRank.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    val displayRankings = if (rankings.isNotEmpty()) rankings else staticRankings
 
     Box(
         modifier = modifier
@@ -112,7 +113,11 @@ fun LeaderboardsScreen(
         if (!isUnlocked) {
             LockedLeaderboardsView(completedLessons = completedLessons, onStartLesson = onStartLesson)
         } else {
-            UnlockedLeaderboardsView()
+            UnlockedLeaderboardsView(
+                rankings = displayRankings,
+                league = league,
+                currentUserRank = currentUserRank
+            )
         }
     }
 }
@@ -391,104 +396,200 @@ private fun LockedLeaderboardsView(
 }
 
 @Composable
-private fun UnlockedLeaderboardsView() {
+private fun UnlockedLeaderboardsView(
+    rankings: List<RankEntry>,
+    league: LeagueTier,
+    currentUserRank: RankEntry?
+) {
     val isDark = LocalDynamicThemeColors.current.isDark
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            // League Header Card
-            AppCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .staggeredAppear(0),
-                cornerRadius = 24.dp,
-                accentGlow = AmberGold.copy(alpha = 0.20f),
-                contentPadding = 18.dp
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = if (currentUserRank != null && currentUserRank.rank > 3) 140.dp else 100.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item {
+                // League Header Card
+                AppCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .staggeredAppear(0),
+                    cornerRadius = 24.dp,
+                    accentGlow = AmberGold.copy(alpha = 0.20f),
+                    contentPadding = 18.dp
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(54.dp)
-                            .clip(CircleShape)
-                            .background(AmberGold.copy(alpha = 0.20f))
-                            .border(1.5.dp, AmberGold, CircleShape),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Text(text = "🥉", fontSize = 28.sp)
-                    }
+                        Box(
+                            modifier = Modifier
+                                .size(54.dp)
+                                .clip(CircleShape)
+                                .background(AmberGold.copy(alpha = 0.20f))
+                                .border(1.5.dp, AmberGold, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = league.badgeEmoji, fontSize = 28.sp)
+                        }
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "BRONZE LEAGUE",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = AppFontFamily,
-                            color = if (isDark) AmberGold else Color(0xFFB45309),
-                            letterSpacing = 0.8.sp
-                        )
-                        Text(
-                            text = "Top 3 advance to Silver League in 3 days!",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = AppFontFamily,
-                            color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B)
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "${league.code} LEAGUE",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = AppFontFamily,
+                                color = if (isDark) AmberGold else Color(0xFFB45309),
+                                letterSpacing = 0.8.sp
+                            )
+                            Text(
+                                text = league.promotionSubtitle,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = AppFontFamily,
+                                color = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64_74_8B)
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            // 3D Top 3 Podium Stage
-            PodiumStageView(staticRankings.take(3))
-        }
+            item {
+                // 3D Top 3 Podium Stage
+                PodiumStageView(rankings.take(3))
+            }
 
-        item {
-            // Promotion Zone Divider
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Box(
+            item {
+                // Promotion Zone Divider
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp)
-                        .background(PhoenixGreen.copy(alpha = 0.4f))
-                )
-                Text(
-                    text = "PROMOTION ZONE",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = AppFontFamily,
-                    color = PhoenixGreen,
-                    letterSpacing = 1.sp
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp)
-                        .background(PhoenixGreen.copy(alpha = 0.4f))
-                )
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .background(PhoenixGreen.copy(alpha = 0.4f))
+                    )
+                    Text(
+                        text = league.promotionDividerLabel,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = AppFontFamily,
+                        color = PhoenixGreen,
+                        letterSpacing = 1.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp)
+                            .background(PhoenixGreen.copy(alpha = 0.4f))
+                    )
+                }
+            }
+
+            // Remaining Rank Items (4+)
+            itemsIndexed(rankings.drop(3)) { index, entry ->
+                RankRowCard(entry = entry, index = index + 4)
             }
         }
 
-        // Remaining Rank Items (4 to 8)
-        itemsIndexed(staticRankings.drop(3)) { index, entry ->
-            RankRowCard(entry = entry, index = index + 4)
+        // Sticky Pinned User Standing Bar (when user rank is outside the podium > 3)
+        if (currentUserRank != null && currentUserRank.rank > 3) {
+            StickyUserStandingBar(
+                entry = currentUserRank,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun StickyUserStandingBar(
+    entry: RankEntry,
+    modifier: Modifier = Modifier
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    val statusText = when {
+        entry.rank <= 3 -> "Podium Contender! 🏆"
+        entry.rank <= 20 -> "In Promotion Zone! 🚀"
+        else -> "Keep climbing! 🔥"
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.verticalGradient(
+                    if (isDark) listOf(Color(0xFF241A0E), Color(0xFF140F08))
+                    else listOf(Color(0xFFFFF7ED), Color(0xFFFEF3C7))
+                )
+            )
+            .border(1.5.dp, AmberGold.copy(alpha = 0.7f), RoundedCornerShape(18.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(AmberGold)
+                .padding(horizontal = 8.dp, vertical = 3.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "#${entry.rank}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = AppFontFamily,
+                color = Color.Black
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.name,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = AppFontFamily,
+                color = if (isDark) Color.White else Color(0xFF12_18_26),
+                maxLines = 1
+            )
+            Text(
+                text = statusText,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFontFamily,
+                color = if (entry.rank <= 20) PhoenixGreen else AmberGold,
+                maxLines = 1
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(if (isDark) Color.Black.copy(alpha = 0.4f) else AmberGold.copy(alpha = 0.15f))
+                .padding(horizontal = 10.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "${entry.xp} XP",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = AppFontFamily,
+                color = if (isDark) AmberGold else Color(0xFFB45309)
+            )
         }
     }
 }

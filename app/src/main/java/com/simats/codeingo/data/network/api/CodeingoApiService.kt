@@ -7,6 +7,7 @@ import com.simats.codeingo.data.network.model.BackendLessonCompleteResponse
 import com.simats.codeingo.data.network.model.ForgotPasswordRequest
 import com.simats.codeingo.data.network.model.GenericApiResponse
 import com.simats.codeingo.data.network.model.GuestStartRequest
+import com.simats.codeingo.data.network.model.LeaderboardEntryDTO
 import com.simats.codeingo.data.network.model.ProgressStatusDTO
 import com.simats.codeingo.data.network.model.RegisterRequest
 import com.simats.codeingo.data.network.model.ResetPasswordRequest
@@ -80,4 +81,12 @@ interface CodeingoApiService {
     suspend fun syncBatchProgress(
         @Body requests: List<BackendLessonCompleteRequest>
     ): Response<BackendLessonCompleteResponse>
+
+    // ── 4. Leaderboard Endpoints ─────────────────────────────────────────────
+
+    @GET("api/users/leaderboard")
+    suspend fun getLeaderboard(
+        @Query("league") league: String = "BRONZE",
+        @Query("courseId") courseId: String? = "cns_defense"
+    ): Response<List<LeaderboardEntryDTO>>
 }

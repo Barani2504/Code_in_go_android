@@ -9,6 +9,7 @@ import com.simats.codeingo.data.network.model.GenericApiResponse
 import com.simats.codeingo.data.network.model.GuestStartRequest
 import com.simats.codeingo.data.network.model.RegisterRequest
 import com.simats.codeingo.data.network.model.ResetPasswordRequest
+import com.simats.codeingo.data.network.model.UpdateProfileRequest
 import com.simats.codeingo.data.network.model.UserDTO
 import com.simats.codeingo.data.network.model.VerifyOtpRequest
 import com.simats.codeingo.data.network.security.TokenManager
@@ -101,6 +102,23 @@ class AuthRepository @Inject constructor(
                 )
             )
             mapResponse(response)
+        }
+    }
+
+    suspend fun updateProfile(request: UpdateProfileRequest): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.updateProfile(request)
+            if (response.isSuccessful) {
+                val updatedUser = response.body()
+                if (updatedUser != null) {
+                    AuthService.shared.signInWithEmail(
+                        email = updatedUser.email,
+                        name = updatedUser.name ?: updatedUser.username
+                    )
+                    return@safeApiCall ApiResult.Success(updatedUser)
+                }
+            }
+            mapErrorResponse(response)
         }
     }
 
