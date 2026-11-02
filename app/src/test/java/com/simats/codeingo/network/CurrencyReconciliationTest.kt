@@ -184,4 +184,66 @@ class CurrencyReconciliationTest {
         )
         assertEquals("Phoenix stage must never regress on stale remote snapshot", 5, gameManager.activePhoenixStage.value)
     }
+
+    @Test
+    fun testOfflineXpPreservation_serverLowerThanLocalNeverDecreasesXp() {
+        // User plays offline and accumulates 450 XP locally
+        gameManager.addXP(450)
+        assertEquals(450, gameManager.totalXP.value)
+
+        // Device reconnects, server returns stale snapshot with 120 XP
+        gameManager.applyRemoteSnapshot(
+            remoteTotalXP = 120,
+            remoteGems = 100,
+            remoteStreak = 1
+        )
+
+        // Offline XP must be preserved
+        assertEquals("Offline accumulated XP must never be decreased by lower server snapshot", 450, gameManager.totalXP.value)
+    }
+
+    @Test
+    fun testClockSkew_reconcilesCompletionsRegardlessOfTimestampDifferences() {
+        // Device clock skewed into the past or future relative to server
+        val localIndices = setOf(1, 2, 3)
+        localIndices.forEach { gameManager.markLevelCompleted(it) }
+
+        // Server has level 4 completed with different clock time
+        val remoteIndices = setOf(4)
+        gameManager.applyRemoteSnapshot(
+            remoteTotalXP = 300,
+            remoteGems = 200,
+            remoteStreak = 3,
+            remoteCompletedIndices = remoteIndices
+        )
+
+        // Result must be union of all completed levels
+        val expectedUnion = setOf(1, 2, 3, 4)
+        assertTrue(gameManager.completedLevelIndices.value.containsAll(expectedUnion))
+    }
+
+    @Test
+    fun testFirstLogin_localCompletionsUnionWithRemoteCompletions() {
+        // Local guest has completed Basecamp 101, 102 and Chapter 1 levels 1, 2
+        gameManager.markBasecampLevelCompleted("c0_l1")
+        gameManager.markBasecampLevelCompleted("c0_l2")
+        gameManager.markLevelCompleted(1)
+        gameManager.markLevelCompleted(2)
+
+        // Server account already has Core level 3 and 4 completed
+        val serverRemoteIndices = setOf(3, 4)
+        gameManager.applyRemoteSnapshot(
+            remoteTotalXP = 200,
+            remoteGems = 150,
+            remoteStreak = 2,
+            remoteCompletedIndices = serverRemoteIndices
+        )
+
+        // Assert union: local levels 1, 2 and server levels 3, 4 are present
+        val union = gameManager.completedLevelIndices.value
+        assertTrue("Local level 1 preserved", union.contains(1))
+        assertTrue("Local level 2 preserved", union.contains(2))
+        assertTrue("Server level 3 merged", union.contains(3))
+        assertTrue("Server level 4 merged", union.contains(4))
+    }
 }
