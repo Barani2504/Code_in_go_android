@@ -58,6 +58,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -297,16 +299,32 @@ fun SettingsScreen(
                 )
             },
             text = {
-                Text(
-                    "Are you sure you want to permanently delete your AshCrypt account and purge all local progress, credentials, and achievements? This action is irreversible.",
-                    fontSize = 14.sp,
-                    color = textSecondary
-                )
+                Column {
+                    Text(
+                        "Are you sure you want to permanently delete your Codeingo account and purge all local progress, credentials, outbox sync queues, and achievements? This action is irreversible.",
+                        fontSize = 14.sp,
+                        color = textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        "Per Google Play policy, you may also request deletion online at: https://codeingo.com/delete-account",
+                        fontSize = 12.sp,
+                        color = AmberGold,
+                        modifier = Modifier.clickable {
+                            runCatching {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://codeingo.com/delete-account")))
+                            }
+                        }
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteAccountAlert = false
                     scope.launch {
+                        runCatching {
+                            com.simats.codeingo.data.db.CodeingoDatabase.getDatabase(context).offlineSyncDao().clearAll()
+                        }
                         com.simats.codeingo.domain.AuthService.instance.deleteAccount()
                         onLogout()
                     }
@@ -2062,6 +2080,21 @@ private fun AccountTab(
         title = "⚠️ DELETE ACCOUNT & DATA",
         style = AppButtonStyle.SECONDARY_GLASS,
         onClick = onDeleteAccountClick,
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    // Web Deletion Request Link (Google Play Data Safety Requirement)
+    val ctx = LocalContext.current
+    AppButton(
+        title = "🌐 REQUEST DELETION VIA WEB",
+        style = AppButtonStyle.SECONDARY_GLASS,
+        onClick = {
+            runCatching {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://codeingo.com/delete-account")))
+            }
+        },
         modifier = Modifier.fillMaxWidth().height(48.dp)
     )
 }

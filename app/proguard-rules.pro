@@ -59,3 +59,16 @@
 -keep class * implements dagger.hilt.internal.GeneratedComponent
 -keep class androidx.hilt.navigation.compose.** { *; }
 -dontwarn dagger.hilt.**
+
+# ── Network DTOs & Retrofit / OkHttp ───────────────────────────────
+-keep class com.simats.codeingo.data.network.model.** { *; }
+-keep interface com.simats.codeingo.data.network.api.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-keepattributes Signature, InnerClasses, EnclosingMethod
+
+# ── Lottie Animation & ConstraintLayout Motion ────────────────────
+-keep class com.airbnb.lottie.** { *; }
+-dontwarn com.airbnb.lottie.**
+-keep class androidx.constraintlayout.** { *; }
+-dontwarn androidx.constraintlayout.**
