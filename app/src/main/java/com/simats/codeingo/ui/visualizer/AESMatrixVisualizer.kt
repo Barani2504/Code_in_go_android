@@ -39,6 +39,9 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.AesEngine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import kotlin.math.roundToInt
 
 @Composable
@@ -211,7 +214,8 @@ private fun AESMatrixExploreView() {
                     Box(
                         modifier = Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(8.dp))
                             .background(if (isChosen) DsaPurple else dynamicColors.inputBackground)
-                            .clickable(enabled = !isOmitted) { selectedStep = stepName }
+                            .shimmerGlossSweep(enabled = isChosen)
+                            .kineticBouncyClick(enabled = !isOmitted) { selectedStep = stepName }
                             .padding(vertical = 5.dp),
                         contentAlignment = Alignment.Center
                     ) {

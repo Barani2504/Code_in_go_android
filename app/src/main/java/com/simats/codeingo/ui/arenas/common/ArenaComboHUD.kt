@@ -45,6 +45,8 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.LocalReduceMotion
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 
 @Composable
 fun ArenaComboHUD(
@@ -90,9 +92,18 @@ fun ArenaComboHUD(
         else -> dynamicColors.textSecondary
     }
 
+    val comboAura = if (comboCount >= 3) {
+        Modifier.unlumenNeonGlow(
+            glowColor = comboColor,
+            cornerRadius = 12.dp,
+            blurRadius = 10.dp
+        ).shimmerGlossSweep(enabled = comboCount >= 5)
+    } else Modifier
+
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(comboAura)
             .clip(RoundedCornerShape(12.dp))
             .background(if (dynamicColors.isDark) dynamicColors.cardBackground.copy(alpha = 0.85f) else Color.White)
             .border(1.dp, dynamicColors.cardBorder.copy(alpha = if (dynamicColors.isDark) 0.5f else 0.8f), RoundedCornerShape(12.dp))

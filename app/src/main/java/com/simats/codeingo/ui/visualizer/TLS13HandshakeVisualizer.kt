@@ -36,6 +36,9 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.TlsEngine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import kotlin.math.roundToInt
 
 @Composable
@@ -155,7 +158,10 @@ private fun TLS13HandshakeExploreView() {
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+            modifier = Modifier.fillMaxWidth()
+                .unlumenNeonGlow(glowColor = orangeColor, cornerRadius = 16.dp, blurRadius = 12.dp)
+                .shimmerGlossSweep(enabled = true)
+                .clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -182,14 +188,14 @@ private fun TLS13HandshakeExploreView() {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(
                         modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp)).background(dynamicColors.inputBackground)
-                            .clickable { if (flightIndex > 0) flightIndex-- }.padding(vertical = 10.dp),
+                            .kineticBouncyClick { if (flightIndex > 0) flightIndex-- }.padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "◀ PREV PACKET", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
                     }
                     Box(
                         modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(10.dp)).background(orangeColor)
-                            .clickable { if (flightIndex < packets.size - 1) flightIndex++ else flightIndex = 0 }.padding(vertical = 10.dp),
+                            .kineticBouncyClick { if (flightIndex < packets.size - 1) flightIndex++ else flightIndex = 0 }.padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "NEXT PACKET ▶", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, color = Color.White)

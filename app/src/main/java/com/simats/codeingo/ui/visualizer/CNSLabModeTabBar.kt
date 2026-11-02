@@ -27,6 +27,9 @@ import com.simats.codeingo.ui.theme.InputBorder
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 
 @Composable
 fun CNSLabModeTabBar(
@@ -54,10 +57,16 @@ fun CNSLabModeTabBar(
                 val isSelected = selectedMode == mode
                 val shape = RoundedCornerShape(12.dp)
 
+                val glowMod = if (isSelected) {
+                    Modifier.unlumenNeonGlow(glowColor = accentColor, cornerRadius = 12.dp, blurRadius = 10.dp)
+                        .shimmerGlossSweep(enabled = true)
+                } else Modifier
+
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp) // Minimum 48dp accessible touch target
+                        .then(glowMod)
                         .clip(shape)
                         .background(
                             if (isSelected) accentColor else (if (isDark) Color.White.copy(alpha = 0.04f) else Color.Black.copy(alpha = 0.03f))
@@ -67,7 +76,7 @@ fun CNSLabModeTabBar(
                             if (isSelected) accentColor else InputBorder.copy(alpha = 0.5f),
                             shape
                         )
-                        .clickable { onSelectMode(mode) }
+                        .kineticBouncyClick { onSelectMode(mode) }
                         .padding(horizontal = 4.dp, vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {

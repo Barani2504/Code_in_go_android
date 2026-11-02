@@ -36,6 +36,8 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.RsaEngine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import java.math.BigInteger
 import kotlin.math.roundToInt
 
@@ -159,14 +161,23 @@ private fun RSAPublicKeyExploreView() {
                 val decrypted = BigInteger.valueOf(ciphertext.toLong()).modPow(rsaKey.d, rsaKey.n)
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(AmberGold.copy(alpha = 0.15f)).padding(10.dp)) {
+                    Box(
+                        modifier = Modifier.weight(1f)
+                            .unlumenNeonGlow(glowColor = AmberGold, cornerRadius = 10.dp, blurRadius = 8.dp)
+                            .clip(RoundedCornerShape(10.dp)).background(AmberGold.copy(alpha = 0.15f)).padding(10.dp)
+                    ) {
                         Column {
                             Text(text = "CIPHERTEXT (c)", fontSize = 10.sp, color = amberColor, fontWeight = FontWeight.Bold)
                             Text(text = "$ciphertext", fontSize = 15.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                             Text(text = "c = m^e mod n", fontSize = 9.sp, color = SubtextGray)
                         }
                     }
-                    Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = 0.15f)).padding(10.dp)) {
+                    Box(
+                        modifier = Modifier.weight(1f)
+                            .unlumenNeonGlow(glowColor = DuolingoGreen, cornerRadius = 10.dp, blurRadius = 8.dp)
+                            .shimmerGlossSweep(enabled = true)
+                            .clip(RoundedCornerShape(10.dp)).background(DuolingoGreen.copy(alpha = 0.15f)).padding(10.dp)
+                    ) {
                         Column {
                             Text(text = "DECRYPTED (m)", fontSize = 10.sp, color = greenColor, fontWeight = FontWeight.Bold)
                             Text(text = "$decrypted", fontSize = 15.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 /**
@@ -47,8 +48,11 @@ import kotlinx.coroutines.launch
 fun Modifier.kineticBouncyClick(
     squashFactor: Float = 0.92f,
     stretchFactor: Float = 1.05f,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ): Modifier = composed {
+    if (!enabled) return@composed this
+
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val scaleX = remember { Animatable(1f) }
@@ -95,6 +99,7 @@ fun Modifier.kineticBouncyClick(
         .clickable(
             interactionSource = interactionSource,
             indication = null,
+            enabled = enabled,
             onClick = {
                 view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                 onClick()
@@ -109,8 +114,13 @@ fun Modifier.kineticBouncyClick(
 fun Modifier.unlumenNeonGlow(
     glowColor: Color = Color(0xFFFFB800),
     secondaryColor: Color = Color(0xFFFF4500),
-    pulseDurationMs: Int = 2200
+    pulseDurationMs: Int = 2200,
+    cornerRadius: androidx.compose.ui.unit.Dp = 16.dp,
+    blurRadius: androidx.compose.ui.unit.Dp = 12.dp,
+    enabled: Boolean = true
 ): Modifier = composed {
+    if (!enabled) return@composed this
+
     val infiniteTransition = rememberInfiniteTransition(label = "unlumenGlow")
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.35f,
@@ -145,8 +155,11 @@ fun Modifier.unlumenNeonGlow(
  */
 fun Modifier.shimmerGlossSweep(
     durationMs: Int = 2400,
-    shineColor: Color = Color.White.copy(alpha = 0.45f)
+    shineColor: Color = Color.White.copy(alpha = 0.45f),
+    enabled: Boolean = true
 ): Modifier = composed {
+    if (!enabled) return@composed this
+
     val transition = rememberInfiniteTransition(label = "glossSweep")
     val progress by transition.animateFloat(
         initialValue = -1.2f,

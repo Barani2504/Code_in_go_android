@@ -48,6 +48,9 @@ import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.pressScale
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 
 data class ArenaHubSpec(
     val routeKey: String,
@@ -301,6 +304,11 @@ private fun ArenaBattleHeroCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .unlumenNeonGlow(
+                glowColor = effectivePrimary,
+                cornerRadius = 24.dp,
+                blurRadius = if (isDark) 18.dp else 10.dp
+            )
             .shadow(
                 elevation = 12.dp,
                 shape = cardShape,
@@ -487,8 +495,8 @@ private fun ArenaBattleHeroCard(
                             listOf(effectivePrimary, effectiveSecondary)
                         )
                     )
-                    .pressScale(targetScale = 0.96f)
-                    .clickable { onEnterArena() },
+                    .shimmerGlossSweep(enabled = true)
+                    .kineticBouncyClick { onEnterArena() },
                 contentAlignment = Alignment.Center
             ) {
                 Row(

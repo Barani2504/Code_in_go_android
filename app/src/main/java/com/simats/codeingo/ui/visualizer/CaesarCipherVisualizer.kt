@@ -50,6 +50,9 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.KasiskiEngine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import kotlin.math.roundToInt
 
 @Composable
@@ -200,7 +203,7 @@ private fun CaesarCipherExploreView() {
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
                     .background(if (!isDecryptMode) DsaGreen else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
                     .border(1.dp, if (!isDecryptMode) DsaGreen else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { isDecryptMode = false }
+                    .kineticBouncyClick { isDecryptMode = false }
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -210,7 +213,7 @@ private fun CaesarCipherExploreView() {
                 modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
                     .background(if (isDecryptMode) AmberGold else (if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.05f)))
                     .border(1.dp, if (isDecryptMode) AmberGold else dynamicColors.inputBorder, RoundedCornerShape(10.dp))
-                    .clickable { isDecryptMode = true }
+                    .kineticBouncyClick { isDecryptMode = true }
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -266,7 +269,14 @@ private fun CaesarCipherExploreView() {
 
         // Output Display Card
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+            modifier = Modifier.fillMaxWidth()
+                .unlumenNeonGlow(
+                    glowColor = if (isDecryptMode) AmberGold else DsaGreen,
+                    cornerRadius = 16.dp,
+                    blurRadius = 12.dp
+                )
+                .shimmerGlossSweep(enabled = true)
+                .clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, if (isDecryptMode) AmberGold.copy(alpha = 0.6f) else DsaGreen.copy(alpha = 0.6f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

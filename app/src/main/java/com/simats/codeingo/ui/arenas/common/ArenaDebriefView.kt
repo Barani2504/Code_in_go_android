@@ -33,6 +33,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.motion.CelebrationOverlay
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
@@ -63,6 +70,20 @@ fun ArenaDebriefView(
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    var showCelebration by remember { mutableStateOf(isVictory) }
+
+    if (showCelebration) {
+        CelebrationOverlay(
+            visible = true,
+            title = "ARENA LEVEL CONQUERED! 🏆",
+            subtitle = levelName,
+            xpEarned = xpEarned,
+            gemsEarned = gemsEarned,
+            streakDays = starsEarned.coerceAtLeast(1),
+            onContinue = { showCelebration = false }
+        )
+        return
+    }
 
     Box(
         modifier = modifier
@@ -76,6 +97,11 @@ fun ArenaDebriefView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .unlumenNeonGlow(
+                    glowColor = if (isVictory) DuolingoGreen else DuolingoRed,
+                    cornerRadius = 24.dp,
+                    blurRadius = 16.dp
+                )
                 .clip(RoundedCornerShape(24.dp))
                 .background(dynamicColors.cardBackground)
                 .border(

@@ -35,6 +35,8 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.DhEngine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import kotlin.math.roundToInt
 
 @Composable
@@ -171,7 +173,10 @@ private fun DiffieHellmanExploreView() {
                 )
 
                 Box(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                    modifier = Modifier.fillMaxWidth()
+                        .unlumenNeonGlow(glowColor = DuolingoGreen, cornerRadius = 12.dp, blurRadius = 14.dp)
+                        .shimmerGlossSweep(enabled = true)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(DuolingoGreen.copy(alpha = 0.15f)).border(1.5.dp, DuolingoGreen, RoundedCornerShape(12.dp)).padding(12.dp),
                     contentAlignment = Alignment.Center
                 ) {

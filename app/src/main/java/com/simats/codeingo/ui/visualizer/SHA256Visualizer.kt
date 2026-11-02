@@ -37,6 +37,8 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.engine.Sha256Engine
 import com.simats.codeingo.ui.visualizer.model.CNSLabMode
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import kotlin.math.roundToInt
 
 @Composable
@@ -86,7 +88,10 @@ private fun SHA256AttackView() {
         }
 
         Box(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+            modifier = Modifier.fillMaxWidth()
+                .unlumenNeonGlow(glowColor = purpleColor, cornerRadius = 16.dp, blurRadius = 12.dp)
+                .shimmerGlossSweep(enabled = true)
+                .clip(RoundedCornerShape(16.dp)).background(CardBackground)
                 .border(1.5.dp, purpleColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -138,7 +143,9 @@ private fun SHA256ExploreView() {
 
         if (activeRoundState != null) {
             Box(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(CardBackground)
+                modifier = Modifier.fillMaxWidth()
+                    .unlumenNeonGlow(glowColor = purpleColor, cornerRadius = 16.dp, blurRadius = 10.dp)
+                    .clip(RoundedCornerShape(16.dp)).background(CardBackground)
                     .border(1.5.dp, purpleColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

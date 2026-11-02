@@ -93,6 +93,9 @@ import com.simats.codeingo.ui.visualizer.model.CNSLabMode
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AppFontFamily
 import com.simats.codeingo.ui.theme.CardBackground
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DsaBlue
 import com.simats.codeingo.ui.theme.DsaGreen
@@ -935,12 +938,21 @@ private fun TopicDetailView(
             items(DSAVisualizerType.PEDAGOGICAL_ORDER) { type ->
                 val isSelected = selectedType == type
                 val shape = RoundedCornerShape(20.dp)
+                val glowMod = if (isSelected) {
+                    Modifier.unlumenNeonGlow(
+                        glowColor = type.color,
+                        cornerRadius = 20.dp,
+                        blurRadius = 12.dp
+                    ).shimmerGlossSweep(enabled = true)
+                } else Modifier
+
                 Box(
                     modifier = Modifier
+                        .then(glowMod)
                         .clip(shape)
                         .background(if (isSelected) type.color else CardBackground.copy(alpha = 0.7f))
                         .border(1.5.dp, if (isSelected) type.color else InputBorder, shape)
-                        .clickable {
+                        .kineticBouncyClick {
                             activeLabMode = CNSLabMode.EXPLORE
                             onSelectType(type)
                         }

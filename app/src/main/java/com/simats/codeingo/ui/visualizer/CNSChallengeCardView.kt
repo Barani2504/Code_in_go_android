@@ -54,6 +54,10 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.visualizer.model.CNSChallengeQuestion
 import com.simats.codeingo.ui.visualizer.model.CNSChallengeRepository
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
+import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
 
 @Composable
 fun CNSChallengeCardView(
@@ -253,14 +257,21 @@ fun CNSChallengeCardView(
                                 else -> dynamicColors.inputBorder
                             }
 
+                            val optionMotionMod = when {
+                                isAnswered && isThisCorrectAnswer -> Modifier.unlumenNeonGlow(greenColor, cornerRadius = 12.dp, blurRadius = 10.dp).shimmerGlossSweep(enabled = true)
+                                isAnswered && isThisSelected && !isCorrect -> Modifier.dangerHeartbeatShake(enabled = true)
+                                else -> Modifier
+                            }
+
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(IntrinsicSize.Min)
+                                    .then(optionMotionMod)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(bgColor)
                                     .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-                                    .clickable {
+                                    .kineticBouncyClick {
                                         selectedAnswers[question.id] = optIdx
                                     }
                                     .padding(horizontal = 14.dp, vertical = 12.dp),

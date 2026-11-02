@@ -58,6 +58,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
+import com.simats.codeingo.ui.components.motion.CelebrationOverlay
+import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
+import com.simats.codeingo.ui.components.motion.kineticBouncyClick
+import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
+import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -259,31 +264,49 @@ fun AssessmentScreen(
         )
 
         if (isFinished) {
-            PhoenixEggHatch3DView(
-                unitId = unitId, levelNumber = levelNumber, totalLevelsInUnit = totalLevelsInUnit,
-                isBoss = isBoss, xpEarned = totalXPEarned, starsEarned = starsEarned, accuracyPercentage = accuracyPercentage,
-                onContinue = {
-                    gameManager.addStars(starsEarned)
-                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                    gameManager.completeLessonAndExtendStreak()
-                    gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
-                    onComplete(totalXPEarned)
-                },
-                onFinish = {
-                    gameManager.addStars(starsEarned)
-                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                    gameManager.completeLessonAndExtendStreak()
-                    gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
-                    onComplete(totalXPEarned)
-                },
-                onUpgradePhoenixNextUnit = {
-                    gameManager.addStars(starsEarned)
-                    gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                    gameManager.completeLessonAndExtendStreak()
-                    gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, nextUnitFirstLevelIndex = levelNumber + 1, accuracy = accuracyPercentage)
-                    onUpgradePhoenixNextUnit?.invoke() ?: onComplete(totalXPEarned)
-                }
-            )
+            if (isBoss) {
+                PhoenixEggHatch3DView(
+                    unitId = unitId, levelNumber = levelNumber, totalLevelsInUnit = totalLevelsInUnit,
+                    isBoss = isBoss, xpEarned = totalXPEarned, starsEarned = starsEarned, accuracyPercentage = accuracyPercentage,
+                    onContinue = {
+                        gameManager.addStars(starsEarned)
+                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                        gameManager.completeLessonAndExtendStreak()
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        onComplete(totalXPEarned)
+                    },
+                    onFinish = {
+                        gameManager.addStars(starsEarned)
+                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                        gameManager.completeLessonAndExtendStreak()
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        onComplete(totalXPEarned)
+                    },
+                    onUpgradePhoenixNextUnit = {
+                        gameManager.addStars(starsEarned)
+                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                        gameManager.completeLessonAndExtendStreak()
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, nextUnitFirstLevelIndex = levelNumber + 1, accuracy = accuracyPercentage)
+                        onUpgradePhoenixNextUnit?.invoke() ?: onComplete(totalXPEarned)
+                    }
+                )
+            } else {
+                CelebrationOverlay(
+                    visible = true,
+                    title = "LESSON COMPLETED! ✨",
+                    subtitle = "Chapter $unitId • Accuracy $accuracyPercentage%",
+                    xpEarned = totalXPEarned,
+                    gemsEarned = (starsEarned * 2).coerceAtLeast(5),
+                    streakDays = gameManager.streakDays.value,
+                    onContinue = {
+                        gameManager.addStars(starsEarned)
+                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                        gameManager.completeLessonAndExtendStreak()
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        onComplete(totalXPEarned)
+                    }
+                )
+            }
         } else if (heartsCount <= 0) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(24.dp).statusBarsPadding().navigationBarsPadding(),
@@ -885,12 +908,22 @@ private fun HolographicCommandTile(
 
     val isCodeSyntax = text.contains("()") || text.contains("O(") || text.contains("[]") || text.contains("->")
 
+    val glowModifier = when {
+        isChecked && isSelected && isCorrectOpt -> Modifier
+            .unlumenNeonGlow(glowColor = PhoenixGreen, cornerRadius = 16.dp, blurRadius = 16.dp)
+            .shimmerGlossSweep(enabled = true)
+        isChecked && isSelected && !isCorrectOpt -> Modifier
+            .dangerHeartbeatShake(enabled = true)
+        isSelected -> Modifier
+            .unlumenNeonGlow(glowColor = Color(0xFF1C_B0_F6), cornerRadius = 16.dp, blurRadius = 12.dp)
+        else -> Modifier
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
+            .then(glowModifier)
+            .kineticBouncyClick(
                 enabled = isEnabled,
                 onClick = onClick
             )
