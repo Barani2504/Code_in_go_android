@@ -1,5 +1,15 @@
 package com.simats.codeingo.ui.debug
 
+import androidx.compose.runtime.mutableFloatStateOf
+import com.simats.codeingo.ui.components.motion.BossAuraEffect
+import com.simats.codeingo.ui.components.motion.CelebrationGlowField
+import com.simats.codeingo.ui.components.motion.AvalancheHeatmapRipple
+import com.simats.codeingo.ui.components.motion.MascotAuraEffect
+import com.simats.codeingo.ui.components.motion.PacketTravelTrails
+import com.simats.codeingo.ui.components.motion.ShockwaveEffect
+import com.simats.codeingo.ui.mascot.MascotEmotion
+import com.simats.codeingo.ui.mascot.PhoenixStage
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -116,6 +126,9 @@ fun MotionLabScreen(
     // Systems
     var showConfetti by remember { mutableStateOf(false) }
     var showExplode by remember { mutableStateOf(false) }
+    var labAvalancheTrigger by remember { mutableStateOf(false) }
+    var labShockwaveTrigger by remember { mutableStateOf(false) }
+    var labPacketProgress by remember { mutableFloatStateOf(0.5f) }
     var cardFace by remember { mutableStateOf(CardFace.FRONT) }
 
     Box(
@@ -540,6 +553,164 @@ fun MotionLabScreen(
                                 .clip(RoundedCornerShape(8.dp))
                                 .skeletonShimmer()
                         )
+                    }
+                }
+            }
+
+            // 5. Part 4: Native Effects Studio (AGSL API 33+ & Canvas Fallback)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = dynamicColors.cardBackground),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Text(
+                            text = "5. NATIVE EFFECTS STUDIO (AGSL & CANVAS)",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = AmberGold
+                        )
+
+                        Text(
+                            text = "Dual-engine visual effects with < 1.5 Hz photosensitivity safety and Calm Mode compatibility.",
+                            fontSize = 11.sp,
+                            color = dynamicColors.textSecondary
+                        )
+
+                        // 1. Boss Aura & Mascot Aura Previews
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Boss Aura", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = PhoenixCrimson)
+                                Box(
+                                    modifier = Modifier.size(90.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    BossAuraEffect(size = 80.dp, color = PhoenixCrimson)
+                                    Box(
+                                        modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFF1E293B)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("?", fontSize = 18.sp)
+                                    }
+                                }
+                            }
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Mascot Aura", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+                                Box(
+                                    modifier = Modifier.size(90.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    MascotAuraEffect(
+                                        size = 75.dp,
+                                        stage = PhoenixStage.DIVINE_PHOENIX,
+                                        emotion = MascotEmotion.CELEBRATE,
+                                        color = AmberGold
+                                    )
+                                    Box(
+                                        modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFF1E293B)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("?", fontSize = 18.sp)
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Packet Travel Trails Preview
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Packet Travel Trails (TLS / Protocols):", fontSize = 11.sp, color = dynamicColors.textSecondary)
+                                Text("${(labPacketProgress * 100).toInt()}%", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = AmberGold)
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF0F172A))
+                                    .padding(horizontal = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                PacketTravelTrails(
+                                    progress = labPacketProgress,
+                                    packetColor = AmberGold,
+                                    modifier = Modifier.fillMaxWidth().height(44.dp)
+                                )
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = { labPacketProgress = (labPacketProgress - 0.2f).coerceAtLeast(0.1f) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155))
+                                ) {
+                                    Text("? Reverse", fontSize = 10.sp)
+                                }
+                                Button(
+                                    onClick = { labPacketProgress = (labPacketProgress + 0.2f).coerceAtMost(0.95f) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155))
+                                ) {
+                                    Text("Advance ?", fontSize = 10.sp)
+                                }
+                            }
+                        }
+
+                        // 3. One-Shot Interactive Triggers
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = { labAvalancheTrigger = !labAvalancheTrigger },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1))
+                            ) {
+                                Text("Avalanche Ripple", fontSize = 10.5.sp, color = Color.White)
+                            }
+
+                            Button(
+                                onClick = { labShockwaveTrigger = !labShockwaveTrigger },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = PhoenixCrimson)
+                            ) {
+                                Text("Shockwave Burst", fontSize = 10.5.sp, color = Color.White)
+                            }
+                        }
+
+                        // Avalanche & Shockwave Preview Container
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFF0F172A))
+                                .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AvalancheHeatmapRipple(
+                                trigger = labAvalancheTrigger,
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color(0xFF6366F1)
+                            )
+                            ShockwaveEffect(
+                                trigger = labShockwaveTrigger,
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "TAP BUTTONS ABOVE TO TEST AGSL / CANVAS RIPPLE",
+                                fontSize = 9.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = Color.White.copy(alpha = 0.5f)
+                            )
+                        }
                     }
                 }
             }

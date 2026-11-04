@@ -42,6 +42,12 @@ object EffectBudgetManager {
     private val activeRiveInstances = AtomicInteger(0)
 
     // ── Public Controls ──
+    fun isCalmModeEnabled(): Boolean = _isCalmMode.value
+
+    fun requestConfetti(): Boolean = acquireConfetti()
+
+    fun requestExplode(): Boolean = acquireExplosion()
+
     fun setCalmMode(enabled: Boolean) {
         _isCalmMode.value = enabled
     }

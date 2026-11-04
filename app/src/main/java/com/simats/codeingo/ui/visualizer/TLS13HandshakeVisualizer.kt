@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.visualizer
 
+import com.simats.codeingo.ui.components.motion.PacketTravelTrails
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -171,6 +173,39 @@ private fun TLS13HandshakeExploreView() {
                 }
 
                 Text(text = currentPacket.description, fontSize = 10.5.sp, color = SubtextGray)
+
+                // Dynamic Packet Travel Trails (Client <-> Server)
+                val isClientSender = currentPacket.sender.contains("Client", ignoreCase = true)
+                val trailProgress by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = if (isClientSender) 0.85f else 0.15f,
+                    animationSpec = androidx.compose.animation.core.tween(600, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                    label = "PacketTrailAnim"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(38.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(dynamicColors.inputBackground.copy(alpha = 0.5f))
+                        .padding(horizontal = 12.dp)
+                ) {
+                    PacketTravelTrails(
+                        progress = trailProgress,
+                        startOffset = androidx.compose.ui.geometry.Offset(0.08f, 0.5f),
+                        endOffset = androidx.compose.ui.geometry.Offset(0.92f, 0.5f),
+                        packetColor = orangeColor,
+                        modifier = Modifier.fillMaxWidth().height(38.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(38.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("CLIENT", fontSize = 9.sp, fontWeight = FontWeight.Black, color = tealColor)
+                        Text("SERVER", fontSize = 9.sp, fontWeight = FontWeight.Black, color = tealColor)
+                    }
+                }
 
                 // Packet Headers & Fields Table
                 Column(

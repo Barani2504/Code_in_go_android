@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.exercise
 
+import com.simats.codeingo.ui.components.motion.BossAuraEffect
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -77,7 +79,8 @@ import com.simats.codeingo.ui.theme.liquidGlassCard
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.tilt3D
 import androidx.compose.ui.platform.LocalContext
-import com.simats.codeingo.ui.theme.FeedbackManager
+import com.simats.codeingo.ui.theme.FeedbackManager
+
 import com.simats.codeingo.data.repository.QuizQuestionsData
 import kotlinx.coroutines.delay
 
@@ -355,6 +358,10 @@ fun BossBattleScreen(
                             .offset(y = bossOffsetY.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        BossAuraEffect(
+                            size = 135.dp,
+                            color = DuolingoRed
+                        )
                         Box(
                             modifier = Modifier
                                 .size(110.dp)

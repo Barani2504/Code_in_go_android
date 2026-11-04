@@ -1025,3 +1025,75 @@ object QuestionTransition {
             animationSpec = tween(260, easing = FastOutSlowInEasing)
         ) + fadeOut(tween(180))
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PART 4: NATIVE MOTION EFFECTS EXTENSION (DUAL ENGINE: AGSL + CANVAS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun BossAura(
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 140.dp,
+    color: Color = PhoenixCrimson
+) {
+    com.simats.codeingo.ui.components.motion.BossAuraEffect(
+        modifier = modifier,
+        size = size,
+        color = color
+    )
+}
+
+@Composable
+fun CelebrationGlow(
+    modifier: Modifier = Modifier,
+    color: Color = AmberGold
+) {
+    com.simats.codeingo.ui.components.motion.CelebrationGlowField(
+        modifier = modifier,
+        color = color
+    )
+}
+
+@Composable
+fun MascotAura(
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 90.dp,
+    stage: com.simats.codeingo.ui.mascot.PhoenixStage = com.simats.codeingo.ui.mascot.PhoenixStage.FLEDGED,
+    emotion: com.simats.codeingo.ui.mascot.MascotEmotion = com.simats.codeingo.ui.mascot.MascotEmotion.IDLE,
+    color: Color = AmberGold
+) {
+    com.simats.codeingo.ui.components.motion.MascotAuraEffect(
+        modifier = modifier,
+        size = size,
+        stage = stage,
+        emotion = emotion,
+        color = color
+    )
+}
+
+@Composable
+fun PacketTrails(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    packetColor: Color = AmberGold
+) {
+    com.simats.codeingo.ui.components.motion.PacketTravelTrails(
+        progress = progress,
+        modifier = modifier,
+        packetColor = packetColor
+    )
+}
+
+@Composable
+fun Shockwave(
+    trigger: Boolean,
+    modifier: Modifier = Modifier,
+    color: Color = Color.White
+) {
+    com.simats.codeingo.ui.components.motion.ShockwaveEffect(
+        trigger = trigger,
+        modifier = modifier,
+        color = color
+    )
+}

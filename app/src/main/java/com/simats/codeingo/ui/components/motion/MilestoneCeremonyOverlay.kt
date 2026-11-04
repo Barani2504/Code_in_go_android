@@ -89,6 +89,12 @@ fun MilestoneCeremonyOverlay(
             .background(Color.Black.copy(alpha = 0.82f)),
         contentAlignment = Alignment.Center
     ) {
+        // Ambient Celebration Glow Field
+        CelebrationGlowField(
+            modifier = Modifier.fillMaxSize(),
+            color = AmberGold
+        )
+
         // 1. T4 Konfetti Particle Shower
         ConfettiHost(trigger = true)
 

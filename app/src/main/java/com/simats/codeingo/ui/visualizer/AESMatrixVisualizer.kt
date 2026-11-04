@@ -1,5 +1,8 @@
 package com.simats.codeingo.ui.visualizer
 
+import com.simats.codeingo.ui.components.motion.AvalancheHeatmapRipple
+
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -165,7 +168,11 @@ private fun AESMatrixExploreView() {
     val amberColor = if (isDark) AmberGold else Color(0xFFB45309)
 
     var selectedRound by remember { mutableIntStateOf(1) } // 1..10
-    var selectedStep by remember { mutableStateOf("SubBytes") } // "Start", "SubBytes", "ShiftRows", "MixColumns", "AddRoundKey"
+    var selectedStep by remember { mutableStateOf("SubBytes") }
+    var rippleTrigger by remember { mutableStateOf(false) }
+    LaunchedEffect(selectedRound, selectedStep) {
+        rippleTrigger = !rippleTrigger
+    } // "Start", "SubBytes", "ShiftRows", "MixColumns", "AddRoundKey"
 
     val fipsKey = remember { AesEngine.hexToBytes("2b7e151628aed2a6abf7158809cf4f3c") }
     val fipsPt = remember { AesEngine.hexToBytes("3243f6a8885a308d313198a2e0370734") }
@@ -229,11 +236,17 @@ private fun AESMatrixExploreView() {
                 }
             }
 
-            // 4x4 Byte State Matrix Grid
-            Column(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground).padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            // 4x4 Byte State Matrix Grid with Avalanche Ripple
+            Box(contentAlignment = Alignment.Center) {
+                AvalancheHeatmapRipple(
+                    trigger = rippleTrigger,
+                    modifier = Modifier.fillMaxWidth().height(180.dp),
+                    color = DsaPurple
+                )
+                Column(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(dynamicColors.inputBackground.copy(alpha = 0.85f)).padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                 for (r in 0..3) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (c in 0..3) {
@@ -253,6 +266,8 @@ private fun AESMatrixExploreView() {
                         }
                     }
                 }
+            }
+
             }
 
             Text(

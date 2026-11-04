@@ -110,6 +110,12 @@ fun CelebrationOverlay(
             .background(Color.Black.copy(alpha = 0.78f)),
         contentAlignment = Alignment.Center
     ) {
+        // Ambient Celebration Glow Field
+        CelebrationGlowField(
+            modifier = Modifier.fillMaxSize(),
+            color = AmberGold
+        )
+
         // 1. Procedural Confetti Particle Shower
         ConfettiHost(trigger = true)
 

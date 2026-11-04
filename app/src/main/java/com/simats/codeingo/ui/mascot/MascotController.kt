@@ -1,5 +1,7 @@
 package com.simats.codeingo.ui.mascot
 
+import com.simats.codeingo.ui.components.motion.MascotAuraEffect
+
 import android.content.Context
 import android.view.ViewGroup
 import androidx.compose.animation.core.animateFloatAsState
@@ -120,9 +122,11 @@ fun MascotView(
         contentAlignment = Alignment.Center
     ) {
         if (showGlow && !isCalm) {
-            BehindPhoenixGlow(
-                size = size,
-                glowColor = glowColor
+            MascotAuraEffect(
+                size = size + 18.dp,
+                color = glowColor,
+                stage = stage,
+                emotion = emotion
             )
         }
 
