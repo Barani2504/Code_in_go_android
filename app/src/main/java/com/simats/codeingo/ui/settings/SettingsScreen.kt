@@ -109,6 +109,7 @@ fun SettingsScreen(
     onDismiss: () -> Unit,
     onLogout: () -> Unit,
     onOpenAnimationLab: () -> Unit = {},
+    onOpenMotionLab: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // ── Singletons ──────────────────────────────────────────────
@@ -808,6 +809,7 @@ fun SettingsScreen(
                         onResetStreak = { gameManager.debugResetStreak() },
                         onOpenForgotPassword = { showForgotPasswordSheet = true },
                         onOpenAnimationLab = onOpenAnimationLab,
+                        onOpenMotionLab = onOpenMotionLab,
                         onOpenLanguagePicker = { showLanguagePickerSheet = true },
                         onOpenEmotionPicker = { showEmotionPickerSheet = true },
                         selectedLanguage = selectedLang,
@@ -1073,6 +1075,7 @@ private fun PreferencesTab(
     onResetStreak: () -> Unit,
     onOpenForgotPassword: () -> Unit,
     onOpenAnimationLab: () -> Unit,
+    onOpenMotionLab: () -> Unit = {},
     onOpenLanguagePicker: () -> Unit,
     onOpenEmotionPicker: () -> Unit,
     selectedLanguage: Language?,
@@ -1132,6 +1135,40 @@ private fun PreferencesTab(
                 )
             }
             Text("Switch", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DuolingoBlue)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = textSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        SettingsDivider(cardBorder)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenMotionLab() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("⚡", fontSize = 18.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "AshCrypt Motion Lab",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textPrimary
+                )
+                Text(
+                    "Test 11 springs, 3D FlipCard, Tiers & Calm Mode",
+                    fontSize = 12.sp,
+                    color = textSecondary
+                )
+            }
+            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,

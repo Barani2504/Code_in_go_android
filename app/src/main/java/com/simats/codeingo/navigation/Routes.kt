@@ -20,4 +20,5 @@ sealed class Screen(val route: String) {
     object PhoenixEggHatch : Screen("phoenix_egg_hatch")
     object Settings : Screen("settings")
     object AnimationLab : Screen("animation_lab")
+    object MotionLab : Screen("motion_lab")
 }

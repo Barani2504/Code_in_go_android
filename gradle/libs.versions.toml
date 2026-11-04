@@ -23,6 +23,8 @@ tink = "1.15.0"
 workmanager = "2.10.0"
 lottieCompose = "6.6.2"
 constraintlayoutCompose = "1.1.0"
+konfetti = "2.2.0"
+rive = "11.15.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,6 +68,8 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+konfetti-compose = { group = "nl.dionsegijn", name = "konfetti-compose", version.ref = "konfetti" }
+rive-android = { group = "app.rive", name = "rive-android", version.ref = "rive" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

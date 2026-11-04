@@ -236,12 +236,23 @@ fun AppNavHost(
                     },
                     onOpenAnimationLab = {
                         navController.navigate(Screen.AnimationLab.route)
+                    },
+                    onOpenMotionLab = {
+                        navController.navigate(Screen.MotionLab.route)
                     }
                 )
             }
 
             composable(Screen.AnimationLab.route) {
                 com.simats.codeingo.ui.components.AnimationLabScreen(
+                    onDismiss = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.MotionLab.route) {
+                com.simats.codeingo.ui.debug.MotionLabScreen(
                     onDismiss = {
                         navController.popBackStack()
                     }

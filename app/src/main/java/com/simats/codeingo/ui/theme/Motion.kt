@@ -853,8 +853,9 @@ class FeedbackManager(private val context: Context) {
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
+            val quietScale = if (com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) 0.6f else 1.0f
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                v.vibrate(VibrationEffect.createOneShot(14L, 70))
+                v.vibrate(VibrationEffect.createOneShot(14L, (70 * quietScale).toInt().coerceAtLeast(1)))
             } else {
                 @Suppress("DEPRECATION")
                 v.vibrate(14L)
@@ -862,16 +863,20 @@ class FeedbackManager(private val context: Context) {
         } catch (_: Throwable) {}
     }
 
+    fun tick(tier: EffectTier = EffectTier.FULL) = tap(tier)
+
     fun correct(combo: Int = 1, tier: EffectTier = EffectTier.FULL) {
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
-            val intensity = when {
+            val quietScale = if (com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) 0.6f else 1.0f
+            val baseIntensity = when {
                 combo >= 5 -> 220
                 combo >= 3 -> 175
                 combo >= 2 -> 140
                 else -> 100
             }
+            val intensity = (baseIntensity * quietScale).toInt().coerceAtLeast(1)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 // Double-tick pulse with escalating strength
                 v.vibrate(
@@ -888,17 +893,69 @@ class FeedbackManager(private val context: Context) {
         } catch (_: Throwable) {}
     }
 
+    fun success(combo: Int = 1, tier: EffectTier = EffectTier.FULL) = correct(combo, tier)
+
     fun wrong(tier: EffectTier = EffectTier.FULL) {
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
+            val quietScale = if (com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) 0.6f else 1.0f
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                v.vibrate(VibrationEffect.createOneShot(110L, 190))
+                v.vibrate(VibrationEffect.createOneShot(110L, (190 * quietScale).toInt().coerceAtLeast(1)))
             } else {
                 @Suppress("DEPRECATION")
                 v.vibrate(110L)
             }
         } catch (_: Throwable) {}
+    }
+
+    fun error(tier: EffectTier = EffectTier.FULL) {
+        if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
+        try {
+            val v = vibrator ?: return
+            val quietScale = if (com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) 0.6f else 1.0f
+            val amp1 = (160 * quietScale).toInt().coerceAtLeast(1)
+            val amp2 = (220 * quietScale).toInt().coerceAtLeast(1)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Double buzz pattern for wrong answer
+                v.vibrate(
+                    VibrationEffect.createWaveform(
+                        longArrayOf(0L, 50L, 60L, 80L),
+                        intArrayOf(0, amp1, 0, amp2),
+                        -1
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(longArrayOf(0L, 50L, 60L, 80L), -1)
+            }
+        } catch (_: Throwable) {}
+    }
+
+    fun milestone(tier: EffectTier = EffectTier.FULL) {
+        if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
+        try {
+            val v = vibrator ?: return
+            val quietScale = if (com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) 0.6f else 1.0f
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Rising crescendo pattern
+                v.vibrate(
+                    VibrationEffect.createWaveform(
+                        longArrayOf(0L, 40L, 40L, 60L, 40L, 100L),
+                        intArrayOf(0, (90 * quietScale).toInt(), 0, (160 * quietScale).toInt(), 0, (255 * quietScale).toInt()),
+                        -1
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(longArrayOf(0L, 40L, 40L, 60L, 40L, 100L), -1)
+            }
+        } catch (_: Throwable) {}
+    }
+
+    fun soundEffect(cueName: String) {
+        if (!MotionController.soundEnabled.value || com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) return
+        // Pluggable SoundPool audio cue hook
     }
 
     fun fizzle(tier: EffectTier = EffectTier.FULL) {
