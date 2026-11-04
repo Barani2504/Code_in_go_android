@@ -76,11 +76,11 @@ import com.simats.codeingo.ui.components.motion.FlipCard
 import com.simats.codeingo.ui.components.motion.CardFace
 import com.simats.codeingo.ui.components.motion.ExplodeHost
 import com.simats.codeingo.ui.components.motion.AshMotionScheme
-import com.simats.codeingo.ui.components.motion.AshMotionModifiers.bounce
-import com.simats.codeingo.ui.components.motion.AshMotionModifiers.wobble
-import com.simats.codeingo.ui.components.motion.AshMotionModifiers.pulse
-import com.simats.codeingo.ui.components.motion.AshMotionModifiers.shake
-import com.simats.codeingo.ui.components.motion.AshMotionModifiers.pressSquish
+import com.simats.codeingo.ui.components.motion.bounce
+import com.simats.codeingo.ui.components.motion.wobble
+import com.simats.codeingo.ui.components.motion.pulse
+import com.simats.codeingo.ui.components.motion.shake
+import com.simats.codeingo.ui.components.motion.pressSquish
 import com.simats.codeingo.ui.theme.FeedbackManager
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AppFontFamily
@@ -815,6 +815,35 @@ fun OrderStepsExerciseView(
                         }
                     }
                 }
+
+                // Protocol Message-Flow Handshake Arrow between steps
+                if (index < currentSteps.size - 1) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val isEven = index % 2 == 0
+                        val packetLabel = if (isEven) "Client ➔ Server [Key Exchange]" else "Server ➔ Client [Cipher Handshake]"
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF0F172A))
+                                .border(0.8.dp, Color(0xFF1E293B), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "⚡ $packetLabel",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                color = if (isChecked) (if (isCorrectPosition) PhoenixGreen else PhoenixCrimson) else Color(0xFF38BDF8)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -839,7 +868,24 @@ fun FillCodeExerciseView(
     var selectedToken by remember(codeTemplate, wordBank) { mutableStateOf<String?>(null) }
     val activeToken = externalSelectedToken ?: selectedToken
 
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    var explodeTrigger by remember { mutableStateOf(false) }
+    var slotCenter by remember { mutableStateOf(Offset(200f, 200f)) }
+
+    LaunchedEffect(isChecked) {
+        if (isChecked && activeToken != null && activeToken != correctToken) {
+            explodeTrigger = true
+        }
+    }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        ExplodeHost(
+            trigger = explodeTrigger,
+            origin = slotCenter,
+            shardCount = 28,
+            onComplete = { explodeTrigger = false }
+        )
+
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Hacker IDE Editor Window
         Column(
             modifier = Modifier
@@ -1024,6 +1070,48 @@ fun FillCodeExerciseView(
                 }
             }
         }
+
+        // Mini Cryptographic Terminal Live Execution Box
+        AnimatedVisibility(
+            visible = activeToken != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF090D16))
+                    .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(12.dp))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(">_", fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Black, color = AmberGold)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("CRYPTO REPL LIVE EXECUTION", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = SubtextGray)
+                }
+                Text(
+                    text = "python cipher_runtime.py --token='$activeToken'",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color(0xFF94A3B8)
+                )
+                Text(
+                    text = if (isChecked) {
+                        if (activeToken == correctToken) ">>> [PASS] AST Verified. Cipher block valid. Output hash intact."
+                        else ">>> [FAIL] Integrity check failed! Signature mismatch."
+                    } else {
+                        ">>> [STAGED] Token inserted into AST slot. Awaiting execution..."
+                    },
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isChecked) (if (activeToken == correctToken) PhoenixGreen else PhoenixCrimson) else Color(0xFF38BDF8)
+                )
+            }
+        }
+    }
     }
 }
 
@@ -1259,111 +1347,210 @@ fun TrueFalseSwipeExerciseView(
             }
         }
 
-        // Swipeable Fact Card with 3D Depth
+        // Swipeable 3D FlipCard with Rubber-Stamp Overlays & Analysis
         val cardShape = RoundedCornerShape(20.dp)
         val rotationDeg = (dragOffsetX.value / 25f).coerceIn(-15f, 15f)
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
-                .graphicsLayer { rotationZ = rotationDeg }
-                .pointerInput(statement, isChecked) {
-                    if (!isChecked) {
-                        detectHorizontalDragGestures(
-                            onDragEnd = {
-                                val currentOffset = dragOffsetX.value
-                                coroutineScope.launch {
-                                    if (currentOffset > 80f) {
-                                        feedback.tap()
-                                        dragOffsetX.animateTo(300f, tween(150))
-                                        chosenDecision = true
-                                        onDecisionMade(true)
-                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-                                    } else if (currentOffset < -80f) {
-                                        feedback.tap()
-                                        dragOffsetX.animateTo(-300f, tween(150))
-                                        chosenDecision = false
-                                        onDecisionMade(false)
-                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-                                    } else {
-                                        dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        var cardFace by remember(statement) { mutableStateOf(CardFace.FRONT) }
+
+        LaunchedEffect(isChecked) {
+            if (isChecked && activeDecision != isCorrectTrue) {
+                delay(400)
+                cardFace = CardFace.BACK
+            }
+        }
+
+        FlipCard(
+            cardFace = cardFace,
+            onFlip = { nextFace -> cardFace = nextFace },
+            enableClickFlip = isChecked,
+            modifier = Modifier.fillMaxWidth(),
+            frontContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
+                        .graphicsLayer { rotationZ = rotationDeg }
+                        .pointerInput(statement, isChecked) {
+                            if (!isChecked) {
+                                detectHorizontalDragGestures(
+                                    onDragEnd = {
+                                        val currentOffset = dragOffsetX.value
+                                        coroutineScope.launch {
+                                            if (currentOffset > 80f) {
+                                                feedback.tap()
+                                                dragOffsetX.animateTo(300f, tween(150))
+                                                chosenDecision = true
+                                                onDecisionMade(true)
+                                                dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                            } else if (currentOffset < -80f) {
+                                                feedback.tap()
+                                                dragOffsetX.animateTo(-300f, tween(150))
+                                                chosenDecision = false
+                                                onDecisionMade(false)
+                                                dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                            } else {
+                                                dragOffsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                            }
+                                        }
+                                    },
+                                    onHorizontalDrag = { _, dragAmount ->
+                                        coroutineScope.launch { dragOffsetX.snapTo(dragOffsetX.value + dragAmount) }
                                     }
-                                }
-                            },
-                            onHorizontalDrag = { _, dragAmount ->
-                                coroutineScope.launch { dragOffsetX.snapTo(dragOffsetX.value + dragAmount) }
+                                )
+                            }
+                        }
+                        .correctPop(trigger = isChecked && activeDecision == isCorrectTrue)
+                        .shake(shakeTrigger = if (isChecked && activeDecision != isCorrectTrue) isChecked else null)
+                        .clip(cardShape)
+                        .background(
+                            when {
+                                dragOffsetX.value > 40f -> PhoenixGreen.copy(alpha = 0.2f)
+                                dragOffsetX.value < -40f -> PhoenixCrimson.copy(alpha = 0.2f)
+                                activeDecision == true -> PhoenixGreen.copy(alpha = 0.16f)
+                                activeDecision == false -> PhoenixCrimson.copy(alpha = 0.16f)
+                                else -> DuolingoInputBg
                             }
                         )
-                    }
-                }
-                .correctPop(trigger = isChecked && activeDecision == isCorrectTrue)
-                .shake(shakeTrigger = if (isChecked && activeDecision != isCorrectTrue) isChecked else null)
-                .clip(cardShape)
-                .background(
-                    when {
-                        dragOffsetX.value > 40f -> PhoenixGreen.copy(alpha = 0.2f)
-                        dragOffsetX.value < -40f -> PhoenixCrimson.copy(alpha = 0.2f)
-                        activeDecision == true -> PhoenixGreen.copy(alpha = 0.16f)
-                        activeDecision == false -> PhoenixCrimson.copy(alpha = 0.16f)
-                        else -> DuolingoInputBg
-                    }
-                )
-                .border(
-                    width = if (activeDecision != null) 2.dp else 1.5.dp,
-                    color = when {
-                        dragOffsetX.value > 40f -> PhoenixGreen
-                        dragOffsetX.value < -40f -> PhoenixCrimson
-                        activeDecision == null -> DuolingoInputBorder
-                        isChecked -> if (activeDecision == isCorrectTrue) PhoenixGreen else PhoenixCrimson
-                        activeDecision == true -> PhoenixGreen
-                        else -> PhoenixCrimson
-                    },
-                    shape = cardShape
-                )
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                if (dragOffsetX.value > 50f) {
-                    Box(
-                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(PhoenixGreen).padding(horizontal = 14.dp, vertical = 4.dp)
-                    ) { Text("TRUE 👉", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White) }
-                } else if (dragOffsetX.value < -50f) {
-                    Box(
-                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(PhoenixCrimson).padding(horizontal = 14.dp, vertical = 4.dp)
-                    ) { Text("👈 FALSE", fontSize = 14.sp, fontWeight = FontWeight.Black, color = Color.White) }
-                }
-
-                Text(
-                    text = statement,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = LocalDynamicThemeColors.current.textPrimary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-
-                if (activeDecision != null) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color.Black.copy(alpha = 0.35f))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = if (activeDecision) "VERDICT: TRUE ✅" else "VERDICT: FALSE ❌",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            color = if (activeDecision) PhoenixGreen else PhoenixCrimson
+                        .border(
+                            width = if (activeDecision != null) 2.dp else 1.5.dp,
+                            color = when {
+                                dragOffsetX.value > 40f -> PhoenixGreen
+                                dragOffsetX.value < -40f -> PhoenixCrimson
+                                activeDecision == null -> DuolingoInputBorder
+                                isChecked -> if (activeDecision == isCorrectTrue) PhoenixGreen else PhoenixCrimson
+                                activeDecision == true -> PhoenixGreen
+                                else -> PhoenixCrimson
+                            },
+                            shape = cardShape
                         )
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        // Dynamic Rubber-Stamp Badges
+                        if (dragOffsetX.value > 40f || activeDecision == true) {
+                            Box(
+                                modifier = Modifier
+                                    .graphicsLayer { rotationZ = -5f }
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(PhoenixGreen.copy(alpha = 0.18f))
+                                    .border(2.dp, PhoenixGreen, RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                            ) {
+                                Text("CONFIRMED TRUE • VALID ✅", fontSize = 13.sp, fontWeight = FontWeight.Black, color = PhoenixGreen)
+                            }
+                        } else if (dragOffsetX.value < -40f || activeDecision == false) {
+                            Box(
+                                modifier = Modifier
+                                    .graphicsLayer { rotationZ = 5f }
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(PhoenixCrimson.copy(alpha = 0.18f))
+                                    .border(2.dp, PhoenixCrimson, RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                            ) {
+                                Text("VULNERABILITY • FALSE ❌", fontSize = 13.sp, fontWeight = FontWeight.Black, color = PhoenixCrimson)
+                            }
+                        }
+
+                        Text(
+                            text = statement,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LocalDynamicThemeColors.current.textPrimary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        if (isChecked) {
+                            Text(
+                                text = "🔄 TAP TO FLIP FOR ANALYSIS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = AmberGold
+                            )
+                        }
+                    }
+                }
+            },
+            backContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(cardShape)
+                        .background(Color(0xFF0F1522))
+                        .border(1.8.dp, AmberGold.copy(alpha = 0.6f), cardShape)
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🔐", fontSize = 18.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "CRYPTOGRAPHIC ANALYSIS",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = AmberGold
+                            )
+                        }
+
+                        Text(
+                            text = explanation ?: "Cryptographic security requires formal proof under adversarial models (e.g. IND-CPA, IND-CCA2) to ensure privacy against modern computational attacks.",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFE2E8F0),
+                            lineHeight = 18.sp
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(1.dp, Color(0xFF334155), RoundedCornerShape(10.dp))
+                                .padding(10.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                Text(
+                                    text = "⚠️ SECURITY TAKEAWAY",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFFF97316)
+                                )
+                                Text(
+                                    text = if (isCorrectTrue) {
+                                        "Verified primitive: conforms to standard provable security benchmarks."
+                                    } else {
+                                        "Flawed assumption: relying on unverified assumptions compromises entire ciphertext integrity."
+                                    },
+                                    fontSize = 11.sp,
+                                    color = Color(0xFFCBD5E1)
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = "🔄 TAP TO RETURN TO STATEMENT",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = AmberGold
+                            )
+                        }
                     }
                 }
             }
-        }
+        )
 
         // Two 3D Tactile Arcade Decision Buttons
         Row(

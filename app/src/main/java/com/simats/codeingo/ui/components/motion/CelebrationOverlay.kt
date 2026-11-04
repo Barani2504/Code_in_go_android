@@ -41,6 +41,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import com.simats.codeingo.ui.components.motion.ConfettiHost
+import com.simats.codeingo.ui.components.motion.NumberRollText
+import com.simats.codeingo.ui.components.motion.bounce
+import com.simats.codeingo.ui.components.motion.pulse
+import com.simats.codeingo.ui.components.motion.tada
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -106,7 +111,7 @@ fun CelebrationOverlay(
         contentAlignment = Alignment.Center
     ) {
         // 1. Procedural Confetti Particle Shower
-        ConfettiParticleField()
+        ConfettiHost(trigger = true)
 
         // 2. High-Impact Modal Container
         Column(
@@ -178,7 +183,7 @@ fun CelebrationOverlay(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Dynamic Reward Chips with Kinetic Springs
+            // 3. Dynamic Reward Chips with Rolling Numbers
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -186,13 +191,13 @@ fun CelebrationOverlay(
                 RewardCard(
                     icon = "⚡",
                     label = "XP EARNED",
-                    value = "+${xpAnim.value.toInt()}",
+                    value = "+${xpEarned}",
                     accentColor = Color(0xFFF59E0B)
                 )
                 RewardCard(
                     icon = "💎",
                     label = "GEMS",
-                    value = "+${gemsAnim.value.toInt()}",
+                    value = "+${gemsEarned}",
                     accentColor = Color(0xFF06B6D4)
                 )
                 RewardCard(

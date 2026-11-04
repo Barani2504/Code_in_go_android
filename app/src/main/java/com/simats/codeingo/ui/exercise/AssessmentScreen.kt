@@ -62,6 +62,9 @@ import com.simats.codeingo.ui.components.motion.CelebrationOverlay
 import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
 import com.simats.codeingo.ui.components.motion.kineticBouncyClick
 import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
+import com.simats.codeingo.ui.components.motion.wobble
+import com.simats.codeingo.ui.components.motion.pressSquish
+import androidx.compose.ui.graphics.Brush
 import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -341,7 +344,7 @@ fun AssessmentScreen(
 
                     // Progress capsule
                     val progress = if (questions.isNotEmpty()) currentIndex.toFloat() / questions.size else 0f
-                    ProgressBarAnimated(progress = progress, modifier = Modifier.weight(1f).height(16.dp))
+                    ProgressBarAnimated(progress = progress, modifier = Modifier.weight(1f).height(16.dp).shimmerGlossSweep(enabled = true))
 
                     Spacer(modifier = Modifier.width(14.dp))
 
@@ -372,6 +375,48 @@ fun AssessmentScreen(
                         .padding(horizontal = 20.dp)
                 ) {
                     Spacer(modifier = Modifier.height(6.dp))
+
+                    // Themed Challenge Intro Banner
+                    AnimatedVisibility(
+                        visible = currentIndex == 0 && !isChecked,
+                        enter = fadeIn() + slideInVertically()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            AmberGold.copy(alpha = 0.18f),
+                                            Color(0xFF38BDF8).copy(alpha = 0.12f)
+                                        )
+                                    )
+                                )
+                                .border(1.dp, AmberGold.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("🎯", fontSize = 16.sp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "MISSION: CHAPTER $unitId CRYPTO DEFENSE",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Black,
+                                        fontFamily = AppFontFamily,
+                                        color = AmberGold
+                                    )
+                                    Text(
+                                        text = "Complete all ${questions.size} challenges to secure the protocol.",
+                                        fontSize = 11.sp,
+                                        color = SubtextGray
+                                    )
+                                }
+                            }
+                        }
+                    }
 
                     // Chapter / Stage Sub-Header + Cheat Code
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -460,9 +505,16 @@ fun AssessmentScreen(
                                 size = 64.dp,
                                 glowColor = if (isChecked && isAnswerCorrect) PhoenixGreen else AmberGold
                             )
+                            val mascotMod = when {
+                                isChecked && isAnswerCorrect -> Modifier.pulse(1.0f..1.12f, 400)
+                                isChecked && !isAnswerCorrect -> Modifier.wobble()
+                                currentCombo >= 2 -> Modifier.pulse(1.0f..1.1f, 500)
+                                else -> Modifier
+                            }
                             Box(
                                 modifier = Modifier
                                     .size(64.dp)
+                                    .then(mascotMod)
                                     .clip(RoundedCornerShape(18.dp))
                                     .background(PhoenixGreen.copy(alpha = 0.1f))
                                     .border(1.5.dp, PhoenixGreen.copy(alpha = 0.4f), RoundedCornerShape(18.dp)),
