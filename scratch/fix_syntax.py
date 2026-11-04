@@ -1,3 +1,4 @@
+
 path = "app/src/main/java/com/simats/codeingo/ui/exercise/DSAGamifiedExerciseViews.kt"
 with open(path, "r", encoding="utf-8") as f:
     lines = f.readlines()
