@@ -354,6 +354,14 @@ private fun AuthenticatedProfileBody(
             onViewAllClick = {}
         )
 
+        // 6b. Crypto Codex Collectible Cards Gallery
+        val gameManager = com.simats.codeingo.domain.GameManager.instance
+        val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
+        CryptoCodexGallery(
+            unlockedChapter = maxUnlockedChapter,
+            modifier = Modifier.fillMaxWidth()
+        )
+
         // 7. Add Friends Section
         AddFriendsSection()
 

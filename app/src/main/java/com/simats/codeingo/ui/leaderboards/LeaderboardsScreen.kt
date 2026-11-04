@@ -38,6 +38,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.simats.codeingo.ui.components.motion.MilestoneCeremonyOverlay
+import com.simats.codeingo.ui.components.motion.MilestoneType
+import com.simats.codeingo.ui.components.motion.pressSquish
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -102,6 +108,7 @@ fun LeaderboardsScreen(
     val isLoading by viewModel.isLoading.collectAsState()
 
     val displayRankings = if (rankings.isNotEmpty()) rankings else staticRankings
+    var showPromotionCeremony by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -116,9 +123,17 @@ fun LeaderboardsScreen(
             UnlockedLeaderboardsView(
                 rankings = displayRankings,
                 league = league,
-                currentUserRank = currentUserRank
+                currentUserRank = currentUserRank,
+                onShowPromotionCeremony = { showPromotionCeremony = true }
             )
         }
+
+        MilestoneCeremonyOverlay(
+            visible = showPromotionCeremony,
+            type = MilestoneType.LEAGUE_PROMOTION,
+            rewardXp = 35,
+            onContinue = { showPromotionCeremony = false }
+        )
     }
 }
 
@@ -399,7 +414,8 @@ private fun LockedLeaderboardsView(
 private fun UnlockedLeaderboardsView(
     rankings: List<RankEntry>,
     league: LeagueTier,
-    currentUserRank: RankEntry?
+    currentUserRank: RankEntry?,
+    onShowPromotionCeremony: () -> Unit = {}
 ) {
     val isDark = LocalDynamicThemeColors.current.isDark
 
@@ -417,7 +433,8 @@ private fun UnlockedLeaderboardsView(
                 AppCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .staggeredAppear(0),
+                        .staggeredAppear(0)
+                        .pressSquish(onClick = onShowPromotionCeremony),
                     cornerRadius = 24.dp,
                     accentGlow = AmberGold.copy(alpha = 0.20f),
                     contentPadding = 18.dp

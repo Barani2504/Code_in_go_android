@@ -397,6 +397,10 @@ fun MainDashboardScreen(
                                 Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
 
                                 // ── LIVING REALM DASHBOARD HERO CARDS ──────────────────────
+                                EthicalReengagementGreeting(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
+
                                 val currentChapterModel = remember(maxUnlockedChapter) {
                                     com.simats.codeingo.data.model.DSA5ChapterData.chapters.firstOrNull { it.id == maxUnlockedChapter }
                                 }
