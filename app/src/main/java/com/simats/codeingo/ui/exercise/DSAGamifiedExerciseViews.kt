@@ -1,5 +1,10 @@
 package com.simats.codeingo.ui.exercise
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -8,6 +13,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,6 +57,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
@@ -64,6 +72,15 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.simats.codeingo.ui.components.motion.FlipCard
+import com.simats.codeingo.ui.components.motion.CardFace
+import com.simats.codeingo.ui.components.motion.ExplodeHost
+import com.simats.codeingo.ui.components.motion.AshMotionScheme
+import com.simats.codeingo.ui.components.motion.AshMotionModifiers.bounce
+import com.simats.codeingo.ui.components.motion.AshMotionModifiers.wobble
+import com.simats.codeingo.ui.components.motion.AshMotionModifiers.pulse
+import com.simats.codeingo.ui.components.motion.AshMotionModifiers.shake
+import com.simats.codeingo.ui.components.motion.AshMotionModifiers.pressSquish
 import com.simats.codeingo.ui.theme.FeedbackManager
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AppFontFamily
@@ -124,6 +141,7 @@ fun MatchPairsExerciseView(
 
     val leftItemCentersInWindow = remember { mutableStateMapOf<String, Offset>() }
     val rightBoundsInWindow = remember { mutableStateMapOf<String, Rect>() }
+    var parentTopLeftInWindow by remember { mutableStateOf(Offset.Zero) }
 
     LaunchedEffect(wrongPairLeft, wrongPairRight) {
         if (wrongPairLeft != null || wrongPairRight != null) {
@@ -135,8 +153,69 @@ fun MatchPairsExerciseView(
     }
 
     Box(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coords ->
+                parentTopLeftInWindow = coords.boundsInWindow().topLeft
+            }
     ) {
+        // ── Synapse Dynamic Bezier Connectors ────────────────────────
+        Canvas(modifier = Modifier.matchParentSize()) {
+            // 1. Confirmed matched pair synapse lines with electric glow
+            matchedPairs.forEach { (leftKey, rightVal) ->
+                val startInWindow = leftItemCentersInWindow[leftKey]
+                val rightRect = rightBoundsInWindow[rightVal]
+                if (startInWindow != null && rightRect != null) {
+                    val start = startInWindow - parentTopLeftInWindow
+                    val end = rightRect.centerLeft - parentTopLeftInWindow
+                    val control1 = Offset(start.x + (end.x - start.x) * 0.5f, start.y)
+                    val control2 = Offset(start.x + (end.x - start.x) * 0.5f, end.y)
+                    val path = Path().apply {
+                        moveTo(start.x, start.y)
+                        cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+                    }
+                    // Outer neon pulse aura
+                    drawPath(
+                        path = path,
+                        color = PhoenixGreen.copy(alpha = 0.35f),
+                        style = Stroke(width = 6.dp.toPx())
+                    )
+                    // Core electric laser beam
+                    drawPath(
+                        path = path,
+                        color = PhoenixGreen,
+                        style = Stroke(width = 2.5.dp.toPx())
+                    )
+                }
+            }
+
+            // 2. Active dragging synapse beam
+            val currentDragItem = activeDraggingLeft
+            if (currentDragItem != null) {
+                val startInWindow = leftItemCentersInWindow[currentDragItem]
+                if (startInWindow != null) {
+                    val start = startInWindow - parentTopLeftInWindow
+                    val end = start + activeDragOffset
+                    val control1 = Offset(start.x + (end.x - start.x) * 0.5f, start.y)
+                    val control2 = Offset(start.x + (end.x - start.x) * 0.5f, end.y)
+                    val path = Path().apply {
+                        moveTo(start.x, start.y)
+                        cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+                    }
+                    drawPath(
+                        path = path,
+                        color = Color(0xFF1CB0F6).copy(alpha = 0.35f),
+                        style = Stroke(width = 5.dp.toPx())
+                    )
+                    drawPath(
+                        path = path,
+                        color = Color(0xFF1CB0F6),
+                        style = Stroke(width = 2.dp.toPx())
+                    )
+                }
+            }
+        }
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -479,6 +558,12 @@ fun OrderStepsExerciseView(
                     label = "orderDragScale"
                 )
 
+                val dragTilt by animateFloatAsState(
+                    targetValue = if (isDraggedCard) (dragOffsetY / 30f).coerceIn(-4.5f, 4.5f) else 0f,
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
+                    label = "orderDragTilt"
+                )
+
                 val borderColor by animateColorAsState(
                     targetValue = when {
                         isChecked && isCorrectPosition -> PhoenixGreen
@@ -518,6 +603,7 @@ fun OrderStepsExerciseView(
                                 translationY = if (isSettling) settleAnim.value else dragOffsetY
                                 scaleX = dragScale
                                 scaleY = dragScale
+                                rotationZ = dragTilt
                             } else {
                                 translationY = animatedShiftY
                             }
