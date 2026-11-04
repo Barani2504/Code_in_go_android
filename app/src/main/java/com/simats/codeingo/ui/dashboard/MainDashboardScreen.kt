@@ -1,5 +1,13 @@
 package com.simats.codeingo.ui.dashboard
 
+import com.simats.codeingo.ui.dashboard.ContinueHeroCard
+import com.simats.codeingo.ui.dashboard.TodaysMissionsCarousel
+import com.simats.codeingo.ui.dashboard.DailyGoalAndStreakPill
+import com.simats.codeingo.ui.dashboard.DailyRewardChestCard
+import com.simats.codeingo.ui.mascot.MascotView
+import com.simats.codeingo.ui.mascot.MascotEmotion
+import com.simats.codeingo.ui.mascot.PhoenixStage
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.togetherWith
@@ -387,6 +395,41 @@ fun MainDashboardScreen(
                             ) {
                                 // Spacing for floating top stats header (status bar + cutout insets + header height)
                                 Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
+
+                                // ── LIVING REALM DASHBOARD HERO CARDS ──────────────────────
+                                val currentChapterModel = remember(maxUnlockedChapter) {
+                                    com.simats.codeingo.data.model.DSA5ChapterData.chapters.firstOrNull { it.id == maxUnlockedChapter }
+                                }
+                                val currentChapterTitle = currentChapterModel?.title ?: "Cryptographic Security Foundations"
+
+                                ContinueHeroCard(
+                                    activeLevelIndex = activeLevelIndex,
+                                    chapterId = maxUnlockedChapter,
+                                    chapterTitle = currentChapterTitle,
+                                    onContinueClick = {
+                                        onStartLesson(maxUnlockedChapter, activeLevelIndex, 5, false)
+                                    },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+
+                                DailyGoalAndStreakPill(
+                                    currentXp = totalXP % 50,
+                                    targetXp = 50,
+                                    streakDays = streakDays,
+                                    hasStreakFreeze = true,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
+
+                                TodaysMissionsCarousel(
+                                    onOpenLesson = { onStartLesson(maxUnlockedChapter, activeLevelIndex, 5, false) },
+                                    onOpenMistakeVault = { selectedTab = DashboardTab.VISUALIZER },
+                                    onOpenArena = { selectedTab = DashboardTab.ARENAS },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+
+                                DailyRewardChestCard(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
 
                                 // Chapter 0: Basecamp Foundations Primer Card (Android Expansion)
                                 BasecampFoundationsCard(
