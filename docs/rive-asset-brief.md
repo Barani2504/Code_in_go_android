@@ -73,3 +73,4 @@ AshCrypt provides [`MascotController.kt`](file:///c:/Users/baran/AndroidStudioPr
 - If `.riv` is missing or on low-end devices in battery-saver mode, automatically falls back to native Jetpack Compose vector/GIF renderers with identical emotion state bindings.
 - Automatically pauses Rive rendering when the view scrolls off-screen or the activity enters background.
 - Caps concurrent active instances to at most 2 across the entire application view hierarchy.
+

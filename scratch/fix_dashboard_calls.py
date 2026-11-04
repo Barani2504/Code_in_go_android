@@ -18,3 +18,4 @@ m = m.replace("Modifier.pulse(1.0f..1.08f, 600)", "Modifier.pulse(minScale = 1.0
 with open("app/src/main/java/com/simats/codeingo/ui/mascot/MascotController.kt", "w", encoding="utf-8") as f:
     f.write(m)
 print("Fixed MascotController.kt")
+
