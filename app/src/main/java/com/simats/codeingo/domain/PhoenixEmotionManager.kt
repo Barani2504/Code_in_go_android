@@ -216,6 +216,19 @@ class PhoenixEmotionManager private constructor() {
             val prefs = ctx.getSharedPreferences("phoenix_icon_prefs", Context.MODE_PRIVATE)
             var currentActive = prefs.getString("current_active_alias", null)
 
+            val defaultComp = ComponentName(pkgName, "$pkgName.MainActivityAliasDefault")
+            if (com.simats.codeingo.BuildConfig.DEBUG) {
+                // In debug builds, always guarantee MainActivityAliasDefault is ENABLED for Android Studio launch
+                val defaultState = pm.getComponentEnabledSetting(defaultComp)
+                if (defaultState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                    pm.setComponentEnabledSetting(
+                        defaultComp,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP
+                    )
+                }
+            }
+
             val anyEnabled = ALL_ALIASES.any { alias ->
                 val comp = ComponentName(pkgName, "$pkgName.$alias")
                 val state = pm.getComponentEnabledSetting(comp)
@@ -224,7 +237,6 @@ class PhoenixEmotionManager private constructor() {
             }
             if (!anyEnabled) {
                 safeLogW("No launcher alias active on launch! Recovering MainActivityAliasDefault.")
-                val defaultComp = ComponentName(pkgName, "$pkgName.MainActivityAliasDefault")
                 pm.setComponentEnabledSetting(
                     defaultComp,
                     PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
