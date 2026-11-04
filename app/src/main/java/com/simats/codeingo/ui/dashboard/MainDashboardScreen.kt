@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -396,7 +397,13 @@ fun MainDashboardScreen(
                                 // Spacing for floating top stats header (status bar + cutout insets + header height)
                                 Spacer(modifier = Modifier.height(topInsetPadding + 96.dp))
 
-                                // ── LIVING REALM DASHBOARD HERO CARDS ──────────────────────
+                                // ── LIVING REALM DASHBOARD HERO CARDS (ADAPTIVE TABLET CONTAINER) ──
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .widthIn(max = 680.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                 EthicalReengagementGreeting(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
@@ -434,6 +441,7 @@ fun MainDashboardScreen(
                                 DailyRewardChestCard(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
+                                }
 
                                 // Chapter 0: Basecamp Foundations Primer Card (Android Expansion)
                                 BasecampFoundationsCard(

@@ -72,3 +72,15 @@
 -dontwarn com.airbnb.lottie.**
 -keep class androidx.constraintlayout.** { *; }
 -dontwarn androidx.constraintlayout.**
+
+
+# ── Rive Android Runtime ───────────────────────────────────────────
+-keep class app.rive.runtime.** { *; }
+-keep interface app.rive.runtime.** { *; }
+-keepnames class app.rive.runtime.kotlin.core.** { *; }
+-dontwarn app.rive.runtime.**
+
+# ── Konfetti Particle System ──────────────────────────────────────
+-keep class nl.dionsegijn.konfetti.** { *; }
+-keep interface nl.dionsegijn.konfetti.** { *; }
+-dontwarn nl.dionsegijn.konfetti.**
