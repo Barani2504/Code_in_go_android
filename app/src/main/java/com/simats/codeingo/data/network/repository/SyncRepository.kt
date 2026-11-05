@@ -159,8 +159,8 @@ class SyncRepository @Inject constructor(
                 ProgressStatusDTO(
                     completedLessons = completedLessonIds,
                     totalXp = gameManager.totalXP.value,
-                    hearts = gameManager.hearts.value,
-                    gems = gameManager.gems.value,
+                    hearts = gameManager.heartsCount.value,
+                    gems = gameManager.gemsCount.value,
                     streakDays = gameManager.streakDays.value
                 )
             )

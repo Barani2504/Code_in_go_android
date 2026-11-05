@@ -612,7 +612,7 @@ fun MainDashboardScreen(
                                         ) {
                                             unit.nodes.forEachIndexed { index, node ->
                                                 val isNodeCompleted = completedLevelIndices.contains(node.levelNumber)
-                                                val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted)
+                                                val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted || node.levelNumber == activeLevelIndex)
                                                 val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
                                                 val isLockedSelected = selectedLockedNodeId == node.id
 
@@ -658,7 +658,7 @@ fun MainDashboardScreen(
                                                                 }
                                                                 selectedLockedNodeId = null
                                                             } else {
-                                                                selectedLockedNodeId = node.id
+                                                                selectedLockedNodeId = if (selectedLockedNodeId == node.id) null else node.id
                                                             }
                                                         },
                                                         onStartClick = {
@@ -698,6 +698,65 @@ fun MainDashboardScreen(
                                                         )
                                                     }
                                                 }
+                                            }
+                                        }
+                                    }
+
+                                    // Finish Chapter & Unlock Next Button (Parity with iOS hasCompletedAllLevels)
+                                    val isUnitCompleted = completedChapters.contains(unit.id)
+                                    val hasCompletedAllLevelsInUnit = unit.nodes.all { completedLevelIndices.contains(it.levelNumber) }
+                                    if (hasCompletedAllLevelsInUnit && !isUnitCompleted && unit.id == maxUnlockedChapter) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        val nextUnit = masterUnits.firstOrNull { it.id == unit.id + 1 }
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 24.dp)
+                                                .shadow(8.dp, RoundedCornerShape(16.dp))
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(
+                                                    Brush.horizontalGradient(
+                                                        listOf(AmberGold, Color(0xFFFF9500))
+                                                    )
+                                                )
+                                                .clickable {
+                                                    gameManager.markChapterCompleted(unit.id)
+                                                    if (nextUnit != null) {
+                                                        val firstLevel = nextUnit.nodes.firstOrNull()?.levelNumber ?: (unit.nodes.last().levelNumber + 1)
+                                                        gameManager.unlockNextUnit(nextUnit.id, firstLevel)
+                                                    }
+                                                }
+                                                .padding(vertical = 14.dp, horizontal = 18.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.CheckCircle,
+                                                        contentDescription = null,
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Text(
+                                                        text = "FINISH CHAPTER ${unit.unitNumber} & UNLOCK NEXT",
+                                                        fontSize = 12.5.sp,
+                                                        fontWeight = FontWeight.Black,
+                                                        color = Color.White
+                                                    )
+                                                }
+                                                Icon(
+                                                    imageVector = Icons.Default.ArrowForward,
+                                                    contentDescription = null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
                                             }
                                         }
                                     }
@@ -759,7 +818,7 @@ fun MainDashboardScreen(
                                 selectedStageCardNode?.let { cardNode ->
                                     val cardUnit = visibleUnits.firstOrNull { it.nodes.any { n -> n.id == cardNode.id } } ?: visibleUnits.firstOrNull()
                                     val isCardNodeCompleted = completedLevelIndices.contains(cardNode.levelNumber)
-                                    val isCardNodeUnlocked = cardUnit != null && cardUnit.id <= maxUnlockedChapter && (unlockedLevels.contains(cardNode.levelNumber) || isCardNodeCompleted)
+                                    val isCardNodeUnlocked = cardUnit != null && cardUnit.id <= maxUnlockedChapter && (unlockedLevels.contains(cardNode.levelNumber) || isCardNodeCompleted || cardNode.levelNumber == activeLevelIndex)
                                     val isCardBoss = cardNode.isBoss
                                     val dynamicColors = LocalDynamicThemeColors.current
                                     val isDark = dynamicColors.isDark

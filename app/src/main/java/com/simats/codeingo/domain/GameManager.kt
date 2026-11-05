@@ -111,17 +111,7 @@ class GameManager private constructor() {
     private val _activePhoenixStage = MutableStateFlow(1)
     val activePhoenixStage: StateFlow<Int> = _activePhoenixStage.asStateFlow()
 
-    private val _highestCombo = MutableStateFlow(5)
-    val highestCombo: StateFlow<Int> = _highestCombo.asStateFlow()
 
-    private val _eggCrackLevel = MutableStateFlow(0)
-    val eggCrackLevel: StateFlow<Int> = _eggCrackLevel.asStateFlow()
-
-    private val _currentCombo = MutableStateFlow(0)
-    val currentCombo: StateFlow<Int> = _currentCombo.asStateFlow()
-
-    private val _showEvolutionModal = MutableStateFlow(false)
-    val showEvolutionModal: StateFlow<Boolean> = _showEvolutionModal.asStateFlow()
 
     private val _evolutionFromStage = MutableStateFlow(1)
     val evolutionFromStage: StateFlow<Int> = _evolutionFromStage.asStateFlow()
@@ -221,6 +211,7 @@ class GameManager private constructor() {
             _completedLessonIds.value = snapshot.completedLessons
             _completedBossIds.value = snapshot.completedBosses
             _unlockedLevelIndices.value = snapshot.unlockedLevels
+            reconcileUnlockedLevels()
             _completedChapters.value = snapshot.completedChapters
             _completedLevelIndices.value = snapshot.completedLevelIndices
             _maxUnlockedChapter.value = snapshot.maxUnlockedChapter
@@ -387,8 +378,69 @@ class GameManager private constructor() {
 
     fun unlockNextChapter(nextId: Int) {
         _maxUnlockedChapter.update { maxOf(it, nextId) }
+        reconcileUnlockedLevels()
         val p = prefs ?: return
         scope.launch { p.setMaxUnlockedChapter(nextId) }
+    }
+
+    fun unlockNextUnit(nextUnitId: Int, firstLevelIndex: Int) {
+        _maxUnlockedChapter.update { maxOf(it, nextUnitId) }
+        _unlockedLevelIndices.update { it + firstLevelIndex }
+        _activeLevelIndex.value = firstLevelIndex
+        _eggCrackLevel.value = 0
+        reconcileUnlockedLevels()
+        persistStats()
+        val p = prefs ?: return
+        scope.launch {
+            p.setMaxUnlockedChapter(nextUnitId)
+            p.setActiveLevelIndex(firstLevelIndex)
+            p.completeLesson("level_$firstLevelIndex", firstLevelIndex)
+        }
+    }
+
+    /**
+     * Reconciles unlocked levels strictly following iOS syncUnlockedLevelsFromStorage logic:
+     * - All levels in completed previous chapters (unit.id < maxUnlockedChapter or in completedChapters) are fully unlocked for replay.
+     * - The first level of the current active chapter is always unlocked at minimum.
+     * - Every completed level unlocks the subsequent level (level + 1).
+     * - The active target level is always in the unlocked set.
+     * - Base level 1 is unconditionally unlocked.
+     */
+    fun reconcileUnlockedLevels() {
+        val completedUnits = _completedChapters.value
+        val maxChapter = _maxUnlockedChapter.value
+        val completedLevels = _completedLevelIndices.value
+        val currentUnlocked = _unlockedLevelIndices.value.toMutableSet()
+
+        currentUnlocked.add(1)
+
+        val allUnits = ChapterRegistry.getCoreUnits() + ChapterRegistry.getExpansionUnits()
+        for (unit in allUnits) {
+            if (unit.id < maxChapter || completedUnits.contains(unit.id)) {
+                // Completed previous units: all nodes unlocked for replay
+                for (node in unit.nodes) {
+                    currentUnlocked.add(node.levelNumber)
+                }
+            } else if (unit.id == maxChapter) {
+                // Current unit: first node unlocked at minimum
+                unit.nodes.firstOrNull()?.let { first ->
+                    currentUnlocked.add(first.levelNumber)
+                }
+            }
+        }
+
+        // Each completed level unlocks the sequential next level
+        for (lvl in completedLevels) {
+            currentUnlocked.add(lvl)
+            if (lvl in 1..49) {
+                currentUnlocked.add(lvl + 1)
+            } else if (lvl in 101..104) {
+                currentUnlocked.add(lvl + 1)
+            }
+        }
+
+        currentUnlocked.add(_activeLevelIndex.value)
+        _unlockedLevelIndices.value = currentUnlocked
     }
 
     fun setActiveLevel(level: Int) {
@@ -433,9 +485,9 @@ class GameManager private constructor() {
      * Uses Gems Delta Ledger Algorithm to preserve local spend and prevent double-counting.
      */
     fun applyRemoteSnapshot(
-        remoteTotalXP: Int?,
-        remoteGems: Int?,
-        remoteStreak: Int?,
+        remoteTotalXP: Int? = null,
+        remoteGems: Int? = null,
+        remoteStreak: Int? = null,
         remoteCompletedIndices: Set<Int> = emptySet(),
         remotePhoenixStage: Int? = null,
         isLessonUploadResponse: Boolean = false
@@ -764,7 +816,8 @@ class GameManager private constructor() {
     fun completeLesson(lessonId: String, nextLevelIndex: Int? = null) {
         _completedLessonIds.value = _completedLessonIds.value + lessonId
         if (nextLevelIndex != null) {
-            _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevelIndex
+            _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevel
+        reconcileUnlockedLevels()Index
         }
         val p = prefs ?: return
         scope.launch { p.completeLesson(lessonId, nextLevelIndex) }
