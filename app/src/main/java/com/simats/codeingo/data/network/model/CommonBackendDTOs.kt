@@ -205,3 +205,104 @@ data class SocialEventDTO(
     val cheerCount: Int = 0,
     val cheeredUserIds: List<Int>? = emptyList()
 )
+
+// -------------------------------------------------------------------------
+// Live Dynamic Curriculum and Lessons (/api/courses/*)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class CourseLessonDTO(
+    val id: String,
+    val title: String,
+    val type: String? = null,
+    val xpReward: Int? = 10,
+    val questionCount: Int? = 5
+)
+
+@Serializable
+data class CourseUnitDTO(
+    val id: String,
+    val title: String,
+    val unitIndex: Int = 1,
+    val difficulty: String? = null,
+    val worldTheme: String? = null,
+    val worldMetaphor: String? = null,
+    val lessons: List<CourseLessonDTO>? = emptyList()
+)
+
+// -------------------------------------------------------------------------
+// Live Dynamic Questions (/api/courses/questions, /api/courses/lessons/*/questions)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class QuestionDTO(
+    val id: Int,
+    val type: String? = null,
+    val difficulty: String? = null,
+    val text: String? = null,
+    val xpReward: Int? = 10,
+    val options: List<String>? = emptyList(),
+    val correctAnswer: String? = null,
+    val explanation: String? = null,
+    val codeSnippet: String? = null,
+    val lessonId: String? = null
+)
+
+// -------------------------------------------------------------------------
+// Mascot Companion Interactivity (/api/mascot/*)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class MascotPetResponse(
+    val message: String? = null,
+    val affectionLevel: Int? = null,
+    val heartsAwarded: Int? = 0,
+    val xpAwarded: Int? = 0
+)
+
+// -------------------------------------------------------------------------
+// Procedural Onboarding & Algorithmic Challenges (/api/courses/onboarding/*)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class OnboardingFlowDTO(
+    val totalSteps: Int? = 12,
+    val alreadyHaveAccountButtonText: String? = null,
+    val carouselAutoSlideSeconds: Double? = null
+)
+
+@Serializable
+data class OnboardingStepDTO(
+    val step: Int? = 1,
+    val totalSteps: Int? = 12,
+    val pointerDirection: String? = null,
+    val mascotState: String? = null,
+    val speechText: String? = null,
+    val title: String? = null,
+    val subtitle: String? = null,
+    val options: List<String>? = emptyList()
+)
+
+@Serializable
+data class PointerChallengeDTO(
+    val arrayDeclaration: String? = null,
+    val arrayElements: List<Int>? = emptyList(),
+    val targetIndex: Int? = null,
+    val targetValue: Int? = null,
+    val questionPrompt: String? = null,
+    val options: List<String>? = emptyList(),
+    val correctAnswer: String? = null,
+    val explanation: String? = null
+)
+
+@Serializable
+data class ConceptChallengeDTO(
+    val badge: String? = null,
+    val title: String? = null,
+    val visualRepresentation: String? = null,
+    val prompt: String? = null,
+    val options: List<String>? = emptyList(),
+    val correctAnswer: String? = null,
+    val explanation: String? = null
+)
+

@@ -111,6 +111,18 @@ class GameManager private constructor() {
     private val _activePhoenixStage = MutableStateFlow(1)
     val activePhoenixStage: StateFlow<Int> = _activePhoenixStage.asStateFlow()
 
+    private val _highestCombo = MutableStateFlow(5)
+    val highestCombo: StateFlow<Int> = _highestCombo.asStateFlow()
+
+    private val _eggCrackLevel = MutableStateFlow(0)
+    val eggCrackLevel: StateFlow<Int> = _eggCrackLevel.asStateFlow()
+
+    private val _currentCombo = MutableStateFlow(0)
+    val currentCombo: StateFlow<Int> = _currentCombo.asStateFlow()
+
+    private val _showEvolutionModal = MutableStateFlow(false)
+    val showEvolutionModal: StateFlow<Boolean> = _showEvolutionModal.asStateFlow()
+
 
 
     private val _evolutionFromStage = MutableStateFlow(1)
@@ -816,8 +828,8 @@ class GameManager private constructor() {
     fun completeLesson(lessonId: String, nextLevelIndex: Int? = null) {
         _completedLessonIds.value = _completedLessonIds.value + lessonId
         if (nextLevelIndex != null) {
-            _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevel
-        reconcileUnlockedLevels()Index
+            _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevelIndex
+            reconcileUnlockedLevels()
         }
         val p = prefs ?: return
         scope.launch { p.completeLesson(lessonId, nextLevelIndex) }
@@ -869,6 +881,7 @@ class GameManager private constructor() {
             currentLevelIndex + 1
         }
         _unlockedLevelIndices.value = _unlockedLevelIndices.value + nextLevel
+        reconcileUnlockedLevels()
         setActiveLevel(nextLevel)
 
         if (isBoss) {

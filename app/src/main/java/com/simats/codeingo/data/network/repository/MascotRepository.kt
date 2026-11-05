@@ -125,4 +125,39 @@ class MascotRepository @Inject constructor(
             false
         }
     }
+
+    /**
+     * Interacts with the Phoenix companion mascot, triggering affectionate animation and remote sync.
+     */
+    suspend fun petMascot(): ApiResult<com.simats.codeingo.data.network.model.MascotPetResponse> = withContext(Dispatchers.IO) {
+        val token = tokenStorage.getAccessToken()
+        if (token.isNullOrEmpty()) {
+            return@withContext ApiResult.Success(
+                com.simats.codeingo.data.network.model.MascotPetResponse(
+                    message = "Phoenix chirps happily! (Offline)",
+                    affectionLevel = 1
+                )
+            )
+        }
+        try {
+            val response = apiService.petMascot()
+            if (response.isSuccessful && response.body() != null) {
+                ApiResult.Success(response.body()!!)
+            } else {
+                ApiResult.Success(
+                    com.simats.codeingo.data.network.model.MascotPetResponse(
+                        message = "Phoenix nuzzles your hand!",
+                        affectionLevel = 1
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            ApiResult.Success(
+                com.simats.codeingo.data.network.model.MascotPetResponse(
+                    message = "Phoenix chirps warmly!",
+                    affectionLevel = 1
+                )
+            )
+        }
+    }
 }

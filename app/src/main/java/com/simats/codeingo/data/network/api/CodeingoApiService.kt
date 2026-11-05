@@ -38,6 +38,15 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.POST
+import retrofit2.http.DELETE
+import com.simats.codeingo.data.network.model.CourseUnitDTO
+import com.simats.codeingo.data.network.model.QuestionDTO
+import com.simats.codeingo.data.network.model.MascotPetResponse
+import com.simats.codeingo.data.network.model.OnboardingFlowDTO
+import com.simats.codeingo.data.network.model.OnboardingStepDTO
+import com.simats.codeingo.data.network.model.PointerChallengeDTO
+import com.simats.codeingo.data.network.model.ConceptChallengeDTO
+import com.simats.codeingo.data.network.model.LinkAccountRequest
 import retrofit2.http.Query
 
 interface CodeingoApiService {
@@ -271,4 +280,114 @@ interface CodeingoApiService {
     suspend fun searchUsers(
         @Query("q") query: String
     ): Response<List<UserDTO>>
+
+    // ── 14. Course Curriculum & Dynamic Questions ─────────────────────────────
+
+    @GET("api/courses/{courseId}/units")
+    suspend fun getCourseUnits(
+        @Path("courseId") courseId: String = "cns_defense"
+    ): Response<List<CourseUnitDTO>>
+
+    @GET("api/courses/dsa/units")
+    suspend fun getDsaUnits(): Response<List<CourseUnitDTO>>
+
+    @GET("api/game/curriculum")
+    suspend fun getGameCurriculum(): Response<List<CourseUnitDTO>>
+
+    @GET("api/courses/questions")
+    suspend fun getCourseQuestions(
+        @Query("unitId") unitId: String? = null,
+        @Query("levelNumber") levelNumber: Int? = null,
+        @Query("userId") userId: String? = null,
+        @Query("goal") goal: String? = null,
+        @Query("track") track: String? = null
+    ): Response<List<QuestionDTO>>
+
+    @GET("api/courses/lessons/{lessonId}/questions")
+    suspend fun getLessonQuestions(
+        @Path("lessonId") lessonId: String,
+        @Query("userId") userId: String? = null
+    ): Response<List<QuestionDTO>>
+
+    @POST("api/courses/goals/{id}/on")
+    suspend fun turnGoalOn(@Path("id") id: String): Response<GenericApiResponse>
+
+    @POST("api/courses/goals/{id}/off")
+    suspend fun turnGoalOff(@Path("id") id: String): Response<GenericApiResponse>
+
+    @POST("api/courses/goals/{id}/toggle")
+    suspend fun toggleGoal(@Path("id") id: String): Response<GenericApiResponse>
+
+    // ── 15. Procedural Onboarding Flow & Live Challenges ─────────────────────
+
+    @GET("api/courses/onboarding/flow")
+    suspend fun getOnboardingFlow(): Response<OnboardingFlowDTO>
+
+    @GET("api/courses/onboarding/welcome")
+    suspend fun getOnboardingWelcome(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/intro")
+    suspend fun getOnboardingIntro(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/languages")
+    suspend fun getOnboardingLanguages(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/goals")
+    suspend fun getOnboardingGoals(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/pointer-challenge")
+    suspend fun getOnboardingPointerChallenge(): Response<PointerChallengeDTO>
+
+    @GET("api/courses/challenges/pointer/random")
+    suspend fun getRandomPointerChallenge(): Response<PointerChallengeDTO>
+
+    @GET("api/courses/onboarding/interstitial")
+    suspend fun getOnboardingInterstitial(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/concept-challenge")
+    suspend fun getOnboardingConceptChallenge(): Response<ConceptChallengeDTO>
+
+    @GET("api/courses/challenges/concept/random")
+    suspend fun getRandomConceptChallenge(): Response<ConceptChallengeDTO>
+
+    @GET("api/courses/onboarding/streak-earned")
+    suspend fun getOnboardingStreakEarned(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/streak-goals")
+    suspend fun getOnboardingStreakGoals(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/celebration")
+    suspend fun getOnboardingCelebration(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/widget-cheer")
+    suspend fun getOnboardingWidgetCheer(): Response<OnboardingStepDTO>
+
+    @GET("api/courses/onboarding/curriculum-prep")
+    suspend fun getOnboardingCurriculumPrep(): Response<OnboardingStepDTO>
+
+    // ── 16. Additional User Actions & Companion Interactivity ────────────────
+
+    @POST("api/mascot/pet")
+    suspend fun petMascot(): Response<MascotPetResponse>
+
+    @POST("api/users/me/reset-course")
+    suspend fun resetCourse(
+        @Query("courseId") courseId: String = "cns_defense"
+    ): Response<GenericApiResponse>
+
+    @POST("api/users/me/phoenix-stage")
+    suspend fun setPhoenixStage(
+        @Query("stage") stage: Int
+    ): Response<UserDTO>
+
+    @POST("api/users/me/premium/activate")
+    suspend fun activatePremium(): Response<UserDTO>
+
+    @DELETE("api/users/me")
+    suspend fun deactivateAccount(): Response<GenericApiResponse>
+
+    @POST("api/auth/link-account")
+    suspend fun linkAccount(
+        @Body request: LinkAccountRequest
+    ): Response<AuthResponse>
 }

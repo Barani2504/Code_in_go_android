@@ -7,6 +7,7 @@ import com.simats.codeingo.data.network.model.AuthResponse
 import com.simats.codeingo.data.network.model.ForgotPasswordRequest
 import com.simats.codeingo.data.network.model.GenericApiResponse
 import com.simats.codeingo.data.network.model.GuestStartRequest
+import com.simats.codeingo.data.network.model.LinkAccountRequest
 import com.simats.codeingo.data.network.model.RegisterRequest
 import com.simats.codeingo.data.network.model.ResetPasswordRequest
 import com.simats.codeingo.data.network.model.UpdateProfileRequest
@@ -121,6 +122,13 @@ class AuthRepository @Inject constructor(
                 }
             }
             mapErrorResponse(response)
+        }
+    }
+
+    suspend fun linkAccount(request: LinkAccountRequest): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.linkAccount(request)
+            handleAuthResponse(response)
         }
     }
 

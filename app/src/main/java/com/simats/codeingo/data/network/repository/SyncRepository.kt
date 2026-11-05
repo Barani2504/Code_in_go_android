@@ -21,6 +21,12 @@ import com.simats.codeingo.data.network.model.SystemAnnouncementDTO
 import com.simats.codeingo.data.network.model.UpdateProfileRequest
 import com.simats.codeingo.data.network.model.UserDTO
 import com.simats.codeingo.data.network.model.UserProgressItemDTO
+import com.simats.codeingo.data.network.model.CourseUnitDTO
+import com.simats.codeingo.data.network.model.QuestionDTO
+import com.simats.codeingo.data.network.model.MascotPetResponse
+import com.simats.codeingo.data.network.model.OnboardingFlowDTO
+import com.simats.codeingo.data.network.model.PointerChallengeDTO
+import com.simats.codeingo.data.network.model.ConceptChallengeDTO
 import com.simats.codeingo.data.network.security.TokenManager
 import com.simats.codeingo.domain.AuthService
 import com.simats.codeingo.domain.GameManager
@@ -395,6 +401,92 @@ class SyncRepository @Inject constructor(
 
     suspend fun searchUsers(query: String): ApiResult<List<UserDTO>> = safeApiCall {
         mapResponse(apiService.searchUsers(query))
+    }
+
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // 10. Live Curriculum & Dynamic Questions
+    // -------------------------------------------------------------------------
+
+    suspend fun fetchCourseUnits(courseId: String = CNS_COURSE_ID): ApiResult<List<CourseUnitDTO>> = safeApiCall {
+        val res = apiService.getCourseUnits(courseId)
+        if (res.isSuccessful) mapResponse(res)
+        else {
+            val dsaRes = apiService.getDsaUnits()
+            if (dsaRes.isSuccessful) mapResponse(dsaRes)
+            else mapResponse(apiService.getGameCurriculum())
+        }
+    }
+
+    suspend fun fetchQuestions(
+        unitId: String? = null,
+        levelNumber: Int? = null,
+        goal: String? = "cns",
+        track: String? = CNS_COURSE_ID
+    ): ApiResult<List<QuestionDTO>> = safeApiCall {
+        mapResponse(apiService.getCourseQuestions(unitId = unitId, levelNumber = levelNumber, goal = goal, track = track))
+    }
+
+    suspend fun fetchLessonQuestions(lessonId: String): ApiResult<List<QuestionDTO>> = safeApiCall {
+        mapResponse(apiService.getLessonQuestions(lessonId = lessonId))
+    }
+
+    suspend fun turnGoalOn(id: String): ApiResult<GenericApiResponse> = safeApiCall {
+        mapResponse(apiService.turnGoalOn(id))
+    }
+
+    suspend fun turnGoalOff(id: String): ApiResult<GenericApiResponse> = safeApiCall {
+        mapResponse(apiService.turnGoalOff(id))
+    }
+
+    suspend fun toggleGoal(id: String): ApiResult<GenericApiResponse> = safeApiCall {
+        mapResponse(apiService.toggleGoal(id))
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. Procedural Onboarding & Live Challenges
+    // -------------------------------------------------------------------------
+
+    suspend fun fetchOnboardingFlow(): ApiResult<OnboardingFlowDTO> = safeApiCall {
+        mapResponse(apiService.getOnboardingFlow())
+    }
+
+    suspend fun fetchRandomPointerChallenge(): ApiResult<PointerChallengeDTO> = safeApiCall {
+        mapResponse(apiService.getRandomPointerChallenge())
+    }
+
+    suspend fun fetchRandomConceptChallenge(): ApiResult<ConceptChallengeDTO> = safeApiCall {
+        mapResponse(apiService.getRandomConceptChallenge())
+    }
+
+    // -------------------------------------------------------------------------
+    // 12. User Course Lifecycle & Pet Mascot
+    // -------------------------------------------------------------------------
+
+    suspend fun petMascot(): ApiResult<MascotPetResponse> = safeApiCall {
+        mapResponse(apiService.petMascot())
+    }
+
+    suspend fun resetCourse(courseId: String = CNS_COURSE_ID): ApiResult<GenericApiResponse> = safeApiCall {
+        mapResponse(apiService.resetCourse(courseId))
+    }
+
+    suspend fun setPhoenixStage(stage: Int): ApiResult<UserDTO> = safeApiCall {
+        val res = apiService.setPhoenixStage(stage)
+        if (res.isSuccessful && res.body() != null) {
+            withContext(Dispatchers.Main) {
+                gameManager.setActivePhoenixStage(stage)
+            }
+        }
+        mapResponse(res)
+    }
+
+    suspend fun activatePremium(): ApiResult<UserDTO> = safeApiCall {
+        mapResponse(apiService.activatePremium())
+    }
+
+    suspend fun deactivateAccount(): ApiResult<GenericApiResponse> = safeApiCall {
+        mapResponse(apiService.deactivateAccount())
     }
 
     // -------------------------------------------------------------------------

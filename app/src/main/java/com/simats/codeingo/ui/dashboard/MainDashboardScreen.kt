@@ -55,6 +55,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Lock
@@ -752,7 +754,7 @@ fun MainDashboardScreen(
                                                     )
                                                 }
                                                 Icon(
-                                                    imageVector = Icons.Default.ArrowForward,
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                                     contentDescription = null,
                                                     tint = Color.White,
                                                     modifier = Modifier.size(16.dp)

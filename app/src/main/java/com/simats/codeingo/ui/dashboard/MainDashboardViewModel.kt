@@ -213,6 +213,28 @@ class MainDashboardViewModel @Inject constructor(
         }
     }
 
+    fun petCompanion(onSuccess: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            when (val result = syncRepository.petMascot()) {
+                is ApiResult.Success -> {
+                    onSuccess(result.data.message ?: "Phoenix chirps happily!")
+                }
+                else -> {
+                    onSuccess("Phoenix nuzzles your hand!")
+                }
+            }
+        }
+    }
+
+    fun resetCourse(onComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            syncRepository.resetCourse()
+            gameManager.resetChapterProgression()
+            refreshAll()
+            onComplete()
+        }
+    }
+
     fun updateDisplayName(name: String, onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
         viewModelScope.launch {
             val trimmed = name.trim()

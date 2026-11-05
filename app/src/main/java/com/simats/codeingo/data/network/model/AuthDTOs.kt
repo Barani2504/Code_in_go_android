@@ -121,3 +121,10 @@ data class UpdateProfileRequest(
     val hapticsEnabled: Boolean? = null,
     val themeMode: String? = null
 )
+
+@Serializable
+data class LinkAccountRequest(
+    val email: String,
+    val password: String,
+    val name: String? = null
+)
