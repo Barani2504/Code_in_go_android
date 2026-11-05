@@ -191,13 +191,16 @@ fun ContinueHeroCard(
 
 /**
  * 2. TODAY'S MISSIONS CAROUSEL (M3 Horizontal Scroll)
- * Shows the 3 daily missions: Lesson, Mistake Vault review, and Arena trial.
+ * Shows live daily missions from common backend, or falls back to the 3 standard missions:
+ * Lesson, Mistake Vault review, and Arena trial.
  */
 @Composable
 fun TodaysMissionsCarousel(
     onOpenLesson: () -> Unit,
     onOpenMistakeVault: () -> Unit,
     onOpenArena: () -> Unit,
+    dailyQuests: List<com.simats.codeingo.data.network.model.DailyQuestItem> = emptyList(),
+    onClaimQuest: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -216,7 +219,7 @@ fun TodaysMissionsCarousel(
                 color = SubtextGray
             )
             Text(
-                text = "3 ACTIVE",
+                text = if (dailyQuests.isNotEmpty()) "${dailyQuests.count { !it.isClaimed }} ACTIVE" else "3 ACTIVE",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = AmberGold
@@ -229,30 +232,55 @@ fun TodaysMissionsCarousel(
                 .horizontalScroll(scrollState),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MissionCard(
-                icon = "🎯",
-                title = "Secure 1 Node",
-                description = "Complete any lesson node",
-                rewardXp = 20,
-                isCompleted = false,
-                onClick = onOpenLesson
-            )
-            MissionCard(
-                icon = "🛡️",
-                title = "Mistake Vault",
-                description = "Review past vulnerabilities",
-                rewardXp = 10,
-                isCompleted = false,
-                onClick = onOpenMistakeVault
-            )
-            MissionCard(
-                icon = "⚔️",
-                title = "Arena Trial",
-                description = "Survive 1 cipher arena wave",
-                rewardXp = 25,
-                isCompleted = false,
-                onClick = onOpenArena
-            )
+            if (dailyQuests.isNotEmpty()) {
+                dailyQuests.forEach { quest ->
+                    val isCompleted = quest.isCompleted
+                    val isClaimed = quest.isClaimed
+                    MissionCard(
+                        icon = if (isClaimed) "✅" else if (isCompleted) "🎁" else "🎯",
+                        title = quest.title,
+                        description = quest.requirement + if (quest.targetCount > 1) " (${quest.currentCount}/${quest.targetCount})" else "",
+                        rewardXp = quest.xpReward,
+                        isCompleted = isCompleted,
+                        isClaimed = isClaimed,
+                        onClick = {
+                            if (isCompleted && !isClaimed) {
+                                onClaimQuest?.invoke(quest.id)
+                            } else {
+                                onOpenLesson()
+                            }
+                        }
+                    )
+                }
+            } else {
+                MissionCard(
+                    icon = "🎯",
+                    title = "Secure 1 Node",
+                    description = "Complete any lesson node",
+                    rewardXp = 20,
+                    isCompleted = false,
+                    isClaimed = false,
+                    onClick = onOpenLesson
+                )
+                MissionCard(
+                    icon = "🛡️",
+                    title = "Mistake Vault",
+                    description = "Review past vulnerabilities",
+                    rewardXp = 10,
+                    isCompleted = false,
+                    isClaimed = false,
+                    onClick = onOpenMistakeVault
+                )
+                MissionCard(
+                    icon = "⚔️",
+                    title = "Arena Trial",
+                    description = "Survive 1 cipher arena wave",
+                    rewardXp = 25,
+                    isCompleted = false,
+                    isClaimed = false,
+                    onClick = onOpenArena
+                )
+            }
         }
     }
 }
@@ -264,15 +292,22 @@ private fun MissionCard(
     description: String,
     rewardXp: Int,
     isCompleted: Boolean,
+    isClaimed: Boolean = false,
     onClick: () -> Unit
 ) {
+    val borderColor = when {
+        isClaimed -> Color(0xFF10B981).copy(alpha = 0.5f)
+        isCompleted -> AmberGold.copy(alpha = 0.8f)
+        else -> Color(0xFF1E293B)
+    }
+
     Box(
         modifier = Modifier
             .width(200.dp)
             .pressSquish(onClick = onClick)
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFF131B2A))
-            .border(1.2.dp, Color(0xFF1E293B), RoundedCornerShape(16.dp))
+            .border(1.2.dp, borderColor, RoundedCornerShape(16.dp))
             .padding(14.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -285,14 +320,14 @@ private fun MissionCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(AmberGold.copy(alpha = 0.15f))
+                        .background(if (isClaimed) Color(0xFF10B981).copy(alpha = 0.2f) else AmberGold.copy(alpha = 0.15f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = "+$rewardXp XP",
+                        text = if (isClaimed) "CLAIMED" else if (isCompleted) "CLAIM +$rewardXp XP" else "+$rewardXp XP",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = AmberGold
+                        color = if (isClaimed) Color(0xFF10B981) else AmberGold
                     )
                 }
             }
@@ -433,13 +468,21 @@ fun DailyGoalAndStreakPill(
  */
 @Composable
 fun DailyRewardChestCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClaimReward: (() -> Unit)? = null
 ) {
     var cardFace by remember { mutableStateOf(CardFace.FRONT) }
+    var hasClaimed by remember { mutableStateOf(false) }
 
     FlipCard(
         cardFace = cardFace,
-        onFlip = { next -> cardFace = next },
+        onFlip = { next ->
+            cardFace = next
+            if (next == CardFace.BACK && !hasClaimed) {
+                hasClaimed = true
+                onClaimReward?.invoke()
+            }
+        },
         enableClickFlip = true,
         modifier = modifier.fillMaxWidth(),
         frontContent = {

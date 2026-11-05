@@ -600,6 +600,16 @@ class GameManager private constructor() {
         PhoenixEmotionManager.instance.handleHeartsRefilled()
     }
 
+    fun setHeartsCount(count: Int) {
+        _heartsCount.value = count.coerceIn(0, 10)
+        persistStats()
+    }
+
+    fun replenishHearts(amount: Int = 5) {
+        _heartsCount.update { minOf(10, it + amount) }
+        persistStats()
+    }
+
     fun buyHearts(amount: Int, price: Int): Pair<Boolean, String> {
         if (_heartsCount.value >= 10) {
             return Pair(false, "Your life hearts are already full! (10/10 ❤️)")

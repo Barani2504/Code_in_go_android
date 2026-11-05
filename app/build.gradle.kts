@@ -62,7 +62,7 @@ android {
             dimension = "environment"
             val devUrl = localProperties.getProperty("API_BASE_URL_DEV")
                 ?: (project.findProperty("API_BASE_URL_DEV") as? String)
-                ?: "http://10.0.2.2:8080/"
+                ?: "https://qkc9q70m-8080.inc1.devtunnels.ms/"
             buildConfigField("String", "API_BASE_URL", "\"$devUrl\"")
         }
         create("staging") {

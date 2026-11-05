@@ -72,6 +72,8 @@ import com.simats.codeingo.ui.theme.tilt3D
 fun ProfileScreen(
     onOpenSettings: () -> Unit = {},
     onLogout: () -> Unit = {},
+    achievements: List<com.simats.codeingo.data.network.model.AchievementDTO> = emptyList(),
+    onClaimAchievement: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val localizationManager = LocalizationManager.instance
@@ -113,7 +115,9 @@ fun ProfileScreen(
                 onOpenEditProfile = { showCreateAccountSheet = true },
                 onOpenGemShop = { showGemShopSheet = true },
                 onOpenSettings = onOpenSettings,
-                onSignOutClick = { showSignOutAlert = true }
+                onSignOutClick = { showSignOutAlert = true },
+                achievements = achievements,
+                onClaimAchievement = onClaimAchievement
             )
         } else {
             UnauthenticatedProfileBody(
@@ -231,7 +235,9 @@ private fun AuthenticatedProfileBody(
     onOpenEditProfile: () -> Unit,
     onOpenGemShop: () -> Unit,
     onOpenSettings: () -> Unit,
-    onSignOutClick: () -> Unit
+    onSignOutClick: () -> Unit,
+    achievements: List<com.simats.codeingo.data.network.model.AchievementDTO> = emptyList(),
+    onClaimAchievement: ((String) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -351,6 +357,8 @@ private fun AuthenticatedProfileBody(
         AchievementsSection(
             streakDays = streakDays,
             totalXP = totalXP,
+            achievements = achievements,
+            onClaimAchievement = onClaimAchievement,
             onViewAllClick = {}
         )
 
@@ -1026,6 +1034,8 @@ private fun ProfileStatCard(
 private fun AchievementsSection(
     streakDays: Int,
     totalXP: Int,
+    achievements: List<com.simats.codeingo.data.network.model.AchievementDTO> = emptyList(),
+    onClaimAchievement: ((String) -> Unit)? = null,
     onViewAllClick: () -> Unit
 ) {
     Column(
@@ -1060,38 +1070,47 @@ private fun AchievementsSection(
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            AchievementRow(
-                icon = "🔥",
-                level = 1,
-                title = "Wildfire",
-                subtitle = "Reach a 3-day streak",
-                progress = minOf(streakDays, 3),
-                maxProgress = 3,
-                barColor = Color(0xFFFF9500),
-                gradient = listOf(Color(0xFFD9381E), Color(0xFF8B1800))
-            )
+            if (achievements.isNotEmpty()) {
+                achievements.forEach { achievement ->
+                    RemoteAchievementCard(
+                        achievement = achievement,
+                        onClaim = { onClaimAchievement?.invoke(achievement.id) }
+                    )
+                }
+            } else {
+                AchievementRow(
+                    icon = "🔥",
+                    level = 1,
+                    title = "Wildfire",
+                    subtitle = "Reach a 3-day streak",
+                    progress = minOf(streakDays, 3),
+                    maxProgress = 3,
+                    barColor = Color(0xFFFF9500),
+                    gradient = listOf(Color(0xFFD9381E), Color(0xFF8B1800))
+                )
 
-            AchievementRow(
-                icon = "🧙‍♂️",
-                level = 1,
-                title = "Sage",
-                subtitle = "Earn 100 XP in Cryptography labs",
-                progress = minOf(totalXP, 100),
-                maxProgress = 100,
-                barColor = Color(0xFF2CB84B),
-                gradient = listOf(Color(0xFF1E823C), Color(0xFF0F4D22))
-            )
+                AchievementRow(
+                    icon = "🧙‍♂️",
+                    level = 1,
+                    title = "Sage",
+                    subtitle = "Earn 100 XP in Cryptography labs",
+                    progress = minOf(totalXP, 100),
+                    maxProgress = 100,
+                    barColor = Color(0xFF2CB84B),
+                    gradient = listOf(Color(0xFF1E823C), Color(0xFF0F4D22))
+                )
 
-            AchievementRow(
-                icon = "🛡️",
-                level = 1,
-                title = "Champion",
-                subtitle = "Unlock leaderboards & compete",
-                progress = 1,
-                maxProgress = 1,
-                barColor = Color(0xFF9E47FF),
-                gradient = listOf(Color(0xFF6B2FB8), Color(0xFF3F1970))
-            )
+                AchievementRow(
+                    icon = "🛡️",
+                    level = 1,
+                    title = "Champion",
+                    subtitle = "Unlock leaderboards & compete",
+                    progress = 1,
+                    maxProgress = 1,
+                    barColor = Color(0xFF9E47FF),
+                    gradient = listOf(Color(0xFF6B2FB8), Color(0xFF3F1970))
+                )
+            }
         }
     }
 }
@@ -1183,6 +1202,139 @@ private fun AchievementRow(
                 fontWeight = FontWeight.Medium,
                 color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.45f)
             )
+        }
+    }
+}
+
+@Composable
+private fun RemoteAchievementCard(
+    achievement: com.simats.codeingo.data.network.model.AchievementDTO,
+    onClaim: () -> Unit
+) {
+    val isUnlocked = achievement.isUnlocked
+    val isClaimed = achievement.isClaimed
+    val cur = achievement.currentValue ?: 0
+    val target = maxOf(achievement.targetValue, 1)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassCard(
+                accentGlow = if (isClaimed) Color(0xFF10B981) else if (isUnlocked) AmberGold else Color(0xFF3B82F6),
+                cornerRadius = 18.dp
+            )
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Emoji Badge
+        Box(
+            modifier = Modifier
+                .size(50.dp, 56.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    if (isClaimed) Color(0xFF064E3B)
+                    else if (isUnlocked) Color(0xFF451A03)
+                    else Color(0xFF1E293B)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = achievement.emoji, fontSize = 24.sp)
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = achievement.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = LocalDynamicThemeColors.current.textPrimary
+                )
+                // Reward Badge
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "+💎${achievement.gemReward}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF38BDF8)
+                    )
+                    Text(
+                        text = "+⚡${achievement.xpReward}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AmberGold
+                    )
+                }
+            }
+
+            achievement.description?.let { desc ->
+                Text(
+                    text = desc,
+                    fontSize = 11.sp,
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.55f),
+                    lineHeight = 14.sp
+                )
+            }
+
+            // Progress bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Color.White.copy(alpha = 0.08f))
+            ) {
+                val fraction = (cur.toFloat() / target.toFloat()).coerceIn(0f, 1f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (isClaimed) Color(0xFF10B981) else if (isUnlocked) AmberGold else Color(0xFF3B82F6))
+                )
+            }
+
+            // Claim / Status Button
+            if (isClaimed) {
+                Text(
+                    text = "REWARD CLAIMED ✅",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF10B981)
+                )
+            } else if (isUnlocked) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(AmberGold)
+                        .clickable { onClaim() }
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "CLAIM REWARD (+💎${achievement.gemReward} / +⚡${achievement.xpReward})",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.Black
+                    )
+                }
+            } else {
+                Text(
+                    text = "$cur/$target In Progress",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.4f)
+                )
+            }
         }
     }
 }

@@ -64,6 +64,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.simats.codeingo.ui.dashboard.MainDashboardViewModel
+import com.simats.codeingo.ui.dashboard.SyncUiStatus
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -173,7 +176,8 @@ fun MainDashboardScreen(
     onOpenPhoenixSanctuary: () -> Unit,
     onOpenSettings: () -> Unit,
     onLogout: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: MainDashboardViewModel = hiltViewModel()
 ) {
     val gameManager = GameManager.instance
     val localizationManager = LocalizationManager.instance
@@ -192,6 +196,11 @@ fun MainDashboardScreen(
     val completedChapters by gameManager.completedChapters.collectAsState()
     val completedLevelIndices by gameManager.completedLevelIndices.collectAsState()
     val activeLevelIndex by gameManager.activeLevelIndex.collectAsState()
+    val syncStatus by viewModel.syncStatus.collectAsState()
+    val dailyQuests by viewModel.dailyQuests.collectAsState()
+    val pendingSyncCount by viewModel.pendingSyncCount.collectAsState()
+    val systemAnnouncement by viewModel.systemAnnouncement.collectAsState()
+    val achievements by viewModel.achievements.collectAsState()
 
     var selectedTab by remember { mutableStateOf(DashboardTab.LEARN) }
     val dashboardTabs = remember {
@@ -404,6 +413,106 @@ fun MainDashboardScreen(
                                         .widthIn(max = 680.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+                                // Common Backend Sync & Offline Status Indicator
+                                AnimatedVisibility(
+                                    visible = syncStatus !is SyncUiStatus.Idle || pendingSyncCount > 0,
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                                ) {
+                                    val (bgColor, textColor, text) = when (val s = syncStatus) {
+                                        is SyncUiStatus.Syncing -> Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Syncing with Common Backend...")
+                                        is SyncUiStatus.Synced -> Triple(Color(0xFF064E3B), Color(0xFF6EE7B7), "Live Cloud Synced")
+                                        is SyncUiStatus.Error -> Triple(Color(0xFF451A03), Color(0xFFFDBA74), if (pendingSyncCount > 0) "Offline: $pendingSyncCount completions saved in local outbox" else "Operating in Local Cache Mode")
+                                        else -> Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Outbox: $pendingSyncCount pending sync")
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 3.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(bgColor.copy(alpha = 0.85f))
+                                            .border(1.dp, textColor.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(6.dp)
+                                                        .clip(CircleShape)
+                                                        .background(textColor)
+                                                )
+                                                Text(
+                                                    text = text,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = textColor
+                                                )
+                                            }
+                                            if (syncStatus is SyncUiStatus.Error || syncStatus is SyncUiStatus.Idle) {
+                                                Text(
+                                                    text = "RETRY",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = textColor,
+                                                    modifier = Modifier.clickable { viewModel.refreshAll() }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Broadcast System Announcement Banner (from Admin Console)
+                                AnimatedVisibility(
+                                    visible = systemAnnouncement != null,
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                                ) {
+                                    val announcement = systemAnnouncement ?: ""
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFF1E1B4B))
+                                            .border(1.2.dp, AmberGold.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            Text(text = "📢", fontSize = 16.sp)
+                                            Text(
+                                                text = announcement,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                modifier = Modifier.weight(1f),
+                                                maxLines = 2
+                                            )
+                                            Text(
+                                                text = "✕",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF94A3B8),
+                                                modifier = Modifier
+                                                    .clip(CircleShape)
+                                                    .clickable { viewModel.dismissAnnouncement() }
+                                                    .padding(4.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
                                 EthicalReengagementGreeting(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
@@ -435,11 +544,16 @@ fun MainDashboardScreen(
                                     onOpenLesson = { onStartLesson(maxUnlockedChapter, activeLevelIndex, 5, false) },
                                     onOpenMistakeVault = { selectedTab = DashboardTab.VISUALIZER },
                                     onOpenArena = { selectedTab = DashboardTab.ARENAS },
+                                    dailyQuests = dailyQuests,
+                                    onClaimQuest = { questId -> viewModel.claimQuest(questId) },
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
 
                                 DailyRewardChestCard(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                    onClaimReward = {
+                                        viewModel.claimDailyChestReward(xp = 20, gems = 15)
+                                    }
                                 )
                                 }
 
@@ -846,6 +960,8 @@ fun MainDashboardScreen(
                         ProfileScreen(
                             onOpenSettings = onOpenSettings,
                             onLogout = onLogout,
+                            achievements = achievements,
+                            onClaimAchievement = { viewModel.claimAchievement(it) },
                             modifier = Modifier.fillMaxSize()
                         )
                     }

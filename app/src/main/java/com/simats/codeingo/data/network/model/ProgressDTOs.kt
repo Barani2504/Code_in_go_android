@@ -29,6 +29,8 @@ data class BackendLessonCompleteResponse(
     val accuracyPercentage: Int? = null,
     val currentStreak: Int? = null,
     val streakExtendedToday: Boolean? = false,
+    val streakProtectedByFreeze: Boolean? = false,
+    val streakFreezesRemaining: Int? = null,
     val gemsEarned: Int? = 0,
     val totalGems: Int? = null
 )

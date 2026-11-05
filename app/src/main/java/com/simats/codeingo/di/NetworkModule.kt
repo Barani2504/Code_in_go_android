@@ -1,6 +1,7 @@
 package com.simats.codeingo.di
 
 import com.simats.codeingo.BuildConfig
+import com.simats.codeingo.data.network.NetworkConfig
 import com.simats.codeingo.data.network.api.CodeingoApiService
 import com.simats.codeingo.data.network.security.AuthHeaderInterceptor
 import dagger.Module
@@ -32,12 +33,25 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        authHeaderInterceptor: AuthHeaderInterceptor
+        authHeaderInterceptor: AuthHeaderInterceptor,
+        networkConfig: NetworkConfig
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
-            .connectTimeout(6, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
+            // Dynamic host redirection: routes all requests to active NetworkConfig target (Dev Tunnel / Prod / Local)
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val targetUrl = networkConfig.getHttpUrl()
+                val newUrl = original.url.newBuilder()
+                    .scheme(targetUrl.scheme)
+                    .host(targetUrl.host)
+                    .port(targetUrl.port)
+                    .build()
+                val newRequest = original.newBuilder().url(newUrl).build()
+                chain.proceed(newRequest)
+            }
             .addInterceptor(authHeaderInterceptor)
 
         if (BuildConfig.DEBUG) {
@@ -78,10 +92,11 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
-        json: Json
+        json: Json,
+        networkConfig: NetworkConfig
     ): Retrofit {
         val contentType = "application/json".toMediaType()
-        val baseUrl = BuildConfig.API_BASE_URL.let { if (it.endsWith("/")) it else "$it/" }
+        val baseUrl = networkConfig.getBaseUrl()
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)

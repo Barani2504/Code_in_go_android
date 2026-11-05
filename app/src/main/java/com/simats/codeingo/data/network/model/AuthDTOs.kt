@@ -62,7 +62,14 @@ data class UserDTO(
     val selectedLanguage: String? = "python",
     val codingGoal: String? = "cns",
     val activeCourseId: String? = "cns_defense",
-    val streakGoal: Int? = null
+    val streakGoal: Int? = null,
+    val soundEnabled: Boolean? = true,
+    val hapticsEnabled: Boolean? = true,
+    val equippedHat: String? = null,
+    val equippedOutfit: String? = null,
+    val equippedAccessory: String? = null,
+    val equippedEffect: String? = null,
+    val ownedCosmeticIds: List<String>? = emptyList()
 )
 
 @Serializable
