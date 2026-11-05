@@ -20,6 +20,7 @@ import com.simats.codeingo.data.network.model.MascotConfigResponse
 import com.simats.codeingo.data.network.model.MascotStageDTO
 import com.simats.codeingo.data.network.model.MistakeReviewDTO
 import com.simats.codeingo.data.network.model.ProgressStatusDTO
+import com.simats.codeingo.data.network.model.UserProgressItemDTO
 import com.simats.codeingo.data.network.model.RefillHeartsResponse
 import com.simats.codeingo.data.network.model.RegisterRequest
 import com.simats.codeingo.data.network.model.ReportIssueRequest
@@ -166,6 +167,9 @@ interface CodeingoApiService {
     suspend fun getProgressStatus(
         @Query("courseId") courseId: String? = "cns_defense"
     ): Response<ProgressStatusDTO>
+
+    @GET("api/progress/me")
+    suspend fun getMyProgress(): Response<List<UserProgressItemDTO>>
 
     @POST("api/progress/lesson/complete")
     suspend fun completeLesson(

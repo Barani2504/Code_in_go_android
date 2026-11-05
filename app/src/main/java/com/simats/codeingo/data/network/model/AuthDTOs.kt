@@ -77,8 +77,32 @@ data class AuthResponse(
     val token: String,
     val refreshToken: String? = null,
     val user: UserDTO? = null,
-    val message: String? = null
-)
+    val message: String? = null,
+    val id: Int? = null,
+    val username: String? = null,
+    val email: String? = null,
+    val name: String? = null,
+    val totalXp: Int? = 0,
+    val hearts: Int? = 5,
+    val gems: Int? = 0,
+    val currentStreak: Int? = 1,
+    val activePhoenixStage: Int? = 1,
+    val activeCourseId: String? = "cns_defense"
+) {
+    val resolvedUser: UserDTO
+        get() = user ?: UserDTO(
+            id = id,
+            username = username ?: "operative",
+            email = email ?: "",
+            name = name,
+            totalXp = totalXp,
+            hearts = hearts,
+            gems = gems,
+            currentStreak = currentStreak,
+            activePhoenixStage = activePhoenixStage,
+            activeCourseId = activeCourseId ?: "cns_defense"
+        )
+}
 
 @Serializable
 data class UpdateProfileRequest(

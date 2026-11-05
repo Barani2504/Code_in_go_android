@@ -76,7 +76,7 @@ android {
             dimension = "environment"
             val prodUrl = localProperties.getProperty("API_BASE_URL_PROD")
                 ?: (project.findProperty("API_BASE_URL_PROD") as? String)
-                ?: "https://api.codeingo.com/"
+                ?: "https://qkc9q70m-8080.inc1.devtunnels.ms/"
             buildConfigField("String", "API_BASE_URL", "\"$prodUrl\"")
         }
     }

@@ -136,11 +136,7 @@ class AuthRepository @Inject constructor(
                 tokenManager.saveAccessToken(body.token)
                 body.refreshToken?.let { tokenManager.saveRefreshToken(it) }
 
-                val user = body.user ?: UserDTO(
-                    username = "operative",
-                    email = "",
-                    activeCourseId = "cns_defense"
-                )
+                val user = body.resolvedUser
 
                 // Sync with local AuthService session
                 AuthService.shared.signInWithEmail(user.email, user.name ?: user.username)

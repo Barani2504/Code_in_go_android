@@ -10,6 +10,7 @@ import com.simats.codeingo.data.network.model.CompleteSessionRequest
 import com.simats.codeingo.data.network.model.CompleteSessionResponse
 import com.simats.codeingo.data.network.model.DailyQuestItem
 import com.simats.codeingo.data.network.model.GenericApiResponse
+import com.simats.codeingo.data.network.model.GuestStartRequest
 import com.simats.codeingo.data.network.model.MistakeReviewDTO
 import com.simats.codeingo.data.network.model.ProgressStatusDTO
 import com.simats.codeingo.data.network.model.RefillHeartsResponse
@@ -19,6 +20,9 @@ import com.simats.codeingo.data.network.model.SubmitAnswerResponse
 import com.simats.codeingo.data.network.model.SystemAnnouncementDTO
 import com.simats.codeingo.data.network.model.UpdateProfileRequest
 import com.simats.codeingo.data.network.model.UserDTO
+import com.simats.codeingo.data.network.model.UserProgressItemDTO
+import com.simats.codeingo.data.network.security.TokenManager
+import com.simats.codeingo.domain.AuthService
 import com.simats.codeingo.domain.GameManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,11 +47,44 @@ import javax.inject.Singleton
 @Singleton
 class SyncRepository @Inject constructor(
     private val apiService: CodeingoApiService,
-    private val gameManager: GameManager
+    private val gameManager: GameManager,
+    private val tokenManager: TokenManager
 ) {
     companion object {
         private const val TAG = "SyncRepository"
         const val CNS_COURSE_ID = "cns_defense"
+    }
+
+    suspend fun ensureAuthenticated(): Boolean {
+        val existing = tokenManager.getAccessToken()
+        if (!existing.isNullOrBlank()) return true
+        return try {
+            val res = apiService.guestStart(GuestStartRequest(activeCourseId = CNS_COURSE_ID))
+            if (res.isSuccessful && res.body() != null) {
+                val body = res.body()!!
+                tokenManager.saveAccessToken(body.token)
+                body.refreshToken?.let { tokenManager.saveRefreshToken(it) }
+                val user = body.resolvedUser
+                withContext(Dispatchers.Main) {
+                    AuthService.shared.signInWithEmail(user.email, user.name ?: user.username)
+                    gameManager.applyRemoteSnapshot(
+                        remoteTotalXP = user.totalXp,
+                        remoteGems = user.gems,
+                        remoteStreak = user.currentStreak,
+                        remotePhoenixStage = user.activePhoenixStage,
+                        isLessonUploadResponse = false
+                    )
+                }
+                Log.i(TAG, "Successfully acquired guest session for ${user.username}")
+                true
+            } else {
+                Log.w(TAG, "guestStart failed with HTTP ${res.code()}")
+                false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "guestStart error during ensureAuthenticated", e)
+            false
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -102,7 +139,33 @@ class SyncRepository @Inject constructor(
         mapResponse(apiService.getProgressStatus(courseId = courseId))
     }
 
+    suspend fun fetchMyProgress(): ApiResult<List<UserProgressItemDTO>> = safeApiCall {
+        mapResponse(apiService.getMyProgress())
+    }
+
     suspend fun syncRemoteProgressToLocal(courseId: String? = CNS_COURSE_ID): ApiResult<ProgressStatusDTO> {
+        val meResult = fetchMyProgress()
+        if (meResult is ApiResult.Success) {
+            val items = meResult.data
+            val completedLessonIds = items.filter { it.isCompleted == true }.map { it.lessonId }
+            val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(completedLessonIds)
+            withContext(Dispatchers.Main) {
+                gameManager.applyRemoteSnapshot(
+                    remoteCompletedIndices = localIndices,
+                    isLessonUploadResponse = false
+                )
+            }
+            return ApiResult.Success(
+                ProgressStatusDTO(
+                    completedLessons = completedLessonIds,
+                    totalXp = gameManager.totalXP.value,
+                    hearts = gameManager.hearts.value,
+                    gems = gameManager.gems.value,
+                    streakDays = gameManager.streakDays.value
+                )
+            )
+        }
+
         val result = fetchProgressStatus(courseId)
         if (result is ApiResult.Success) {
             val status = result.data
@@ -357,7 +420,17 @@ class SyncRepository @Inject constructor(
     private suspend fun <T> safeApiCall(block: suspend () -> ApiResult<T>): ApiResult<T> {
         return withContext(Dispatchers.IO) {
             try {
-                block()
+                ensureAuthenticated()
+                var result = block()
+                if (result is ApiResult.Unauthorized || (result is ApiResult.HttpError && (result.code == 401 || result.code == 403))) {
+                    Log.d(TAG, "Received 401/403, attempting re-authentication...")
+                    tokenManager.clearTokens()
+                    val reAuthed = ensureAuthenticated()
+                    if (reAuthed) {
+                        result = block()
+                    }
+                }
+                result
             } catch (e: IOException) {
                 Log.w(TAG, "Network I/O error: ${e.message}")
                 ApiResult.NetworkError(e)
