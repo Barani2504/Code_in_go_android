@@ -44,21 +44,51 @@ object LessonIdAdapter {
      */
     fun toLocalLevelIndex(backendId: String): Int? {
         val trimmed = backendId.trim().lowercase()
-        if (!trimmed.startsWith("$PREFIX.c")) return null
 
-        val parts = trimmed.removePrefix("$PREFIX.c").split(".l")
-        if (parts.size != 2) return null
-
-        val chapter = parts[0].toIntOrNull() ?: return null
-        val stage = parts[1].toIntOrNull() ?: return null
-        if (stage !in 1..5) return null
-
-        return when (chapter) {
-            0 -> 100 + stage
-            in 1..5 -> ((chapter - 1) * 5) + stage
-            in 6..10 -> 25 + ((chapter - 6) * 5) + stage
-            else -> null
+        // Direct integer: "1" .. "50", "101" .. "105"
+        trimmed.toIntOrNull()?.let { num ->
+            if (num in 1..50 || num in 101..105) return num
         }
+
+        // Direct level prefix: "level_5", "level-5"
+        if (trimmed.startsWith("level_") || trimmed.startsWith("level-")) {
+            val num = trimmed.substring(6).toIntOrNull()
+            if (num != null && (num in 1..50 || num in 101..105)) return num
+        }
+
+        // Normalized separators: replace '-' and '_' with '.'
+        val normalized = trimmed.replace('_', '.').replace('-', '.')
+
+        // Match cns.c{chapter}.l{stage}
+        val matchDot = Regex("^cns\\.c(\\d+)\\.l(\\d+)$").find(normalized)
+        if (matchDot != null) {
+            val chapter = matchDot.groupValues[1].toIntOrNull() ?: return null
+            val stage = matchDot.groupValues[2].toIntOrNull() ?: return null
+            if (stage !in 1..5) return null
+            return when (chapter) {
+                0 -> 100 + stage
+                in 1..5 -> ((chapter - 1) * 5) + stage
+                in 6..10 -> 25 + ((chapter - 6) * 5) + stage
+                else -> null
+            }
+        }
+
+        // Match cns.{chapter}.{stage}
+        val matchSimple = Regex("^cns\\.(\\d+)\\.(\\d+)$").find(normalized)
+        if (matchSimple != null) {
+            val chapter = matchSimple.groupValues[1].toIntOrNull() ?: return null
+            val stage = matchSimple.groupValues[2].toIntOrNull() ?: return null
+            val adjustedStage = if (stage == 0) 1 else stage
+            if (adjustedStage !in 1..5) return null
+            return when (chapter) {
+                0 -> 100 + adjustedStage
+                in 1..5 -> ((chapter - 1) * 5) + adjustedStage
+                in 6..10 -> 25 + ((chapter - 6) * 5) + adjustedStage
+                else -> null
+            }
+        }
+
+        return null
     }
 
     /**

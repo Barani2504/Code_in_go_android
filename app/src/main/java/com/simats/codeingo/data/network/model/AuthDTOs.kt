@@ -1,3 +1,4 @@
+
 package com.simats.codeingo.data.network.model
 
 import kotlinx.serialization.Serializable
@@ -69,7 +70,12 @@ data class UserDTO(
     val equippedOutfit: String? = null,
     val equippedAccessory: String? = null,
     val equippedEffect: String? = null,
-    val ownedCosmeticIds: List<String>? = emptyList()
+    val ownedCosmeticIds: List<String>? = emptyList(),
+    val isPremium: Boolean? = false,
+    val isGuest: Boolean? = false,
+    val unlockedAchievements: List<String>? = emptyList(),
+    val claimedQuestIds: List<String>? = emptyList(),
+    val claimedAchievementIds: List<String>? = emptyList()
 )
 
 @Serializable

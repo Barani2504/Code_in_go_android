@@ -18,7 +18,9 @@ data class ProgressStatusDTO(
 data class BackendLessonCompleteRequest(
     val lessonId: String,
     val accuracyPercentage: Int = 100,
+    @kotlinx.serialization.Transient
     val completedAtEpochMs: Long? = null,
+    @kotlinx.serialization.Transient
     val idempotencyKey: String? = null
 )
 
