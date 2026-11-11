@@ -188,7 +188,7 @@ fun DSAFinalMasterJourneyView(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "DATA STRUCTURES MASTER",
+                        text = "CNS DEFENSE MASTER",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -202,7 +202,7 @@ fun DSAFinalMasterJourneyView(
                         color = LocalDynamicThemeColors.current.textPrimary
                     )
                     Text(
-                        text = "You have completed your Data Structures journey.",
+                        text = "You have completed your Cryptography & Network Security journey.",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.8f),
@@ -355,7 +355,7 @@ private fun WaterfallMasterItem() {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "🏆 DATA STRUCTURES MASTER",
+                text = "🏆 CNS DEFENSE MASTER",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
                 color = Color.Yellow
@@ -416,7 +416,7 @@ private fun StatsGrid(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             StatTile(emoji = "🔥", iconColor = Color(0xFFEF4444), value = "$currentStreak Days", label = "Current Streak", modifier = Modifier.weight(1f))
-            StatTile(emoji = "🛡️", iconColor = Color(0xFFA855F7), value = "Master", label = "DSA Badge", modifier = Modifier.weight(1f))
+            StatTile(emoji = "🛡️", iconColor = Color(0xFFA855F7), value = "Master", label = "CNS Badge", modifier = Modifier.weight(1f))
         }
     }
 }

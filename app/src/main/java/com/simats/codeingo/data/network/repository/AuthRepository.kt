@@ -16,6 +16,7 @@ import com.simats.codeingo.data.network.model.VerifyOtpRequest
 import com.simats.codeingo.data.network.security.TokenManager
 import com.simats.codeingo.domain.AuthService
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.domain.LocalizationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -28,7 +29,8 @@ import javax.inject.Singleton
 class AuthRepository @Inject constructor(
     private val apiService: CodeingoApiService,
     private val tokenManager: TokenManager,
-    private val progressOutboxRepositoryProvider: Provider<ProgressOutboxRepository>
+    private val progressOutboxRepositoryProvider: Provider<ProgressOutboxRepository>,
+    private val syncRepositoryProvider: Provider<SyncRepository>
 ) {
     suspend fun authenticate(email: String, password: String): ApiResult<UserDTO> {
         return safeApiCall {
@@ -204,6 +206,8 @@ class AuthRepository @Inject constructor(
     fun logout() {
         tokenManager.clearTokens()
         AuthService.shared.signOut()
+        LocalizationManager.instance.resetProfileData()
+        GameManager.instance.deleteAccountAndClearAllData()
     }
 
     private suspend fun handleAuthResponse(response: Response<AuthResponse>): ApiResult<UserDTO> {
@@ -215,24 +219,32 @@ class AuthRepository @Inject constructor(
 
                 val user = body.resolvedUser
 
-                // Sync with local AuthService session
+                // 1. Wipe out any prior cached user progress completely to prevent cross-user state leaks
+                GameManager.instance.resetAllProgress()
+                LocalizationManager.instance.resetProfileData()
+
+                // 2. Sync with local AuthService & LocalizationManager sessions
+                LocalizationManager.instance.setLoggedIn(true, user.name ?: user.username, user.username)
                 AuthService.shared.signInWithEmail(user.email, user.name ?: user.username)
 
-                // Reconcile user profile stats into GameManager
+                // 3. Reconcile user profile stats into GameManager
                 val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(user.completedLessonIds)
+                val maxCompletedIndex = localIndices.maxOrNull() ?: 0
+                val unitFromLessons = if (maxCompletedIndex > 0) ((maxCompletedIndex - 1) / 5) + 1 else 1
+
                 GameManager.instance.applyRemoteSnapshot(
                     remoteTotalXP = user.totalXp,
                     remoteGems = user.gems,
                     remoteStreak = user.currentStreak,
                     remotePhoenixStage = user.activePhoenixStage,
                     remoteCompletedIndices = localIndices,
+                    remoteCurrentUnitIndex = unitFromLessons,
                     isLessonUploadResponse = false
                 )
 
-                // D5: First-login upload of pre-existing local completions via outbox
+                // 4. Trigger remote progress sync to fetch latest server-side units and lessons
                 runCatching {
-                    val uid = user.id?.toString() ?: user.email.ifEmpty { "user_authenticated" }
-                    progressOutboxRepositoryProvider.get().uploadInitialLocalProgress(uid)
+                    syncRepositoryProvider.get().syncRemoteProgressToLocal()
                 }
 
                 return ApiResult.Success(user)

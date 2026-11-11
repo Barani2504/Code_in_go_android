@@ -54,13 +54,13 @@ fun SideMenuDrawer(
         ) {
             Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                 Text(
-                    text = "DSA Learning",
+                    text = "CNS Defense",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
-                    color = DsaBlue
+                    color = DuolingoBlue
                 )
                 Text(
-                    text = "Duolingo for Data Structures",
+                    text = "Cryptography & Network Security",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = SubtextGray

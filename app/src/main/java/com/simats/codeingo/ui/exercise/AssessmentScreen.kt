@@ -275,14 +275,14 @@ fun AssessmentScreen(
                         gameManager.addStars(starsEarned)
                         gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                         gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, accuracy = accuracyPercentage)
                         onComplete(totalXPEarned)
                     },
                     onFinish = {
                         gameManager.addStars(starsEarned)
                         gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                         gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, accuracy = accuracyPercentage)
                         onComplete(totalXPEarned)
                     },
                     onUpgradePhoenixNextUnit = {
@@ -305,7 +305,7 @@ fun AssessmentScreen(
                         gameManager.addStars(starsEarned)
                         gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
                         gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = false, accuracy = accuracyPercentage)
+                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = (levelNumber % 5 == 0), accuracy = accuracyPercentage)
                         onComplete(totalXPEarned)
                     }
                 )

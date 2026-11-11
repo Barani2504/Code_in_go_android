@@ -349,6 +349,8 @@ class AuthService private constructor() {
     fun signOut() {
         tokenStorage?.clearTokens()
         saveSession(null)
+        LocalizationManager.shared.resetProfileData()
+        GameManager.instance.resetAllProgress()
     }
 
     /** Permanently deletes the user account and purges local storage (Google Play User Data Deletion Policy) */

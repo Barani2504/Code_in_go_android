@@ -78,19 +78,19 @@ class UserPreferences(private val context: Context) : UserProgressSource {
     val userEmail: Flow<String> = context.dataStore.data.map { it[KEY_USER_EMAIL] ?: "" }
     val selectedLanguage: Flow<String> = context.dataStore.data.map { it[KEY_SELECTED_LANGUAGE] ?: "python" }
 
-    val totalXP: Flow<Int> = context.dataStore.data.map { it[KEY_TOTAL_XP] ?: 120 }
-    val gemsCount: Flow<Int> = context.dataStore.data.map { it[KEY_GEMS] ?: 450 }
-    val heartsCount: Flow<Int> = context.dataStore.data.map { it[KEY_HEARTS] ?: 10 }
-    val streakDays: Flow<Int> = context.dataStore.data.map { it[KEY_STREAK] ?: 3 }
+    val totalXP: Flow<Int> = context.dataStore.data.map { it[KEY_TOTAL_XP] ?: 0 }
+    val gemsCount: Flow<Int> = context.dataStore.data.map { it[KEY_GEMS] ?: 0 }
+    val heartsCount: Flow<Int> = context.dataStore.data.map { it[KEY_HEARTS] ?: 5 }
+    val streakDays: Flow<Int> = context.dataStore.data.map { it[KEY_STREAK] ?: 0 }
     val activePhoenixStage: Flow<Int> = context.dataStore.data.map { it[KEY_PHOENIX_STAGE] ?: 1 }
-    val highestCombo: Flow<Int> = context.dataStore.data.map { it[KEY_HIGHEST_COMBO] ?: 5 }
+    val highestCombo: Flow<Int> = context.dataStore.data.map { it[KEY_HIGHEST_COMBO] ?: 0 }
     val eggCrackLevel: Flow<Int> = context.dataStore.data.map { it[KEY_EGG_CRACK] ?: 0 }
 
     val lastPracticedTimestampMs: Flow<Long> = context.dataStore.data.map { it[KEY_LAST_PRACTICED_MS] ?: 0L }
     val lastPlayedDateMs: Flow<Long> = context.dataStore.data.map { it[KEY_LAST_PLAYED_MS] ?: 0L }
 
     val completedLessons: Flow<Set<String>> = context.dataStore.data.map {
-        it[KEY_COMPLETED_LESSONS] ?: setOf("u1_l1_what_is_ds")
+        it[KEY_COMPLETED_LESSONS] ?: emptySet()
     }
     val completedBosses: Flow<Set<String>> = context.dataStore.data.map {
         it[KEY_COMPLETED_BOSSES] ?: emptySet()
@@ -142,16 +142,16 @@ class UserPreferences(private val context: Context) : UserProgressSource {
         val resolvedActive = if (legitimateMaxChapter == 1 && savedActive !in 1..5) 1 else savedActive
 
         GameStateSnapshot(
-            totalXP = prefs[KEY_TOTAL_XP] ?: 120,
-            gemsCount = prefs[KEY_GEMS] ?: 450,
-            heartsCount = prefs[KEY_HEARTS] ?: 10,
-            streakDays = prefs[KEY_STREAK] ?: 3,
+            totalXP = prefs[KEY_TOTAL_XP] ?: 0,
+            gemsCount = prefs[KEY_GEMS] ?: 0,
+            heartsCount = prefs[KEY_HEARTS] ?: 5,
+            streakDays = prefs[KEY_STREAK] ?: 0,
             activePhoenixStage = prefs[KEY_PHOENIX_STAGE] ?: 1,
-            highestCombo = prefs[KEY_HIGHEST_COMBO] ?: 5,
+            highestCombo = prefs[KEY_HIGHEST_COMBO] ?: 0,
             eggCrackLevel = prefs[KEY_EGG_CRACK] ?: 0,
             lastPracticedTimestampMs = prefs[KEY_LAST_PRACTICED_MS] ?: 0L,
             lastPlayedDateMs = prefs[KEY_LAST_PLAYED_MS] ?: 0L,
-            completedLessons = prefs[KEY_COMPLETED_LESSONS] ?: setOf("u1_l1_what_is_ds"),
+            completedLessons = prefs[KEY_COMPLETED_LESSONS] ?: emptySet(),
             completedBosses = prefs[KEY_COMPLETED_BOSSES] ?: emptySet(),
             unlockedLevels = (prefs[KEY_UNLOCKED_LEVELS] ?: setOf("1")).mapNotNull { it.toIntOrNull() }.toSet().ifEmpty { setOf(1) },
             maxUnlockedChapter = legitimateMaxChapter,

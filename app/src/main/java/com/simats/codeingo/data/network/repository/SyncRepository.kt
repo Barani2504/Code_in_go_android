@@ -158,6 +158,8 @@ class SyncRepository @Inject constructor(
         var remoteTotalXp: Int? = null
         var remoteGems: Int? = null
         var remoteStreak: Int? = null
+        var remoteCurrentUnitIndex: Int? = null
+        val remoteCompletedUnits = mutableSetOf<Int>()
 
         if (statusResult is ApiResult.Success) {
             val status = statusResult.data
@@ -165,6 +167,10 @@ class SyncRepository @Inject constructor(
             remoteTotalXp = status.totalXp
             remoteGems = status.gems
             remoteStreak = status.streakDays
+            remoteCurrentUnitIndex = status.currentUnitIndex
+            status.completedUnits?.forEach { uStr ->
+                LessonIdAdapter.parseUnitNumber(uStr)?.let { remoteCompletedUnits.add(it) }
+            }
         }
 
         if (meResult is ApiResult.Success) {
@@ -179,6 +185,8 @@ class SyncRepository @Inject constructor(
                 remoteGems = remoteGems,
                 remoteStreak = remoteStreak,
                 remoteCompletedIndices = localIndices,
+                remoteCurrentUnitIndex = remoteCurrentUnitIndex,
+                remoteCompletedUnits = remoteCompletedUnits,
                 isLessonUploadResponse = false
             )
         }

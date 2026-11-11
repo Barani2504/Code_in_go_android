@@ -123,10 +123,13 @@ class ProgressOutboxRepository @Inject constructor(
 
                 // Reconcile non-destructively with GameManager without echo loops
                 response.body()?.let { res ->
+                    val completedLevel = LessonIdAdapter.toLocalLevelIndex(item.lessonId)
+                    val completedSet = if (completedLevel != null) setOf(completedLevel) else emptySet()
                     GameManager.instance.applyRemoteSnapshot(
                         remoteTotalXP = res.totalXp,
                         remoteGems = res.totalGems,
                         remoteStreak = res.currentStreak,
+                        remoteCompletedIndices = completedSet,
                         isLessonUploadResponse = true
                     )
                 }

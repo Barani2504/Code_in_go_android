@@ -460,8 +460,8 @@ private fun AgeStepView(
 ) {
     val motivationalText = when (val age = ageText.toIntOrNull() ?: 0) {
         0 -> "Whether 16 or 60, anyone can ignite their inner coding Phoenix!"
-        in 1..19 -> "Starting young! Master Data Structures early to become a legend."
-        in 20..29 -> "The prime coding years! Let's conquer FAANG interviews together."
+        in 1..19 -> "Starting young! Master Cryptography & Network Security early to become a legend."
+        in 20..29 -> "The prime defense years! Let's conquer Cryptography & Cyber Security together."
         else -> "A seasoned mind! Deep analytical thinking makes the best engineers."
     }
 
@@ -670,10 +670,10 @@ private fun GoalStepView(
     onGoogleSignUp: () -> Unit
 ) {
     val goals = listOf(
-        CodingGoal("dsa", "⚡", "Master Data Structures & Algorithms", "Arrays, Trees, Graphs, Dynamic Programming & recursion", "POPULAR"),
-        CodingGoal("interview", "🎯", "Ace Tech & FAANG Interviews", "Top 150 LeetCode patterns & system design fundamentals", "RECOMMENDED"),
-        CodingGoal("languages", "🚀", "Learn Go & Swift from Scratch", "Modern syntax, memory management & concurrent programming", "ESSENTIAL"),
-        CodingGoal("habit", "🔥", "Build a 15-Minute Daily Habit", "Keep your Phoenix flame alive with bite-sized daily challenges", "DAILY")
+        CodingGoal("cns", "🛡️", "Master Cryptography & Network Security", "Ciphers, AES, RSA, Hashes, ECC & Cyber Defense", "POPULAR"),
+        CodingGoal("security", "🎯", "Ace Cyber Security & Cryptanalysis", "Security protocols, cryptanalysis & defense fundamentals", "RECOMMENDED"),
+        CodingGoal("protocols", "🚀", "Learn Cryptographic Protocols", "TLS, Diffie-Hellman, digital signatures & PKI infrastructure", "ESSENTIAL"),
+        CodingGoal("habit", "🔥", "Build a 15-Minute Daily Habit", "Keep your Phoenix defense flame alive with bite-sized security challenges", "DAILY")
     )
 
     Column(

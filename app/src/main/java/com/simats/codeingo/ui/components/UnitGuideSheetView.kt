@@ -117,7 +117,7 @@ fun UnitGuideSheetView(
                     color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
                 )
                 Text(
-                    text = "In this unit, you will practice data structure challenges. Prepare to master:",
+                    text = "In this unit, you will practice Cryptography & Network Security challenges. Prepare to master:",
                     fontSize = 13.sp,
                     color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
                 )
@@ -129,7 +129,7 @@ fun UnitGuideSheetView(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = dsaTopicsPreview(unit.id),
+                        text = cnsTopicsPreview(unit.id),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = DuolingoGreen,
@@ -226,19 +226,19 @@ private fun GuideInfoRow(
     }
 }
 
-private fun dsaTopicsPreview(unitId: Int): String {
+private fun cnsTopicsPreview(unitId: Int): String {
     return when (unitId) {
-        1 -> "• Big-O Notation\n• Basic Syntax\n• Problem Solving"
-        2 -> "• Arrays & Strings\n• Two Pointers\n• Sliding Window"
-        3 -> "• String Manipulation\n• Palindromes\n• Anagrams"
-        4 -> "• Singly Linked Lists\n• Doubly Linked Lists\n• Fast/Slow Pointers"
-        5 -> "• LIFO Structures\n• Valid Parentheses\n• Monotonic Stacks"
-        6 -> "• FIFO Structures\n• BFS Fundamentals\n• Deque"
-        7 -> "• Hash Maps\n• Hash Sets\n• Collision Resolution"
-        8 -> "• Binary Trees\n• DFS & BFS Traversals\n• BST"
-        9 -> "• Prefix Trees\n• Autocomplete\n• Word Search"
-        10 -> "• Graph Traversals\n• Shortest Path\n• Topological Sort"
-        11 -> "• Heaps, Tries & DP\n• Hard Problems\n• Final Mastery"
-        else -> "• Core Fundamentals\n• Algorithm Design"
+        0 -> "• Bits, Bytes & Hex\n• Modulo Arithmetic\n• XOR Truth & CIA Triad"
+        1 -> "• Shift & Caesar Ciphers\n• Substitution Techniques\n• Frequency Cryptanalysis"
+        2 -> "• DES & Feistel Networks\n• AES 128/256 Architecture\n• CBC & GCM Block Modes"
+        3 -> "• Modular Arithmetic & Totient\n• Diffie-Hellman Key Exchange\n• RSA Encryption & Factoring"
+        4 -> "• Cryptographic Hashes (SHA-256)\n• HMAC & Integrity Verification\n• Digital Signatures (ECDSA)"
+        5 -> "• Firewalls & Packet Filtering\n• TLS/SSL Handshake & PKI\n• Zero-Trust Cyber Defense"
+        6 -> "• Elliptic Curve Cryptography (ECC)\n• Discrete Logarithm Problems\n• Post-Quantum Cryptography"
+        7 -> "• Network Intrusion Detection\n• Zero-Knowledge Proofs (zk-SNARKs)\n• Side-Channel Attacks & Defense"
+        8 -> "• Blockchain Security & Merkle Trees\n• Multi-Party Computation\n• Quantum Key Distribution (QKD)"
+        9 -> "• Advanced Cyber Threat Modeling\n• Reverse Engineering Malware\n• Exploit Mitigation (ASLR, DEP)"
+        10 -> "• Sovereign Defense Architecture\n• Hardened Cryptographic Systems\n• Grand Master Final Citadel"
+        else -> "• Cryptography Fundamentals\n• Network Security Architecture"
     }
 }

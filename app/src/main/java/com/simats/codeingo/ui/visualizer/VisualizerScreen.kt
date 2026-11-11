@@ -1705,7 +1705,7 @@ private fun GrandChampionBanner() {
                     color = if (isDark) AmberGold else Color(0xFFC66900)
                 )
                 Text(
-                    text = "You have mastered all data structure arenas & visualizers.",
+                    text = "You have mastered all cryptography & network security arenas & visualizers.",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.75f)

@@ -106,15 +106,15 @@
     <string name="world_final_master_journey">Final Master Journey</string>
     <string name="world_final_master_journey_sub">Complete all 5 arenas to unlock</string>
 
-    <!-- DSA Chapter Course Names (5 chapters) -->
-    <string name="chapter_1_name">Chapter 1: Array — The Data Highway</string>
-    <string name="chapter_2_name">Chapter 2: Linked List — The Chain Quest</string>
-    <string name="chapter_3_name">Chapter 3: Stack — The Tower of Plates</string>
-    <string name="chapter_4_name">Chapter 4: Queue — The Waiting Line</string>
-    <string name="chapter_5_name">Chapter 5: Tree — The Data Kingdom</string>
+    <!-- CNS Chapter Course Names (5 chapters) -->
+    <string name="chapter_1_name">Chapter 1: Classical Ciphers — The Cipher Sanctum</string>
+    <string name="chapter_2_name">Chapter 2: Symmetric Encryption — The Block Fortress</string>
+    <string name="chapter_3_name">Chapter 3: Asymmetric Cryptography — The Asymmetric Spire</string>
+    <string name="chapter_4_name">Chapter 4: Hashes &amp; Signatures — The Signature Bastion</string>
+    <string name="chapter_5_name">Chapter 5: Network Defense — The Cyber Bastion</string>
 
     <!-- Practice Hub -->
-    <string name="practice_hub_title">⚔️ DSA Practice Arena</string>
+    <string name="practice_hub_title">⚔️ CNS Defense Arena</string>
     <string name="practice_world_challenges">World Challenges</string>
     <string name="practice_mistake_review">Mistake Review</string>
     <string name="practice_speed_challenge">Speed Challenge</string>

@@ -93,13 +93,11 @@ fun KeyExchangeCitadelArenaScreen(
     val gemsCount by gameManager.gemsCount.collectAsState()
 
     val context = androidx.compose.ui.platform.LocalContext.current
-    val prefs = remember { context.getSharedPreferences("arena_progression_prefs", Context.MODE_PRIVATE) }
+    val prefs = remember { com.simats.codeingo.ui.arenas.common.ArenaProgressionManager.getPrefs(context) }
 
     var currentLevel by remember { mutableStateOf(KeyExchangeCitadelLevel.LEVEL_1) }
     var unlockedLevels by remember {
-        val saved = prefs.getStringSet("key_exchange_citadel_unlocked", null)
-            ?.mapNotNull { it.toIntOrNull() }?.toSet() ?: setOf(1)
-        mutableStateOf(if (saved.isEmpty()) setOf(1) else saved)
+        mutableStateOf(com.simats.codeingo.ui.arenas.common.ArenaProgressionManager.getUnlockedLevels(prefs, "key_exchange_citadel_unlocked"))
     }
     var levelStars by remember { mutableStateOf(mutableMapOf<Int, Int>()) }
 

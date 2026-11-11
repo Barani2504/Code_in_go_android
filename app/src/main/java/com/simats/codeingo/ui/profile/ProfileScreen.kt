@@ -195,7 +195,9 @@ fun ProfileScreen(
                     TextButton(
                         onClick = {
                             showSignOutAlert = false
-                            localizationManager.setLoggedIn(false)
+                            localizationManager.resetProfileData()
+                            com.simats.codeingo.domain.AuthService.shared.signOut()
+                            gameManager.deleteAccountAndClearAllData()
                             onLogout()
                         }
                     ) {
@@ -332,10 +334,12 @@ private fun AuthenticatedProfileBody(
         )
 
         // 2. Level & XP Progress Card (Matches iOS ProfileView)
+        val currentLvl = (totalXP / 100).coerceAtLeast(1)
+        val maxLvlXP = (currentLvl + 1) * 100
         LevelProgressCard(
-            currentLevel = 8,
+            currentLevel = currentLvl,
             totalXP = totalXP,
-            maxLevelXP = 1000
+            maxLevelXP = maxLvlXP
         )
 
         // 3. Customization: YOUR PHOENIX Section (Matches iOS ProfileView)
@@ -651,10 +655,10 @@ private fun YourPhoenixCustomizationSection(
     onOpenGemShop: () -> Unit
 ) {
     val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("dsa_cosmetics_prefs", Context.MODE_PRIVATE) }
-    val headId = prefs.getString("dsaEquippedHeadwear", "cap_grad") ?: "cap_grad"
-    val outfitId = prefs.getString("dsaEquippedOutfit", "none_outfit") ?: "none_outfit"
-    val accId = prefs.getString("dsaEquippedAccessory", "glasses_nerd") ?: "glasses_nerd"
+    val prefs = remember { context.getSharedPreferences("cns_cosmetics_prefs", Context.MODE_PRIVATE) }
+    val headId = prefs.getString("cnsEquippedHeadwear", prefs.getString("dsaEquippedHeadwear", "cap_grad")) ?: "cap_grad"
+    val outfitId = prefs.getString("cnsEquippedOutfit", prefs.getString("dsaEquippedOutfit", "none_outfit")) ?: "none_outfit"
+    val accId = prefs.getString("cnsEquippedAccessory", prefs.getString("dsaEquippedAccessory", "glasses_nerd")) ?: "glasses_nerd"
 
     val headItem = CosmeticsCatalog.item(headId)
     val outfitItem = CosmeticsCatalog.item(outfitId)
@@ -857,14 +861,40 @@ private data class LearningJourneyTopic(
 
 @Composable
 private fun LearningJourneySection() {
-    val topics = remember {
-        listOf(
-            LearningJourneyTopic("ciphers", "Classical Ciphers", "🏛️", Color(0xFFB45309), 0.85f, false),
-            LearningJourneyTopic("block_ciphers", "Block Ciphers & AES", "⚙️", Color(0xFFEF4444), 0.70f, false),
-            LearningJourneyTopic("key_exchange", "Key Exchange & RSA", "🏰", Color(0xFFF59E0B), 0.55f, false),
-            LearningJourneyTopic("integrity", "Hashes & Integrity", "🛡️", Color(0xFFA855F7), 0.30f, false),
-            LearningJourneyTopic("network_defense", "Cyber Network Defense", "⚡", Color(0xFF10B981), 0.0f, true)
+    val gameManager = com.simats.codeingo.domain.GameManager.instance
+    val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
+    val completedChapters by gameManager.completedChapters.collectAsState()
+    val completedLevelIndices by gameManager.completedLevelIndices.collectAsState()
+
+    val topics = remember(maxUnlockedChapter, completedChapters, completedLevelIndices) {
+        val chapterConfigs = listOf(
+            Triple(1, "Classical Ciphers", "🏛️" to Color(0xFFB45309)),
+            Triple(2, "Block Ciphers & AES", "⚙️" to Color(0xFFEF4444)),
+            Triple(3, "Key Exchange & RSA", "🏰" to Color(0xFFF59E0B)),
+            Triple(4, "Hashes & Integrity", "🛡️" to Color(0xFFA855F7)),
+            Triple(5, "Cyber Network Defense", "⚡" to Color(0xFF10B981))
         )
+
+        chapterConfigs.map { (chapId, name, pair) ->
+            val (emoji, color) = pair
+            val isLocked = chapId > maxUnlockedChapter
+            val isCompleted = completedChapters.contains(chapId)
+            val levelsInChapter = ((chapId - 1) * 5 + 1)..(chapId * 5)
+            val completedInChapter = completedLevelIndices.count { it in levelsInChapter }
+            val progress = when {
+                isCompleted -> 1.0f
+                isLocked -> 0.0f
+                else -> (completedInChapter / 5.0f).coerceIn(0.0f, 1.0f)
+            }
+            LearningJourneyTopic(
+                id = "cns_chapter_$chapId",
+                name = name,
+                iconEmoji = emoji,
+                color = color,
+                progress = progress,
+                isLocked = isLocked
+            )
+        }
     }
 
     Column(

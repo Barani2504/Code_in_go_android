@@ -59,19 +59,19 @@ class GameManager private constructor() {
 
     // ── Core stats ────────────────────────────────────────────────────────────
 
-    private val _totalXP = MutableStateFlow(120)
+    private val _totalXP = MutableStateFlow(0)
     val totalXP: StateFlow<Int> = _totalXP.asStateFlow()
 
-    private val _gemsCount = MutableStateFlow(450)
+    private val _gemsCount = MutableStateFlow(0)
     val gemsCount: StateFlow<Int> = _gemsCount.asStateFlow()
 
     private val _lastSyncedServerGems = MutableStateFlow(0)
     val lastSyncedServerGems: StateFlow<Int> = _lastSyncedServerGems.asStateFlow()
 
-    private val _heartsCount = MutableStateFlow(10)
+    private val _heartsCount = MutableStateFlow(5)
     val heartsCount: StateFlow<Int> = _heartsCount.asStateFlow()
 
-    private val _streakDays = MutableStateFlow(3)
+    private val _streakDays = MutableStateFlow(0)
     val streakDays: StateFlow<Int> = _streakDays.asStateFlow()
 
     private val _lastPlayedDateUnix = MutableStateFlow(0.0)
@@ -111,7 +111,7 @@ class GameManager private constructor() {
     private val _activePhoenixStage = MutableStateFlow(1)
     val activePhoenixStage: StateFlow<Int> = _activePhoenixStage.asStateFlow()
 
-    private val _highestCombo = MutableStateFlow(5)
+    private val _highestCombo = MutableStateFlow(0)
     val highestCombo: StateFlow<Int> = _highestCombo.asStateFlow()
 
     private val _eggCrackLevel = MutableStateFlow(0)
@@ -139,7 +139,7 @@ class GameManager private constructor() {
     private val _dailyQuests = MutableStateFlow<List<DailyQuestItem>>(emptyList())
     val dailyQuests: StateFlow<List<DailyQuestItem>> = _dailyQuests.asStateFlow()
 
-    private val _completedLessonIds = MutableStateFlow<Set<String>>(setOf("u1_l1_what_is_ds"))
+    private val _completedLessonIds = MutableStateFlow<Set<String>>(emptySet())
     val completedLessonIds: StateFlow<Set<String>> = _completedLessonIds.asStateFlow()
 
     private val _completedBossIds = MutableStateFlow<Set<String>>(emptySet())
@@ -335,19 +335,30 @@ class GameManager private constructor() {
         persistStats()
     }
 
-    /** Resets all unlocked levels and XP — used by Settings → Courses → RESET. */
+    /** Resets all unlocked levels and XP — used by Settings → Courses → RESET and on user logout. */
     fun resetAllProgress() {
         _totalXP.value = 0
+        _gemsCount.value = 0
+        _heartsCount.value = 5
         _lastSyncedServerGems.value = 0
         _unlockedLevelIndices.value = setOf(1)
         _maxUnlockedChapter.value = 1
         _completedChapters.value = emptySet()
         _completedLevelIndices.value = emptySet()
+        _completedLessonIds.value = emptySet()
+        _completedBossIds.value = emptySet()
+        _basecampCompletedLevels.value = emptySet()
         _activeLevelIndex.value = 1
         _streakDays.value = 0
         _savedStreakDays.value = 0
         _isStreakLostPendingRestore.value = false
         _lastPlayedDateUnix.value = 0.0
+        _lastPracticedTimestamp.value = 0.0
+        _highestCombo.value = 0
+        _currentCombo.value = 0
+        _eggCrackLevel.value = 0
+        _activePhoenixStage.value = 1
+        _mistakeVault.value = emptyList()
         persistStats()
         val p = prefs
         if (p != null) {
@@ -502,6 +513,8 @@ class GameManager private constructor() {
         remoteStreak: Int? = null,
         remoteCompletedIndices: Set<Int> = emptySet(),
         remotePhoenixStage: Int? = null,
+        remoteCurrentUnitIndex: Int? = null,
+        remoteCompletedUnits: Set<Int> = emptySet(),
         isLessonUploadResponse: Boolean = false
     ) {
         if (remoteTotalXP != null && remoteTotalXP > _totalXP.value) {
@@ -563,6 +576,24 @@ class GameManager private constructor() {
             _activePhoenixStage.value = remotePhoenixStage
         }
 
+        // Advance max chapter based on backend's currentUnitIndex
+        if (remoteCurrentUnitIndex != null && remoteCurrentUnitIndex > 0) {
+            _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, remoteCurrentUnitIndex)
+        }
+
+        // Advance completed chapters and unlocked chapters from backend
+        if (remoteCompletedUnits.isNotEmpty()) {
+            _completedChapters.update { it + remoteCompletedUnits }
+            val maxFromCompleted = (remoteCompletedUnits.maxOrNull() ?: 0) + 1
+            _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, maxFromCompleted)
+            val autoCompletedLevels = remoteCompletedUnits.flatMap { c ->
+                val capstone = if (c <= 5) c * 5 else 25 + (c - 5) * 5
+                val first = if (c <= 5) ((c - 1) * 5) + 1 else 25 + ((c - 6) * 5) + 1
+                (first..capstone).toList()
+            }
+            _completedLevelIndices.update { it + autoCompletedLevels }
+        }
+
         // HEARTS SOVEREIGNTY: Remote hearts are strictly ignored to preserve Android's 10-heart capacity & local timer.
 
         if (remoteCompletedIndices.isNotEmpty()) {
@@ -583,12 +614,13 @@ class GameManager private constructor() {
 
             val maxFromCompleted = (newlyCompletedChapters.maxOrNull() ?: 0) + 1
             val maxChapterFromLevels = union.filter { it in 1..50 }.maxOfOrNull {
-                if (it <= 25) ((it - 1) / 5) + 1 else ((it - 26) / 5) + 6
+                val ch = if (it <= 25) ((it - 1) / 5) + 1 else ((it - 26) / 5) + 6
+                if (it % 5 == 0) ch + 1 else ch
             } ?: 1
             _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, maxFromCompleted, maxChapterFromLevels)
-
-            reconcileUnlockedLevels()
         }
+
+        reconcileUnlockedLevels()
         persistStats()
     }
 
@@ -711,14 +743,39 @@ class GameManager private constructor() {
     }
 
     fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {
-        val bossXP = 25
+        val bossXP = 35
         _totalXP.update { it + bossXP }
-        _gemsCount.update { it + 15 }
+        _gemsCount.update { it + 20 }
         _completedBossIds.update { it + boss.id }
+
+        // 1. Mark chapter completed
+        markChapterCompleted(unitId)
+
+        // 2. Unlock next chapter
+        val nextUnitId = unitId + 1
+        unlockNextChapter(nextUnitId)
+
+        // 3. Mark capstone level completed & advance active level
+        val capstoneLevel = if (unitId <= 5) unitId * 5 else 25 + (unitId - 5) * 5
+        markLevelCompleted(capstoneLevel)
+        val nextLevel = capstoneLevel + 1
+        _unlockedLevelIndices.update { it + nextLevel }
+        setActiveLevel(nextLevel)
+
+        reconcileUnlockedLevels()
         triggerEvolution(boss.targetPhoenixStageAwarded)
         persistStats()
+
         val p = prefs ?: return
-        scope.launch { p.completeBoss(boss.id) }
+        scope.launch {
+            p.completeBoss(boss.id)
+            p.completeLesson("level_$capstoneLevel", capstoneLevel)
+            p.setActiveLevelIndex(nextLevel)
+            p.setMaxUnlockedChapter(nextUnitId)
+            runCatching {
+                progressOutboxRepository?.enqueueLessonCompletion(capstoneLevel, 100)
+            }
+        }
         PhoenixEmotionManager.instance.handleBossBattle("victory")
     }
 
@@ -881,7 +938,8 @@ class GameManager private constructor() {
         }
 
         markLevelCompleted(currentLevelIndex)
-        val nextLevel = if (isBoss) {
+        val isCapstone = isBoss || (currentLevelIndex in 1..50 && currentLevelIndex % 5 == 0)
+        val nextLevel = if (isCapstone) {
             val currentUnitId = if (ChapterRegistry.isExpansionLevel(currentLevelIndex)) {
                 ((currentLevelIndex - 26) / 5) + 6
             } else {
@@ -898,7 +956,7 @@ class GameManager private constructor() {
         reconcileUnlockedLevels()
         setActiveLevel(nextLevel)
 
-        if (isBoss) {
+        if (isCapstone) {
             _eggCrackLevel.value = 0
             val targetStage = (_activePhoenixStage.value + 1).coerceAtMost(18)
             triggerEvolution(targetStage)
@@ -909,6 +967,15 @@ class GameManager private constructor() {
         val p = prefs ?: return
         scope.launch {
             p.completeLesson("level_$currentLevelIndex", nextLevel)
+            p.setActiveLevelIndex(nextLevel)
+            if (isCapstone) {
+                val currentUnitId = if (ChapterRegistry.isExpansionLevel(currentLevelIndex)) {
+                    ((currentLevelIndex - 26) / 5) + 6
+                } else {
+                    ((currentLevelIndex - 1) / 5) + 1
+                }
+                p.setMaxUnlockedChapter(currentUnitId + 1)
+            }
             runCatching {
                 progressOutboxRepository?.enqueueLessonCompletion(currentLevelIndex, accuracy)
             }

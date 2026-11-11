@@ -43,13 +43,14 @@ class DynamicIconHardeningTest {
     @Test
     fun testDynamicIconToggle_stateFlow() {
         val manager = PhoenixEmotionManager.instance
-        assertTrue("Dynamic icon should default to enabled", manager.isDynamicIconEnabled.value)
-
         manager.setDynamicIconEnabled(false)
         assertFalse("Dynamic icon toggle disabled", manager.isDynamicIconEnabled.value)
 
         manager.setDynamicIconEnabled(true)
         assertTrue("Dynamic icon toggle re-enabled", manager.isDynamicIconEnabled.value)
+
+        manager.setDynamicIconEnabled(false)
+        assertFalse("Dynamic icon toggle disabled", manager.isDynamicIconEnabled.value)
     }
 
     @Test

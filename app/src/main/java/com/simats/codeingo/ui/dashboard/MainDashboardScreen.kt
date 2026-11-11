@@ -1177,6 +1177,17 @@ fun MainDashboardScreen(
             }
         }
 
+        // Back navigation: navigate to LEARN primary tab before allowing app exit
+        BackHandler(enabled = activeWorldArena == null && !showDiagnosticScreen && activeMicroLab == null && selectedTab != DashboardTab.LEARN) {
+            val learnIndex = dashboardTabs.indexOf(DashboardTab.LEARN)
+            if (learnIndex >= 0) {
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(learnIndex)
+                }
+            }
+            selectedTab = DashboardTab.LEARN
+        }
+
         // 3D Interactive World Full-Screen Arena
         activeWorldArena?.let { arenaKey ->
             BackHandler {

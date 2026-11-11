@@ -187,7 +187,7 @@ class PhoenixEmotionManager private constructor() {
                 _currentEmotion.value = savedEmotion
                 _lastAppliedIconName.value = "MainActivityAlias_$savedEmotionId"
             }
-            _isDynamicIconEnabled.value = prefs?.getBoolean("dynamic_icon_enabled", true) ?: true
+            _isDynamicIconEnabled.value = prefs?.getBoolean("dynamic_icon_enabled", false) ?: false
             ensureLauncherAliasIntegrity()
 
             if (!isObserverRegistered) {
@@ -640,68 +640,19 @@ class PhoenixEmotionManager private constructor() {
             }
 
             try {
-                safeLog("Background alias switch: $previousActiveAlias -> $targetAlias")
+                safeLog("Persisting emotion alias state safely: $previousActiveAlias -> $targetAlias")
 
-                // 1. Enable new target alias FIRST with DONT_KILL_APP
-                pm.setComponentEnabledSetting(
-                    targetComponent,
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP
-                )
-
-                // 2. Verify target alias is confirmed enabled
-                val verifiedState = pm.getComponentEnabledSetting(targetComponent)
-                if (verifiedState != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                    safeLogE("Failed to verify enabled state for target alias: $targetAlias")
-                    return@launch
-                }
-
-                // 3. Disable ONLY the previously active alias (preserving default alias in debug builds for IDE tooling)
-                if (previousActiveAlias != targetAlias) {
-                    if (com.simats.codeingo.BuildConfig.DEBUG && previousActiveAlias == "MainActivityAliasDefault") {
-                        safeLog("Debug build: Preserving MainActivityAliasDefault enabled state for Android Studio IDE launch.")
-                    } else {
-                        val prevComponent = ComponentName(pkgName, "$pkgName.$previousActiveAlias")
-                        try {
-                            pm.setComponentEnabledSetting(
-                                prevComponent,
-                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                                PackageManager.DONT_KILL_APP
-                            )
-                        } catch (e: Exception) {
-                            safeLogW("Failed to disable previous alias $previousActiveAlias: ${e.message}")
-                        }
-                    }
-                }
-
-                // 4. Safety Guard: Guarantee at least one launcher alias remains enabled
-                val anyEnabled = ALL_ALIASES.any { alias ->
-                    val comp = ComponentName(pkgName, "$pkgName.$alias")
-                    val state = pm.getComponentEnabledSetting(comp)
-                    state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
-                            (alias == "MainActivityAliasDefault" && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
-                }
-
-                if (!anyEnabled) {
-                    safeLogE("CRITICAL: All aliases disabled! Recovering target alias: $targetAlias")
-                    pm.setComponentEnabledSetting(
-                        targetComponent,
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                        PackageManager.DONT_KILL_APP
-                    )
-                }
-
-                // 5. Persist selection in SharedPreferences
+                // Persist selection in SharedPreferences (avoids calling PackageManager.setComponentEnabledSetting
+                // at runtime, which causes Android ActivityTaskManager to restart the task or kill the app process).
                 prefs.edit()
                     .putString("current_active_alias", targetAlias)
                     .putInt("active_emotion_id", targetId)
                     .putString("active_icon_name", targetAlias)
                     .apply()
 
-                safeLog("Successfully switched and persisted launcher app icon: $targetAlias")
+                safeLog("Successfully persisted active emotion state: $targetAlias")
             } catch (e: Exception) {
-                safeLogE("Failed to switch launcher app icon: ${e.message}", e)
-                ensureLauncherAliasIntegrity()
+                safeLogE("Failed to persist launcher app icon: ${e.message}", e)
             }
         }
     }

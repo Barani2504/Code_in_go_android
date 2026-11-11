@@ -3,11 +3,11 @@ package com.simats.codeingo.data.network.repository
 import com.simats.codeingo.data.repository.ChapterRegistry
 
 /**
- * Pure programmatic bidirectional adapter between Android CNS level indices
+ * Universal bidirectional adapter between Android CNS level indices
  * and standardized backend lesson IDs.
  *
- * Guarantees zero drift with ChapterRegistry.
- * Strictly ignores foreign DSA IDs (e.g. u1_l1).
+ * Guarantees zero drift with ChapterRegistry while fully supporting
+ * all backend curriculum seeds (CNS, Crypto, and DSA unit mappings).
  */
 object LessonIdAdapter {
 
@@ -40,7 +40,13 @@ object LessonIdAdapter {
 
     /**
      * Converts a backend lesson ID back to an Android integer level index.
-     * Returns null if the ID is foreign (e.g., DSA u1_l1) or invalid.
+     * Supports:
+     *  - Standard CNS IDs: cns.c1.l1 .. cns.c10.l5, cns.1.1
+     *  - Direct indices: "1" .. "50", "level_1" .. "level_50", "101" .. "105"
+     *  - Crypto seeds: "crypto_l1_caesar_vigenere" .. "crypto_l16_boss_zkp"
+     *  - Unit seeds: "unit_crypto_01", "unit_01_foundations", "unit_01" -> capstone boss level
+     *  - Generic seeds: "u1_l1_what_is_ds" .. "u10_l4_boss_dsu"
+     *  - Basecamp: "c0_l1" .. "c0_l5"
      */
     fun toLocalLevelIndex(backendId: String): Int? {
         val trimmed = backendId.trim().lowercase()
@@ -54,6 +60,12 @@ object LessonIdAdapter {
         if (trimmed.startsWith("level_") || trimmed.startsWith("level-")) {
             val num = trimmed.substring(6).toIntOrNull()
             if (num != null && (num in 1..50 || num in 101..105)) return num
+        }
+
+        // Basecamp prefix: "c0_l1", "basecamp_l1"
+        if (trimmed.startsWith("c0_l") || trimmed.startsWith("c0.l")) {
+            val stage = trimmed.substring(4).toIntOrNull()
+            if (stage != null && stage in 1..5) return 100 + stage
         }
 
         // Normalized separators: replace '-' and '_' with '.'
@@ -88,12 +100,68 @@ object LessonIdAdapter {
             }
         }
 
+        // Match Crypto Seed Lessons: crypto_l1 .. crypto_l16
+        val matchCrypto = Regex("^crypto\\.l(\\d+)(?:\\..*)?$").find(normalized)
+        if (matchCrypto != null) {
+            val num = matchCrypto.groupValues[1].toIntOrNull() ?: return null
+            return when (num) {
+                in 1..4 -> if (num == 4) 5 else num
+                in 5..8 -> if (num == 8) 10 else 5 + (num - 4)
+                in 9..12 -> if (num == 12) 15 else 10 + (num - 8)
+                in 13..16 -> if (num == 16) 20 else 15 + (num - 12)
+                else -> null
+            }
+        }
+
+        // Match Course Unit seeds: unit_crypto_01, unit_01_foundations, unit_01, unit_1
+        val matchUnit = Regex("^unit(?:\\.crypto)?\\.(\\d+)(?:\\..*)?$").find(normalized)
+        if (matchUnit != null) {
+            val unitNum = matchUnit.groupValues[1].toIntOrNull() ?: return null
+            if (unitNum in 1..10) {
+                return if (unitNum <= 5) unitNum * 5 else 25 + (unitNum - 5) * 5
+            }
+        }
+
+        // Match Generic backend lesson seeds: u1_l1_..., u1_l4_boss_...
+        val matchUL = Regex("^u(\\d+)\\.l(\\d+)(?:\\..*)?$").find(normalized)
+        if (matchUL != null) {
+            val unit = matchUL.groupValues[1].toIntOrNull() ?: return null
+            val lesson = matchUL.groupValues[2].toIntOrNull() ?: return null
+            if (unit in 1..10) {
+                val isBoss = trimmed.contains("boss") || lesson >= 4
+                return if (isBoss) {
+                    if (unit <= 5) unit * 5 else 25 + (unit - 5) * 5
+                } else {
+                    val base = if (unit <= 5) (unit - 1) * 5 else 25 + (unit - 6) * 5
+                    base + lesson.coerceIn(1, 4)
+                }
+            }
+        }
+
         return null
     }
 
     /**
-     * Filters a list of remote backend lesson IDs, keeping only valid CNS lessons
-     * and translating them into Android level indices. Foreign DSA IDs are discarded.
+     * Parses a unit string (e.g. "unit_01_foundations", "unit_crypto_02", "3")
+     * into an integer unit/chapter index (1..10).
+     */
+    fun parseUnitNumber(unitStr: String?): Int? {
+        if (unitStr.isNullOrBlank()) return null
+        val trimmed = unitStr.trim().lowercase()
+        trimmed.toIntOrNull()?.let { num ->
+            if (num in 1..10) return num
+        }
+        val match = Regex("unit_(?:crypto_)?(\\d+)").find(trimmed)
+        if (match != null) {
+            val num = match.groupValues[1].toIntOrNull()
+            if (num != null && num in 1..10) return num
+        }
+        return null
+    }
+
+    /**
+     * Filters a list of remote backend lesson IDs, translating them into
+     * Android level indices.
      */
     fun extractLocalIndicesFromRemoteList(remoteIds: List<String>?): Set<Int> {
         if (remoteIds.isNullOrEmpty()) return emptySet()

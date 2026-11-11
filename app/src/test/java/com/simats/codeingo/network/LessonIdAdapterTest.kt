@@ -51,28 +51,41 @@ class LessonIdAdapterTest {
     }
 
     @Test
-    fun testForeignDsaIds_areRejected() {
-        // iOS DSA curriculum IDs must map strictly to null
-        assertNull(LessonIdAdapter.toLocalLevelIndex("u1_l1_what_is_ds"))
-        assertNull(LessonIdAdapter.toLocalLevelIndex("u1_l2_array_intro"))
-        assertNull(LessonIdAdapter.toLocalLevelIndex("u1_boss"))
-        assertNull(LessonIdAdapter.toLocalLevelIndex("u5_boss"))
+    fun testBackendCurriculumIds_areParsed() {
+        // Backend crypto and generic curriculum IDs map to their corresponding levels
+        assertEquals(1, LessonIdAdapter.toLocalLevelIndex("u1_l1_what_is_ds"))
+        assertEquals(5, LessonIdAdapter.toLocalLevelIndex("u1_l4_boss_foundations"))
+        assertEquals(1, LessonIdAdapter.toLocalLevelIndex("crypto_l1_caesar_vigenere"))
+        assertEquals(5, LessonIdAdapter.toLocalLevelIndex("crypto_l4_boss_cipher"))
+        assertEquals(6, LessonIdAdapter.toLocalLevelIndex("u2_l1_static_arrays"))
+        assertEquals(10, LessonIdAdapter.toLocalLevelIndex("crypto_l8_boss_hash"))
+        
+        // Truly invalid IDs must map strictly to null
         assertNull(LessonIdAdapter.toLocalLevelIndex("random_id"))
         assertNull(LessonIdAdapter.toLocalLevelIndex("cns.invalid"))
         assertNull(LessonIdAdapter.toLocalLevelIndex("cns.c1.l99")) // invalid stage
     }
 
     @Test
-    fun testExtractLocalIndicesFromRemoteList_filtersForeignIds() {
+    fun testExtractLocalIndicesFromRemoteList_decodesValidCurriculum() {
         val remoteList = listOf(
             "cns.c0.l1",
-            "u1_l1_what_is_ds", // Foreign DSA ID
+            "u1_l1_what_is_ds",
             "cns.c1.l1",
-            "u2_boss",          // Foreign DSA ID
-            "cns.c6.l1"
+            "crypto_l1_caesar_vigenere",
+            "cns.c6.l1",
+            "random_junk_id"
         )
 
         val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(remoteList)
         assertEquals(setOf(101, 1, 26), localIndices)
+    }
+
+    @Test
+    fun testParseUnitNumber() {
+        assertEquals(1, LessonIdAdapter.parseUnitNumber("unit_01_foundations"))
+        assertEquals(2, LessonIdAdapter.parseUnitNumber("unit_crypto_02"))
+        assertEquals(3, LessonIdAdapter.parseUnitNumber("3"))
+        assertNull(LessonIdAdapter.parseUnitNumber("invalid"))
     }
 }

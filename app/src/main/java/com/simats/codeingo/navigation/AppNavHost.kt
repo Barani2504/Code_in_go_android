@@ -166,6 +166,9 @@ fun AppNavHost(
                         navController.navigate(Screen.Settings.route)
                     },
                     onLogout = {
+                        com.simats.codeingo.domain.AuthService.shared.signOut()
+                        com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
+                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -230,6 +233,9 @@ fun AppNavHost(
                         navController.popBackStack()
                     },
                     onLogout = {
+                        com.simats.codeingo.domain.AuthService.shared.signOut()
+                        com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
+                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
