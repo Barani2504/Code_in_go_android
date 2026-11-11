@@ -214,7 +214,25 @@ private fun CodexItemCard(
     card: CryptographerCard,
     isUnlocked: Boolean
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
     var cardFace by remember { mutableStateOf(CardFace.FRONT) }
+
+    val cardBg = if (isDark) {
+        if (isUnlocked) Color(0xFF111827) else Color(0xFF0B0F19)
+    } else {
+        if (isUnlocked) Color.White else Color(0xFFF8FAFC)
+    }
+    val cardBorder = if (isUnlocked) {
+        card.rarity.borderBrush
+    } else {
+        Brush.linearGradient(
+            listOf(
+                if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0),
+                if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+            )
+        )
+    }
 
     FlipCard(
         cardFace = cardFace,
@@ -227,12 +245,10 @@ private fun CodexItemCard(
                     .width(220.dp)
                     .height(260.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(
-                        if (isUnlocked) Color(0xFF111827) else Color(0xFF0B0F19)
-                    )
+                    .background(cardBg)
                     .border(
                         width = if (isUnlocked) 2.dp else 1.dp,
-                        brush = if (isUnlocked) card.rarity.borderBrush else Brush.linearGradient(listOf(Color(0xFF1E293B), Color(0xFF1E293B))),
+                        brush = cardBorder,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(16.dp),
@@ -247,13 +263,13 @@ private fun CodexItemCard(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.05f)),
+                                .background(if (isDark) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.04f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = "Locked",
-                                tint = SubtextGray,
+                                tint = if (isDark) SubtextGray else dynamicColors.textSecondary,
                                 modifier = Modifier.size(26.dp)
                             )
                         }
@@ -261,12 +277,12 @@ private fun CodexItemCard(
                             text = "LOCKED CODEX",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
-                            color = SubtextGray
+                            color = if (isDark) SubtextGray else dynamicColors.textSecondary
                         )
                         Text(
                             text = "Master Chapter ${card.requiredChapter} to decipher this legendary cryptographer.",
                             fontSize = 11.sp,
-                            color = SubtextGray.copy(alpha = 0.8f),
+                            color = if (isDark) SubtextGray.copy(alpha = 0.8f) else dynamicColors.textSecondary,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             lineHeight = 15.sp
                         )
@@ -299,7 +315,7 @@ private fun CodexItemCard(
                                 text = card.year,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = SubtextGray
+                                color = if (isDark) SubtextGray else dynamicColors.textSecondary
                             )
                         }
 
@@ -314,14 +330,14 @@ private fun CodexItemCard(
                                 text = card.name,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.White,
+                                color = dynamicColors.textPrimary,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                             Text(
                                 text = card.epithet,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = SubtextGray,
+                                color = dynamicColors.textSecondary,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 lineHeight = 13.sp
                             )
@@ -333,7 +349,7 @@ private fun CodexItemCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.06f))
+                                .background(if (isDark) Color.White.copy(alpha = 0.06f) else card.rarity.color.copy(alpha = 0.08f))
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -364,7 +380,7 @@ private fun CodexItemCard(
                     .width(220.dp)
                     .height(260.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF0F172A))
+                    .background(if (isDark) Color(0xFF0F172A) else Color.White)
                     .border(1.8.dp, card.rarity.color, RoundedCornerShape(20.dp))
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -397,7 +413,7 @@ private fun CodexItemCard(
                         text = card.principle,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFFE2E8F0),
+                        color = dynamicColors.textPrimary,
                         lineHeight = 16.sp
                     )
 
@@ -405,13 +421,13 @@ private fun CodexItemCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
+                            .background(if (isDark) Color.White.copy(alpha = 0.05f) else Color(0xFFF1F5F9))
                             .padding(8.dp)
                     ) {
                         Text(
                             text = "Legacy: ${card.legacy}",
                             fontSize = 10.sp,
-                            color = SubtextGray,
+                            color = dynamicColors.textSecondary,
                             lineHeight = 13.sp
                         )
                     }

@@ -76,7 +76,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.domain.GameManagerEntryPoint
+import com.simats.codeingo.domain.AuthService
+import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.Dispatchers
 import com.simats.codeingo.ui.components.AppDialog
 import com.simats.codeingo.ui.components.Duolingo3DButton
 import com.simats.codeingo.ui.components.Duolingo3DButtonColor
@@ -187,17 +192,33 @@ fun GemShopSheet(
     val scope = rememberCoroutineScope()
     val isDark = LocalDynamicThemeColors.current.isDark
 
-    val prefs = remember { context.getSharedPreferences("dsa_cosmetics_prefs", Context.MODE_PRIVATE) }
+    val syncRepository = remember {
+        runCatching {
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                GameManagerEntryPoint::class.java
+            ).syncRepository()
+        }.getOrNull()
+    }
+
+    val userKey = (AuthService.shared.currentUser.value?.email ?: LocalizationManager.instance.userHandle.value)
+        .ifBlank { "guest" }
+        .lowercase()
+        .replace(Regex("[^a-z0-9_]"), "_")
+
+    val prefs = remember(userKey) {
+        context.getSharedPreferences("cns_cosmetics_prefs_$userKey", Context.MODE_PRIVATE)
+    }
 
     // Equipped state
-    var equippedHeadwear by remember { mutableStateOf(prefs.getString("dsaEquippedHeadwear", "cap_grad") ?: "cap_grad") }
-    var equippedOutfit by remember { mutableStateOf(prefs.getString("dsaEquippedOutfit", "none_outfit") ?: "none_outfit") }
-    var equippedAccessory by remember { mutableStateOf(prefs.getString("dsaEquippedAccessory", "glasses_nerd") ?: "glasses_nerd") }
-    var equippedAura by remember { mutableStateOf(prefs.getString("dsaEquippedAura", "aura_ember") ?: "aura_ember") }
-    var ownedCosmeticsString by remember {
+    var equippedHeadwear by remember(userKey) { mutableStateOf(prefs.getString("cnsEquippedHeadwear", "none_head") ?: "none_head") }
+    var equippedOutfit by remember(userKey) { mutableStateOf(prefs.getString("cnsEquippedOutfit", "none_outfit") ?: "none_outfit") }
+    var equippedAccessory by remember(userKey) { mutableStateOf(prefs.getString("cnsEquippedAccessory", "none_acc") ?: "none_acc") }
+    var equippedAura by remember(userKey) { mutableStateOf(prefs.getString("cnsEquippedAura", "none_aura") ?: "none_aura") }
+    var ownedCosmeticsString by remember(userKey) {
         mutableStateOf(
-            prefs.getString("dsaOwnedCosmetics", "none_head,none_outfit,none_acc,none_aura,cap_grad,glasses_nerd,aura_ember,hat_party")
-                ?: "none_head,none_outfit,none_acc,none_aura,cap_grad,glasses_nerd,aura_ember,hat_party"
+            prefs.getString("cnsOwnedCosmetics", "none_head,none_outfit,none_acc,none_aura")
+                ?: "none_head,none_outfit,none_acc,none_aura"
         )
     }
 
@@ -325,19 +346,19 @@ fun GemShopSheet(
         when (item.category) {
             CosmeticCategory.HATS -> {
                 equippedHeadwear = item.id
-                prefs.edit().putString("dsaEquippedHeadwear", item.id).apply()
+                prefs.edit().putString("cnsEquippedHeadwear", item.id).apply()
             }
             CosmeticCategory.OUTFITS -> {
                 equippedOutfit = item.id
-                prefs.edit().putString("dsaEquippedOutfit", item.id).apply()
+                prefs.edit().putString("cnsEquippedOutfit", item.id).apply()
             }
             CosmeticCategory.ACCESSORIES -> {
                 equippedAccessory = item.id
-                prefs.edit().putString("dsaEquippedAccessory", item.id).apply()
+                prefs.edit().putString("cnsEquippedAccessory", item.id).apply()
             }
             CosmeticCategory.EFFECTS -> {
                 equippedAura = item.id
-                prefs.edit().putString("dsaEquippedAura", item.id).apply()
+                prefs.edit().putString("cnsEquippedAura", item.id).apply()
             }
             CosmeticCategory.LIVES -> {}
         }
@@ -350,19 +371,19 @@ fun GemShopSheet(
         when (item.category) {
             CosmeticCategory.HATS -> {
                 equippedHeadwear = "none_head"
-                prefs.edit().putString("dsaEquippedHeadwear", "none_head").apply()
+                prefs.edit().putString("cnsEquippedHeadwear", "none_head").apply()
             }
             CosmeticCategory.OUTFITS -> {
                 equippedOutfit = "none_outfit"
-                prefs.edit().putString("dsaEquippedOutfit", "none_outfit").apply()
+                prefs.edit().putString("cnsEquippedOutfit", "none_outfit").apply()
             }
             CosmeticCategory.ACCESSORIES -> {
                 equippedAccessory = "none_acc"
-                prefs.edit().putString("dsaEquippedAccessory", "none_acc").apply()
+                prefs.edit().putString("cnsEquippedAccessory", "none_acc").apply()
             }
             CosmeticCategory.EFFECTS -> {
                 equippedAura = "none_aura"
-                prefs.edit().putString("dsaEquippedAura", "none_aura").apply()
+                prefs.edit().putString("cnsEquippedAura", "none_aura").apply()
             }
             CosmeticCategory.LIVES -> {}
         }
@@ -461,8 +482,16 @@ fun GemShopSheet(
             gameManager.deductGems(item.price)
             val newOwned = "$ownedCosmeticsString,${item.id}"
             ownedCosmeticsString = newOwned
-            prefs.edit().putString("dsaOwnedCosmetics", newOwned).apply()
+            prefs.edit().putString("cnsOwnedCosmetics", newOwned).apply()
             equip(item)
+
+            // Persist cosmetic purchase to online backend API
+            syncRepository?.let { repo ->
+                launch(Dispatchers.IO) {
+                    repo.buyCosmetic(item.id, item.price, item.category.name.lowercase())
+                }
+            }
+
             showPurchaseCelebration = true
 
             delay(950)
@@ -477,7 +506,7 @@ fun GemShopSheet(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(if (isDark) DarkBackground else LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 

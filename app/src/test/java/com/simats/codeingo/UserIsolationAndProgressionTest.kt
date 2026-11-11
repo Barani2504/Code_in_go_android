@@ -76,5 +76,36 @@ class UserIsolationAndProgressionTest {
         val unlocked = ArenaProgressionManager.getUnlockedLevels(mockEmptyPrefs, "cipher_sanctum_unlocked")
         assertEquals("Only Level 1 must be unlocked for a fresh user in any arena", setOf(1), unlocked)
     }
+
+    @Test
+    fun testHeartEconomyAndGemShop_isolationAndZeroStatic() {
+        // Initial hearts start at 5 for new session
+        assertEquals(5, gameManager.heartsCount.value)
+
+        // Lose a heart
+        gameManager.loseHeart()
+        assertEquals(4, gameManager.heartsCount.value)
+
+        // Replenish hearts
+        gameManager.replenishHearts(3)
+        assertEquals(7, gameManager.heartsCount.value)
+
+        // Cannot buy hearts if insufficient gems
+        val (failSuccess, failMsg) = gameManager.buyHearts(amount = 5, price = 20)
+        assertEquals(false, failSuccess)
+        assertTrue(failMsg.contains("Not enough diamonds"))
+
+        // After earning gems, can buy hearts
+        gameManager.applyRemoteSnapshot(remoteGems = 50)
+        assertEquals(50, gameManager.gemsCount.value)
+
+        val (buySuccess, _) = gameManager.buyHearts(amount = 3, price = 20)
+        assertEquals(true, buySuccess)
+        assertEquals(10, gameManager.heartsCount.value)
+        assertEquals(30, gameManager.gemsCount.value)
+
+        // Mistake vault is empty and has NO static seeded dummy DSA questions
+        assertTrue("Mistake vault must have no static seed items", gameManager.mistakeVault.value.isEmpty())
+    }
 }
 

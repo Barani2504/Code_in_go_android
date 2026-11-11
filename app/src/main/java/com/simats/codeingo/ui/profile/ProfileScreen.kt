@@ -655,18 +655,24 @@ private fun YourPhoenixCustomizationSection(
     onOpenGemShop: () -> Unit
 ) {
     val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("cns_cosmetics_prefs", Context.MODE_PRIVATE) }
-    val headId = prefs.getString("cnsEquippedHeadwear", prefs.getString("dsaEquippedHeadwear", "cap_grad")) ?: "cap_grad"
-    val outfitId = prefs.getString("cnsEquippedOutfit", prefs.getString("dsaEquippedOutfit", "none_outfit")) ?: "none_outfit"
-    val accId = prefs.getString("cnsEquippedAccessory", prefs.getString("dsaEquippedAccessory", "glasses_nerd")) ?: "glasses_nerd"
+    val userKey = (com.simats.codeingo.domain.AuthService.shared.currentUser.value?.email
+        ?: com.simats.codeingo.domain.LocalizationManager.instance.userHandle.value)
+        .ifBlank { "guest" }
+        .lowercase()
+        .replace(Regex("[^a-z0-9_]"), "_")
+
+    val prefs = remember(userKey) { context.getSharedPreferences("cns_cosmetics_prefs_$userKey", Context.MODE_PRIVATE) }
+    val headId = prefs.getString("cnsEquippedHeadwear", "none_head") ?: "none_head"
+    val outfitId = prefs.getString("cnsEquippedOutfit", "none_outfit") ?: "none_outfit"
+    val accId = prefs.getString("cnsEquippedAccessory", "none_acc") ?: "none_acc"
 
     val headItem = CosmeticsCatalog.item(headId)
     val outfitItem = CosmeticsCatalog.item(outfitId)
     val accItem = CosmeticsCatalog.item(accId)
 
-    val headEmoji = headItem?.emoji ?: "🎓"
-    val outfitEmoji = outfitItem?.emoji ?: ""
-    val accEmoji = accItem?.emoji ?: "👓"
+    val headEmoji = if (headId == "none_head") "" else (headItem?.emoji ?: "")
+    val outfitEmoji = if (outfitId == "none_outfit") "" else (outfitItem?.emoji ?: "")
+    val accEmoji = if (accId == "none_acc") "" else (accItem?.emoji ?: "")
 
     val headName = headItem?.name ?: "Natural"
     val accName = accItem?.name ?: "None"

@@ -72,12 +72,16 @@ fun EthicalReengagementGreeting(
         }
     }
 
+    val isDark = dynamicColors.isDark
+    val cardBg = if (isDark) Color(0xFF0F172A) else Color.White
+    val borderColor = if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.2.dp, Color(0xFF1E293B), RoundedCornerShape(18.dp))
+            .background(cardBg)
+            .border(1.2.dp, borderColor, RoundedCornerShape(18.dp))
             .padding(14.dp)
     ) {
         Row(
@@ -107,7 +111,7 @@ fun EthicalReengagementGreeting(
                     text = greetingSubtitle,
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
-                    color = SubtextGray,
+                    color = dynamicColors.textSecondary,
                     lineHeight = 15.sp
                 )
             }

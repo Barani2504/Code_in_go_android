@@ -258,8 +258,42 @@ class SyncRepository @Inject constructor(
         if (res.isSuccessful && res.body() != null) {
             val user = res.body()!!
             withContext(Dispatchers.Main) {
-                user.hearts?.let { gameManager.replenishHearts(it) }
+                user.hearts?.let { gameManager.setHeartsCount(it) }
                 user.gems?.let { gameManager.applyRemoteSnapshot(null, it, null) }
+            }
+        }
+        mapResponse(res)
+    }
+
+    suspend fun buyCosmetic(cosmeticId: String, price: Int, category: String = "hats"): ApiResult<UserDTO> = safeApiCall {
+        val res = apiService.buyCosmetic(
+            com.simats.codeingo.data.network.model.CosmeticPurchaseRequest(
+                cosmeticId = cosmeticId,
+                price = price,
+                category = category
+            )
+        )
+        if (res.isSuccessful && res.body() != null) {
+            val user = res.body()!!
+            withContext(Dispatchers.Main) {
+                user.gems?.let { gameManager.applyRemoteSnapshot(null, it, null) }
+            }
+        }
+        mapResponse(res)
+    }
+
+    suspend fun fetchCurrentUser(): ApiResult<UserDTO> = safeApiCall {
+        val res = apiService.getCurrentUser()
+        if (res.isSuccessful && res.body() != null) {
+            val user = res.body()!!
+            withContext(Dispatchers.Main) {
+                user.hearts?.let { gameManager.setHeartsCount(it) }
+                gameManager.applyRemoteSnapshot(
+                    remoteTotalXP = user.totalXp,
+                    remoteGems = user.gems,
+                    remoteStreak = user.currentStreak,
+                    remotePhoenixStage = user.activePhoenixStage
+                )
             }
         }
         mapResponse(res)

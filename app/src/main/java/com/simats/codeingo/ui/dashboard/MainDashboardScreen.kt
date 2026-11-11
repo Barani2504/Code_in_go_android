@@ -421,11 +421,28 @@ fun MainDashboardScreen(
                                     enter = fadeIn(),
                                     exit = fadeOut()
                                 ) {
+                                    val isDarkTheme = LocalDynamicThemeColors.current.isDark
                                     val (bgColor, textColor, text) = when (val s = syncStatus) {
-                                        is SyncUiStatus.Syncing -> Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Syncing with Common Backend...")
-                                        is SyncUiStatus.Synced -> Triple(Color(0xFF064E3B), Color(0xFF6EE7B7), "Live Cloud Synced")
-                                        is SyncUiStatus.Error -> Triple(Color(0xFF451A03), Color(0xFFFDBA74), if (pendingSyncCount > 0) "Offline: $pendingSyncCount completions saved in local outbox" else "Operating in Local Cache Mode")
-                                        else -> Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Outbox: $pendingSyncCount pending sync")
+                                        is SyncUiStatus.Syncing -> if (isDarkTheme) {
+                                            Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Syncing with Common Backend...")
+                                        } else {
+                                            Triple(Color(0xFFF1F5F9), Color(0xFF475569), "Syncing with Common Backend...")
+                                        }
+                                        is SyncUiStatus.Synced -> if (isDarkTheme) {
+                                            Triple(Color(0xFF064E3B), Color(0xFF6EE7B7), "Live Cloud Synced")
+                                        } else {
+                                            Triple(Color(0xFFDCFCE7), Color(0xFF15803D), "Live Cloud Synced")
+                                        }
+                                        is SyncUiStatus.Error -> if (isDarkTheme) {
+                                            Triple(Color(0xFF451A03), Color(0xFFFDBA74), if (pendingSyncCount > 0) "Offline: $pendingSyncCount completions saved in local outbox" else "Operating in Local Cache Mode")
+                                        } else {
+                                            Triple(Color(0xFFFEF3C7), Color(0xFFB45309), if (pendingSyncCount > 0) "Offline: $pendingSyncCount completions saved in local outbox" else "Operating in Local Cache Mode")
+                                        }
+                                        else -> if (isDarkTheme) {
+                                            Triple(Color(0xFF1E293B), Color(0xFF94A3B8), "Outbox: $pendingSyncCount pending sync")
+                                        } else {
+                                            Triple(Color(0xFFF1F5F9), Color(0xFF475569), "Outbox: $pendingSyncCount pending sync")
+                                        }
                                     }
                                     Box(
                                         modifier = Modifier

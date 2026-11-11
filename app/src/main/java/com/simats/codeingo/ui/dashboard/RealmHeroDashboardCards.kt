@@ -1,3 +1,4 @@
+
 package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.animation.core.Animatable
@@ -83,20 +84,31 @@ fun ContinueHeroCard(
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
 
-    val heroGradient = Brush.horizontalGradient(
-        colors = listOf(
-            Color(0xFF1E293B),
-            Color(0xFF0F172A)
+    val heroGradient = if (isDark) {
+        Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFF1E293B),
+                Color(0xFF0F172A)
+            )
         )
-    )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.White,
+                Color(0xFFF8FAFC)
+            )
+        )
+    }
+    val cardBorder = if (isDark) AmberGold.copy(alpha = 0.5f) else AmberGold.copy(alpha = 0.7f)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
             .background(heroGradient)
-            .border(1.5.dp, AmberGold.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
+            .border(1.5.dp, cardBorder, RoundedCornerShape(22.dp))
             .shimmerGlossSweep(enabled = true)
             .padding(18.dp)
     ) {
@@ -147,7 +159,7 @@ fun ContinueHeroCard(
                     text = "Chapter $chapterId: $chapterTitle",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = SubtextGray
+                    color = if (isDark) SubtextGray else dynamicColors.textSecondary
                 )
                 Text(
                     text = "Node $activeLevelIndex Defense Challenge",
@@ -295,10 +307,13 @@ private fun MissionCard(
     isClaimed: Boolean = false,
     onClick: () -> Unit
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val cardBg = if (isDark) Color(0xFF131B2A) else Color.White
     val borderColor = when {
         isClaimed -> Color(0xFF10B981).copy(alpha = 0.5f)
         isCompleted -> AmberGold.copy(alpha = 0.8f)
-        else -> Color(0xFF1E293B)
+        else -> if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0)
     }
 
     Box(
@@ -306,7 +321,7 @@ private fun MissionCard(
             .width(200.dp)
             .pressSquish(onClick = onClick)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF131B2A))
+            .background(cardBg)
             .border(1.2.dp, borderColor, RoundedCornerShape(16.dp))
             .padding(14.dp)
     ) {
@@ -336,13 +351,13 @@ private fun MissionCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = dynamicColors.textPrimary
             )
 
             Text(
                 text = description,
                 fontSize = 11.sp,
-                color = SubtextGray,
+                color = dynamicColors.textSecondary,
                 lineHeight = 14.sp
             )
         }
@@ -361,14 +376,18 @@ fun DailyGoalAndStreakPill(
     hasStreakFreeze: Boolean = true,
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val cardBg = if (isDark) Color(0xFF111827) else Color.White
+    val borderColor = if (isDark) Color(0xFF1F2937) else Color(0xFFE2E8F0)
     val progress = (currentXp.toFloat() / targetXp.toFloat()).coerceIn(0f, 1f)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF111827))
-            .border(1.dp, Color(0xFF1F2937), RoundedCornerShape(18.dp))
+            .background(cardBg)
+            .border(1.dp, borderColor, RoundedCornerShape(18.dp))
             .padding(14.dp)
     ) {
         Row(
@@ -386,7 +405,7 @@ fun DailyGoalAndStreakPill(
                         progress = { progress },
                         modifier = Modifier.size(42.dp),
                         color = PhoenixGreen,
-                        trackColor = Color.White.copy(alpha = 0.1f),
+                        trackColor = if (isDark) Color.White.copy(alpha = 0.1f) else Color.Black.copy(alpha = 0.08f),
                         strokeWidth = 4.dp,
                         strokeCap = StrokeCap.Round
                     )
@@ -404,13 +423,13 @@ fun DailyGoalAndStreakPill(
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = AppFontFamily,
-                        color = SubtextGray
+                        color = if (isDark) SubtextGray else dynamicColors.textSecondary
                     )
                     Text(
                         text = "$currentXp / $targetXp XP",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = dynamicColors.textPrimary
                     )
                 }
             }
@@ -474,6 +493,18 @@ fun DailyRewardChestCard(
     var cardFace by remember { mutableStateOf(CardFace.FRONT) }
     var hasClaimed by remember { mutableStateOf(false) }
 
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val chestGradient = if (isDark) {
+        Brush.horizontalGradient(
+            colors = listOf(Color(0xFF291B0B), Color(0xFF1F1608))
+        )
+    } else {
+        Brush.horizontalGradient(
+            colors = listOf(Color(0xFFFFFBEB), Color(0xFFFEF3C7))
+        )
+    }
+
     FlipCard(
         cardFace = cardFace,
         onFlip = { next ->
@@ -490,11 +521,7 @@ fun DailyRewardChestCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(Color(0xFF291B0B), Color(0xFF1F1608))
-                        )
-                    )
+                    .background(chestGradient)
                     .border(1.5.dp, AmberGold, RoundedCornerShape(18.dp))
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -514,12 +541,12 @@ fun DailyRewardChestCard(
                                 text = "DAILY CHEST READY",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
-                                color = AmberGold
+                                color = if (isDark) AmberGold else Color(0xFFB45309)
                             )
                             Text(
                                 text = "Tap to claim daily defense reward",
                                 fontSize = 11.sp,
-                                color = SubtextGray
+                                color = if (isDark) SubtextGray else Color(0xFF78350F)
                             )
                         }
                     }

@@ -28,12 +28,16 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import com.simats.codeingo.data.network.repository.SyncRepository
+import com.simats.codeingo.data.network.api.CodeingoApiService
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface GameManagerEntryPoint {
     fun progressOutboxRepository(): ProgressOutboxRepository
     fun mascotRepository(): MascotRepository
+    fun syncRepository(): SyncRepository
+    fun apiService(): CodeingoApiService
 }
 
 class GameManager private constructor() {
@@ -48,10 +52,16 @@ class GameManager private constructor() {
     private var database: CodeingoDatabase? = null
     private var progressOutboxRepository: ProgressOutboxRepository? = null
     private var mascotRepository: MascotRepository? = null
+    private var syncRepository: SyncRepository? = null
+    private var apiService: CodeingoApiService? = null
     private var persistJob: Job? = null
 
     fun setProgressOutboxRepository(repository: ProgressOutboxRepository?) {
         this.progressOutboxRepository = repository
+    }
+
+    fun setSyncRepository(repository: SyncRepository?) {
+        this.syncRepository = repository
     }
 
     private val _isInitialized = MutableStateFlow(false)
@@ -169,12 +179,11 @@ class GameManager private constructor() {
     private val _activeLevelIndex = MutableStateFlow(1)
     val activeLevelIndex: StateFlow<Int> = _activeLevelIndex.asStateFlow()
 
-    private val _totalStars = MutableStateFlow(15)
+    private val _totalStars = MutableStateFlow(0)
     val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
 
     init {
         initializeDailyQuests()
-        loadDefaultMistakes()
         evaluateStreakOnLaunch()
     }
 
@@ -194,16 +203,14 @@ class GameManager private constructor() {
             )
             progressOutboxRepository = entryPoint.progressOutboxRepository()
             mascotRepository = entryPoint.mascotRepository()
+            syncRepository = entryPoint.syncRepository()
+            apiService = entryPoint.apiService()
         }
 
-        // Observe Room mistakes and mirror into reactive state flow
+        // Observe Room mistakes and mirror into reactive state flow (no static seeding)
         scope.launch {
             db.mistakeVaultDao().getAllMistakesFlow().collect { entities ->
-                if (entities.isNotEmpty()) {
-                    _mistakeVault.value = entities.map { it.toDomain() }
-                } else {
-                    seedDefaultMistakesIntoRoom(db)
-                }
+                _mistakeVault.value = entities.map { it.toDomain() }
             }
         }
 
@@ -702,12 +709,34 @@ class GameManager private constructor() {
         _currentCombo.value = 0
         _heartsCount.update { maxOf(0, it - 1) }
         persistStats()
+        val repo = syncRepository
+        if (repo != null) {
+            scope.launch {
+                repo.loseHeart()
+            }
+        }
     }
 
     fun refillHearts() {
         _heartsCount.value = 10
         persistStats(immediate = true)
         PhoenixEmotionManager.instance.handleHeartsRefilled()
+        val repo = syncRepository
+        if (repo != null) {
+            scope.launch {
+                repo.buyHeartRefill(price = 0, hearts = 10)
+            }
+        }
+    }
+
+    fun earnPracticeHeart() {
+        replenishHearts(1)
+        val repo = syncRepository
+        if (repo != null) {
+            scope.launch {
+                repo.earnPracticeHeart()
+            }
+        }
     }
 
     fun setHeartsCount(count: Int) {
@@ -732,6 +761,12 @@ class GameManager private constructor() {
         _heartsCount.update { minOf(10, it + amount) }
         persistStats(immediate = true)
         PhoenixEmotionManager.instance.handleHeartsRefilled()
+        val repo = syncRepository
+        if (repo != null) {
+            scope.launch {
+                repo.buyHeartRefill(price = price, hearts = amount)
+            }
+        }
         return Pair(true, "Restored +$amount life hearts! ❤️ (${_heartsCount.value}/10)")
     }
 
@@ -1081,49 +1116,6 @@ class GameManager private constructor() {
                 xpReward = 30,
                 gemReward = 20,
                 isClaimed = false
-            )
-        )
-    }
-
-    private suspend fun seedDefaultMistakesIntoRoom(db: CodeingoDatabase) {
-        val seedEntities = listOf(
-            MistakeVaultEntity(
-                id = "seed_1",
-                prompt = "What is the worst-case search time in an unsorted array of size n?",
-                conceptId = "array_search",
-                wrongAnswerGiven = "O(log n)",
-                correctAnswer = "O(n)",
-                explanation = "Unsorted arrays must check every element from beginning to end in the worst case."
-            ),
-            MistakeVaultEntity(
-                id = "seed_2",
-                prompt = "In a linked list insertion at head, which pointer assignment must happen FIRST?",
-                conceptId = "pointer_order",
-                wrongAnswerGiven = "head = newNode",
-                correctAnswer = "newNode.next = head",
-                explanation = "If head is updated first, you lose reference to the rest of the list!"
-            )
-        )
-        db.mistakeVaultDao().insertAll(seedEntities)
-    }
-
-    private fun loadDefaultMistakes() {
-        _mistakeVault.value = listOf(
-            MistakeVaultItem(
-                id = "seed_1",
-                prompt = "What is the worst-case search time in an unsorted array of size n?",
-                conceptId = "array_search",
-                wrongAnswerGiven = "O(log n)",
-                correctAnswer = "O(n)",
-                explanation = "Unsorted arrays must check every element from beginning to end in the worst case."
-            ),
-            MistakeVaultItem(
-                id = "seed_2",
-                prompt = "In a linked list insertion at head, which pointer assignment must happen FIRST?",
-                conceptId = "pointer_order",
-                wrongAnswerGiven = "head = newNode",
-                correctAnswer = "newNode.next = head",
-                explanation = "If head is updated first, you lose reference to the rest of the list!"
             )
         )
     }
