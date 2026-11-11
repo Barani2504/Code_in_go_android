@@ -515,11 +515,31 @@ class SyncRepository @Inject constructor(
                 ensureAuthenticated()
                 var result = block()
                 if (result is ApiResult.Unauthorized || (result is ApiResult.HttpError && (result.code == 401 || result.code == 403))) {
-                    Log.d(TAG, "Received 401/403, attempting re-authentication...")
-                    tokenManager.clearTokens()
-                    val reAuthed = ensureAuthenticated()
-                    if (reAuthed) {
-                        result = block()
+                    Log.d(TAG, "Received 401/403, attempting token refresh...")
+                    var refreshed = false
+                    val refreshToken = tokenManager.getRefreshToken()
+                    if (!refreshToken.isNullOrEmpty()) {
+                        try {
+                            val refreshRes = apiService.refreshToken("Bearer $refreshToken")
+                            if (refreshRes.isSuccessful && refreshRes.body() != null) {
+                                val body = refreshRes.body()!!
+                                tokenManager.saveAccessToken(body.token)
+                                body.refreshToken?.let { tokenManager.saveRefreshToken(it) }
+                                refreshed = true
+                                result = block()
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Refresh token exchange failed: ${e.message}")
+                        }
+                    }
+
+                    if (!refreshed) {
+                        Log.d(TAG, "Token refresh unavailable or failed; clearing tokens and performing fresh guest auth...")
+                        tokenManager.clearTokens()
+                        val reAuthed = ensureAuthenticated()
+                        if (reAuthed) {
+                            result = block()
+                        }
                     }
                 }
                 result

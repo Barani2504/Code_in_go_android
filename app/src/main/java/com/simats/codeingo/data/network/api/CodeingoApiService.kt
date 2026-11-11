@@ -83,6 +83,31 @@ interface CodeingoApiService {
         @Body request: ResetPasswordRequest
     ): Response<GenericApiResponse>
 
+    @POST("api/auth/refresh-token")
+    suspend fun refreshToken(
+        @retrofit2.http.Header("Authorization") refreshTokenHeader: String
+    ): Response<AuthResponse>
+
+    @POST("api/auth/reactivate")
+    suspend fun reactivateAccount(
+        @Body request: AuthRequest
+    ): Response<AuthResponse>
+
+    @POST("api/auth/google")
+    suspend fun googleAuthenticate(
+        @Body request: com.simats.codeingo.data.network.model.GoogleLoginRequest
+    ): Response<AuthResponse>
+
+    @POST("api/auth/apple")
+    suspend fun appleAuthenticate(
+        @Body request: com.simats.codeingo.data.network.model.AppleLoginRequest
+    ): Response<AuthResponse>
+
+    @POST("api/auth/social")
+    suspend fun socialAuthenticate(
+        @Body request: com.simats.codeingo.data.network.model.SocialLoginRequest
+    ): Response<AuthResponse>
+
     // ── 2. User Profile & Preferences ────────────────────────────────────────
 
     @GET("api/users/me")
@@ -92,6 +117,22 @@ interface CodeingoApiService {
     suspend fun updateProfile(
         @Body request: UpdateProfileRequest
     ): Response<UserDTO>
+
+    @POST("api/users/me/change-password")
+    suspend fun changePassword(
+        @Body request: com.simats.codeingo.data.network.model.ChangePasswordRequest
+    ): Response<GenericApiResponse>
+
+    @GET("api/users/me/preferences")
+    suspend fun getPreferences(): Response<com.simats.codeingo.data.network.model.UserPreferencesDto>
+
+    @PATCH("api/users/me/preferences")
+    suspend fun updatePreferences(
+        @Body request: com.simats.codeingo.data.network.model.UserPreferencesDto
+    ): Response<com.simats.codeingo.data.network.model.UserPreferencesDto>
+
+    @GET("api/users/tournament/status")
+    suspend fun getTournamentStatus(): Response<com.simats.codeingo.data.network.model.TournamentStatusResponse>
 
     @POST("api/users/me/claim-reward")
     suspend fun claimDailyReward(

@@ -142,7 +142,14 @@ class MascotRepository @Inject constructor(
         try {
             val response = apiService.petMascot()
             if (response.isSuccessful && response.body() != null) {
-                ApiResult.Success(response.body()!!)
+                val body = response.body()!!
+                val bonus = (body.xpBonus ?: 0).takeIf { it > 0 } ?: (body.xpAwarded ?: 0)
+                if (bonus > 0) {
+                    withContext(Dispatchers.Main) {
+                        gameManager.addXP(bonus)
+                    }
+                }
+                ApiResult.Success(body)
             } else {
                 ApiResult.Success(
                     com.simats.codeingo.data.network.model.MascotPetResponse(

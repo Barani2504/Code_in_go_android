@@ -132,6 +132,75 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun refreshToken(): ApiResult<UserDTO> {
+        val refreshToken = tokenManager.getRefreshToken()
+        if (refreshToken.isNullOrEmpty()) {
+            return ApiResult.Unauthorized()
+        }
+        return safeApiCall {
+            val response = apiService.refreshToken("Bearer $refreshToken")
+            handleAuthResponse(response)
+        }
+    }
+
+    suspend fun reactivateAccount(email: String, password: String): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.reactivateAccount(
+                AuthRequest(email = email.trim().lowercase(), password = password)
+            )
+            handleAuthResponse(response)
+        }
+    }
+
+    suspend fun googleAuthenticate(request: com.simats.codeingo.data.network.model.GoogleLoginRequest): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.googleAuthenticate(request)
+            handleAuthResponse(response)
+        }
+    }
+
+    suspend fun appleAuthenticate(request: com.simats.codeingo.data.network.model.AppleLoginRequest): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.appleAuthenticate(request)
+            handleAuthResponse(response)
+        }
+    }
+
+    suspend fun socialAuthenticate(request: com.simats.codeingo.data.network.model.SocialLoginRequest): ApiResult<UserDTO> {
+        return safeApiCall {
+            val response = apiService.socialAuthenticate(request)
+            handleAuthResponse(response)
+        }
+    }
+
+    suspend fun changePassword(request: com.simats.codeingo.data.network.model.ChangePasswordRequest): ApiResult<GenericApiResponse> {
+        return safeApiCall {
+            val response = apiService.changePassword(request)
+            mapResponse(response)
+        }
+    }
+
+    suspend fun getPreferences(): ApiResult<com.simats.codeingo.data.network.model.UserPreferencesDto> {
+        return safeApiCall {
+            val response = apiService.getPreferences()
+            mapResponse(response)
+        }
+    }
+
+    suspend fun updatePreferences(request: com.simats.codeingo.data.network.model.UserPreferencesDto): ApiResult<com.simats.codeingo.data.network.model.UserPreferencesDto> {
+        return safeApiCall {
+            val response = apiService.updatePreferences(request)
+            mapResponse(response)
+        }
+    }
+
+    suspend fun getTournamentStatus(): ApiResult<com.simats.codeingo.data.network.model.TournamentStatusResponse> {
+        return safeApiCall {
+            val response = apiService.getTournamentStatus()
+            mapResponse(response)
+        }
+    }
+
     fun logout() {
         tokenManager.clearTokens()
         AuthService.shared.signOut()

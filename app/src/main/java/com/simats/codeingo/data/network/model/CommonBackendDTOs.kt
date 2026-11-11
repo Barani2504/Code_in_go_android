@@ -101,10 +101,11 @@ data class DailyQuestItem(
     val currentCount: Int,
     val xpReward: Int,
     val gemReward: Int,
+    val isCompleted: Boolean = false,
     val isClaimed: Boolean = false
 ) {
-    val isCompleted: Boolean
-        get() = currentCount >= targetCount
+    val completed: Boolean
+        get() = isCompleted || currentCount >= targetCount
 }
 
 // -------------------------------------------------------------------------
@@ -254,10 +255,95 @@ data class QuestionDTO(
 
 @Serializable
 data class MascotPetResponse(
+    val status: String? = null,
     val message: String? = null,
+    val quote: String? = null,
+    val xpBonus: Int? = 0,
+    val totalXp: Int? = null,
     val affectionLevel: Int? = null,
     val heartsAwarded: Int? = 0,
     val xpAwarded: Int? = 0
+)
+
+// -------------------------------------------------------------------------
+// User Preferences & Settings (/api/users/me/preferences)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class UserPreferencesDto(
+    val soundEffectsEnabled: Boolean? = true,
+    val soundEnabled: Boolean? = true,
+    val hapticsEnabled: Boolean? = true,
+    val themeMode: String? = "DARK",
+    val animationsEnabled: Boolean? = true,
+    val motivationalMessagesEnabled: Boolean? = true,
+    val listeningExercisesEnabled: Boolean? = true,
+    val productUpdates: Boolean? = true,
+    val newFollower: Boolean? = true,
+    val friendActivity: Boolean? = true,
+    val weeklyProgress: Boolean? = true,
+    val specialPromotions: Boolean? = true,
+    val researchOpportunities: Boolean? = true,
+    val practiceReminder: Boolean? = true,
+    val practiceTime: String? = "5 PM",
+    val activePhoenixStage: Int? = 1,
+    val eggCrackLevel: Int? = 0,
+    val highestCombo: Int? = 5
+)
+
+// -------------------------------------------------------------------------
+// League Tournament Status (/api/users/tournament/status)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class TournamentStatusResponse(
+    val currentLeague: String? = "BRONZE",
+    val secondsRemaining: Long? = 0L,
+    val formattedEndsAt: String? = null,
+    val rank: Int? = 1,
+    val totalInLeague: Int? = 30,
+    val promotionCutoff: Int? = 10,
+    val demotionCutoff: Int? = 25,
+    val standingStatus: String? = "PROMOTING",
+    val projectedRewardGems: Int? = 50
+)
+
+// -------------------------------------------------------------------------
+// Security & Authentication Requests (/api/users/me/change-password, /api/auth/*)
+// -------------------------------------------------------------------------
+
+@Serializable
+data class ChangePasswordRequest(
+    val currentPassword: String,
+    val newPassword: String
+)
+
+@Serializable
+data class SocialLoginRequest(
+    val provider: String,
+    val providerId: String? = null,
+    val email: String? = null,
+    val name: String? = null,
+    val picture: String? = null,
+    val idToken: String? = null,
+    val accessToken: String? = null
+)
+
+@Serializable
+data class GoogleLoginRequest(
+    val idToken: String? = null,
+    val email: String? = null,
+    val name: String? = null,
+    val picture: String? = null,
+    val googleId: String? = null
+)
+
+@Serializable
+data class AppleLoginRequest(
+    val appleId: String,
+    val email: String? = null,
+    val name: String? = null,
+    val identityToken: String? = null
 )
 
 // -------------------------------------------------------------------------
