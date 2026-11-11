@@ -1296,7 +1296,7 @@ private fun WorldPortalCard(
     onOpenWorld: (String) -> Unit
 ) {
     val isDark = LocalDynamicThemeColors.current.isDark
-    val isUnlocked = true // All arenas unlocked for testing
+    val isUnlocked = chapterId <= maxUnlockedChapter
 
     Box(
         modifier = Modifier

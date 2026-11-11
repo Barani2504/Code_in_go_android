@@ -95,6 +95,12 @@ import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.simats.codeingo.data.network.model.ApiResult
+import com.simats.codeingo.domain.AuthServiceEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 /**
@@ -132,6 +138,17 @@ fun ProfileCreationScreen(
 
     var showGoogleAuthSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val authRepository = remember(context) {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AuthServiceEntryPoint::class.java
+        ).authRepository()
+    }
+    var isSubmitting by remember { mutableStateOf(false) }
+    var submissionError by remember { mutableStateOf<String?>(null) }
 
     val isCredentialsValid = emailText.trim().isNotEmpty() && passwordText.length >= 6
     val displayName = nameText.trim().ifEmpty {
@@ -304,11 +321,71 @@ fun ProfileCreationScreen(
                         )
                     }
                     3 -> {
+                        if (submissionError != null) {
+                            Text(
+                                text = submissionError!!,
+                                color = Color(0xFFEF4444),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+                            )
+                        }
                         com.simats.codeingo.ui.components.AppButton(
-                            title = "CREATE ACCOUNT",
-                            style = if (isCredentialsValid) com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER else com.simats.codeingo.ui.components.AppButtonStyle.DISABLED,
-                            isEnabled = isCredentialsValid,
-                            onClick = { currentStep = 4 },
+                            title = if (isSubmitting) "CREATING ACCOUNT..." else "CREATE ACCOUNT",
+                            style = if (isCredentialsValid && !isSubmitting) com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER else com.simats.codeingo.ui.components.AppButtonStyle.DISABLED,
+                            isEnabled = isCredentialsValid && !isSubmitting,
+                            onClick = {
+                                val resolvedEmail = emailText.trim().lowercase()
+                                val parsedAge = ageText.toIntOrNull() ?: 21
+                                isSubmitting = true
+                                submissionError = null
+
+                                coroutineScope.launch {
+                                    val regResult = authRepository.register(
+                                        email = resolvedEmail,
+                                        password = passwordText,
+                                        username = displayName.replace(" ", "").lowercase(),
+                                        name = displayName,
+                                        age = parsedAge
+                                    )
+                                    when (regResult) {
+                                        is ApiResult.Success -> {
+                                            isSubmitting = false
+                                            currentStep = 4
+                                        }
+                                        is ApiResult.HttpError -> {
+                                            if (regResult.code == 409 || regResult.message.contains("already exists", ignoreCase = true)) {
+                                                // Try logging in with the entered credentials
+                                                val authResult = authRepository.authenticate(resolvedEmail, passwordText)
+                                                if (authResult is ApiResult.Success) {
+                                                    isSubmitting = false
+                                                    currentStep = 4
+                                                } else {
+                                                    isSubmitting = false
+                                                    submissionError = "An account with this email already exists. Please sign in or reset your password."
+                                                }
+                                            } else {
+                                                isSubmitting = false
+                                                submissionError = regResult.message.ifEmpty { "Registration failed (${regResult.code})" }
+                                            }
+                                        }
+                                        is ApiResult.NetworkError -> {
+                                            // Fallback locally
+                                            com.simats.codeingo.domain.AuthService.instance.signInWithEmail(resolvedEmail, displayName)
+                                            if (passwordText.isNotEmpty()) {
+                                                com.simats.codeingo.domain.AuthService.instance.updatePassword(resolvedEmail, passwordText)
+                                            }
+                                            isSubmitting = false
+                                            currentStep = 4
+                                        }
+                                        else -> {
+                                            isSubmitting = false
+                                            submissionError = "Unable to create account. Please try again."
+                                        }
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Text(
@@ -353,7 +430,17 @@ fun ProfileCreationScreen(
                         nameText = accName
                         emailText = accEmail
                         passwordText = "GoogleAuth2026!"
-                        currentStep = 4
+                        coroutineScope.launch {
+                            val googleReq = com.simats.codeingo.data.network.model.GoogleLoginRequest(
+                                idToken = "google_${System.currentTimeMillis()}",
+                                email = accEmail,
+                                name = accName,
+                                picture = null,
+                                googleId = accEmail.substringBefore("@")
+                            )
+                            authRepository.googleAuthenticate(googleReq)
+                            currentStep = 4
+                        }
                     },
                     onDismiss = { showGoogleAuthSheet = false }
                 )

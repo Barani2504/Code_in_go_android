@@ -37,16 +37,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.data.network.model.ApiResult
+import com.simats.codeingo.domain.AuthService
+import com.simats.codeingo.domain.AuthServiceEntryPoint
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.components.AppCard
@@ -89,10 +97,36 @@ fun ForgotPasswordSheet(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val isDark = LocalDynamicThemeColors.current.isDark
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val authRepository = remember(context) {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AuthServiceEntryPoint::class.java
+        ).authRepository()
+    }
+
     LaunchedEffect(step) {
         if (step == ForgotPasswordStep.SENDING_EMAIL) {
-            delay(1200)
-            step = ForgotPasswordStep.VERIFY_CODE
+            val res = authRepository.forgotPassword(email.trim().lowercase())
+            when (res) {
+                is ApiResult.Success -> {
+                    errorMessage = null
+                    step = ForgotPasswordStep.VERIFY_CODE
+                }
+                is ApiResult.HttpError -> {
+                    errorMessage = res.message.ifEmpty { "Unable to send recovery code" }
+                    step = ForgotPasswordStep.ENTER_EMAIL
+                }
+                is ApiResult.NetworkError -> {
+                    errorMessage = "Network error. Please check your connection."
+                    step = ForgotPasswordStep.ENTER_EMAIL
+                }
+                else -> {
+                    errorMessage = "Failed to send code. Please try again."
+                    step = ForgotPasswordStep.ENTER_EMAIL
+                }
+            }
         }
     }
 
@@ -268,7 +302,23 @@ fun ForgotPasswordSheet(
                                 style = AppButtonStyle.PRIMARY_AMBER,
                                 onClick = {
                                     if (verificationCode.trim().length >= 4) {
-                                        step = ForgotPasswordStep.RESET_PASSWORD
+                                        coroutineScope.launch {
+                                            when (val res = authRepository.verifyOtp(email.trim().lowercase(), verificationCode.trim())) {
+                                                is ApiResult.Success -> {
+                                                    errorMessage = null
+                                                    step = ForgotPasswordStep.RESET_PASSWORD
+                                                }
+                                                is ApiResult.HttpError -> {
+                                                    errorMessage = res.message.ifEmpty { "Invalid or expired verification code" }
+                                                }
+                                                is ApiResult.NetworkError -> {
+                                                    errorMessage = "Network error. Please check your connection."
+                                                }
+                                                else -> {
+                                                    errorMessage = "Invalid verification code"
+                                                }
+                                            }
+                                        }
                                     } else {
                                         errorMessage = "Code must be at least 4 digits."
                                     }
@@ -332,9 +382,24 @@ fun ForgotPasswordSheet(
                                     } else if (newPassword != confirmPassword) {
                                         errorMessage = "Passwords do not match."
                                     } else {
-                                        errorMessage = null
-                                        com.simats.codeingo.domain.AuthService.shared.updatePassword(email, newPassword)
-                                        step = ForgotPasswordStep.SUCCESS
+                                        coroutineScope.launch {
+                                            when (val res = authRepository.resetPassword(email.trim().lowercase(), verificationCode.trim(), newPassword)) {
+                                                is ApiResult.Success -> {
+                                                    errorMessage = null
+                                                    AuthService.shared.updatePassword(email.trim().lowercase(), newPassword)
+                                                    step = ForgotPasswordStep.SUCCESS
+                                                }
+                                                is ApiResult.HttpError -> {
+                                                    errorMessage = res.message.ifEmpty { "Password reset failed" }
+                                                }
+                                                is ApiResult.NetworkError -> {
+                                                    errorMessage = "Network error. Please check your connection."
+                                                }
+                                                else -> {
+                                                    errorMessage = "Failed to reset password. Please try again."
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             )

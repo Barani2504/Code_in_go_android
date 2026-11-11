@@ -90,9 +90,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.data.network.model.ApiResult
+import com.simats.codeingo.data.network.model.GoogleLoginRequest
 import com.simats.codeingo.domain.AuthService
+import com.simats.codeingo.domain.AuthServiceEntryPoint
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
+import dagger.hilt.android.EntryPointAccessors
 import com.simats.codeingo.ui.components.AppleLogoView
 import com.simats.codeingo.ui.components.GoogleLogoView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
@@ -135,6 +139,18 @@ fun LoginScreen(
     val isDark = dynamicColors.isDark
 
     val prefs = remember { context.getSharedPreferences("dsa_preferences", Context.MODE_PRIVATE) }
+    val authRepository = remember(context) {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AuthServiceEntryPoint::class.java
+        ).authRepository()
+    }
+    val syncRepository = remember(context) {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AuthServiceEntryPoint::class.java
+        ).syncRepository()
+    }
 
     // Form inputs
     var emailOrUsername by remember { mutableStateOf("") }
@@ -197,34 +213,66 @@ fun LoginScreen(
         isSubmitting = true
 
         coroutineScope.launch {
-            delay(300)
-            val trimmed = emailOrUsername.trim()
-            val isPasswordCorrect = AuthService.shared.verifyPassword(trimmed, password)
+            val trimmed = emailOrUsername.trim().lowercase()
+            val result = authRepository.authenticate(trimmed, password)
 
-            if (!isPasswordCorrect) {
-                isSubmitting = false
-                isSuccessToast = false
-                toastMessage = "Incorrect password. Tap 'Forgot password?' to reset."
-                triggerShake()
-                return@launch
+            when (result) {
+                is ApiResult.Success -> {
+                    val user = result.data
+                    val displayName = user.name ?: user.username
+                    if (rememberMe) {
+                        prefs.edit().putString("dsaUserEmail", trimmed).apply()
+                    } else {
+                        prefs.edit().remove("dsaUserEmail").apply()
+                    }
+                    AuthService.shared.updatePassword(trimmed, password)
+                    localizationManager.updateUserProfile(displayName, user.username)
+                    localizationManager.setLoggedIn(true, displayName, user.username)
+
+                    // Refresh remote progress in background
+                    launch {
+                        syncRepository.syncRemoteProgressToLocal()
+                    }
+
+                    isSubmitting = false
+                    isSuccessToast = true
+                    toastMessage = "Welcome back, $displayName! 🔥"
+
+                    delay(600)
+                    onLoginSuccess(displayName, user.email)
+                }
+                is ApiResult.Unauthorized -> {
+                    isSubmitting = false
+                    isSuccessToast = false
+                    toastMessage = "Incorrect email or password. Tap 'Forgot password?' to reset."
+                    triggerShake()
+                }
+                is ApiResult.HttpError -> {
+                    isSubmitting = false
+                    isSuccessToast = false
+                    toastMessage = result.message.ifEmpty { "Sign in failed (${result.code})" }
+                    triggerShake()
+                }
+                is ApiResult.NetworkError -> {
+                    // Graceful offline fallback: verify salted local credentials
+                    val isPasswordCorrect = AuthService.shared.verifyPassword(trimmed, password)
+                    if (isPasswordCorrect) {
+                        val profile = AuthService.shared.signInWithEmail(trimmed)
+                        localizationManager.updateUserProfile(profile.name, profile.handle)
+                        localizationManager.setLoggedIn(true, profile.name, profile.handle)
+                        isSubmitting = false
+                        isSuccessToast = true
+                        toastMessage = "Welcome back, ${profile.name}! (Offline) 🔥"
+                        delay(600)
+                        onLoginSuccess(profile.name, profile.email)
+                    } else {
+                        isSubmitting = false
+                        isSuccessToast = false
+                        toastMessage = "Server unreachable. Please check your network connection."
+                        triggerShake()
+                    }
+                }
             }
-
-            if (rememberMe) {
-                prefs.edit().putString("dsaUserEmail", trimmed).apply()
-            } else {
-                prefs.edit().remove("dsaUserEmail").apply()
-            }
-
-            val profile = AuthService.shared.signInWithEmail(trimmed)
-            localizationManager.updateUserProfile(profile.name, profile.handle)
-            localizationManager.setLoggedIn(true, profile.name, profile.handle)
-
-            isSubmitting = false
-            isSuccessToast = true
-            toastMessage = "Welcome back, ${profile.name}! 🔥"
-
-            delay(600)
-            onLoginSuccess(profile.name, profile.email)
         }
     }
 
@@ -923,10 +971,27 @@ fun LoginScreen(
                             RoundedCornerShape(14.dp)
                         )
                         .clickable {
-                            val guest = AuthService.shared.signInAsGuest()
-                            localizationManager.updateUserProfile(guest.name, guest.handle)
-                            localizationManager.setLoggedIn(true, guest.name, guest.handle)
-                            onLoginSuccess(guest.name, guest.email)
+                            if (isSubmitting) return@clickable
+                            isSubmitting = true
+                            coroutineScope.launch {
+                                when (val res = authRepository.guestStart()) {
+                                    is ApiResult.Success -> {
+                                        val user = res.data
+                                        val guestName = user.name ?: user.username
+                                        localizationManager.updateUserProfile(guestName, user.username)
+                                        localizationManager.setLoggedIn(true, guestName, user.username)
+                                        isSubmitting = false
+                                        onLoginSuccess(guestName, user.email)
+                                    }
+                                    else -> {
+                                        val guest = AuthService.shared.signInAsGuest()
+                                        localizationManager.updateUserProfile(guest.name, guest.handle)
+                                        localizationManager.setLoggedIn(true, guest.name, guest.handle)
+                                        isSubmitting = false
+                                        onLoginSuccess(guest.name, guest.email)
+                                    }
+                                }
+                            }
                         }
                         .padding(horizontal = 14.dp),
                     contentAlignment = Alignment.Center
@@ -1023,14 +1088,38 @@ fun LoginScreen(
                 GoogleAuthSheet(
                     onSelectAccount = { accName, accEmail ->
                         showGoogleAuthSheet = false
-                        val user = AuthService.shared.signInWithGoogle(accName, accEmail)
-                        localizationManager.updateUserProfile(user.name, user.handle)
-                        localizationManager.setLoggedIn(true, user.name, user.handle)
-                        isSuccessToast = true
-                        toastMessage = "Welcome, ${user.name}!"
+                        isSubmitting = true
                         coroutineScope.launch {
-                            delay(450)
-                            onLoginSuccess(user.name, user.email)
+                            val googleReq = GoogleLoginRequest(
+                                idToken = "google_${System.currentTimeMillis()}",
+                                email = accEmail,
+                                name = accName,
+                                picture = null,
+                                googleId = accEmail.substringBefore("@")
+                            )
+                            when (val res = authRepository.googleAuthenticate(googleReq)) {
+                                is ApiResult.Success -> {
+                                    val user = res.data
+                                    val displayName = user.name ?: user.username
+                                    localizationManager.updateUserProfile(displayName, user.username)
+                                    localizationManager.setLoggedIn(true, displayName, user.username)
+                                    isSubmitting = false
+                                    isSuccessToast = true
+                                    toastMessage = "Welcome back, $displayName!"
+                                    delay(450)
+                                    onLoginSuccess(displayName, user.email)
+                                }
+                                else -> {
+                                    val user = AuthService.shared.signInWithGoogle(accName, accEmail)
+                                    localizationManager.updateUserProfile(user.name, user.handle)
+                                    localizationManager.setLoggedIn(true, user.name, user.handle)
+                                    isSubmitting = false
+                                    isSuccessToast = true
+                                    toastMessage = "Welcome, ${user.name}!"
+                                    delay(450)
+                                    onLoginSuccess(user.name, user.email)
+                                }
+                            }
                         }
                     },
                     onDismiss = { showGoogleAuthSheet = false }

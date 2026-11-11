@@ -150,43 +150,56 @@ class SyncRepository @Inject constructor(
     }
 
     suspend fun syncRemoteProgressToLocal(courseId: String? = CNS_COURSE_ID): ApiResult<ProgressStatusDTO> {
+        val statusResult = fetchProgressStatus(courseId)
         val meResult = fetchMyProgress()
+
+        val allCompletedLessonIds = mutableSetOf<String>()
+
+        var remoteTotalXp: Int? = null
+        var remoteGems: Int? = null
+        var remoteStreak: Int? = null
+
+        if (statusResult is ApiResult.Success) {
+            val status = statusResult.data
+            status.completedLessons?.let { allCompletedLessonIds.addAll(it) }
+            remoteTotalXp = status.totalXp
+            remoteGems = status.gems
+            remoteStreak = status.streakDays
+        }
+
         if (meResult is ApiResult.Success) {
             val items = meResult.data
-            val completedLessonIds = items.filter { it.isCompleted == true }.map { it.lessonId }
-            val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(completedLessonIds)
-            withContext(Dispatchers.Main) {
-                gameManager.applyRemoteSnapshot(
-                    remoteCompletedIndices = localIndices,
-                    isLessonUploadResponse = false
-                )
-            }
-            return ApiResult.Success(
+            allCompletedLessonIds.addAll(items.filter { it.isCompleted == true }.map { it.lessonId })
+        }
+
+        val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(allCompletedLessonIds.toList())
+        withContext(Dispatchers.Main) {
+            gameManager.applyRemoteSnapshot(
+                remoteTotalXP = remoteTotalXp,
+                remoteGems = remoteGems,
+                remoteStreak = remoteStreak,
+                remoteCompletedIndices = localIndices,
+                isLessonUploadResponse = false
+            )
+        }
+
+        return if (statusResult is ApiResult.Success) {
+            ApiResult.Success(
+                statusResult.data.copy(completedLessons = allCompletedLessonIds.toList())
+            )
+        } else if (meResult is ApiResult.Success) {
+            ApiResult.Success(
                 ProgressStatusDTO(
-                    completedLessons = completedLessonIds,
+                    completedLessons = allCompletedLessonIds.toList(),
                     totalXp = gameManager.totalXP.value,
                     hearts = gameManager.heartsCount.value,
                     gems = gameManager.gemsCount.value,
                     streakDays = gameManager.streakDays.value
                 )
             )
+        } else {
+            statusResult
         }
-
-        val result = fetchProgressStatus(courseId)
-        if (result is ApiResult.Success) {
-            val status = result.data
-            val localIndices = LessonIdAdapter.extractLocalIndicesFromRemoteList(status.completedLessons)
-            withContext(Dispatchers.Main) {
-                gameManager.applyRemoteSnapshot(
-                    remoteTotalXP = status.totalXp,
-                    remoteGems = status.gems,
-                    remoteStreak = status.streakDays,
-                    remoteCompletedIndices = localIndices,
-                    isLessonUploadResponse = false
-                )
-            }
-        }
-        return result
     }
 
     // -------------------------------------------------------------------------

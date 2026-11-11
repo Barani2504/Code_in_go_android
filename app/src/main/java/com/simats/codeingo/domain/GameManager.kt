@@ -568,12 +568,26 @@ class GameManager private constructor() {
         if (remoteCompletedIndices.isNotEmpty()) {
             val union = _completedLevelIndices.value + remoteCompletedIndices
             _completedLevelIndices.value = union
-            val maxChapter = union.filter { it in 1..50 }.maxOfOrNull {
+
+            // Reconcile completed chapters: completing boss level of chapter c finishes chapter c
+            val newlyCompletedChapters = mutableSetOf<Int>()
+            for (c in 1..10) {
+                val bossLevel = if (c <= 5) c * 5 else 25 + (c - 5) * 5
+                if (union.contains(bossLevel)) {
+                    newlyCompletedChapters.add(c)
+                }
+            }
+            if (newlyCompletedChapters.isNotEmpty()) {
+                _completedChapters.update { it + newlyCompletedChapters }
+            }
+
+            val maxFromCompleted = (newlyCompletedChapters.maxOrNull() ?: 0) + 1
+            val maxChapterFromLevels = union.filter { it in 1..50 }.maxOfOrNull {
                 if (it <= 25) ((it - 1) / 5) + 1 else ((it - 26) / 5) + 6
             } ?: 1
-            _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, maxChapter)
-            val unlockedNext = union.map { if (it in 101..104) it + 1 else it + 1 }.toSet()
-            _unlockedLevelIndices.value = _unlockedLevelIndices.value + unlockedNext
+            _maxUnlockedChapter.value = maxOf(_maxUnlockedChapter.value, maxFromCompleted, maxChapterFromLevels)
+
+            reconcileUnlockedLevels()
         }
         persistStats()
     }

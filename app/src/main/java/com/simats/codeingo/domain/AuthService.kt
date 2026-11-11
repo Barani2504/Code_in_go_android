@@ -3,6 +3,8 @@ package com.simats.codeingo.domain
 import android.content.Context
 import android.content.SharedPreferences
 import com.simats.codeingo.data.network.security.TokenStorage
+import com.simats.codeingo.data.network.repository.AuthRepository
+import com.simats.codeingo.data.network.repository.SyncRepository
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -24,6 +26,8 @@ import java.util.UUID
 @InstallIn(SingletonComponent::class)
 interface AuthServiceEntryPoint {
     fun tokenStorage(): TokenStorage
+    fun authRepository(): AuthRepository
+    fun syncRepository(): SyncRepository
 }
 
 enum class AuthProvider(val id: String, val displayName: String) {

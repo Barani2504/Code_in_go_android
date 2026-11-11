@@ -1,5 +1,6 @@
 package com.simats.codeingo.ui.arenas.key_exchange_citadel
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -91,8 +92,15 @@ fun KeyExchangeCitadelArenaScreen(
     val heartsCount by gameManager.heartsCount.collectAsState()
     val gemsCount by gameManager.gemsCount.collectAsState()
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val prefs = remember { context.getSharedPreferences("arena_progression_prefs", Context.MODE_PRIVATE) }
+
     var currentLevel by remember { mutableStateOf(KeyExchangeCitadelLevel.LEVEL_1) }
-    var unlockedLevels by remember { mutableStateOf(setOf(1, 2, 3, 4, 5, 6, 7)) }
+    var unlockedLevels by remember {
+        val saved = prefs.getStringSet("key_exchange_citadel_unlocked", null)
+            ?.mapNotNull { it.toIntOrNull() }?.toSet() ?: setOf(1)
+        mutableStateOf(if (saved.isEmpty()) setOf(1) else saved)
+    }
     var levelStars by remember { mutableStateOf(mutableMapOf<Int, Int>()) }
 
     var sessionXP by remember { mutableIntStateOf(0) }
@@ -143,7 +151,9 @@ fun KeyExchangeCitadelArenaScreen(
 
     fun handleLevelCompleted(lvl: KeyExchangeCitadelLevel) {
         val nextId = lvl.id + 1
-        unlockedLevels = unlockedLevels + nextId
+        val updated = unlockedLevels + nextId
+        unlockedLevels = updated
+        prefs.edit().putStringSet("key_exchange_citadel_unlocked", updated.map { it.toString() }.toSet()).apply()
         val earnedStars = if (comboCount >= 3) 3 else 2
         levelStars[lvl.id] = earnedStars
         sessionXP += lvl.xpReward
@@ -426,7 +436,9 @@ fun KeyExchangeCitadelArenaScreen(
                 },
                 onSkipLevel = {
                     val nextId = minOf(7, currentLevel.id + 1)
-                    unlockedLevels = unlockedLevels + nextId
+                    val updated = unlockedLevels + nextId
+                    unlockedLevels = updated
+                    prefs.edit().putStringSet("key_exchange_citadel_unlocked", updated.map { it.toString() }.toSet()).apply()
                     currentLevel = KeyExchangeCitadelLevel.fromId(nextId)
                 }
             )

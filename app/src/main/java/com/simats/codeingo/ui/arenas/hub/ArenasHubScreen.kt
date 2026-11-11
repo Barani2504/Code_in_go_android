@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
@@ -33,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -137,6 +139,8 @@ fun ArenasHubScreen(
     val isDark = dynamicColors.isDark
     val totalXP by GameManager.instance.totalXP.collectAsState()
     val gemsCount by GameManager.instance.gemsCount.collectAsState()
+    val maxUnlockedChapter by GameManager.instance.maxUnlockedChapter.collectAsState()
+    val unlockedCount = CNS_ARENAS_SPECS.count { it.unitNumber <= maxUnlockedChapter }
 
     LazyColumn(
         modifier = modifier
@@ -187,7 +191,7 @@ fun ArenasHubScreen(
                         )
                     }
 
-                    // Status Badge: All 5 Unlocked
+                    // Status Badge: Unlocked Arenas Count
                     val badgeAmber = if (isDark) AmberGold else Color(0xFFB45309)
                     Box(
                         modifier = Modifier
@@ -204,7 +208,7 @@ fun ArenasHubScreen(
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "5/5 UNLOCKED ⚡",
+                            text = "$unlockedCount/5 UNLOCKED ⚡",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
@@ -262,6 +266,7 @@ fun ArenasHubScreen(
         items(CNS_ARENAS_SPECS) { spec ->
             ArenaBattleHeroCard(
                 spec = spec,
+                isUnlocked = spec.unitNumber <= maxUnlockedChapter,
                 onEnterArena = { onOpenArena(spec.routeKey) }
             )
         }
@@ -291,6 +296,7 @@ private fun CombatStatColumn(label: String, value: String, color: Color) {
 @Composable
 private fun ArenaBattleHeroCard(
     spec: ArenaHubSpec,
+    isUnlocked: Boolean,
     onEnterArena: () -> Unit
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
@@ -304,6 +310,7 @@ private fun ArenaBattleHeroCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .alpha(if (isUnlocked) 1f else 0.60f)
             .unlumenNeonGlow(
                 glowColor = effectivePrimary,
                 cornerRadius = 24.dp,
@@ -485,38 +492,74 @@ private fun ArenaBattleHeroCard(
             }
 
             // 5. Action Launch Button
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(effectivePrimary, effectiveSecondary)
+            if (isUnlocked) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(effectivePrimary, effectiveSecondary)
+                            )
                         )
-                    )
-                    .shimmerGlossSweep(enabled = true)
-                    .kineticBouncyClick { onEnterArena() },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .shimmerGlossSweep(enabled = true)
+                        .kineticBouncyClick { onEnterArena() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Enter",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "ENTER ${spec.title.uppercase()} ARENA",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = Color.White,
-                        letterSpacing = 0.6.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Enter",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "ENTER ${spec.title.uppercase()} ARENA",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.White,
+                            letterSpacing = 0.6.sp
+                        )
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0))
+                        .border(
+                            1.dp,
+                            if (isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.08f),
+                            RoundedCornerShape(16.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Locked",
+                            tint = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "LOCKED • REACH CHAPTER ${spec.unitNumber}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
+                            letterSpacing = 0.5.sp
+                        )
+                    }
                 }
             }
         }
