@@ -39,6 +39,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,6 +92,17 @@ fun CipherSanctumArenaScreen(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val prefs = remember { com.simats.codeingo.ui.arenas.common.ArenaProgressionManager.getPrefs(context) }
+    val arenaScope = rememberCoroutineScope()
+    val arenaCompletionUseCase = remember {
+        try {
+            dagger.hilt.android.EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                com.simats.codeingo.ui.arenas.common.ArenaEntryPoint::class.java
+            ).arenaCompletionUseCase()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     var currentLevel by remember { mutableStateOf(CipherSanctumLevel.LEVEL_1) }
     var unlockedLevels by remember {
@@ -152,12 +165,21 @@ fun CipherSanctumArenaScreen(
         val nextId = lvl.id + 1
         val updated = unlockedLevels + nextId
         unlockedLevels = updated
-        prefs.edit().putStringSet("cipher_sanctum_unlocked", updated.map { it.toString() }.toSet()).apply()
+        com.simats.codeingo.ui.arenas.common.ArenaProgressionManager.saveUnlockedLevels(prefs, "cipher_sanctum_unlocked", updated)
         val earnedStars = if (comboCount >= 3) 3 else 2
         levelStars[lvl.id] = earnedStars
         sessionXP += lvl.xpReward
-        gameManager.addXP(lvl.xpReward)
-        gameManager.addGems(lvl.coinReward)
+        arenaScope.launch {
+            arenaCompletionUseCase?.execute(
+                arenaKey = "cipher_sanctum",
+                completedLevel = lvl.id,
+                totalLevelsInArena = CipherSanctumLevel.values().size,
+                baseXpReward = lvl.xpReward
+            ) ?: run {
+                gameManager.addXP(lvl.xpReward)
+                gameManager.addGems(lvl.coinReward)
+            }
+        }
 
         particleTrigger = System.currentTimeMillis()
         shockwaveTrigger = System.currentTimeMillis()
@@ -437,7 +459,7 @@ fun CipherSanctumArenaScreen(
                     val nextId = minOf(7, currentLevel.id + 1)
                     val updated = unlockedLevels + nextId
                     unlockedLevels = updated
-                    prefs.edit().putStringSet("cipher_sanctum_unlocked", updated.map { it.toString() }.toSet()).apply()
+                    com.simats.codeingo.ui.arenas.common.ArenaProgressionManager.saveUnlockedLevels(prefs, "cipher_sanctum_unlocked", updated)
                     currentLevel = CipherSanctumLevel.fromId(nextId)
                 }
             )

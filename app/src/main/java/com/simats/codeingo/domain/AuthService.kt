@@ -86,6 +86,7 @@ class AuthService private constructor() {
 
     private val _currentUser = MutableStateFlow<UserAuthProfile?>(null)
     val currentUser: StateFlow<UserAuthProfile?> = _currentUser.asStateFlow()
+    val currentUserId: String? get() = _currentUser.value?.id
 
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()

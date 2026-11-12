@@ -37,30 +37,46 @@ enum class DSALessonType(val value: String) {
     BOSS("BOSS")
 }
 
-// MARK: - 3. Exercise Types (15 Comprehensive Types)
-enum class DSAExerciseType(val value: String, val displayName: String) {
+// MARK: - 3. Exercise Types (Comprehensive CNS Types)
+enum class ExerciseType(val value: String, val displayName: String) {
     MULTIPLE_CHOICE("MultipleChoice", "Concept Check"),
     MULTI_SELECT("MultiSelect", "Multi-Select"),
     TRUE_FALSE_SWIPE("TrueFalseSwipe", "Fact Swipe"),
     MATCH_PAIRS("MatchPairs", "Match Pairs"),
-    ORDER_STEPS("OrderSteps", "Parsons Puzzle"),
+    ORDER_STEPS("OrderSteps", "Protocol Sequencing"),
     FILL_CODE("FillCode", "Fill in Code"),
-    PREDICT_OUTPUT("PredictOutput", "Predict Output"),
-    BUG_HUNT("BugHunt", "Bug Hunt"),
-    BUILD_STRUCTURE("BuildStructure", "Build Structure"),
+    PREDICT_OUTPUT("PredictOutput", "Predict Ciphertext"),
+    BUG_HUNT("BugHunt", "Vulnerability Hunt"),
+    BUILD_STRUCTURE("BuildStructure", "Build Feistel / Block"),
     OPERATE_VISUALIZER("OperateVisualizer", "Operate Visualizer"),
-    COMPLEXITY_DIAL("ComplexityDial", "Big-O Dial"),
-    SORT_INTO_BUCKETS("SortIntoBuckets", "Bucket Classification"),
-    TRACE_ROUTE("TraceRoute", "Trace Traversal"),
+    KEY_SIZE_DIAL("KeySizeDial", "Key Size & Security Level Dial"),
+    SORT_INTO_BUCKETS("SortIntoBuckets", "Cipher Classification"),
+    TRACE_ROUTE("TraceRoute", "Trace Key Exchange"),
     SPEED_ROUND("SpeedRound", "30s Speed Round"),
-    CODE_SANDBOX("CodeSandbox", "Code Sandbox")
+    CODE_SANDBOX("CodeSandbox", "Cipher Sandbox"),
+    
+    // ── Phase 2 CNS Domain Superpower Exercise Types ──
+    CIPHER_WHEEL("CipherWheel", "Cipher Wheel Decryption"),
+    BIT_FLIPPER("BitFlipper", "Avalanche Bit Flipper"),
+    ROUND_BUILDER("RoundBuilder", "Round Transformation Builder"),
+    MODULAR_MATH("ModularMath", "Modular Arithmetic Keypad"),
+    PACKET_TRIAGE("PacketTriage", "Firewall Packet Triage"),
+    SPOT_THE_FLAW("SpotTheFlaw", "Vulnerability Flaw Locator");
+
+    companion object {
+        @Deprecated("Use KEY_SIZE_DIAL", ReplaceWith("KEY_SIZE_DIAL"))
+        val COMPLEXITY_DIAL = KEY_SIZE_DIAL
+    }
 }
+
+@Deprecated("Use ExerciseType", ReplaceWith("ExerciseType"))
+typealias DSAExerciseType = ExerciseType
 
 // MARK: - 4. Exercise Item Model
 @Serializable
 data class DSAExerciseItem(
     val id: String,
-    val type: DSAExerciseType,
+    val type: ExerciseType,
     val prompt: String,
     val hint: String? = null,
     val explanation: String,
@@ -75,7 +91,7 @@ data class DSAExerciseItem(
     val targetBucketB: List<String> = emptyList(),
     val bucketALabel: String? = null,
     val bucketBLabel: String? = null,
-    val timeComplexityOptions: List<String> = listOf("O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(2ⁿ)"),
+    val timeComplexityOptions: List<String> = listOf("64-bit", "128-bit", "192-bit", "256-bit", "2048-bit", "4096-bit"),
     val traversalTargetNodes: List<String> = emptyList()
 )
 

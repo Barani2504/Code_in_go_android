@@ -118,7 +118,7 @@ fun CreativeTemperatureGaugeView(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Header: DSA Challenge & Array Declaration
+        // 1. Header: Crypto Challenge & Block Key Setup
         AppCard(
             modifier = Modifier.fillMaxWidth(),
             cornerRadius = 18.dp,

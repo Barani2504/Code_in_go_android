@@ -70,55 +70,98 @@ val EmeraldGreen         = Color(0xFF00_C8_5A)
 // so every screen using these names automatically matches the theme.
 // ══════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════
+// SEMANTIC DESIGN TOKENS (ASHCRYPT)
+// ══════════════════════════════════════════════════════
+
+val Success         = PhoenixGreen
+val SuccessDark     = Color(0xFF1A_AE_47)
+val Danger          = PhoenixCrimson
+val DangerDark      = Color(0xFFBB_1C_0A)
+val Warning         = PhoenixEmber
+val WarningDark     = Color(0xFFCC_43_0E)
+val Info            = Color(0xFF1C_B0_F6)
+val InfoDark        = Color(0xFF18_99_D6)
+
+val Surface: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.cardBackground
+
+val SurfaceMuted: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.inputBackground
+
+val OnSurfaceMuted: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalDynamicThemeColors.current.textSecondary
+
+// ══════════════════════════════════════════════════════
+// THEME-ADAPTIVE LEGACY ALIASES — Deprecated in AshCrypt
+// ══════════════════════════════════════════════════════
+
 // Backgrounds
+@Deprecated("Use LocalDynamicThemeColors.current.background or ashTokens.colors.background")
 val DuolingoDarkBg: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.background
 
+@Deprecated("Use LocalDynamicThemeColors.current.headerBackground")
 val DuolingoHeaderBg: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.headerBackground
 
 // Cards & Inputs
+@Deprecated("Use Surface or ashTokens.colors.surface")
 val DuolingoCardBg: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.cardBackground
 
+@Deprecated("Use SurfaceMuted or ashTokens.colors.surfaceMuted")
 val DuolingoInputBg: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.inputBackground
 
+@Deprecated("Use LocalDynamicThemeColors.current.inputBorder")
 val DuolingoInputBorder: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.inputBorder
 
+@Deprecated("Use LocalDynamicThemeColors.current.inputText")
 val DuolingoInputText: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.inputText
 
+@Deprecated("Use LocalDynamicThemeColors.current.placeholder")
 val DuolingoPlaceholder: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.placeholder
 
+@Deprecated("Use OnSurfaceMuted")
 val DuolingoTextGray: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.textSecondary
 
+@Deprecated("Use OnSurfaceMuted")
 val DuolingoSubtext: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.textSecondary
 
 // Accents — legacy "Blue" → Phoenix amber/ember
+@Deprecated("Use AmberGold or ashTokens.colors.primary")
 val DuolingoBlue         = AmberGold
+@Deprecated("Use AmberGoldDark or ashTokens.colors.primaryDark")
 val DuolingoBlueDark     = AmberGoldDark
 
 /**
@@ -131,62 +174,76 @@ val AmberGoldText: Color
     @ReadOnlyComposable
     get() = LocalDynamicThemeColors.current.amberText
 
-// Accents — legacy "Green" → Phoenix green
-val DuolingoGreen        = PhoenixGreen
-val DuolingoGreenDark    = Color(0xFF1A_AE_47)
+// Accents — legacy "Green" → Success
+@Deprecated("Use Success or ashTokens.colors.success")
+val DuolingoGreen        = Success
+@Deprecated("Use SuccessDark or ashTokens.colors.successDark")
+val DuolingoGreenDark    = SuccessDark
 
 // Misc aliases kept for backward compat
-val DuolingoOrange       = PhoenixEmber
-val DuolingoOrangeDark   = Color(0xFFCC_43_0E)
-val DuolingoRed          = PhoenixCrimson
-val DuolingoRedDark      = Color(0xFFBB_1C_0A)
+@Deprecated("Use Warning")
+val DuolingoOrange       = Warning
+@Deprecated("Use WarningDark")
+val DuolingoOrangeDark   = WarningDark
+@Deprecated("Use Danger")
+val DuolingoRed          = Danger
+@Deprecated("Use DangerDark")
+val DuolingoRedDark      = DangerDark
 
 // Neutral brand aliases (Defect 20)
-val ArenaSuccessGreen    = DuolingoGreen
-val ArenaDangerRed       = DuolingoRed
+val ArenaSuccessGreen    = Success
+val ArenaDangerRed       = Danger
 val ArenaAccentGold      = AmberGold
-val TactileGreen         = DuolingoGreen
-val TactileRed           = DuolingoRed
+val TactileGreen         = Success
+val TactileRed           = Danger
 val TactileAmber         = AmberGold
 
 val DarkBackground: Color
     @Composable
     @ReadOnlyComposable
-    get() = DuolingoDarkBg
+    get() = LocalDynamicThemeColors.current.background
 
 val CardBackground: Color
     @Composable
     @ReadOnlyComposable
-    get() = DuolingoCardBg
+    get() = LocalDynamicThemeColors.current.cardBackground
 
 val InputBackground: Color
     @Composable
     @ReadOnlyComposable
-    get() = DuolingoInputBg
+    get() = LocalDynamicThemeColors.current.inputBackground
 
 val InputBorder: Color
     @Composable
     @ReadOnlyComposable
-    get() = DuolingoInputBorder
+    get() = LocalDynamicThemeColors.current.inputBorder
 
 val SubtextGray: Color
     @Composable
     @ReadOnlyComposable
-    get() = DuolingoSubtext
+    get() = LocalDynamicThemeColors.current.textSecondary
 
 // ══════════════════════════════════════════════════════
-// DSA DIFFICULTY TIER COLORS  (unchanged visual values)
+// DIFFICULTY TIER COLORS
 // ══════════════════════════════════════════════════════
-val DsaGreen             = PhoenixGreen
-val DsaGreenDark         = DuolingoGreenDark
-val DsaBlue              = Color(0xFF1C_B0_F6)
-val DsaBlueDark          = Color(0xFF18_99_D6)
+@Deprecated("Use Success")
+val DsaGreen             = Success
+@Deprecated("Use SuccessDark")
+val DsaGreenDark         = SuccessDark
+@Deprecated("Use Info")
+val DsaBlue              = Info
+@Deprecated("Use InfoDark")
+val DsaBlueDark          = InfoDark
 val DsaPurple            = Color(0xFFA0_5A_FF)
 val DsaPurpleDark        = Color(0xFF82_3C_DC)
-val DsaOrange            = PhoenixEmber
-val DsaOrangeDark        = DuolingoOrangeDark
-val DsaRed               = PhoenixCrimson
-val DsaRedDark           = DuolingoRedDark
+@Deprecated("Use Warning")
+val DsaOrange            = Warning
+@Deprecated("Use WarningDark")
+val DsaOrangeDark        = WarningDark
+@Deprecated("Use Danger")
+val DsaRed               = Danger
+@Deprecated("Use DangerDark")
+val DsaRedDark           = DangerDark
 val DsaTeal              = Color(0xFF00_CD_9C)
 
 // ══════════════════════════════════════════════════════

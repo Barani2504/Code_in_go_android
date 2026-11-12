@@ -32,4 +32,10 @@ object DatabaseModule {
     fun provideOfflineSyncDao(database: CodeingoDatabase): OfflineSyncDao {
         return database.offlineSyncDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideConceptMasteryDao(database: CodeingoDatabase): com.simats.codeingo.data.db.ConceptMasteryDao {
+        return database.conceptMasteryDao()
+    }
 }

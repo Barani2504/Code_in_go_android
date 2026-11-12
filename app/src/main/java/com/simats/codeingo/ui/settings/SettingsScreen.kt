@@ -1266,38 +1266,40 @@ private fun PreferencesTab(
             textSecondary = textSecondary
         )
 
-        SettingsDivider(cardBorder)
+        if (com.simats.codeingo.BuildConfig.DEBUG) {
+            SettingsDivider(cardBorder)
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onOpenAnimationLab() }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("🔬", fontSize = 18.sp)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Animation Lab",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textPrimary
-                )
-                Text(
-                    "Test particles, HUD pill, haptics & tiers",
-                    fontSize = 12.sp,
-                    color = textSecondary
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenAnimationLab() }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("🔬", fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Animation Lab (Debug)",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textPrimary
+                    )
+                    Text(
+                        "Test particles, HUD pill, haptics & tiers",
+                        fontSize = 12.sp,
+                        color = textSecondary
+                    )
+                }
+                Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = textSecondary,
+                    modifier = Modifier.size(16.dp)
                 )
             }
-            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = textSecondary,
-                modifier = Modifier.size(16.dp)
-            )
         }
     }
 
@@ -1415,16 +1417,18 @@ private fun PreferencesTab(
             Text("🔥 Streak Days", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textPrimary, modifier = Modifier.weight(1f))
             Text("$streakDays", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF6B35))
         }
-        SettingsDivider(cardBorder)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            TextButton(onClick = onAddDay) {
-                Text("+1 Day", color = DuolingoGreen, fontWeight = FontWeight.Black)
-            }
-            TextButton(onClick = onResetStreak) {
-                Text("Reset", color = DuolingoRed, fontWeight = FontWeight.Black)
+        if (com.simats.codeingo.BuildConfig.DEBUG) {
+            SettingsDivider(cardBorder)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = onAddDay) {
+                    Text("+1 Day", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                }
+                TextButton(onClick = onResetStreak) {
+                    Text("Reset", color = DuolingoRed, fontWeight = FontWeight.Black)
+                }
             }
         }
     }

@@ -11,15 +11,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         MistakeVaultEntity::class,
-        OfflineSyncEntity::class
+        OfflineSyncEntity::class,
+        ConceptMasteryEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class CodeingoDatabase : RoomDatabase() {
 
     abstract fun mistakeVaultDao(): MistakeVaultDao
     abstract fun offlineSyncDao(): OfflineSyncDao
+    abstract fun conceptMasteryDao(): ConceptMasteryDao
 
     companion object {
         @Volatile
@@ -52,6 +54,32 @@ abstract class CodeingoDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `concept_mastery` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `user_id` TEXT NOT NULL,
+                        `concept_id` TEXT NOT NULL,
+                        `mastery_score` REAL NOT NULL,
+                        `repetition_number` INTEGER NOT NULL,
+                        `easiness_factor` REAL NOT NULL,
+                        `interval_days` INTEGER NOT NULL,
+                        `last_reviewed_epoch_ms` INTEGER NOT NULL,
+                        `next_review_epoch_ms` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS `index_concept_mastery_user_id_concept_id`
+                    ON `concept_mastery` (`user_id`, `concept_id`)
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): CodeingoDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -59,7 +87,8 @@ abstract class CodeingoDatabase : RoomDatabase() {
                     CodeingoDatabase::class.java,
                     "codeingo_vault.db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

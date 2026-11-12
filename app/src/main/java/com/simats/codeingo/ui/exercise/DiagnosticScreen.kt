@@ -45,6 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import com.simats.codeingo.data.db.CodeingoDatabase
+import com.simats.codeingo.data.db.ConceptMasteryEntity
+import com.simats.codeingo.domain.AuthService
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
@@ -73,6 +80,8 @@ fun DiagnosticScreen(
     onSelectChapter: (chapterId: Int) -> Unit = {}
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val questions = remember { getDiagnosticQuestions() }
     var currentIndex by remember { mutableIntStateOf(0) }
@@ -84,6 +93,37 @@ fun DiagnosticScreen(
     var moduloScore by remember { mutableIntStateOf(0) }
     var xorScore by remember { mutableIntStateOf(0) }
     var securityScore by remember { mutableIntStateOf(0) }
+
+    fun recordDiagnosticMastery() {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val db = CodeingoDatabase.getDatabase(context)
+                val userId = AuthService.shared.currentUserId ?: "guest"
+                val now = System.currentTimeMillis()
+                val dayMs = 24 * 60 * 60 * 1000L
+                val concepts = listOf(
+                    Triple("cns_binary_hex", binaryScore, "Binary & Hexadecimal"),
+                    Triple("cns_modular_arithmetic", moduloScore, "Modular Arithmetic"),
+                    Triple("cns_xor_logic", xorScore, "Bitwise XOR & Logic"),
+                    Triple("cns_security_triad", securityScore, "Security Core & CIA Triad")
+                )
+                concepts.forEach { (cId, score, _) ->
+                    val mastery = (score * 33).coerceIn(15, 100)
+                    val entity = ConceptMasteryEntity(
+                        conceptId = cId,
+                        userId = userId,
+                        masteryScore = mastery,
+                        lastReviewedAt = now,
+                        nextReviewDue = now + (if (score >= 2) 3 * dayMs else dayMs),
+                        intervalDays = if (score >= 2) 3 else 1,
+                        easeFactor = 2.5f,
+                        consecutiveCorrect = score
+                    )
+                    db.conceptMasteryDao().insertOrUpdate(entity)
+                }
+            } catch (_: Exception) {}
+        }
+    }
 
     var isFinished by remember { mutableStateOf(false) }
     var showSkipConfirmDialog by remember { mutableStateOf(false) }
@@ -204,6 +244,7 @@ fun DiagnosticScreen(
                     title = if (recommendedChapter == 1) "ENTER CHAPTER 1: CIPHER SANCTUM" else "START CHAPTER 0: BASECAMP",
                     style = AppButtonStyle.SUCCESS_GREEN,
                     onClick = {
+                        recordDiagnosticMastery()
                         gameManager.setDiagnosticResult(recommendedChapter)
                         onSelectChapter(recommendedChapter)
                     },
@@ -223,6 +264,7 @@ fun DiagnosticScreen(
                         title = "EXPLORE CHAPTER 0 ANYWAY",
                         style = AppButtonStyle.SECONDARY_GLASS,
                         onClick = {
+                            recordDiagnosticMastery()
                             gameManager.setDiagnosticResult(recommendedChapter)
                             onSelectChapter(0)
                         },
@@ -391,6 +433,7 @@ fun DiagnosticScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         showSkipConfirmDialog = false
+                        recordDiagnosticMastery()
                         gameManager.setDiagnosticResult(1)
                         onSelectChapter(1)
                     }) {

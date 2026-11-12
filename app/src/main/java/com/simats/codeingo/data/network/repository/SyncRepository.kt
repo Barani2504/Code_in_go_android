@@ -2,6 +2,7 @@ package com.simats.codeingo.data.network.repository
 
 import android.util.Log
 import com.simats.codeingo.data.network.api.CodeingoApiService
+import com.simats.codeingo.data.network.model.BackendLessonCompleteResponse
 import com.simats.codeingo.data.network.model.AchievementDTO
 import com.simats.codeingo.data.network.model.AnswerRequest
 import com.simats.codeingo.data.network.model.ApiResult
@@ -213,6 +214,29 @@ class SyncRepository @Inject constructor(
     // -------------------------------------------------------------------------
     // 3. Economy and Heart Lifecycle (POST)
     // -------------------------------------------------------------------------
+
+    suspend fun completeLesson(
+        lessonId: String,
+        accuracyPercentage: Int
+    ): ApiResult<BackendLessonCompleteResponse> = safeApiCall {
+        val req = BackendLessonCompleteRequest(
+            lessonId = lessonId,
+            accuracyPercentage = accuracyPercentage
+        )
+        val res = apiService.completeLesson(req)
+        if (res.isSuccessful && res.body() != null) {
+            val body = res.body()!!
+            withContext(Dispatchers.Main) {
+                gameManager.applyRemoteSnapshot(
+                    remoteTotalXP = body.totalXp,
+                    remoteGems = body.totalGems,
+                    remoteStreak = body.currentStreak,
+                    isLessonUploadResponse = true
+                )
+            }
+        }
+        mapResponse(res)
+    }
 
     suspend fun claimDailyReward(xp: Int = 20, gems: Int = 15): ApiResult<UserDTO> = safeApiCall {
         val res = apiService.claimDailyReward(xp = xp, gems = gems)

@@ -83,17 +83,6 @@ import com.simats.codeingo.data.network.model.RankEntry
 // Exact parity with iOS LeaderboardsView.swift & Backend Leaderboard API
 // ══════════════════════════════════════════════════════════════════
 
-private val staticRankings = listOf(
-    RankEntry(1, "Vikram S.",      540, "🦊"),
-    RankEntry(2, "Sarah M.",       480, "🦉"),
-    RankEntry(3, "You (Learner)",  420, "👤", isUser = true),
-    RankEntry(4, "Alex K.",        360, "🦁"),
-    RankEntry(5, "Elena R.",       310, "🦄"),
-    RankEntry(6, "Chen W.",        280, "🐼"),
-    RankEntry(7, "Priya N.",       220, "🐯"),
-    RankEntry(8, "David L.",       180, "🐻")
-)
-
 @Composable
 fun LeaderboardsScreen(
     completedLessons: Int = 0,
@@ -107,7 +96,6 @@ fun LeaderboardsScreen(
     val currentUserRank by viewModel.currentUserRank.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    val displayRankings = if (rankings.isNotEmpty()) rankings else staticRankings
     var showPromotionCeremony by remember { mutableStateOf(false) }
 
     Box(
@@ -119,9 +107,15 @@ fun LeaderboardsScreen(
 
         if (!isUnlocked) {
             LockedLeaderboardsView(completedLessons = completedLessons, onStartLesson = onStartLesson)
+        } else if (isLoading && rankings.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                androidx.compose.material3.CircularProgressIndicator(color = AmberGold)
+            }
+        } else if (rankings.isEmpty()) {
+            EmptyLeaderboardView(league = league, onStartLesson = onStartLesson)
         } else {
             UnlockedLeaderboardsView(
-                rankings = displayRankings,
+                rankings = rankings,
                 league = league,
                 currentUserRank = currentUserRank,
                 onShowPromotionCeremony = { showPromotionCeremony = true }
@@ -133,6 +127,72 @@ fun LeaderboardsScreen(
             type = MilestoneType.LEAGUE_PROMOTION,
             rewardXp = 35,
             onContinue = { showPromotionCeremony = false }
+        )
+    }
+}
+
+@Composable
+private fun EmptyLeaderboardView(
+    league: LeagueTier,
+    onStartLesson: (() -> Unit)?
+) {
+    val isDark = LocalDynamicThemeColors.current.isDark
+    val userXp by GameManager.instance.totalXP.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .clip(CircleShape)
+                .background(AmberGold.copy(alpha = 0.15f))
+                .border(2.dp, AmberGold.copy(alpha = 0.4f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = league.badgeEmoji, fontSize = 42.sp)
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Welcome to ${league.code} League!",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = AppFontFamily,
+            color = LocalDynamicThemeColors.current.textPrimary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "The weekly contest is freshly opened. Complete a lesson to join the league leaderboard and claim your spot on the podium!",
+            fontSize = 14.sp,
+            color = LocalDynamicThemeColors.current.textSecondary,
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "Your Total XP: $userXp ⚡",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) AmberGold else Color(0xFFB45309)
+            )
+        }
+        Spacer(modifier = Modifier.height(28.dp))
+        com.simats.codeingo.ui.components.AppButton(
+            title = "START A LESSON",
+            style = com.simats.codeingo.ui.components.AppButtonStyle.PRIMARY_AMBER,
+            onClick = { onStartLesson?.invoke() },
+            modifier = Modifier.fillMaxWidth(0.85f).height(50.dp)
         )
     }
 }

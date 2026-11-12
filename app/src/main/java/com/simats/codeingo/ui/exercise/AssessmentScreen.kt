@@ -81,6 +81,30 @@ import com.simats.codeingo.ui.theme.BehindPhoenixGlow
 import com.simats.codeingo.ui.theme.ParticleBurstCanvas
 import com.simats.codeingo.ui.theme.ScreenEdgeLighting
 import com.simats.codeingo.ui.theme.TypewriterText
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.runtime.mutableStateMapOf
+import kotlinx.coroutines.Dispatchers
+import com.simats.codeingo.domain.scoring.CnsExerciseScoring
+import com.simats.codeingo.domain.mastery.Sm2Scheduler
+import com.simats.codeingo.data.db.CodeingoDatabase
+import com.simats.codeingo.domain.AuthService
+import com.simats.codeingo.ui.exercise.components.MiniLessonRegistry
+import com.simats.codeingo.ui.exercise.components.MiniLessonIntroCards
+import com.simats.codeingo.ui.exercise.types.CipherWheelExerciseView
+import com.simats.codeingo.ui.exercise.types.BitFlipperExerciseView
+import com.simats.codeingo.ui.exercise.types.RoundBuilderExerciseView
+import com.simats.codeingo.ui.exercise.types.ModularMathExerciseView
+import com.simats.codeingo.ui.exercise.types.PacketTriageExerciseView
+import com.simats.codeingo.ui.exercise.types.SpotTheFlawExerciseView
+import com.simats.codeingo.data.model.ExerciseType
+import com.simats.codeingo.domain.LessonCompletionUseCase
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import com.simats.codeingo.data.model.DSAExerciseType
 import com.simats.codeingo.data.repository.QuizQuestion
 import com.simats.codeingo.data.repository.QuizQuestionsData
@@ -115,6 +139,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface AssessmentEntryPoint {
+    fun lessonCompletionUseCase(): LessonCompletionUseCase
+}
+
 @Composable
 fun AssessmentScreen(
     unitId: Int = 1,
@@ -132,11 +163,27 @@ fun AssessmentScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
+    val screenWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp
+    val completionUseCase = remember {
+        try {
+            EntryPointAccessors.fromApplication(context.applicationContext, AssessmentEntryPoint::class.java).lessonCompletionUseCase()
+        } catch (_: Exception) {
+            null
+        }
+    }
+    var checkButtonOrigin by remember { mutableStateOf(Offset(540f, 750f)) }
 
     val feedback = remember { FeedbackManager(context) }
     DisposableEffect(Unit) { onDispose { feedback.onDestroy() } }
 
     val questions = remember(unitId, levelNumber) { QuizQuestionsData.getQuestionsForUnit(unitId, levelNumber) }
+
+    val introCards = remember(unitId, levelNumber) {
+        MiniLessonRegistry.getCardsForLesson(unitId, levelNumber)
+    }
+    var showIntroCards by remember(unitId, levelNumber) {
+        mutableStateOf(introCards.isNotEmpty())
+    }
 
     var currentIndex       by remember { mutableIntStateOf(0) }
     var selectedOptionIndex by remember { mutableStateOf<Int?>(null) }
@@ -145,6 +192,20 @@ fun AssessmentScreen(
     var selectedFillToken   by remember { mutableStateOf<String?>(null) }
     var selectedComplexity  by remember { mutableStateOf<String?>(null) }
     var selectedTrueFalse   by remember { mutableStateOf<Boolean?>(null) }
+
+    // Phase 2: CNS Interactive exercise state variables
+    var cipherWheelShift  by remember { mutableIntStateOf(0) }
+    var flippedBits       by remember { mutableStateOf("") }
+    var roundBuilderSteps by remember { mutableStateOf<List<String>>(emptyList()) }
+    var modularRemainder  by remember { mutableStateOf<Int?>(null) }
+    var packetDecision    by remember { mutableStateOf<Boolean?>(null) }
+    var spotFlawLine      by remember { mutableStateOf<Int?>(null) }
+
+    // Mistake forgiveness and ELI5
+    val conceptAttempts = remember { mutableStateMapOf<String, Int>() }
+    var wasFirstMistakeForgiven by remember { mutableStateOf(false) }
+    var isEli5Active by remember { mutableStateOf(false) }
+    var showReportProblemDialog by remember { mutableStateOf(false) }
 
     var isChecked       by remember { mutableStateOf(false) }
     var isAnswerCorrect by remember { mutableStateOf(false) }
@@ -168,7 +229,7 @@ fun AssessmentScreen(
     fun advanceQuestion() {
         scope.launch {
             isTransitioning = true
-            val fullWidth = with(density) { 420.dp.toPx() }
+            val fullWidth = with(density) { screenWidth.toPx() }
             slideOffsetPx.snapTo(fullWidth)
             if (currentIndex + 1 < questions.size) currentIndex += 1 else { isFinished = true; return@launch }
             slideOffsetPx.animateTo(0f, animationSpec = tween(320, easing = FastOutSlowInEasing))
@@ -177,8 +238,8 @@ fun AssessmentScreen(
     }
 
     val currentQuestion: QuizQuestion = questions.getOrElse(currentIndex) {
-        QuizQuestion(typeTitle = "DSA Challenge", speakerName = "Duo", speakerImage = "DuoPencil",
-            promptSentence = "Analyze the algorithmic logic:", targetPrompt = "Select the correct option")
+        QuizQuestion(typeTitle = "CNS Challenge", speakerName = "Phoenix", speakerImage = "PhoenixCurious",
+            promptSentence = "Analyze the cryptographic defense protocol:", targetPrompt = "Select the secure option")
     }
 
     LaunchedEffect(Unit) {
@@ -197,17 +258,27 @@ fun AssessmentScreen(
         selectedFillToken   = null
         selectedComplexity  = null
         selectedTrueFalse   = null
+        cipherWheelShift    = 0
+        flippedBits         = currentQuestion.bitFlipperInputBits
+        roundBuilderSteps   = currentQuestion.roundBuilderScrambledSteps
+        modularRemainder    = null
+        packetDecision      = null
+        spotFlawLine        = null
+        wasFirstMistakeForgiven = false
+        isEli5Active        = false
         isChecked           = false
         isAnswerCorrect     = false
     }
 
     LaunchedEffect(currentIndex, isChecked, isFinished) {
-        while (!isChecked && !isFinished && timeRemaining > 0) {
-            delay(1000)
-            timeRemaining -= 1
-            if (timeRemaining == 10 || timeRemaining == 5) {
-                feedback.timerWarning()
-                DynamicPillController.post(DynamicPillEvent.TimerWarning(timeRemaining))
+        if (isBoss) {
+            while (!isChecked && !isFinished && timeRemaining > 0) {
+                delay(1000)
+                timeRemaining -= 1
+                if (timeRemaining == 10 || timeRemaining == 5) {
+                    feedback.timerWarning()
+                    DynamicPillController.post(DynamicPillEvent.TimerWarning(timeRemaining))
+                }
             }
         }
     }
@@ -217,8 +288,15 @@ fun AssessmentScreen(
         DSAExerciseType.MATCH_PAIRS      -> matchedPairs.size >= currentQuestion.matchSolution.size && currentQuestion.matchSolution.isNotEmpty()
         DSAExerciseType.ORDER_STEPS      -> orderedSteps.isNotEmpty()
         DSAExerciseType.FILL_CODE        -> selectedFillToken != null
-        DSAExerciseType.COMPLEXITY_DIAL  -> selectedComplexity != null
+        DSAExerciseType.COMPLEXITY_DIAL,
+        ExerciseType.KEY_SIZE_DIAL       -> selectedComplexity != null
         DSAExerciseType.TRUE_FALSE_SWIPE -> selectedTrueFalse != null
+        ExerciseType.CIPHER_WHEEL        -> true
+        ExerciseType.BIT_FLIPPER         -> flippedBits.isNotEmpty()
+        ExerciseType.ROUND_BUILDER       -> roundBuilderSteps.isNotEmpty()
+        ExerciseType.MODULAR_MATH        -> modularRemainder != null
+        ExerciseType.PACKET_TRIAGE       -> packetDecision != null
+        ExerciseType.SPOT_THE_FLAW       -> spotFlawLine != null
         else                             -> selectedOptionIndex != null
     }
 
@@ -227,8 +305,15 @@ fun AssessmentScreen(
         DSAExerciseType.MATCH_PAIRS      -> "All pairs connected!"
         DSAExerciseType.ORDER_STEPS      -> currentQuestion.orderStepsSolution.joinToString(" → ")
         DSAExerciseType.FILL_CODE        -> currentQuestion.fillCodeCorrectToken
-        DSAExerciseType.COMPLEXITY_DIAL  -> currentQuestion.complexityDialCorrect
+        DSAExerciseType.COMPLEXITY_DIAL,
+        ExerciseType.KEY_SIZE_DIAL       -> currentQuestion.complexityDialCorrect
         DSAExerciseType.TRUE_FALSE_SWIPE -> if (currentQuestion.trueFalseIsCorrectTrue) "True ✅" else "False ❌"
+        ExerciseType.CIPHER_WHEEL        -> "Shift key K = ${currentQuestion.cipherWheelCorrectShift} (${currentQuestion.cipherWheelTargetPlaintext})"
+        ExerciseType.BIT_FLIPPER         -> "Target bits: ${currentQuestion.bitFlipperTargetBits}"
+        ExerciseType.ROUND_BUILDER       -> currentQuestion.roundBuilderSolution.joinToString(" → ")
+        ExerciseType.MODULAR_MATH        -> "${currentQuestion.modularDividend} mod ${currentQuestion.modularModulus} = ${currentQuestion.modularCorrectRemainder}"
+        ExerciseType.PACKET_TRIAGE       -> if (currentQuestion.packetShouldAllow) "ALLOW Safe Packet" else "DROP Threat Packet"
+        ExerciseType.SPOT_THE_FLAW       -> "Vulnerable line #${currentQuestion.spotTheFlawTargetLine}"
         else                             -> currentQuestion.options.getOrElse(currentQuestion.correctOptionIndex) { "" }
     }
 
@@ -237,14 +322,41 @@ fun AssessmentScreen(
         DSAExerciseType.MATCH_PAIRS      -> "Mismatched pair connections"
         DSAExerciseType.ORDER_STEPS      -> orderedSteps.joinToString(" → ")
         DSAExerciseType.FILL_CODE        -> selectedFillToken ?: "Empty"
-        DSAExerciseType.COMPLEXITY_DIAL  -> selectedComplexity ?: "None"
+        DSAExerciseType.COMPLEXITY_DIAL,
+        ExerciseType.KEY_SIZE_DIAL       -> selectedComplexity ?: "None"
         DSAExerciseType.TRUE_FALSE_SWIPE -> if (selectedTrueFalse == true) "True" else "False"
+        ExerciseType.CIPHER_WHEEL        -> "Shift K = $cipherWheelShift"
+        ExerciseType.BIT_FLIPPER         -> "Bits: $flippedBits"
+        ExerciseType.ROUND_BUILDER       -> roundBuilderSteps.joinToString(" → ")
+        ExerciseType.MODULAR_MATH        -> "Remainder: $modularRemainder"
+        ExerciseType.PACKET_TRIAGE       -> if (packetDecision == true) "Allowed" else "Blocked"
+        ExerciseType.SPOT_THE_FLAW       -> "Line #${spotFlawLine ?: 0}"
         else                             -> selectedOptionIndex?.let { currentQuestion.options.getOrNull(it) } ?: "Option"
     }
 
     val starsEarned = when (correctCount) { 10 -> 5; in 8..9 -> 4; in 6..7 -> 3; in 4..5 -> 2; in 1..3 -> 1; else -> 0 }
     val accuracyPercentage = if (questions.isNotEmpty()) ((correctCount.toFloat() / questions.size) * 100).toInt() else 100
     val totalXPEarned = (unitId * 10) + (starsEarned * 5)
+
+    val performCompletion: (Int) -> Unit = { totalXP ->
+        scope.launch {
+            completionUseCase?.execute(
+                unitId = unitId,
+                levelNumber = levelNumber,
+                totalLevelsInUnit = totalLevelsInUnit,
+                isBoss = isBoss,
+                correctCount = correctCount,
+                totalQuestions = questions.size,
+                timeRemainingSec = timeRemaining
+            ) ?: run {
+                gameManager.addStars(starsEarned)
+                gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
+                gameManager.completeLessonAndExtendStreak()
+                gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = isBoss, accuracy = accuracyPercentage)
+            }
+            onComplete(totalXP)
+        }
+    }
 
     LaunchedEffect(isFinished) {
         if (isFinished) {
@@ -256,7 +368,7 @@ fun AssessmentScreen(
     Box(modifier = modifier.fillMaxSize().background(LocalDynamicThemeColors.current.background)) {
         // Device-aware Edge Lighting & Confetti Particle Canvas
         ScreenEdgeLighting(trigger = edgeLightTrigger, color = edgeLightColor)
-        ParticleBurstCanvas(trigger = particleTrigger, burstOrigin = Offset(540f, 750f), particleCount = 60)
+        ParticleBurstCanvas(trigger = particleTrigger, burstOrigin = checkButtonOrigin, particleCount = 60)
 
         // Dynamic Pill Notch HUD (Device-aware Cutout integration)
         DynamicPillHUD(
@@ -266,31 +378,24 @@ fun AssessmentScreen(
                 .padding(top = 4.dp)
         )
 
-        if (isFinished) {
+        if (showIntroCards && introCards.isNotEmpty()) {
+            MiniLessonIntroCards(
+                unitId = unitId,
+                levelNumber = levelNumber,
+                cards = introCards,
+                onComplete = { showIntroCards = false },
+                onSkip = { showIntroCards = false }
+            )
+        } else if (isFinished) {
             if (isBoss) {
                 PhoenixEggHatch3DView(
                     unitId = unitId, levelNumber = levelNumber, totalLevelsInUnit = totalLevelsInUnit,
                     isBoss = isBoss, xpEarned = totalXPEarned, starsEarned = starsEarned, accuracyPercentage = accuracyPercentage,
-                    onContinue = {
-                        gameManager.addStars(starsEarned)
-                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                        gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, accuracy = accuracyPercentage)
-                        onComplete(totalXPEarned)
-                    },
-                    onFinish = {
-                        gameManager.addStars(starsEarned)
-                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                        gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, accuracy = accuracyPercentage)
-                        onComplete(totalXPEarned)
-                    },
+                    onContinue = { performCompletion(totalXPEarned) },
+                    onFinish = { performCompletion(totalXPEarned) },
                     onUpgradePhoenixNextUnit = {
-                        gameManager.addStars(starsEarned)
-                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                        gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = true, nextUnitFirstLevelIndex = levelNumber + 1, accuracy = accuracyPercentage)
-                        onUpgradePhoenixNextUnit?.invoke() ?: onComplete(totalXPEarned)
+                        performCompletion(totalXPEarned)
+                        onUpgradePhoenixNextUnit?.invoke()
                     }
                 )
             } else {
@@ -301,28 +406,23 @@ fun AssessmentScreen(
                     xpEarned = totalXPEarned,
                     gemsEarned = (starsEarned * 2).coerceAtLeast(5),
                     streakDays = gameManager.streakDays.value,
-                    onContinue = {
-                        gameManager.addStars(starsEarned)
-                        gameManager.awardLessonXP(unitId, accuracyPercentage.toDouble() / 100.0, 45 - timeRemaining)
-                        gameManager.completeLessonAndExtendStreak()
-                        gameManager.unlockNextLevel(currentLevelIndex = levelNumber, isBoss = (levelNumber % 5 == 0), accuracy = accuracyPercentage)
-                        onComplete(totalXPEarned)
-                    }
+                    onContinue = { performCompletion(totalXPEarned) }
                 )
             }
         } else if (heartsCount <= 0) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp).statusBarsPadding().navigationBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-            ) {
-                Text("💔", fontSize = 64.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Out of Hearts!", fontSize = 26.sp, fontWeight = FontWeight.Black, color = LocalDynamicThemeColors.current.textPrimary)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Take a break or visit the Phoenix Sanctuary to restore hearts.", fontSize = 14.sp, color = SubtextGray, textAlign = TextAlign.Center)
-                Spacer(modifier = Modifier.height(32.dp))
-                AppButton(title = "RETURN TO DASHBOARD", style = AppButtonStyle.ACTION_BLUE, onClick = onDismiss, modifier = Modifier.fillMaxWidth().height(50.dp))
-            }
+            HeartRecoveryView(
+                onRefillWithGems = {
+                    scope.launch {
+                        gameManager.buyHearts(amount = 10, price = 35)
+                    }
+                },
+                onPracticeHeart = {
+                    scope.launch {
+                        gameManager.earnPracticeHeart()
+                    }
+                },
+                onDismiss = onDismiss
+            )
         } else {
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
 
@@ -617,7 +717,8 @@ fun AssessmentScreen(
                             )
                         }
 
-                        DSAExerciseType.COMPLEXITY_DIAL -> {
+                        DSAExerciseType.COMPLEXITY_DIAL,
+                        ExerciseType.KEY_SIZE_DIAL -> {
                             ComplexityDialExerciseView(
                                 promptCode = currentQuestion.complexityCodeSnippet, correctComplexity = currentQuestion.complexityDialCorrect,
                                 isChecked = isChecked, externalSelectedComplexity = selectedComplexity,
@@ -630,6 +731,84 @@ fun AssessmentScreen(
                                 statement = currentQuestion.trueFalseStatement, isCorrectTrue = currentQuestion.trueFalseIsCorrectTrue,
                                 explanation = currentQuestion.hint, isChecked = isChecked, externalDecision = selectedTrueFalse,
                                 onDecisionMade = { decision -> if (interactionEnabled) { selectedTrueFalse = decision; feedback.tap() } }
+                            )
+                        }
+
+                        ExerciseType.CIPHER_WHEEL -> {
+                            CipherWheelExerciseView(
+                                ciphertext = currentQuestion.cipherWheelCiphertext.ifEmpty { currentQuestion.targetPrompt },
+                                targetPlaintext = currentQuestion.cipherWheelTargetPlaintext,
+                                onShiftSelected = { shift ->
+                                    if (interactionEnabled) {
+                                        cipherWheelShift = shift
+                                        feedback.tap()
+                                    }
+                                }
+                            )
+                        }
+
+                        ExerciseType.BIT_FLIPPER -> {
+                            BitFlipperExerciseView(
+                                inputBits = currentQuestion.bitFlipperInputBits,
+                                targetBits = currentQuestion.bitFlipperTargetBits,
+                                onBitsUpdated = { bits ->
+                                    if (interactionEnabled) {
+                                        flippedBits = bits
+                                        feedback.tap()
+                                    }
+                                }
+                            )
+                        }
+
+                        ExerciseType.ROUND_BUILDER -> {
+                            RoundBuilderExerciseView(
+                                scrambledSteps = if (roundBuilderSteps.isNotEmpty()) roundBuilderSteps else currentQuestion.roundBuilderScrambledSteps,
+                                onOrderChanged = { newOrder ->
+                                    if (interactionEnabled) {
+                                        roundBuilderSteps = newOrder
+                                        feedback.tap()
+                                    }
+                                }
+                            )
+                        }
+
+                        ExerciseType.MODULAR_MATH -> {
+                            ModularMathExerciseView(
+                                dividend = currentQuestion.modularDividend,
+                                modulus = currentQuestion.modularModulus,
+                                onRemainderChosen = { remainder ->
+                                    if (interactionEnabled) {
+                                        modularRemainder = remainder
+                                        feedback.tap()
+                                    }
+                                }
+                            )
+                        }
+
+                        ExerciseType.PACKET_TRIAGE -> {
+                            PacketTriageExerciseView(
+                                sourceIp = currentQuestion.packetSourceIp,
+                                destIp = currentQuestion.packetDestIp,
+                                protocol = currentQuestion.packetProtocol,
+                                payloadPreview = currentQuestion.packetPayloadPreview,
+                                onDecisionMade = { allow ->
+                                    if (interactionEnabled) {
+                                        packetDecision = allow
+                                        feedback.tap()
+                                    }
+                                }
+                            )
+                        }
+
+                        ExerciseType.SPOT_THE_FLAW -> {
+                            SpotTheFlawExerciseView(
+                                codeSnippet = currentQuestion.spotTheFlawSnippet.ifEmpty { currentQuestion.targetPrompt },
+                                onLineSelected = { line ->
+                                    if (interactionEnabled) {
+                                        spotFlawLine = line
+                                        feedback.tap()
+                                    }
+                                }
                             )
                         }
 
@@ -725,7 +904,9 @@ fun AssessmentScreen(
                                     )
                                 }
 
-                                val activeExplanation = if (!isCorrect) {
+                                val activeExplanation = if (isEli5Active && currentQuestion.eli5Explanation.isNotEmpty()) {
+                                    currentQuestion.eli5Explanation
+                                } else if (!isCorrect) {
                                     val wrongOptExplanation = selectedOptionIndex?.let { currentQuestion.wrongOptionExplanations[it] }
                                     wrongOptExplanation ?: currentQuestion.explanation.ifEmpty { currentQuestion.hint ?: "" }
                                 } else {
@@ -741,6 +922,56 @@ fun AssessmentScreen(
                                         color = Color.White.copy(alpha = 0.85f),
                                         lineHeight = 16.sp
                                     )
+                                }
+
+                                if (wasFirstMistakeForgiven) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "🛡️ 1ST ATTEMPT FORGIVEN • NO HEART LOST",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = AmberGold
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isEli5Active) AmberGold.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.1f))
+                                            .border(1.dp, if (isEli5Active) AmberGold else Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                                            .clickable { isEli5Active = !isEli5Active }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = if (isEli5Active) "💡 Plain English" else "⚙️ Technical RFC",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                            .clickable { showReportProblemDialog = true }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "🚩 Report",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.White.copy(alpha = 0.85f)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -764,6 +995,12 @@ fun AssessmentScreen(
                         title = buttonTitle,
                         style = buttonStyle,
                         isEnabled = (canCheck || isChecked) && !isTransitioning,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .onGloballyPositioned { coordinates ->
+                                checkButtonOrigin = coordinates.boundsInRoot().center
+                            },
                         onClick = {
                             if (!isChecked) {
                                 if (hasSelection) {
@@ -772,8 +1009,15 @@ fun AssessmentScreen(
                                         DSAExerciseType.MATCH_PAIRS      -> matchedPairs.size == currentQuestion.matchSolution.size && currentQuestion.matchSolution.all { matchedPairs[it.key] == it.value }
                                         DSAExerciseType.ORDER_STEPS      -> orderedSteps == currentQuestion.orderStepsSolution
                                         DSAExerciseType.FILL_CODE        -> selectedFillToken == currentQuestion.fillCodeCorrectToken
-                                        DSAExerciseType.COMPLEXITY_DIAL  -> selectedComplexity == currentQuestion.complexityDialCorrect
+                                        DSAExerciseType.COMPLEXITY_DIAL,
+                                        ExerciseType.KEY_SIZE_DIAL       -> selectedComplexity == currentQuestion.complexityDialCorrect
                                         DSAExerciseType.TRUE_FALSE_SWIPE -> selectedTrueFalse == currentQuestion.trueFalseIsCorrectTrue
+                                        ExerciseType.CIPHER_WHEEL        -> CnsExerciseScoring.evaluateCipherWheel(cipherWheelShift, currentQuestion.cipherWheelCorrectShift)
+                                        ExerciseType.BIT_FLIPPER         -> CnsExerciseScoring.evaluateBitFlipper(flippedBits, currentQuestion.bitFlipperTargetBits)
+                                        ExerciseType.ROUND_BUILDER       -> CnsExerciseScoring.evaluateRoundSequence(roundBuilderSteps, currentQuestion.roundBuilderSolution)
+                                        ExerciseType.MODULAR_MATH        -> modularRemainder != null && CnsExerciseScoring.evaluateModularExponentiation(currentQuestion.modularDividend, 1, currentQuestion.modularModulus, modularRemainder!!)
+                                        ExerciseType.PACKET_TRIAGE       -> packetDecision != null && CnsExerciseScoring.evaluatePacketTriage(packetDecision!!, currentQuestion.packetShouldAllow)
+                                        ExerciseType.SPOT_THE_FLAW       -> spotFlawLine != null && CnsExerciseScoring.evaluateSpotTheFlaw(spotFlawLine!!, currentQuestion.spotTheFlawTargetLine)
                                         else                             -> selectedOptionIndex == currentQuestion.correctOptionIndex
                                     }
                                     isAnswerCorrect = correct
@@ -792,24 +1036,53 @@ fun AssessmentScreen(
                                         particleTrigger++
                                     } else {
                                         currentCombo = 0
-                                        gameManager.recordWrongAnswer(
-                                            question = currentQuestion,
-                                            userAnswer = userAnswerSummary,
-                                            correctAnswer = correctAnswerSummary,
-                                            chapterId = unitId
-                                        )
-                                        feedback.wrong()
-                                        wrongAnswerCount += 1
-                                        DynamicPillController.post(DynamicPillEvent.HeartLost)
-                                        edgeLightColor = PhoenixCrimson
-                                        edgeLightTrigger++
+                                        val conceptKey = currentQuestion.conceptTag.ifEmpty { "cns_unit_${unitId}_concept" }
+                                        val attempts = (conceptAttempts[conceptKey] ?: 0) + 1
+                                        conceptAttempts[conceptKey] = attempts
+
+                                        if (attempts == 1) {
+                                            wasFirstMistakeForgiven = true
+                                            feedback.wrong()
+                                            DynamicPillController.post(DynamicPillEvent.General("Attempt 1 Forgiven 🛡️ No Heart Lost"))
+                                            edgeLightColor = AmberGold
+                                            edgeLightTrigger++
+                                        } else {
+                                            wasFirstMistakeForgiven = false
+                                            gameManager.recordWrongAnswer(
+                                                question = currentQuestion,
+                                                userAnswer = userAnswerSummary,
+                                                correctAnswer = correctAnswerSummary,
+                                                chapterId = unitId
+                                            )
+                                            feedback.wrong()
+                                            wrongAnswerCount += 1
+                                            DynamicPillController.post(DynamicPillEvent.HeartLost)
+                                            edgeLightColor = PhoenixCrimson
+                                            edgeLightTrigger++
+                                        }
+                                    }
+
+                                    // Background persist mastery via SM-2
+                                    scope.launch(Dispatchers.IO) {
+                                        try {
+                                            val conceptKey = currentQuestion.conceptTag.ifEmpty { "cns_unit_${unitId}_concept" }
+                                            val userId = AuthService.shared.currentUserId ?: "guest"
+                                            val dao = CodeingoDatabase.getDatabase(context).conceptMasteryDao()
+                                            val currentMastery = dao.getConceptMastery(conceptKey, userId)
+                                            val updated = Sm2Scheduler.recordReviewAttempt(
+                                                conceptId = conceptKey,
+                                                userId = userId,
+                                                isCorrect = correct,
+                                                currentMastery = currentMastery
+                                            )
+                                            dao.insertOrUpdate(updated)
+                                        } catch (_: Exception) {}
                                     }
                                 }
                             } else {
                                 advanceQuestion()
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth().height(52.dp)
+                        }
                     )
                 }
             }
@@ -876,6 +1149,85 @@ fun AssessmentScreen(
                 dismissButton = {
                     TextButton(onClick = { showQuitConfirmDialog = false }) {
                         Text("KEEP GOING", color = DuolingoGreen, fontWeight = FontWeight.Bold)
+                    }
+                },
+                containerColor = DuolingoCardBg,
+                shape = RoundedCornerShape(18.dp)
+            )
+        }
+
+        // Phase 2: Report Problem Dialog
+        if (showReportProblemDialog) {
+            var selectedReason by remember { mutableStateOf("Ambiguous / Confusing explanation") }
+            var reportSubmitted by remember { mutableStateOf(false) }
+
+            AlertDialog(
+                onDismissRequest = { showReportProblemDialog = false },
+                title = {
+                    Text(
+                        text = if (reportSubmitted) "Report Received! 🚩" else "Report a Question Issue",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = LocalDynamicThemeColors.current.textPrimary
+                    )
+                },
+                text = {
+                    if (reportSubmitted) {
+                        Text(
+                            text = "Thanks for keeping AshCrypt rock solid! Our crypto team has logged this issue for verification.",
+                            fontSize = 13.sp,
+                            color = SubtextGray
+                        )
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                "Select the issue with this challenge:",
+                                fontSize = 12.sp,
+                                color = SubtextGray
+                            )
+                            listOf(
+                                "Typo or formatting error",
+                                "Ambiguous / Confusing explanation",
+                                "Incorrect cryptographic answer key",
+                                "Deprecated algorithm or standard"
+                            ).forEach { reason ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (selectedReason == reason) AmberGold.copy(alpha = 0.15f) else Color.Transparent)
+                                        .clickable { selectedReason = reason }
+                                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(if (selectedReason == reason) "🔘 " else "⚪ ", fontSize = 13.sp)
+                                    Text(
+                                        text = reason,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (selectedReason == reason) FontWeight.Bold else FontWeight.Normal,
+                                        color = LocalDynamicThemeColors.current.textPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (!reportSubmitted) {
+                            reportSubmitted = true
+                        } else {
+                            showReportProblemDialog = false
+                        }
+                    }) {
+                        Text(if (reportSubmitted) "DONE" else "SUBMIT REPORT", color = PhoenixGreen, fontWeight = FontWeight.Black)
+                    }
+                },
+                dismissButton = {
+                    if (!reportSubmitted) {
+                        TextButton(onClick = { showReportProblemDialog = false }) {
+                            Text("CANCEL", color = SubtextGray)
+                        }
                     }
                 },
                 containerColor = DuolingoCardBg,
@@ -1050,5 +1402,131 @@ private fun HolographicCommandTile(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun HeartRecoveryView(
+    onRefillWithGems: () -> Unit,
+    onPracticeHeart: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val dynamicColors = LocalDynamicThemeColors.current
+    val isDark = dynamicColors.isDark
+    val gemsCount by GameManager.instance.gemsCount.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .clip(CircleShape)
+                .background(PhoenixCrimson.copy(alpha = 0.14f))
+                .border(2.dp, PhoenixCrimson.copy(alpha = 0.4f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = "Hearts depleted",
+                tint = PhoenixCrimson,
+                modifier = Modifier.size(46.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Out of Hearts!",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Black,
+            fontFamily = AppFontFamily,
+            color = dynamicColors.textPrimary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Don't let your streak break! Choose a path to restore your energy and continue defending:",
+            fontSize = 14.sp,
+            color = dynamicColors.textSecondary,
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
+        )
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Option 1: Practice to earn a heart
+        com.simats.codeingo.ui.components.AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pressSquish(onClick = onPracticeHeart),
+            cornerRadius = 18.dp,
+            contentPadding = 14.dp
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "🛡️", fontSize = 24.sp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Practice Mistake Drill",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = dynamicColors.textPrimary
+                    )
+                    Text(
+                        text = "Review past vulnerabilities to earn +1 Heart (Free)",
+                        fontSize = 12.sp,
+                        color = dynamicColors.textSecondary
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Option 2: Refill with 35 gems
+        com.simats.codeingo.ui.components.AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pressSquish(onClick = onRefillWithGems),
+            cornerRadius = 18.dp,
+            contentPadding = 14.dp
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = "💎", fontSize = 24.sp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Instant Refill (10 Hearts)",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = dynamicColors.textPrimary
+                    )
+                    Text(
+                        text = "Cost: 35 Gems (Balance: $gemsCount 💎)",
+                        fontSize = 12.sp,
+                        color = if (isDark) AmberGold else Color(0xFFB45309)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        AppButton(
+            title = "RETURN TO DASHBOARD",
+            style = AppButtonStyle.SECONDARY_GLASS,
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+        )
     }
 }

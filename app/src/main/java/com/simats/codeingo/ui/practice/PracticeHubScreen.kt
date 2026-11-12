@@ -524,7 +524,7 @@ private fun DailyReviewTab(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "You earned +25 XP and reinforced 5 core DSA memory traces.",
+                text = "You earned +25 XP and reinforced 5 core Cryptographic Security memory traces.",
                 fontSize = 13.sp,
                 color = SubtextGray,
                 textAlign = TextAlign.Center
@@ -670,7 +670,7 @@ private fun DailyReviewTab(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Optimized for long-term retention using Leitner curve",
+                                text = "Optimized with AshCrypt SM-2 Spaced Repetition engine",
                                 fontSize = 12.sp,
                                 color = SubtextGray
                             )

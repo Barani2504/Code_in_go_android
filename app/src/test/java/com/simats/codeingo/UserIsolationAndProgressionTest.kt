@@ -107,5 +107,52 @@ class UserIsolationAndProgressionTest {
         // Mistake vault is empty and has NO static seeded dummy DSA questions
         assertTrue("Mistake vault must have no static seed items", gameManager.mistakeVault.value.isEmpty())
     }
+
+    @Test
+    fun testArenaProgress_isolatedBetweenTwoUsers() {
+        val userAStore = mutableMapOf<String, Any>()
+        val userBStore = mutableMapOf<String, Any>()
+
+        fun createMockPrefs(store: MutableMap<String, Any>): android.content.SharedPreferences {
+            return object : android.content.SharedPreferences {
+                override fun getAll(): MutableMap<String, *> = store
+                override fun getString(key: String?, defValue: String?): String? = store[key] as? String ?: defValue
+                override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? =
+                    (store[key] as? Set<*>)?.map { it.toString() }?.toMutableSet() ?: defValues
+                override fun getInt(key: String?, defValue: Int): Int = store[key] as? Int ?: defValue
+                override fun getLong(key: String?, defValue: Long): Long = store[key] as? Long ?: defValue
+                override fun getFloat(key: String?, defValue: Float): Float = store[key] as? Float ?: defValue
+                override fun getBoolean(key: String?, defValue: Boolean): Boolean = store[key] as? Boolean ?: defValue
+                override fun contains(key: String?): Boolean = store.containsKey(key)
+                override fun edit(): android.content.SharedPreferences.Editor {
+                    return object : android.content.SharedPreferences.Editor {
+                        override fun putString(k: String?, v: String?) = this.also { store[k!!] = v!! }
+                        override fun putStringSet(k: String?, v: MutableSet<String>?) = this.also { store[k!!] = v?.toSet() ?: emptySet<String>() }
+                        override fun putInt(k: String?, v: Int) = this.also { store[k!!] = v }
+                        override fun putLong(k: String?, v: Long) = this.also { store[k!!] = v }
+                        override fun putFloat(k: String?, v: Float) = this.also { store[k!!] = v }
+                        override fun putBoolean(k: String?, v: Boolean) = this.also { store[k!!] = v }
+                        override fun remove(k: String?) = this.also { store.remove(k) }
+                        override fun clear() = this.also { store.clear() }
+                        override fun commit(): Boolean = true
+                        override fun apply() {}
+                    }
+                }
+                override fun registerOnSharedPreferenceChangeListener(l: android.content.SharedPreferences.OnSharedPreferenceChangeListener?) {}
+                override fun unregisterOnSharedPreferenceChangeListener(l: android.content.SharedPreferences.OnSharedPreferenceChangeListener?) {}
+            }
+        }
+
+        val prefsUserA = createMockPrefs(userAStore)
+        val prefsUserB = createMockPrefs(userBStore)
+
+        // User A completes levels 1 and 2, unlocking level 3
+        ArenaProgressionManager.saveUnlockedLevels(prefsUserA, "cipher_sanctum_unlocked", setOf(1, 2, 3))
+        assertEquals(setOf(1, 2, 3), ArenaProgressionManager.getUnlockedLevels(prefsUserA, "cipher_sanctum_unlocked"))
+
+        // User B logs in on same device -> must have strictly Level 1 unlocked
+        val userBUnlocked = ArenaProgressionManager.getUnlockedLevels(prefsUserB, "cipher_sanctum_unlocked")
+        assertEquals("User B must NOT inherit User A's arena unlocks", setOf(1), userBUnlocked)
+    }
 }
 
