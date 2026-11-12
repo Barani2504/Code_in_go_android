@@ -79,7 +79,6 @@ fun MiniLessonIntroCards(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onSkip) {
@@ -127,7 +126,7 @@ fun MiniLessonIntroCards(
                 ) {
                     // Mascot Delivery
                     MascotView(
-                        stage = PhoenixStage.FLEDGLING,
+                        stage = PhoenixStage.FLEDGED,
                         emotion = MascotEmotion.CURIOUS,
                         size = 110.dp
                     )
@@ -229,6 +228,67 @@ fun MiniLessonIntroCards(
                         .height(50.dp)
                 )
             }
+        }
+    }
+}
+
+object MiniLessonRegistry {
+    fun getCardsForLesson(unitId: Int, levelNumber: Int): List<MiniLessonCardData> {
+        if (levelNumber != 1) return emptyList()
+        return when (unitId) {
+            1 -> listOf(
+                MiniLessonCardData(
+                    title = "Classical Ciphers",
+                    conceptHeadline = "Substitution & Caesar's Shift",
+                    diagramEmoji = "🔄",
+                    shortExplanation = "A substitution cipher replaces each plain character with another shifted along the alphabet ring by key k.",
+                    securityTakeaway = "With only 25 possible shifts, frequency analysis breaks single-alphabet substitution instantly."
+                ),
+                MiniLessonCardData(
+                    title = "The Caesar Disc",
+                    conceptHeadline = "Modular Clock Arithmetic",
+                    diagramEmoji = "⏱️",
+                    shortExplanation = "Encryption wraps naturally: C = (P + k) mod 26. Decryption is simply P = (C - k + 26) mod 26.",
+                    securityTakeaway = "Always ensure mathematical operations stay bounded within the alphabet modulus."
+                )
+            )
+            2 -> listOf(
+                MiniLessonCardData(
+                    title = "Block Ciphers & DES",
+                    conceptHeadline = "Shannon's Confusion & Diffusion",
+                    diagramEmoji = "🧱",
+                    shortExplanation = "Block ciphers encrypt fixed-size data blocks using repetitive substitution and permutation rounds.",
+                    securityTakeaway = "Diffusion ensures 1 bit flip in plaintext scrambles ~50% of ciphertext bits (the avalanche effect)."
+                )
+            )
+            3 -> listOf(
+                MiniLessonCardData(
+                    title = "Advanced Encryption Standard",
+                    conceptHeadline = "The 4 Transformations of AES",
+                    diagramEmoji = "🛡️",
+                    shortExplanation = "Each AES-128 round applies 4 mathematical layers: SubBytes (non-linear S-Box), ShiftRows, MixColumns, and AddRoundKey.",
+                    securityTakeaway = "Every bit depends on every key bit after just 2 rounds of this substitution-permutation network."
+                )
+            )
+            4 -> listOf(
+                MiniLessonCardData(
+                    title = "Asymmetric Cryptography",
+                    conceptHeadline = "One-Way Trapdoor Functions",
+                    diagramEmoji = "🔑",
+                    shortExplanation = "Public-key cryptography uses hard math that is easy to compute one way, but infeasible to invert without a private key.",
+                    securityTakeaway = "Diffie-Hellman lets two strangers agree on a secret over a completely public channel."
+                )
+            )
+            5 -> listOf(
+                MiniLessonCardData(
+                    title = "Cryptographic Integrity",
+                    conceptHeadline = "Hashes & MACs",
+                    diagramEmoji = "🔒",
+                    shortExplanation = "Encryption protects confidentiality; cryptographic hashes (SHA-256) and HMAC protect against unauthorized tampering.",
+                    securityTakeaway = "Never use encryption without integrity verification — use AEAD modes like AES-GCM."
+                )
+            )
+            else -> emptyList()
         }
     }
 }

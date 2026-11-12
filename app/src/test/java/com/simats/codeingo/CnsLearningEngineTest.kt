@@ -1,6 +1,5 @@
 package com.simats.codeingo
 
-import com.simats.codeingo.domain.mastery.EmberTier
 import com.simats.codeingo.domain.mastery.Sm2Scheduler
 import com.simats.codeingo.domain.scoring.CnsExerciseScoring
 import org.junit.Assert.assertEquals
@@ -21,70 +20,64 @@ class CnsLearningEngineTest {
 
     @Test
     fun testCipherWheel_evaluation() {
-        // Caesar shift 3: 'K' shifted by 3 gives 'N'
-        assertTrue(CnsExerciseScoring.evaluateCipherWheel(userShift = 3, targetShift = 3))
-        // Shift wraps around modulo 26 (29 % 26 == 3)
-        assertTrue(CnsExerciseScoring.evaluateCipherWheel(userShift = 29, targetShift = 3))
-        assertFalse(CnsExerciseScoring.evaluateCipherWheel(userShift = 4, targetShift = 3))
-
-        val decrypted = CnsExerciseScoring.applyCaesarShift("KHOOR", 3)
-        assertEquals("HELLO", decrypted)
+        // Caesar cipher shift 3: 'KHOOR' decrypted with shift 3 gives 'HELLO'
+        assertTrue(CnsExerciseScoring.scoreCipherWheel(ciphertext = "KHOOR", userShift = 3, targetPlaintext = "HELLO"))
+        // Wrap-around modulo 26 (29 % 26 == 3)
+        assertTrue(CnsExerciseScoring.scoreCipherWheel(ciphertext = "KHOOR", userShift = 29, targetPlaintext = "HELLO"))
+        assertFalse(CnsExerciseScoring.scoreCipherWheel(ciphertext = "KHOOR", userShift = 4, targetPlaintext = "HELLO"))
     }
 
     @Test
     fun testBitFlipper_evaluation() {
         val input = "10110001"
         val target = "10110011" // 1 bit flipped
-        assertTrue(CnsExerciseScoring.evaluateBitFlipper("10110011", target))
-        assertFalse(CnsExerciseScoring.evaluateBitFlipper("10110000", target))
-
-        val distance = CnsExerciseScoring.calculateHammingDistance(input, target)
+        val distance = CnsExerciseScoring.calculateAvalancheHammingDistance(input, target)
         assertEquals(1, distance)
 
-        val avalancheRatio = CnsExerciseScoring.calculateAvalanchePercentage("00000000", "11110000")
-        assertEquals(50.0f, avalancheRatio, 0.01f)
+        assertTrue(CnsExerciseScoring.scoreBitFlipper(originalBits = input, flippedBits = target, minFlipsRequired = 1))
+        assertFalse(CnsExerciseScoring.scoreBitFlipper(originalBits = input, flippedBits = input, minFlipsRequired = 1))
     }
 
     @Test
     fun testRoundSequence_evaluation() {
         val aesRound = listOf("SubBytes", "ShiftRows", "MixColumns", "AddRoundKey")
-        assertTrue(CnsExerciseScoring.evaluateRoundSequence(aesRound, aesRound))
+        assertTrue(CnsExerciseScoring.scoreRoundBuilder(userOrder = aesRound, targetOrder = aesRound))
 
         val scrambled = listOf("ShiftRows", "SubBytes", "MixColumns", "AddRoundKey")
-        assertFalse(CnsExerciseScoring.evaluateRoundSequence(scrambled, aesRound))
+        assertFalse(CnsExerciseScoring.scoreRoundBuilder(userOrder = scrambled, targetOrder = aesRound))
     }
 
     @Test
     fun testModularMath_evaluation() {
         // (17^1) mod 5 = 2
-        assertTrue(CnsExerciseScoring.evaluateModularExponentiation(base = 17, exponent = 1, modulus = 5, userRemainder = 2))
+        assertTrue(CnsExerciseScoring.scoreModularMath(base = 17L, exponent = 1L, modulus = 5L, userAnswer = 2L))
         // (7^2) mod 13 = 49 mod 13 = 10
-        assertTrue(CnsExerciseScoring.evaluateModularExponentiation(base = 7, exponent = 2, modulus = 13, userRemainder = 10))
-        assertFalse(CnsExerciseScoring.evaluateModularExponentiation(base = 7, exponent = 2, modulus = 13, userRemainder = 9))
+        assertTrue(CnsExerciseScoring.scoreModularMath(base = 7L, exponent = 2L, modulus = 13L, userAnswer = 10L))
+        assertFalse(CnsExerciseScoring.scoreModularMath(base = 7L, exponent = 2L, modulus = 13L, userAnswer = 9L))
     }
 
     @Test
     fun testPacketTriage_evaluation() {
-        // Malicious packet (e.g. unencrypted HTTP basic auth on port 80) -> should NOT allow
-        assertTrue(CnsExerciseScoring.evaluatePacketTriage(userAllowed = false, isSafePacket = false))
-        // Dropping a legitimate packet -> false
-        assertFalse(CnsExerciseScoring.evaluatePacketTriage(userAllowed = false, isSafePacket = true))
-        // Allowing a safe packet -> true
-        assertTrue(CnsExerciseScoring.evaluatePacketTriage(userAllowed = true, isSafePacket = true))
+        val expected = mapOf("pkt-1" to "ALLOW", "pkt-2" to "DROP")
+        val correctDecisions = mapOf("pkt-1" to "ALLOW", "pkt-2" to "DROP")
+        val wrongDecisions = mapOf("pkt-1" to "ALLOW", "pkt-2" to "ALLOW")
+
+        assertTrue(CnsExerciseScoring.scorePacketTriage(correctDecisions, expected))
+        assertFalse(CnsExerciseScoring.scorePacketTriage(wrongDecisions, expected))
     }
 
     @Test
     fun testSpotTheFlaw_evaluation() {
-        // Line 4 uses ECB mode: Cipher.getInstance("AES/ECB/PKCS5Padding")
-        assertTrue(CnsExerciseScoring.evaluateSpotTheFlaw(userSelectedLine = 4, vulnerableLine = 4))
-        assertFalse(CnsExerciseScoring.evaluateSpotTheFlaw(userSelectedLine = 2, vulnerableLine = 4))
+        // Line 4 uses ECB mode
+        assertTrue(CnsExerciseScoring.scoreSpotTheFlaw(selectedLineIndex = 4, vulnerableLineIndex = 4))
+        assertFalse(CnsExerciseScoring.scoreSpotTheFlaw(selectedLineIndex = 2, vulnerableLineIndex = 4))
     }
 
     @Test
     fun testKeySizeDial_evaluation() {
-        // 256-bit AES chosen for military grade quantum resistance target
-        assertTrue(CnsExerciseScoring.evaluateKeySizeDial(chosenKeyBits = 256, requiredSecurityBits = 256))
-        assertFalse(CnsExerciseScoring.evaluateKeySizeDial(chosenKeyBits = 128, requiredSecurityBits = 256))
+        // 256-bit AES chosen
+        assertTrue(CnsExerciseScoring.scoreKeySizeDial(selectedKeySize = "256", targetKeySize = "256"))
+        assertFalse(CnsExerciseScoring.scoreKeySizeDial(selectedKeySize = "128", targetKeySize = "256"))
     }
 
     // ── 2. SM-2 SPACED REPETITION SCHEDULER TESTS ────────────────────────
@@ -94,67 +87,69 @@ class CnsLearningEngineTest {
         val now = 1_000_000L
 
         // Repetition 1
-        val rep1 = Sm2Scheduler.calculateNextReview(
+        val rep1 = Sm2Scheduler.calculateNextSchedule(
             quality = 5,
             currentRepetition = 0,
-            currentInterval = 0,
-            currentEaseFactor = 2.5f,
+            currentInterval = 1,
+            currentEf = 2.5f,
+            currentMastery = 0.0f,
             currentTimeMs = now
         )
-        assertEquals(1, rep1.consecutiveCorrect)
-        assertEquals(1, rep1.intervalDays)
-        assertTrue(rep1.nextReviewDueMs >= now + 24 * 60 * 60 * 1000L)
-        assertTrue(rep1.easeFactor >= 2.5f)
+        assertEquals(1, rep1.nextRepetition)
+        assertEquals(1, rep1.nextIntervalDays)
+        assertTrue(rep1.nextReviewEpochMs >= now + 24 * 60 * 60 * 1000L)
+        assertTrue(rep1.nextEasinessFactor >= 2.5f)
 
         // Repetition 2
-        val rep2 = Sm2Scheduler.calculateNextReview(
+        val rep2 = Sm2Scheduler.calculateNextSchedule(
             quality = 5,
-            currentRepetition = rep1.consecutiveCorrect,
-            currentInterval = rep1.intervalDays,
-            currentEaseFactor = rep1.easeFactor,
+            currentRepetition = rep1.nextRepetition,
+            currentInterval = rep1.nextIntervalDays,
+            currentEf = rep1.nextEasinessFactor,
+            currentMastery = rep1.newMasteryScore,
             currentTimeMs = now
         )
-        assertEquals(2, rep2.consecutiveCorrect)
-        assertEquals(6, rep2.intervalDays)
+        assertEquals(2, rep2.nextRepetition)
+        assertEquals(6, rep2.nextIntervalDays)
 
         // Repetition 3: interval = 6 * EF
-        val rep3 = Sm2Scheduler.calculateNextReview(
+        val rep3 = Sm2Scheduler.calculateNextSchedule(
             quality = 5,
-            currentRepetition = rep2.consecutiveCorrect,
-            currentInterval = rep2.intervalDays,
-            currentEaseFactor = rep2.easeFactor,
+            currentRepetition = rep2.nextRepetition,
+            currentInterval = rep2.nextIntervalDays,
+            currentEf = rep2.nextEasinessFactor,
+            currentMastery = rep2.newMasteryScore,
             currentTimeMs = now
         )
-        assertEquals(3, rep3.consecutiveCorrect)
-        assertTrue(rep3.intervalDays >= 15)
+        assertEquals(3, rep3.nextRepetition)
+        assertTrue(rep3.nextIntervalDays >= 15)
     }
 
     @Test
     fun testSm2_resetOnFailure() {
         val now = 1_000_000L
 
-        // Failed review (quality < 3) resets repetitions & interval back to 1
-        val failed = Sm2Scheduler.calculateNextReview(
+        // Failed review (quality < 3) resets repetitions to 0 and interval to 1
+        val failed = Sm2Scheduler.calculateNextSchedule(
             quality = 1,
             currentRepetition = 5,
             currentInterval = 30,
-            currentEaseFactor = 2.4f,
+            currentEf = 2.4f,
+            currentMastery = 0.8f,
             currentTimeMs = now
         )
-        assertEquals(0, failed.consecutiveCorrect)
-        assertEquals(1, failed.intervalDays)
-        // Ease factor decreases but never drops below 1.3
-        assertTrue(failed.easeFactor < 2.4f)
-        assertTrue(failed.easeFactor >= 1.3f)
+        assertEquals(0, failed.nextRepetition)
+        assertEquals(1, failed.nextIntervalDays)
+        assertTrue(failed.nextEasinessFactor < 2.4f)
+        assertTrue(failed.nextEasinessFactor >= 1.3f)
     }
 
     @Test
     fun testEmberTiers() {
-        assertEquals(EmberTier.ASH, Sm2Scheduler.computeEmberTier(masteryScore = 15))
-        assertEquals(EmberTier.SPARK, Sm2Scheduler.computeEmberTier(masteryScore = 35))
-        assertEquals(EmberTier.FLAME, Sm2Scheduler.computeEmberTier(masteryScore = 65))
-        assertEquals(EmberTier.PYRE, Sm2Scheduler.computeEmberTier(masteryScore = 85))
-        assertEquals(EmberTier.SOLAR, Sm2Scheduler.computeEmberTier(masteryScore = 95))
+        assertEquals("Ember", Sm2Scheduler.getMasteryTier(masteryScore = 0.15f))
+        assertEquals("Flame", Sm2Scheduler.getMasteryTier(masteryScore = 0.45f))
+        assertEquals("Blaze", Sm2Scheduler.getMasteryTier(masteryScore = 0.70f))
+        assertEquals("Inferno", Sm2Scheduler.getMasteryTier(masteryScore = 0.90f))
     }
 
     // ── 3. MISTAKE FORGIVENESS PROTOCOL TESTS ────────────────────────────
@@ -183,4 +178,3 @@ class CnsLearningEngineTest {
         assertEquals(2, conceptAttempts[conceptId])
     }
 }
-

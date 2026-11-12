@@ -90,9 +90,11 @@ import kotlinx.coroutines.Dispatchers
 import com.simats.codeingo.domain.scoring.CnsExerciseScoring
 import com.simats.codeingo.domain.mastery.Sm2Scheduler
 import com.simats.codeingo.data.db.CodeingoDatabase
+import com.simats.codeingo.data.db.ConceptMasteryEntity
 import com.simats.codeingo.domain.AuthService
 import com.simats.codeingo.ui.exercise.components.MiniLessonRegistry
 import com.simats.codeingo.ui.exercise.components.MiniLessonIntroCards
+import com.simats.codeingo.ui.exercise.components.MiniLessonCardData
 import com.simats.codeingo.ui.exercise.types.CipherWheelExerciseView
 import com.simats.codeingo.ui.exercise.types.BitFlipperExerciseView
 import com.simats.codeingo.ui.exercise.types.RoundBuilderExerciseView
@@ -178,7 +180,7 @@ fun AssessmentScreen(
 
     val questions = remember(unitId, levelNumber) { QuizQuestionsData.getQuestionsForUnit(unitId, levelNumber) }
 
-    val introCards = remember(unitId, levelNumber) {
+    val introCards: List<MiniLessonCardData> = remember(unitId, levelNumber) {
         MiniLessonRegistry.getCardsForLesson(unitId, levelNumber)
     }
     var showIntroCards by remember(unitId, levelNumber) {
@@ -749,9 +751,8 @@ fun AssessmentScreen(
 
                         ExerciseType.BIT_FLIPPER -> {
                             BitFlipperExerciseView(
-                                inputBits = currentQuestion.bitFlipperInputBits,
-                                targetBits = currentQuestion.bitFlipperTargetBits,
-                                onBitsUpdated = { bits ->
+                                initialBits = currentQuestion.bitFlipperInputBits.ifEmpty { "10110001" },
+                                onBitsChanged = { bits ->
                                     if (interactionEnabled) {
                                         flippedBits = bits
                                         feedback.tap()
@@ -762,7 +763,7 @@ fun AssessmentScreen(
 
                         ExerciseType.ROUND_BUILDER -> {
                             RoundBuilderExerciseView(
-                                scrambledSteps = if (roundBuilderSteps.isNotEmpty()) roundBuilderSteps else currentQuestion.roundBuilderScrambledSteps,
+                                initialSteps = if (roundBuilderSteps.isNotEmpty()) roundBuilderSteps else currentQuestion.roundBuilderScrambledSteps.ifEmpty { listOf("SubBytes", "ShiftRows", "MixColumns", "AddRoundKey") },
                                 onOrderChanged = { newOrder ->
                                     if (interactionEnabled) {
                                         roundBuilderSteps = newOrder
@@ -774,11 +775,10 @@ fun AssessmentScreen(
 
                         ExerciseType.MODULAR_MATH -> {
                             ModularMathExerciseView(
-                                dividend = currentQuestion.modularDividend,
-                                modulus = currentQuestion.modularModulus,
-                                onRemainderChosen = { remainder ->
+                                equationPrompt = "${currentQuestion.modularDividend} mod ${currentQuestion.modularModulus} = ?",
+                                onAnswerChanged = { ans ->
                                     if (interactionEnabled) {
-                                        modularRemainder = remainder
+                                        modularRemainder = ans.toIntOrNull()
                                         feedback.tap()
                                     }
                                 }
@@ -786,14 +786,23 @@ fun AssessmentScreen(
                         }
 
                         ExerciseType.PACKET_TRIAGE -> {
+                            val packetList = remember(currentQuestion) {
+                                listOf(
+                                    com.simats.codeingo.ui.exercise.types.TriagePacket(
+                                        id = "pkt-1",
+                                        protocol = currentQuestion.packetProtocol.ifEmpty { "TCP" },
+                                        port = 443,
+                                        flags = "SYN",
+                                        payloadSnippet = currentQuestion.packetPayloadPreview.ifEmpty { "TLS Handshake ClientHello" }
+                                    )
+                                )
+                            }
                             PacketTriageExerciseView(
-                                sourceIp = currentQuestion.packetSourceIp,
-                                destIp = currentQuestion.packetDestIp,
-                                protocol = currentQuestion.packetProtocol,
-                                payloadPreview = currentQuestion.packetPayloadPreview,
-                                onDecisionMade = { allow ->
+                                packets = packetList,
+                                onClassified = { map ->
                                     if (interactionEnabled) {
-                                        packetDecision = allow
+                                        val action = map["pkt-1"]
+                                        packetDecision = action == "ALLOW"
                                         feedback.tap()
                                     }
                                 }
@@ -801,11 +810,19 @@ fun AssessmentScreen(
                         }
 
                         ExerciseType.SPOT_THE_FLAW -> {
+                            val lines = remember(currentQuestion) {
+                                val raw = currentQuestion.spotTheFlawSnippet.ifEmpty { currentQuestion.targetPrompt }
+                                if (raw.contains("\n")) raw.lines() else listOf(
+                                    "val cipher = Cipher.getInstance(\"AES/ECB/PKCS5Padding\")",
+                                    "cipher.init(Cipher.ENCRYPT_MODE, secretKey)",
+                                    "val ciphertext = cipher.doFinal(plaintext)"
+                                )
+                            }
                             SpotTheFlawExerciseView(
-                                codeSnippet = currentQuestion.spotTheFlawSnippet.ifEmpty { currentQuestion.targetPrompt },
+                                codeLines = lines,
                                 onLineSelected = { line ->
                                     if (interactionEnabled) {
-                                        spotFlawLine = line
+                                        spotFlawLine = line + 1
                                         feedback.tap()
                                     }
                                 }
@@ -1012,12 +1029,12 @@ fun AssessmentScreen(
                                         DSAExerciseType.COMPLEXITY_DIAL,
                                         ExerciseType.KEY_SIZE_DIAL       -> selectedComplexity == currentQuestion.complexityDialCorrect
                                         DSAExerciseType.TRUE_FALSE_SWIPE -> selectedTrueFalse == currentQuestion.trueFalseIsCorrectTrue
-                                        ExerciseType.CIPHER_WHEEL        -> CnsExerciseScoring.evaluateCipherWheel(cipherWheelShift, currentQuestion.cipherWheelCorrectShift)
-                                        ExerciseType.BIT_FLIPPER         -> CnsExerciseScoring.evaluateBitFlipper(flippedBits, currentQuestion.bitFlipperTargetBits)
-                                        ExerciseType.ROUND_BUILDER       -> CnsExerciseScoring.evaluateRoundSequence(roundBuilderSteps, currentQuestion.roundBuilderSolution)
-                                        ExerciseType.MODULAR_MATH        -> modularRemainder != null && CnsExerciseScoring.evaluateModularExponentiation(currentQuestion.modularDividend, 1, currentQuestion.modularModulus, modularRemainder!!)
-                                        ExerciseType.PACKET_TRIAGE       -> packetDecision != null && CnsExerciseScoring.evaluatePacketTriage(packetDecision!!, currentQuestion.packetShouldAllow)
-                                        ExerciseType.SPOT_THE_FLAW       -> spotFlawLine != null && CnsExerciseScoring.evaluateSpotTheFlaw(spotFlawLine!!, currentQuestion.spotTheFlawTargetLine)
+                                        ExerciseType.CIPHER_WHEEL        -> CnsExerciseScoring.scoreCipherWheel(ciphertext = currentQuestion.cipherWheelCiphertext.ifEmpty { currentQuestion.targetPrompt }, userShift = cipherWheelShift, targetPlaintext = currentQuestion.cipherWheelTargetPlaintext.ifEmpty { "HELLO" })
+                                        ExerciseType.BIT_FLIPPER         -> CnsExerciseScoring.scoreBitFlipper(originalBits = currentQuestion.bitFlipperInputBits.ifEmpty { "10110001" }, flippedBits = flippedBits, minFlipsRequired = 1)
+                                        ExerciseType.ROUND_BUILDER       -> CnsExerciseScoring.scoreRoundBuilder(userOrder = roundBuilderSteps, targetOrder = currentQuestion.roundBuilderSolution.ifEmpty { listOf("SubBytes", "ShiftRows", "MixColumns", "AddRoundKey") })
+                                        ExerciseType.MODULAR_MATH        -> modularRemainder != null && CnsExerciseScoring.scoreModularMath(base = currentQuestion.modularDividend.toLong(), exponent = 1L, modulus = currentQuestion.modularModulus.toLong(), userAnswer = (modularRemainder ?: 0).toLong())
+                                        ExerciseType.PACKET_TRIAGE       -> packetDecision != null && CnsExerciseScoring.scorePacketTriage(userClassifications = mapOf("pkt-1" to if (packetDecision == true) "ALLOW" else "DROP"), correctClassifications = mapOf("pkt-1" to if (currentQuestion.packetShouldAllow) "ALLOW" else "DROP"))
+                                        ExerciseType.SPOT_THE_FLAW       -> spotFlawLine != null && CnsExerciseScoring.scoreSpotTheFlaw(selectedLineIndex = spotFlawLine ?: 0, vulnerableLineIndex = currentQuestion.spotTheFlawTargetLine)
                                         else                             -> selectedOptionIndex == currentQuestion.correctOptionIndex
                                     }
                                     isAnswerCorrect = correct
@@ -1043,7 +1060,14 @@ fun AssessmentScreen(
                                         if (attempts == 1) {
                                             wasFirstMistakeForgiven = true
                                             feedback.wrong()
-                                            DynamicPillController.post(DynamicPillEvent.General("Attempt 1 Forgiven 🛡️ No Heart Lost"))
+                                            DynamicPillController.post(
+                                                DynamicPillEvent.Custom(
+                                                    emoji = "🛡️",
+                                                    title = "Attempt 1 Forgiven",
+                                                    subtitle = "No heart lost",
+                                                    color = AmberGold
+                                                )
+                                            )
                                             edgeLightColor = AmberGold
                                             edgeLightTrigger++
                                         } else {
@@ -1069,11 +1093,24 @@ fun AssessmentScreen(
                                             val userId = AuthService.shared.currentUserId ?: "guest"
                                             val dao = CodeingoDatabase.getDatabase(context).conceptMasteryDao()
                                             val currentMastery = dao.getConceptMastery(conceptKey, userId)
-                                            val updated = Sm2Scheduler.recordReviewAttempt(
-                                                conceptId = conceptKey,
+                                            val quality = if (correct) 5 else 1
+                                            val scheduleResult = Sm2Scheduler.calculateNextSchedule(
+                                                quality = quality,
+                                                currentRepetition = currentMastery?.repetitionNumber ?: 0,
+                                                currentInterval = currentMastery?.intervalDays ?: 1,
+                                                currentEf = currentMastery?.easinessFactor ?: 2.5f,
+                                                currentMastery = currentMastery?.masteryScore ?: 0.0f
+                                            )
+                                            val updated = ConceptMasteryEntity(
+                                                id = currentMastery?.id ?: 0L,
                                                 userId = userId,
-                                                isCorrect = correct,
-                                                currentMastery = currentMastery
+                                                conceptId = conceptKey,
+                                                masteryScore = scheduleResult.newMasteryScore,
+                                                repetitionNumber = scheduleResult.nextRepetition,
+                                                easinessFactor = scheduleResult.nextEasinessFactor,
+                                                intervalDays = scheduleResult.nextIntervalDays,
+                                                lastReviewedEpochMs = System.currentTimeMillis(),
+                                                nextReviewEpochMs = scheduleResult.nextReviewEpochMs
                                             )
                                             dao.insertOrUpdate(updated)
                                         } catch (_: Exception) {}

@@ -108,16 +108,16 @@ fun DiagnosticScreen(
                     Triple("cns_security_triad", securityScore, "Security Core & CIA Triad")
                 )
                 concepts.forEach { (cId, score, _) ->
-                    val mastery = (score * 33).coerceIn(15, 100)
+                    val mastery = (score * 0.33f).coerceIn(0.15f, 1.0f)
                     val entity = ConceptMasteryEntity(
                         conceptId = cId,
                         userId = userId,
                         masteryScore = mastery,
-                        lastReviewedAt = now,
-                        nextReviewDue = now + (if (score >= 2) 3 * dayMs else dayMs),
+                        lastReviewedEpochMs = now,
+                        nextReviewEpochMs = now + (if (score >= 2) 3 * dayMs else dayMs),
                         intervalDays = if (score >= 2) 3 else 1,
-                        easeFactor = 2.5f,
-                        consecutiveCorrect = score
+                        easinessFactor = 2.5f,
+                        repetitionNumber = score
                     )
                     db.conceptMasteryDao().insertOrUpdate(entity)
                 }
