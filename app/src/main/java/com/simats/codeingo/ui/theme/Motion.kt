@@ -830,6 +830,10 @@ fun BossTimerRing(
  */
 class FeedbackManager(private val context: Context) {
 
+    private val soundManager by lazy {
+        com.simats.codeingo.ui.motion.SoundEffectsManager.getInstance(context)
+    }
+
     private val vibrator: Vibrator? = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
@@ -850,6 +854,7 @@ class FeedbackManager(private val context: Context) {
         }
 
     fun tap(tier: EffectTier = EffectTier.FULL) {
+        soundManager.playTap()
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
@@ -866,6 +871,7 @@ class FeedbackManager(private val context: Context) {
     fun tick(tier: EffectTier = EffectTier.FULL) = tap(tier)
 
     fun correct(combo: Int = 1, tier: EffectTier = EffectTier.FULL) {
+        if (combo >= 2) soundManager.playCombo(combo) else soundManager.playCorrect()
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
@@ -896,6 +902,7 @@ class FeedbackManager(private val context: Context) {
     fun success(combo: Int = 1, tier: EffectTier = EffectTier.FULL) = correct(combo, tier)
 
     fun wrong(tier: EffectTier = EffectTier.FULL) {
+        soundManager.playWrong()
         if (tier == EffectTier.OFF || !MotionController.hapticsEnabled.value || !isSystemHapticsEnabled) return
         try {
             val v = vibrator ?: return
@@ -955,7 +962,13 @@ class FeedbackManager(private val context: Context) {
 
     fun soundEffect(cueName: String) {
         if (!MotionController.soundEnabled.value || com.simats.codeingo.ui.components.motion.EffectBudgetManager.isQuietTime()) return
-        // Pluggable SoundPool audio cue hook
+        when (cueName.lowercase()) {
+            "tap" -> soundManager.playTap()
+            "correct" -> soundManager.playCorrect()
+            "wrong" -> soundManager.playWrong()
+            "levelup", "complete" -> soundManager.playLevelUp()
+            "chest" -> soundManager.playChest()
+        }
     }
 
     fun fizzle(tier: EffectTier = EffectTier.FULL) {
@@ -991,9 +1004,41 @@ class FeedbackManager(private val context: Context) {
     }
 
     fun timerWarning(tier: EffectTier = EffectTier.FULL) = bossWarning(tier)
-    fun levelComplete(tier: EffectTier = EffectTier.FULL) = correct(5, tier)
+    fun levelComplete(tier: EffectTier = EffectTier.FULL) {
+        soundManager.playLevelUp()
+        correct(5, tier)
+    }
 
     fun onDestroy() {}
+
+    companion object {
+        @Volatile
+        private var defaultInstance: FeedbackManager? = null
+
+        fun init(context: Context): FeedbackManager {
+            return defaultInstance ?: synchronized(this) {
+                defaultInstance ?: FeedbackManager(context.applicationContext).also { defaultInstance = it }
+            }
+        }
+
+        fun tap(tier: EffectTier = EffectTier.FULL) {
+            defaultInstance?.tap(tier) ?: com.simats.codeingo.ui.motion.SoundEffectsManager.playTap()
+        }
+
+        fun tick(tier: EffectTier = EffectTier.FULL) = tap(tier)
+
+        fun correct(combo: Int = 1, tier: EffectTier = EffectTier.FULL) {
+            defaultInstance?.correct(combo, tier) ?: com.simats.codeingo.ui.motion.SoundEffectsManager.playCorrect()
+        }
+
+        fun wrong(tier: EffectTier = EffectTier.FULL) {
+            defaultInstance?.wrong(tier) ?: com.simats.codeingo.ui.motion.SoundEffectsManager.playWrong()
+        }
+
+        fun levelComplete(tier: EffectTier = EffectTier.FULL) {
+            defaultInstance?.levelComplete(tier) ?: com.simats.codeingo.ui.motion.SoundEffectsManager.playLevelComplete()
+        }
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────

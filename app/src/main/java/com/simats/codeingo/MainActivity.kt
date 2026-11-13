@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
             }
         )
 
+        com.simats.codeingo.ui.theme.FeedbackManager.init(this)
+        com.simats.codeingo.ui.motion.SoundEffectsManager.getInstance(this)
+
         setContent {
             CodeingoTheme {
                 ProvideScreenMetrics {

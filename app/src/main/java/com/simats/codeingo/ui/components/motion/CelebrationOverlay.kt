@@ -60,8 +60,8 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.AppButton
+import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AppFontFamily
 import kotlinx.coroutines.delay
@@ -197,31 +197,37 @@ fun CelebrationOverlay(
                 RewardCard(
                     icon = "⚡",
                     label = "XP EARNED",
-                    value = "+${xpEarned}",
+                    numericValue = xpEarned,
+                    prefix = "+",
                     accentColor = Color(0xFFF59E0B)
                 )
                 RewardCard(
                     icon = "💎",
                     label = "GEMS",
-                    value = "+${gemsEarned}",
+                    numericValue = gemsEarned,
+                    prefix = "+",
                     accentColor = Color(0xFF06B6D4)
                 )
                 RewardCard(
                     icon = "🔥",
                     label = "STREAK",
-                    value = "$streakDays DAYS",
+                    numericValue = streakDays,
+                    prefix = "",
+                    suffix = " D",
                     accentColor = Color(0xFFEF4444)
                 )
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // 4. Authentic 3D Duolingo Continue Button
-            Duolingo3DButton(
-                title = "CONTINUE DEFENSE",
+            // 4. Authentic 3D Continue Button
+            AppButton(
+                title = "CONTINUE DEFENSE →",
                 onClick = onContinue,
-                style = Duolingo3DButtonColor.GREEN,
-                modifier = Modifier.fillMaxWidth()
+                style = AppButtonStyle.SUCCESS_GREEN,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
             )
         }
     }
@@ -231,7 +237,9 @@ fun CelebrationOverlay(
 private fun RewardCard(
     icon: String,
     label: String,
-    value: String,
+    numericValue: Int,
+    prefix: String = "+",
+    suffix: String = "",
     accentColor: Color
 ) {
     Column(
@@ -246,12 +254,16 @@ private fun RewardCard(
     ) {
         Text(text = icon, fontSize = 24.sp)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            fontFamily = AppFontFamily,
-            fontWeight = FontWeight.Black,
-            fontSize = 16.sp,
-            color = accentColor
+        com.simats.codeingo.ui.motion.NumberTickerText(
+            value = numericValue,
+            prefix = prefix,
+            suffix = suffix,
+            textStyle = androidx.compose.ui.text.TextStyle(
+                fontFamily = AppFontFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 16.sp,
+                color = accentColor
+            )
         )
         Text(
             text = label,

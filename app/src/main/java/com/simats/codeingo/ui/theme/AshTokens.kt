@@ -11,6 +11,56 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+enum class AshThemeMode {
+    EMBER_DARK,
+    DAYLIGHT,
+    AMOLED
+}
+
+fun createAshColors(mode: AshThemeMode): AshColorTokens {
+    return when (mode) {
+        AshThemeMode.EMBER_DARK -> AshColorTokens()
+        AshThemeMode.DAYLIGHT -> AshColorTokens(
+            primary = Color(0xFFB4_53_09),
+            primaryDark = Color(0xFF78_35_0F),
+            success = Color(0xFF15_80_3D),
+            successDark = Color(0xFF16_65_34),
+            danger = Color(0xFFDC_26_26),
+            dangerDark = Color(0xFF99_1B_1B),
+            warning = Color(0xFFEA_58_0C),
+            warningDark = Color(0xFF9A_34_12),
+            info = Color(0xFF02_84_C7),
+            signalCyan = Color(0xFF08_91_B2),
+            background = Color(0xFFF8_FA_FC),
+            surface = Color(0xFFFFFFFF),
+            surfaceMuted = Color(0xFFF1_F5_F9),
+            onSurface = Color(0xFF0F_17_2A),
+            onSurfaceMuted = Color(0xFF64_74_8B),
+            border = Color(0xFFE2_E8_F0),
+            isDark = false
+        )
+        AshThemeMode.AMOLED -> AshColorTokens(
+            primary = AmberGold,
+            primaryDark = AmberGoldDark,
+            success = PhoenixGreen,
+            successDark = Color(0xFF1A_AE_47),
+            danger = PhoenixCrimson,
+            dangerDark = Color(0xFFBB_1C_0A),
+            warning = PhoenixEmber,
+            warningDark = Color(0xFFCC_43_0E),
+            info = Color(0xFF1C_B0_F6),
+            signalCyan = Color(0xFF00_E5_FF),
+            background = Color(0xFF00_00_00),
+            surface = Color(0xFF08_08_08),
+            surfaceMuted = Color(0xFF12_12_12),
+            onSurface = Color.White,
+            onSurfaceMuted = Color(0xFF94_A3_B8),
+            border = Color.White.copy(alpha = 0.16f),
+            isDark = true
+        )
+    }
+}
+
 @Immutable
 data class AshColorTokens(
     val primary: Color = AmberGold,
