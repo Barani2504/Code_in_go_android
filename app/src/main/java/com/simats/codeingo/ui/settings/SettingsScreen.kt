@@ -84,6 +84,8 @@ import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoBlue
+import com.simats.codeingo.ui.theme.PhoenixGreen
+import com.simats.codeingo.ui.theme.PhoenixCrimson
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
@@ -1144,38 +1146,40 @@ private fun PreferencesTab(
             )
         }
 
-        SettingsDivider(cardBorder)
+        if (com.simats.codeingo.BuildConfig.DEBUG) {
+            SettingsDivider(cardBorder)
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onOpenMotionLab() }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("⚡", fontSize = 18.sp)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "AshCrypt Motion Lab",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textPrimary
-                )
-                Text(
-                    "Test 11 springs, 3D FlipCard, Tiers & Calm Mode",
-                    fontSize = 12.sp,
-                    color = textSecondary
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenMotionLab() }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("⚡", fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "AshCrypt Motion Lab",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textPrimary
+                    )
+                    Text(
+                        "Test 11 springs, 3D FlipCard, Tiers & Calm Mode",
+                        fontSize = 12.sp,
+                        color = textSecondary
+                    )
+                }
+                Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = textSecondary,
+                    modifier = Modifier.size(16.dp)
                 )
             }
-            Text("Open", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isDark) AmberGold else Color(0xFFB45309))
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = textSecondary,
-                modifier = Modifier.size(16.dp)
-            )
         }
     }
 
@@ -1424,10 +1428,10 @@ private fun PreferencesTab(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TextButton(onClick = onAddDay) {
-                    Text("+1 Day", color = DuolingoGreen, fontWeight = FontWeight.Black)
+                    Text("+1 Day", color = PhoenixGreen, fontWeight = FontWeight.Black)
                 }
                 TextButton(onClick = onResetStreak) {
-                    Text("Reset", color = DuolingoRed, fontWeight = FontWeight.Black)
+                    Text("Reset", color = PhoenixCrimson, fontWeight = FontWeight.Black)
                 }
             }
         }

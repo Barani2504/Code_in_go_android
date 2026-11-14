@@ -98,6 +98,13 @@ fun ForgotPasswordSheet(
     val isDark = LocalDynamicThemeColors.current.isDark
 
     val context = LocalContext.current
+    val activity = context as? android.app.Activity
+    androidx.compose.runtime.DisposableEffect(activity) {
+        activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose {
+            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        }
+    }
     val coroutineScope = rememberCoroutineScope()
     val authRepository = remember(context) {
         EntryPointAccessors.fromApplication(

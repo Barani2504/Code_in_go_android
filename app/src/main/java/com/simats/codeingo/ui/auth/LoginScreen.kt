@@ -58,6 +58,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -138,7 +139,15 @@ fun LoginScreen(
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
 
-    val prefs = remember { context.getSharedPreferences("dsa_preferences", Context.MODE_PRIVATE) }
+    val prefs = remember { context.getSharedPreferences("ashcrypt_preferences", Context.MODE_PRIVATE) }
+
+    val activity = context as? android.app.Activity
+    DisposableEffect(activity) {
+        activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose {
+            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        }
+    }
     val authRepository = remember(context) {
         EntryPointAccessors.fromApplication(
             context.applicationContext,

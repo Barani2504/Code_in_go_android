@@ -49,6 +49,8 @@ import com.simats.codeingo.data.network.model.ConceptChallengeDTO
 import com.simats.codeingo.data.network.model.LinkAccountRequest
 import retrofit2.http.Query
 
+typealias AshCryptApiService = CodeingoApiService
+
 interface CodeingoApiService {
 
     // ── 1. Authentication Endpoints ──────────────────────────────────────────

@@ -9,7 +9,7 @@
 
     <application
         android:name=".CodeingoApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
