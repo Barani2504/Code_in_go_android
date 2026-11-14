@@ -1105,13 +1105,13 @@ fun MainDashboardScreen(
             }
         }
 
-        // Streak Modal Sheet
+        // Streak Society Modal Sheet (Phase 5.1)
         if (showStreakSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showStreakSheet = false },
                 containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
-                StreakInfoSheet(
+                com.simats.codeingo.ui.streak.StreakSocietySheet(
                     streakDays = streakDays,
                     isStreakPendingRestore = isStreakLostPendingRestore,
                     savedStreakDays = savedStreakDays,

@@ -96,3 +96,55 @@
 }
 ```
 
+
+
+---
+
+## 4. Friend Squad & Nudge System
+
+* **Purpose**: Send a daily nudge to a friend and track collaborative squad quest progress.
+* **Method**: `POST`
+* **Path**: `/api/v1/friends/nudge`
+* **Auth**: `Bearer <JWT_TOKEN>`
+
+### Request Body
+```json
+{
+  "friendId": "f_9872",
+  "clientTimestamp": 1794781200
+}
+```
+
+### Response Body (`200 OK`)
+```json
+{
+  "status": "NUDGED",
+  "cooldownUntil": 1794867600
+}
+```
+
+---
+
+## 5. Streak Repair via Gems
+
+* **Purpose**: Validate and repair missed streak day within the 24-hour grace window using gems.
+* **Method**: `POST`
+* **Path**: `/api/v1/streak/repair`
+* **Auth**: `Bearer <JWT_TOKEN>`
+
+### Request Body
+```json
+{
+  "gemCost": 50,
+  "clientTimestamp": 1794781200
+}
+```
+
+### Response Body (`200 OK`)
+```json
+{
+  "status": "REPAIRED",
+  "restoredStreakDays": 15,
+  "remainingGems": 420
+}
+```
