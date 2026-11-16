@@ -440,7 +440,7 @@ fun PhoenixSanctuaryScreen(
             val isEquipped = stage.id == activeStage
             ModalBottomSheet(
                 onDismissRequest = { previewStage = null },
-                containerColor = dynamicColors.cardBackground
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
                 PhoenixStageDetailSheet(
                     stage = stage,

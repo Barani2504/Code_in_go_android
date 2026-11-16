@@ -237,7 +237,7 @@ fun PracticeHubScreen(
                 val item = mistakeToRepair
                 ModalBottomSheet(
                     onDismissRequest = { repairingMistake = null },
-                    containerColor = dynamicColors.cardBackground
+                    containerColor = LocalDynamicThemeColors.current.cardBackground
                 ) {
                     Column(
                         modifier = Modifier
@@ -324,7 +324,7 @@ fun PracticeHubScreen(
                 val prob = problemToView
                 ModalBottomSheet(
                     onDismissRequest = { selectedProblem = null },
-                    containerColor = dynamicColors.cardBackground
+                    containerColor = LocalDynamicThemeColors.current.cardBackground
                 ) {
                     Column(
                         modifier = Modifier

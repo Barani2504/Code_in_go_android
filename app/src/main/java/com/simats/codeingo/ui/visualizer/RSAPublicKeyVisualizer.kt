@@ -126,10 +126,10 @@ private fun RSAPublicKeyExploreView() {
             if (rsaKey.n > BigInteger.ZERO && rsaKey.e > BigInteger.ZERO) {
                 RsaEngine.traceModExp(BigInteger.valueOf(messageNum.toLong()), rsaKey.e, rsaKey.n)
             } else {
-                RsaEngine.ModExpTrace(0L, emptyList())
+                RsaEngine.ModExpTrace(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ONE, "0", emptyList(), BigInteger.ZERO)
             }
         }.getOrElse {
-            RsaEngine.ModExpTrace(0L, emptyList())
+            RsaEngine.ModExpTrace(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ONE, "0", emptyList(), BigInteger.ZERO)
         }
     }
 
@@ -168,7 +168,7 @@ private fun RSAPublicKeyExploreView() {
                 val ciphertext = modExpTrace.result
                 val decrypted = runCatching {
                     if (rsaKey.n > BigInteger.ZERO && rsaKey.d > BigInteger.ZERO) {
-                        BigInteger.valueOf(ciphertext.toLong()).modPow(rsaKey.d, rsaKey.n)
+                        ciphertext.modPow(rsaKey.d, rsaKey.n)
                     } else {
                         BigInteger.ZERO
                     }

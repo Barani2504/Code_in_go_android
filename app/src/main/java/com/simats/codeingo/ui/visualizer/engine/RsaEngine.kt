@@ -194,7 +194,7 @@ object RsaEngine {
                 cProductModN = BigInteger.ZERO,
                 decryptedProduct = BigInteger.ZERO,
                 expectedProductModN = BigInteger.ZERO,
-                homomorphicPropertyHolds = false
+                isMalleableMatch = false
             )
         }
         val m1 = BigInteger.valueOf(m1Val) % n
@@ -238,6 +238,7 @@ object RsaEngine {
     fun demonstrateSignature(message: String, e: BigInteger, d: BigInteger, n: BigInteger): SignatureDemo {
         if (n <= BigInteger.ONE || e <= BigInteger.ZERO || d <= BigInteger.ZERO) {
             return SignatureDemo(
+                message = message,
                 digestModN = BigInteger.ZERO,
                 signature = BigInteger.ZERO,
                 verifiedDigest = BigInteger.ZERO,

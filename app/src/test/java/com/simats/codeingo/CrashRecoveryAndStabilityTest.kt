@@ -47,7 +47,7 @@ class CrashRecoveryAndStabilityTest {
             n = BigInteger.ZERO
         )
         assertNotNull(result)
-        assertFalse(result.homomorphicPropertyHolds)
+        assertFalse(result.isMalleableMatch)
 
         // Invalid signature parameters should not throw
         val sigResult = RsaEngine.demonstrateSignature(
@@ -65,7 +65,7 @@ class CrashRecoveryAndStabilityTest {
         val validation = TlsEngine.validateCertificateChain(emptyList(), "example.com")
         assertNotNull(validation)
         assertFalse(validation.isValid)
-        assertTrue(validation.failureReason.contains("Empty certificate chain"))
+        assertTrue(validation.failureReason?.contains("Empty certificate chain") == true)
     }
 
     @Test
