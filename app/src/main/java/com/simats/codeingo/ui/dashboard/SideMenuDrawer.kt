@@ -39,11 +39,12 @@ fun SideMenuDrawer(
     onMoreClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
     Box(
         modifier = modifier
             .width(260.dp)
             .fillMaxHeight()
-            .background(DarkBackground)
+            .background(dynamicColors.cardBackground)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {

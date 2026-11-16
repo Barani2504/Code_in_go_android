@@ -159,9 +159,10 @@ fun DynamicPillHUD(
         contentAlignment = Alignment.TopCenter
     ) {
         // Cutout Ambient Glow Ring / Top Bar Glow
-        if (ambientGlow != null && tier != EffectTier.OFF) {
+        val currentGlow = ambientGlow
+        if (currentGlow != null && tier != EffectTier.OFF) {
             CutoutAmbientGlowRing(
-                color = ambientGlow!!,
+                color = currentGlow,
                 hasCutout = hasCutout,
                 onDismiss = { DynamicPillController.triggerAmbientGlow(Color.Transparent) }
             )
@@ -169,17 +170,19 @@ fun DynamicPillHUD(
 
         // Screen Edge Lighting Sweep (Part C2)
         val edgeLight by DynamicPillController.edgeLightingColor.collectAsState()
-        if (edgeLight != null && tier != EffectTier.OFF) {
+        val currentEdge = edgeLight
+        if (currentEdge != null && tier != EffectTier.OFF) {
             ScreenEdgeLightingSweep(
-                color = edgeLight!!,
+                color = currentEdge,
                 onFinished = { DynamicPillController.triggerEdgeLighting(Color.Transparent) }
             )
         }
 
         // Dynamic Pill Morphing Container
-        if (currentEvent != null && !isPhoenixNearTop && tier != EffectTier.OFF) {
+        val activeEvent = currentEvent
+        if (activeEvent != null && !isPhoenixNearTop && tier != EffectTier.OFF) {
             DynamicPillBody(
-                event = currentEvent!!,
+                event = activeEvent,
                 hasCutout = hasCutout,
                 cutoutTopPadding = if (hasCutout) topCutoutPx else 10.dp
             )

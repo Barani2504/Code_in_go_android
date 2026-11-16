@@ -214,7 +214,7 @@ fun ArenaComboHUD(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = if (toolUsed) "USED" else equippedTool.title.split(" ").first(),
+                        text = if (toolUsed) "USED" else (equippedTool.title.split(" ").firstOrNull() ?: equippedTool.title),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (toolUsed) dynamicColors.textSecondary else equippedTool.accentColor

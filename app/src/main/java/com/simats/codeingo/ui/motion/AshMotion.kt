@@ -63,8 +63,9 @@ import com.simats.codeingo.ui.theme.MotionController
 import com.simats.codeingo.ui.theme.PhoenixCrimson
 import com.simats.codeingo.ui.theme.PhoenixEmber
 import com.simats.codeingo.ui.theme.PhoenixGreen
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -342,39 +343,53 @@ class SoundEffectsManager private constructor(context: Context) {
         null
     }
 
+    private val soundScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     fun playTap() {
         if (!shouldPlaySound()) return
-        toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 25)
+        try {
+            toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 25)
+        } catch (_: Throwable) {}
     }
 
     fun playCorrect() {
         if (!shouldPlaySound()) return
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 90)
+        try {
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 90)
+        } catch (_: Throwable) {}
     }
 
     fun playWrong() {
         if (!shouldPlaySound()) return
-        toneGenerator?.startTone(ToneGenerator.TONE_PROP_NACK, 120)
+        try {
+            toneGenerator?.startTone(ToneGenerator.TONE_PROP_NACK, 120)
+        } catch (_: Throwable) {}
     }
 
     fun playCombo(multiplier: Int) {
         if (!shouldPlaySound()) return
-        val duration = (60 + multiplier * 15).coerceAtMost(160)
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, duration)
+        try {
+            val duration = (60 + multiplier * 15).coerceAtMost(160)
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, duration)
+        } catch (_: Throwable) {}
     }
 
     fun playLevelUp() {
         if (!shouldPlaySound()) return
-        GlobalScope.launch(Dispatchers.Default) {
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PIP, 60)
-            delay(80)
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 120)
+        soundScope.launch {
+            try {
+                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PIP, 60)
+                delay(80)
+                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 120)
+            } catch (_: Throwable) {}
         }
     }
 
     fun playChest() {
         if (!shouldPlaySound()) return
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150)
+        try {
+            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150)
+        } catch (_: Throwable) {}
     }
 
     private fun shouldPlaySound(): Boolean {

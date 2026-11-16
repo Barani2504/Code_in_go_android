@@ -152,13 +152,7 @@ fun CyberBastionArenaScreen(
 
     fun onActionSuccess(points: Int = 100) {
         comboCount++
-        val multiplier = when {
-            comboCount >= 8 -> 3.0f
-            comboCount >= 5 -> 2.0f
-            comboCount >= 3 -> 1.5f
-            else -> 1.0f
-        }
-        score += (points * multiplier).toInt()
+        score += com.simats.codeingo.domain.scoring.ArenaScoring.calculateEarnedPoints(points, comboCount)
     }
 
     fun handleLevelCompleted(lvl: CyberBastionLevel) {

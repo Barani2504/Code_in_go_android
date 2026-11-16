@@ -87,7 +87,7 @@ fun BitFlipLabLevel(
     // Live Hamming distance between pre-flip and post-flip digest
     val hammingDistance = remember(previousDigest, currentDigest) {
         if (previousDigest != null) {
-            ArenaCryptoEngine.hammingBitDistance(previousDigest!!, currentDigest)
+            val prev = previousDigest; if (prev != null) ArenaCryptoEngine.hammingBitDistance(prev, currentDigest) else 0
         } else {
             0
         }

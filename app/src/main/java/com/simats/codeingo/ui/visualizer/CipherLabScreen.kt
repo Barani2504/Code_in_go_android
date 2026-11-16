@@ -1,3 +1,4 @@
+
 package com.simats.codeingo.ui.visualizer
 
 import android.content.ClipData
@@ -205,7 +206,7 @@ fun CipherLabScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = algo.displayName.split(" ").first(),
+                        text = algo.displayName.split(" ").firstOrNull() ?: algo.displayName,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isSelected) Color.Black else dynamicColors.textPrimary

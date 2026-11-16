@@ -157,8 +157,12 @@ private fun DiffieHellmanExploreView() {
                     Text(text = "👩 Alice private a", fontSize = 11.sp, color = tealColor, fontWeight = FontWeight.Bold)
                     Text(text = "a = $aSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = tealColor, fontFamily = FontFamily.Monospace)
                 }
+                val maxSecret = (p - 2).coerceAtLeast(2).toInt()
+                val maxSecretFloat = maxSecret.toFloat().coerceAtLeast(2.01f)
                 Slider(
-                    value = aSecret.toFloat(), onValueChange = { aSecret = it.roundToInt().coerceIn(2, (p - 2).toInt()) }, valueRange = 2f..(p - 2).toFloat(),
+                    value = aSecret.toFloat().coerceIn(2f, maxSecretFloat),
+                    onValueChange = { aSecret = it.roundToInt().coerceIn(2, maxSecret) },
+                    valueRange = 2f..maxSecretFloat,
                     colors = SliderDefaults.colors(thumbColor = Color(0xFF00CD9C), activeTrackColor = Color(0xFF00CD9C))
                 )
 
@@ -168,7 +172,9 @@ private fun DiffieHellmanExploreView() {
                     Text(text = "b = $bSecret", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
                 }
                 Slider(
-                    value = bSecret.toFloat(), onValueChange = { bSecret = it.roundToInt().coerceIn(2, (p - 2).toInt()) }, valueRange = 2f..(p - 2).toFloat(),
+                    value = bSecret.toFloat().coerceIn(2f, maxSecretFloat),
+                    onValueChange = { bSecret = it.roundToInt().coerceIn(2, maxSecret) },
+                    valueRange = 2f..maxSecretFloat,
                     colors = SliderDefaults.colors(thumbColor = AmberGold, activeTrackColor = AmberGold)
                 )
 

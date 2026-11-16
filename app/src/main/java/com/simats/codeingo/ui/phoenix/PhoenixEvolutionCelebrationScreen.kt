@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.phoenix
+package com.simats.codeingo.ui.phoenix
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -77,8 +77,8 @@ fun PhoenixEvolutionCelebrationScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val fromStage = allPhoenixStages.firstOrNull { it.id == fromStageId } ?: allPhoenixStages.first()
-    val toStage = allPhoenixStages.firstOrNull { it.id == toStageId } ?: allPhoenixStages.getOrElse(toStageId - 1) { allPhoenixStages.last() }
+    val fromStage = allPhoenixStages.firstOrNull { it.id == fromStageId } ?: allPhoenixStages.firstOrNull() ?: allPhoenixStages[0]
+    val toStage = allPhoenixStages.firstOrNull { it.id == toStageId } ?: allPhoenixStages.getOrElse(toStageId - 1) { allPhoenixStages.lastOrNull() ?: allPhoenixStages[0] }
 
     var animPhase by remember { mutableStateOf(0) }
     val mascotScale = remember { Animatable(0.6f) }

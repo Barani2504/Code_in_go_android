@@ -6,6 +6,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import com.simats.codeingo.core.diagnostics.CrashLogStore
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
@@ -36,6 +37,7 @@ class CodeingoApp : Application(), ImageLoaderFactory {
             )
         }
 
+        CrashLogStore.initialize(this)
         PhoenixEmotionManager.instance.initialize(this)
         ThemeManager.instance.initialize(this)
         LocalizationManager.instance.initialize(this)

@@ -95,7 +95,7 @@ val allPhoenixEmotions: List<PhoenixEmotion> = listOf(
 
 /** Convenience lookup by emotion id. Falls back to emotion 0 (Calm Phoenix) if missing. */
 fun phoenixEmotion(id: Int): PhoenixEmotion =
-    allPhoenixEmotions.firstOrNull { it.id == id } ?: allPhoenixEmotions.first()
+    allPhoenixEmotions.firstOrNull { it.id == id } ?: allPhoenixEmotions.firstOrNull() ?: allPhoenixEmotions[0]
 
 /** Emotions filtered by category (ALL returns everything). */
 fun PhoenixEmotionCategory.filtered(): List<PhoenixEmotion> =

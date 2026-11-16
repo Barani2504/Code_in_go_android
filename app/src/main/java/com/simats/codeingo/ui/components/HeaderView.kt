@@ -87,14 +87,15 @@ fun HeaderView(
                     modifier = Modifier.size(13.dp)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
-                if (selectedLanguage != null) {
+                val lang = selectedLanguage
+                if (lang != null) {
                     Text(
-                        text = selectedLanguage!!.flagEmoji,
+                        text = lang.flagEmoji,
                         fontSize = 12.sp
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = selectedLanguage!!.name.uppercase(),
+                        text = lang.name.uppercase(),
                         color = LocalDynamicThemeColors.current.textPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,

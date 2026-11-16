@@ -400,10 +400,10 @@ fun TlsHandshakeLevel(
 
         if (feedbackText != null) {
             Text(
-                text = feedbackText!!,
+                text = feedbackText.orEmpty(),
                 fontSize = 11.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (feedbackText!!.startsWith("✓") || feedbackText!!.startsWith("🎉")) ArenaSuccessGreen else ArenaDangerRed,
+                color = if (feedbackText.orEmpty().startsWith("✓") || feedbackText.orEmpty().startsWith("🎉")) ArenaSuccessGreen else ArenaDangerRed,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )

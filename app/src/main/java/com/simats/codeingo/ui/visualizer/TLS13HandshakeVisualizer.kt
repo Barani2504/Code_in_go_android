@@ -156,7 +156,7 @@ private fun TLS13HandshakeExploreView() {
 
     var flightIndex by remember { mutableIntStateOf(0) }
     val packets = remember { TlsEngine.getHandshakePackets() }
-    val currentPacket = packets.getOrElse(flightIndex) { packets.first() }
+    val currentPacket = packets.getOrElse(flightIndex) { packets.firstOrNull() ?: return }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(

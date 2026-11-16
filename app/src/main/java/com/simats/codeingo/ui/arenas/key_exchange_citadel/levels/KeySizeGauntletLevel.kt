@@ -237,10 +237,10 @@ fun KeySizeGauntletLevel(
 
             if (feedbackMessage != null) {
                 Text(
-                    text = feedbackMessage!!,
+                    text = feedbackMessage.orEmpty(),
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (feedbackMessage!!.startsWith("✓")) ArenaSuccessGreen else ArenaDangerRed,
+                    color = if (feedbackMessage.orEmpty().startsWith("✓")) ArenaSuccessGreen else ArenaDangerRed,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

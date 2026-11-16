@@ -159,7 +159,9 @@ private fun DESFeistelExploreView() {
     }
 
     val currentRoundState = remember(desTrace, roundIndex) {
-        desTrace.rounds.getOrElse(roundIndex - 1) { desTrace.rounds.first() }
+        desTrace.rounds.getOrElse(roundIndex - 1) {
+            desTrace.rounds.firstOrNull() ?: DesEngine.DesRoundState(1, 0L, 0L, 0L, 0L, 0L, 0L)
+        }
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {

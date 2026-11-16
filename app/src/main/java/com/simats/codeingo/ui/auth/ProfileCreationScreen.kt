@@ -321,9 +321,10 @@ fun ProfileCreationScreen(
                         )
                     }
                     3 -> {
-                        if (submissionError != null) {
+                        val subErr = submissionError
+                        if (!subErr.isNullOrBlank()) {
                             Text(
-                                text = submissionError!!,
+                                text = subErr,
                                 color = Color(0xFFEF4444),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,

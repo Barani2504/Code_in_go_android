@@ -116,7 +116,7 @@ fun MiniLessonIntroCards(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp)
             ) { page ->
-                val card = cards.getOrElse(page) { cards.first() }
+                val card = cards.getOrElse(page) { cards.firstOrNull() ?: return@HorizontalPager }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

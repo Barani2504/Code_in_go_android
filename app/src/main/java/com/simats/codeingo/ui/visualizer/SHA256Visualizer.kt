@@ -124,7 +124,7 @@ private fun SHA256ExploreView() {
     }
 
     val currentBlockTrace = traceA.blocks.firstOrNull()
-    val activeRoundState = currentBlockTrace?.steps?.getOrElse(selectedRoundStep) { currentBlockTrace.steps.first() }
+    val activeRoundState = currentBlockTrace?.steps?.getOrElse(selectedRoundStep) { currentBlockTrace.steps.firstOrNull() }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(

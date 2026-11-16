@@ -234,7 +234,7 @@ fun RailFenceGridLevel(
                             if (selectedIdx == null) {
                                 selectedIdx = i
                             } else {
-                                val first = selectedIdx!!
+                                val first = selectedIdx ?: i
                                 val temp = initialScrambled[first]
                                 initialScrambled[first] = initialScrambled[i]
                                 initialScrambled[i] = temp

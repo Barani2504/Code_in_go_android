@@ -1,4 +1,4 @@
-﻿package com.simats.codeingo.ui.dashboard
+package com.simats.codeingo.ui.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,11 +44,12 @@ fun MoreBottomDrawer(
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(DarkBackground)
+            .background(dynamicColors.cardBackground)
             .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {

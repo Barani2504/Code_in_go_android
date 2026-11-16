@@ -219,10 +219,11 @@ fun ForgotPasswordSheet(
                                 placeholder = "Email address",
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            if (errorMessage != null) {
+                            val currentErr = errorMessage
+                            if (!currentErr.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = errorMessage!!,
+                                    text = currentErr,
                                     color = Color(0xFFE8_24_10),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
@@ -294,10 +295,11 @@ fun ForgotPasswordSheet(
                                 placeholder = "6-digit code (e.g. 123456)",
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            if (errorMessage != null) {
+                            val currentErr = errorMessage
+                            if (!currentErr.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = errorMessage!!,
+                                    text = currentErr,
                                     color = Color(0xFFE8_24_10),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
@@ -370,10 +372,11 @@ fun ForgotPasswordSheet(
                                 placeholder = "Confirm password",
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            if (errorMessage != null) {
+                            val currentErr = errorMessage
+                            if (!currentErr.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = errorMessage!!,
+                                    text = currentErr,
                                     color = Color(0xFFE8_24_10),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold

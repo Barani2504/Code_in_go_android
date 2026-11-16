@@ -633,8 +633,9 @@ fun SettingsScreen(
     }
 
     // ── Arena Dossier Inspection Dialog ──────────────────────────
-    if (selectedArenaDossier != null) {
-        val arena = selectedArenaDossier!!
+    val arenaToInspect = selectedArenaDossier
+    if (arenaToInspect != null) {
+        val arena = arenaToInspect
         AlertDialog(
             onDismissRequest = { selectedArenaDossier = null },
             title = {

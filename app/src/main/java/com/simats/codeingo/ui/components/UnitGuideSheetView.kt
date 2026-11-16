@@ -56,10 +56,11 @@ fun UnitGuideSheetView(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = DarkBackground,
+        containerColor = dynamicColors.cardBackground,
         dragHandle = null,
         modifier = modifier
     ) {

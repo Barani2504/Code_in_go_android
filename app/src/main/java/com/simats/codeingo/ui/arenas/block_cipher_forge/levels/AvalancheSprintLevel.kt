@@ -80,7 +80,7 @@ fun AvalancheSprintLevel(
     }
 
     var currentRoundIndex by remember { mutableIntStateOf(0) }
-    val currentRound = diffusionRounds.getOrElse(currentRoundIndex) { diffusionRounds.last() }
+    val currentRound = diffusionRounds.getOrElse(currentRoundIndex) { diffusionRounds.lastOrNull() ?: return }
     val diffusionPercentage = (currentRound.totalDifferingBits / 128f) * 100f
 
     // Interactive Strict Avalanche Criterion (SAC) Challenge

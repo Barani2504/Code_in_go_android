@@ -285,9 +285,11 @@ fun MainDashboardScreen(
     }
 
     fun getMascotPositionForLevel(level: Int): DpOffset {
-        val unit = masterUnits.firstOrNull { it.nodes.any { n -> n.levelNumber == level } } ?: masterUnits.first()
+        val unit = masterUnits.firstOrNull { it.nodes.any { n -> n.levelNumber == level } }
+            ?: masterUnits.firstOrNull()
+            ?: return DpOffset(0.dp, 0.dp)
         val nodeIndex = unit.nodes.indexOfFirst { it.levelNumber == level }.coerceAtLeast(0)
-        val node = unit.nodes.getOrNull(nodeIndex) ?: unit.nodes.first()
+        val node = unit.nodes.getOrNull(nodeIndex) ?: unit.nodes.firstOrNull() ?: return DpOffset(0.dp, 0.dp)
 
         val safeX = (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
         val mascotX = if (safeX <= 0.dp) 82.dp else (-82).dp
@@ -741,7 +743,7 @@ fun MainDashboardScreen(
                                                 .clickable {
                                                     gameManager.markChapterCompleted(unit.id)
                                                     if (nextUnit != null) {
-                                                        val firstLevel = nextUnit.nodes.firstOrNull()?.levelNumber ?: (unit.nodes.last().levelNumber + 1)
+                                                        val firstLevel = nextUnit.nodes.firstOrNull()?.levelNumber ?: ((unit.nodes.lastOrNull()?.levelNumber ?: 0) + 1)
                                                         gameManager.unlockNextUnit(nextUnit.id, firstLevel)
                                                     }
                                                 }

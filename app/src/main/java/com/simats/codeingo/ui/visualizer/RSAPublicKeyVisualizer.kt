@@ -122,7 +122,15 @@ private fun RSAPublicKeyExploreView() {
     var messageNum by remember { mutableIntStateOf(65) } // 'A'
 
     val modExpTrace = remember(messageNum, rsaKey) {
-        RsaEngine.traceModExp(BigInteger.valueOf(messageNum.toLong()), rsaKey.e, rsaKey.n)
+        runCatching {
+            if (rsaKey.n > BigInteger.ZERO && rsaKey.e > BigInteger.ZERO) {
+                RsaEngine.traceModExp(BigInteger.valueOf(messageNum.toLong()), rsaKey.e, rsaKey.n)
+            } else {
+                RsaEngine.ModExpTrace(0L, emptyList())
+            }
+        }.getOrElse {
+            RsaEngine.ModExpTrace(0L, emptyList())
+        }
     }
 
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -158,7 +166,13 @@ private fun RSAPublicKeyExploreView() {
                 )
 
                 val ciphertext = modExpTrace.result
-                val decrypted = BigInteger.valueOf(ciphertext.toLong()).modPow(rsaKey.d, rsaKey.n)
+                val decrypted = runCatching {
+                    if (rsaKey.n > BigInteger.ZERO && rsaKey.d > BigInteger.ZERO) {
+                        BigInteger.valueOf(ciphertext.toLong()).modPow(rsaKey.d, rsaKey.n)
+                    } else {
+                        BigInteger.ZERO
+                    }
+                }.getOrElse { BigInteger.ZERO }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(

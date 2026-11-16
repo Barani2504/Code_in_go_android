@@ -232,11 +232,12 @@ fun PracticeHubScreen(
             }
 
             // Mistake Repair Bottom Sheet
-            if (repairingMistake != null) {
-                val item = repairingMistake!!
+            val mistakeToRepair = repairingMistake
+            if (mistakeToRepair != null) {
+                val item = mistakeToRepair
                 ModalBottomSheet(
                     onDismissRequest = { repairingMistake = null },
-                    containerColor = DarkBackground
+                    containerColor = dynamicColors.cardBackground
                 ) {
                     Column(
                         modifier = Modifier
@@ -318,11 +319,12 @@ fun PracticeHubScreen(
             }
 
             // Problem Detail Bottom Sheet
-            if (selectedProblem != null) {
-                val prob = selectedProblem!!
+            val problemToView = selectedProblem
+            if (problemToView != null) {
+                val prob = problemToView
                 ModalBottomSheet(
                     onDismissRequest = { selectedProblem = null },
-                    containerColor = DarkBackground
+                    containerColor = dynamicColors.cardBackground
                 ) {
                     Column(
                         modifier = Modifier

@@ -202,7 +202,7 @@ fun PhoenixSanctuaryScreen(
             }
 
             // Hero Stage Header Banner
-            val currentStageObj = allPhoenixStages.getOrNull(activeStage - 1) ?: allPhoenixStages.first()
+            val currentStageObj = allPhoenixStages.getOrNull(activeStage - 1) ?: allPhoenixStages.firstOrNull() ?: allPhoenixStages[0]
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -434,12 +434,13 @@ fun PhoenixSanctuaryScreen(
         }
 
         // Stage Detail 360 Turntable Bottom Sheet
-        if (previewStage != null) {
-            val stage = previewStage!!
+        val stageToPreview = previewStage
+        if (stageToPreview != null) {
+            val stage = stageToPreview
             val isEquipped = stage.id == activeStage
             ModalBottomSheet(
                 onDismissRequest = { previewStage = null },
-                containerColor = DarkBackground
+                containerColor = dynamicColors.cardBackground
             ) {
                 PhoenixStageDetailSheet(
                     stage = stage,

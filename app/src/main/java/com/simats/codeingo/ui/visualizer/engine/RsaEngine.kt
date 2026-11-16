@@ -185,6 +185,18 @@ object RsaEngine {
     )
 
     fun testMalleability(m1Val: Long, m2Val: Long, e: BigInteger, d: BigInteger, n: BigInteger): MalleabilityDemo {
+        if (n <= BigInteger.ZERO || e <= BigInteger.ZERO || d <= BigInteger.ZERO) {
+            return MalleabilityDemo(
+                m1 = BigInteger.ZERO,
+                m2 = BigInteger.ZERO,
+                c1 = BigInteger.ZERO,
+                c2 = BigInteger.ZERO,
+                cProductModN = BigInteger.ZERO,
+                decryptedProduct = BigInteger.ZERO,
+                expectedProductModN = BigInteger.ZERO,
+                homomorphicPropertyHolds = false
+            )
+        }
         val m1 = BigInteger.valueOf(m1Val) % n
         val m2 = BigInteger.valueOf(m2Val) % n
 
@@ -224,6 +236,17 @@ object RsaEngine {
     )
 
     fun demonstrateSignature(message: String, e: BigInteger, d: BigInteger, n: BigInteger): SignatureDemo {
+        if (n <= BigInteger.ONE || e <= BigInteger.ZERO || d <= BigInteger.ZERO) {
+            return SignatureDemo(
+                digestModN = BigInteger.ZERO,
+                signature = BigInteger.ZERO,
+                verifiedDigest = BigInteger.ZERO,
+                isValid = false,
+                tamperedMessage = "TAMPERED",
+                tamperedDigestModN = BigInteger.ZERO,
+                tamperedValid = false
+            )
+        }
         fun simpleDigest(msg: String): BigInteger {
             var h = 0L
             for (c in msg) {

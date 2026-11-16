@@ -91,11 +91,13 @@ fun AppNavHost(
             ) {
                 SplashScreen(
                     onFinishedSplash = {
-                        val destination = if (com.simats.codeingo.domain.AuthService.instance.isAuthenticated.value) {
-                            Screen.Dashboard.route
-                        } else {
-                            Screen.Onboarding.route
-                        }
+                        val destination = runCatching {
+                            if (com.simats.codeingo.domain.AuthService.instance.isAuthenticated.value) {
+                                Screen.Dashboard.route
+                            } else {
+                                Screen.Onboarding.route
+                            }
+                        }.getOrDefault(Screen.Onboarding.route)
                         navController.navigate(destination) {
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }

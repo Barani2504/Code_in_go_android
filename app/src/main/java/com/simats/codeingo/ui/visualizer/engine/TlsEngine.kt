@@ -169,7 +169,7 @@ object TlsEngine {
         }
 
         // Verify root anchor
-        val root = chain.last()
+        val root = chain.lastOrNull() ?: return CertChainValidation(chain, targetDomain, currentYear, false, "Empty certificate chain")
         if (!root.isRoot || root.subject != root.issuer) {
             return CertChainValidation(chain, targetDomain, currentYear, false, "Root certificate is not a valid self-signed anchor")
         }
@@ -192,7 +192,7 @@ object TlsEngine {
         }
 
         // Check domain name on leaf
-        val leaf = chain.first()
+        val leaf = chain.firstOrNull() ?: return CertChainValidation(chain, targetDomain, currentYear, false, "Empty certificate chain")
         val expectedSubj = "CN=$targetDomain"
         if (!leaf.subject.contains(targetDomain)) {
             return CertChainValidation(chain, targetDomain, currentYear, false, "Domain name mismatch: Certificate is for ${leaf.subject}, not $targetDomain")
