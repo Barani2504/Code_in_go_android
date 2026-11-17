@@ -1,0 +1,164 @@
+{
+  "id": 14,
+  "number": 14,
+  "realmId": 3,
+  "realmTitle": "Public-Key Citadel",
+  "title": "Sharing keys safely",
+  "syllabusUnit": "Unit III: Diffie-Hellman Key Exchange & ElGamal",
+  "covers": "Diffie-Hellman, ElGamal, key distribution & management, MITM",
+  "visualizerId": "diffie_hellman",
+  "visualizerTitle": "Diffie-Hellman Paint-Mixing & ElGamal",
+  "prerequisites": "Chapter 13",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to illustrate the Diffie-Hellman key exchange using the paint-mixing analogy.",
+    "You will be able to calculate a shared secret from public and private keys.",
+    "You will be able to explain how a Man-in-the-Middle (MITM) attacks unauthenticated Diffie-Hellman."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Diffie-Hellman Paint Mixing",
+      "analogy": "Alice and Bob start with common yellow paint. Each adds a secret color, swaps the mix, and adds their secret again to get matching brown.",
+      "coreConcept": "Alice picks private a, publishes A = g^a mod p. Bob picks private b, publishes B = g^b mod p. Alice computes B^a mod p; Bob computes A^b mod p. Both get g^(ab) mod p!",
+      "example": "An eavesdropper sees g, p, A, and B, but cannot calculate g^(ab) without solving the discrete log problem."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The Man-in-the-Middle (MITM) Threat",
+      "analogy": "An imposter intercepting letters at the post office, creating separate secret codes with Alice and Bob.",
+      "coreConcept": "Unauthenticated Diffie-Hellman is vulnerable to MITM: Mallory intercepts Alice's A and sends her M1; intercepts Bob's B and sends him M2. She decrypts and re-encrypts all traffic.",
+      "example": "Solution: Authenticate public keys using digital signatures and X.509 certificates."
+    },
+    {
+      "cardIndex": 3,
+      "title": "The ElGamal Cryptosystem",
+      "analogy": "Extending Diffie-Hellman into a complete public-key encryption and digital signature system.",
+      "coreConcept": "Published by Taher ElGamal in 1985: uses DLP over cyclic groups. Encryption produces two ciphertext parts (c1, c2) using an ephemeral random session key.",
+      "example": "ElGamal is randomized: encrypting the identical message twice produces totally different ciphertexts."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c14_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary purpose of the Diffie-Hellman protocol?",
+      "options": [
+        "To enable two parties to agree on a shared secret key across an insecure public channel",
+        "To compress email attachments",
+        "To calculate hash checksums",
+        "To scan networks for open ports"
+      ],
+      "correctIndex": 0,
+      "explanation": "Whitfield Diffie and Martin Hellman designed this protocol in 1976 to solve the ancient problem of key distribution over insecure networks.",
+      "wrongExplanations": [
+        "Correct! Diffie-Hellman securely derives shared symmetric keys across the public internet.",
+        "It does not compress files.",
+        "Hashing is performed by SHA-256.",
+        "Port scanning is network enumeration."
+      ],
+      "realWorldExample": "Diffie-Hellman was the first published public-key cryptographic protocol."
+    },
+    {
+      "id": "c14_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In Diffie-Hellman with modulus p = 23 and generator g = 5, Alice chooses private key a = 6. What is her public key A = g^a mod p?",
+      "options": [
+        "8",
+        "15",
+        "2",
+        "6"
+      ],
+      "correctIndex": 0,
+      "explanation": "5^6 = 15625. 15625 / 23 = 679 with remainder 8. (679 * 23 = 15617; 15625 - 15617 = 8).",
+      "wrongExplanations": [
+        "Correct! 5^6 mod 23 = 8.",
+        "15 is incorrect.",
+        "2 is incorrect.",
+        "6 is Alice's private key."
+      ],
+      "realWorldExample": "Alice sends public key A = 8 openly across the internet to Bob."
+    },
+    {
+      "id": "c14_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is standard anonymous Diffie-Hellman vulnerable to a Man-in-the-Middle (MITM) attack?",
+      "options": [
+        "It provides no authentication of the participants' identities",
+        "Because it uses prime numbers",
+        "Because Diffie-Hellman requires wires",
+        "Because exponents cannot exceed 10"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because public values A and B are unauthenticated, an attacker can substitute their own public keys and establish independent keys with both parties.",
+      "wrongExplanations": [
+        "Correct! Without digital signatures or certificates, neither party can verify who they are talking to.",
+        "Prime numbers are mathematically required.",
+        "Diffie-Hellman works over any network medium.",
+        "Exponents in real systems are hundreds of bits."
+      ],
+      "realWorldExample": "TLS 1.3 uses Ephemeral Diffie-Hellman (ECDHE) signed by certificate authorities to prevent MITM."
+    },
+    {
+      "id": "c14_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What makes Ephemeral Diffie-Hellman (DHE / ECDHE) provide 'Forward Secrecy'?",
+      "options": [
+        "A fresh private key is generated for every session and erased from memory immediately after",
+        "It uses keys that last 100 years",
+        "It saves all master keys on the hard drive",
+        "It transmits keys over Bluetooth"
+      ],
+      "correctIndex": 0,
+      "explanation": "If a server's long-term certificate private key is stolen years later, past recorded traffic cannot be decrypted because session keys were erased.",
+      "wrongExplanations": [
+        "Correct! Forward Secrecy ensures past sessions remain secure even after future key compromise.",
+        "Persistent keys destroy forward secrecy.",
+        "Saving keys to disk enables retrospective decryption.",
+        "Radio transmission has no security advantage."
+      ],
+      "realWorldExample": "Modern browsers flag websites that do not support Forward Secrecy as legacy."
+    },
+    {
+      "id": "c14_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does ElGamal encryption differ from textbook RSA?",
+      "options": [
+        "ElGamal is non-deterministic (probabilistic) using an ephemeral random k per message",
+        "ElGamal does not use math",
+        "ElGamal is symmetric",
+        "ElGamal produces shorter ciphertexts than plaintexts"
+      ],
+      "correctIndex": 0,
+      "explanation": "ElGamal incorporates a fresh random number k into every encryption, so encrypting 'SECRET' ten times produces ten totally different ciphertexts.",
+      "wrongExplanations": [
+        "Correct! Randomized encryption prevents codebook eavesdropping attacks.",
+        "ElGamal is based on cyclic group mathematics.",
+        "ElGamal is an asymmetric public-key system.",
+        "ElGamal ciphertext consists of two group elements (c1, c2), doubling length."
+      ],
+      "realWorldExample": "ElGamal encryption is the direct ancestor of the US Digital Signature Algorithm (DSA)."
+    },
+    {
+      "id": "c14_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "If Alice's public key is A, and Bob's private key is b, how does Bob compute the shared secret K?",
+      "options": [
+        "K = A^b mod p",
+        "K = A + b mod p",
+        "K = A * b mod p",
+        "K = A - b mod p"
+      ],
+      "correctIndex": 0,
+      "explanation": "Bob raises Alice's public key A to his own private key b: K = (g^a)^b = g^(ab) mod p.",
+      "wrongExplanations": [
+        "Correct! K = A^b mod p.",
+        "Addition does not yield the shared secret exponent.",
+        "Multiplication does not match Diffie-Hellman mathematics.",
+        "Subtraction is invalid."
+      ],
+      "realWorldExample": "Both Alice (B^a mod p) and Bob (A^b mod p) arrive at the exact same key K = g^(ab) mod p."
+    }
+  ],
+  "ashRecap": "Diffie-Hellman lets two strangers agree on a secret key in public. Always pair it with digital certificates so an eavesdropper can't stand in the middle!"
+}

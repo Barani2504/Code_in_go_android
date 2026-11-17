@@ -1,0 +1,164 @@
+{
+  "id": 15,
+  "number": 15,
+  "realmId": 3,
+  "realmTitle": "Public-Key Citadel",
+  "title": "Elliptic curves",
+  "syllabusUnit": "Unit III: Elliptic Curve Cryptography (ECC)",
+  "covers": "Point addition, doubling, ECC vs RSA key size",
+  "visualizerId": "ecc",
+  "visualizerTitle": "ECC Point Addition & Doubling",
+  "prerequisites": "Chapter 14",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain the geometric equation y^2 = x^3 + ax + b of an elliptic curve.",
+    "You will be able to demonstrate point addition and point doubling geometrically.",
+    "You will be able to compare ECC 256-bit security against RSA 3072-bit key sizes."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Elliptic Curve Equation",
+      "analogy": "A smooth, symmetric roller-coaster loop shaped by the formula: y^2 = x^3 + ax + b.",
+      "coreConcept": "Defined over prime fields F_p, an elliptic curve forms an abelian group with a special 'point at infinity' O acting as identity.",
+      "example": "NIST curve P-256 and Bitcoin's secp256k1 are the most widely deployed curves on earth."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Point Addition & Point Doubling",
+      "analogy": "Drawing a line through two points on the curve: it intersects a third point; reflect it across the x-axis to find P + Q.",
+      "coreConcept": "If P != Q, draw the chord line to find intersection R, then reflect: P + Q = -R. If adding P to itself (point doubling P + P), draw the tangent line.",
+      "example": "Repeating point addition k times computes public key Q = k * P using double-and-add."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Small Keys, Titanic Strength",
+      "analogy": "A tiny diamond laser lock providing more protection than a massive 10-foot iron bank door.",
+      "coreConcept": "Because there is no sub-exponential attack against the Elliptic Curve Discrete Log Problem (ECDLP), a 256-bit ECC key matches the strength of a huge 3072-bit RSA key.",
+      "example": "Saves 90% bandwidth and battery power on smartphones, smart watches, and IoT sensors."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c15_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the standard Weierstrass algebraic equation for an elliptic curve over a real field?",
+      "options": [
+        "y^2 = x^3 + ax + b",
+        "y = mx + b",
+        "x^2 + y^2 = r^2",
+        "y = x^2"
+      ],
+      "correctIndex": 0,
+      "explanation": "The standard non-singular cubic equation is y^2 = x^3 + ax + b, where 4a^3 + 27b^2 != 0.",
+      "wrongExplanations": [
+        "Correct! y^2 = x^3 + ax + b is the elliptic curve equation.",
+        "y = mx + b is a straight line.",
+        "x^2 + y^2 = r^2 is a circle.",
+        "y = x^2 is a simple parabola."
+      ],
+      "realWorldExample": "Neil Koblitz and Victor Miller independently proposed using elliptic curves for cryptography in 1985."
+    },
+    {
+      "id": "c15_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does a 256-bit Elliptic Curve key (e.g. NIST P-256) compare in cryptographic security to an RSA key?",
+      "options": [
+        "A 256-bit ECC key offers equivalent security to an RSA 3072-bit key",
+        "A 256-bit ECC key is much weaker than RSA-512",
+        "RSA keys are always 100x stronger than any ECC key",
+        "They are identical in bit length and speed"
+      ],
+      "correctIndex": 0,
+      "explanation": "NIST guidelines equate 256-bit elliptic curves (128 bits of symmetric security) to a 3072-bit RSA key, with vastly smaller signature sizes and faster computation.",
+      "wrongExplanations": [
+        "Correct! 256-bit ECC matches 3072-bit RSA.",
+        "256-bit ECC is orders of magnitude stronger than broken RSA-512.",
+        "ECC offers vastly superior security-per-bit than RSA.",
+        "RSA requires over 10x more bits."
+      ],
+      "realWorldExample": "Apple iMessage, WhatsApp, and TLS 1.3 default to elliptic curves to maximize battery life."
+    },
+    {
+      "id": "c15_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In the geometric definition of point addition on an elliptic curve, how is P + Q determined?",
+      "options": [
+        "Draw a straight line through P and Q, find the third intersection point on the curve, and reflect it across the x-axis",
+        "Add the x coordinates and multiply the y coordinates",
+        "Draw a circle around P and Q",
+        "Calculate the average of both coordinates"
+      ],
+      "correctIndex": 0,
+      "explanation": "A line intersecting points P and Q intersects the curve at a third point R; reflecting R across the x-axis (x, -y) gives P + Q.",
+      "wrongExplanations": [
+        "Correct! Chord-and-tangent reflection defines group addition.",
+        "Coordinate addition is non-linear.",
+        "Circles do not define group laws.",
+        "Averages do not lie on the curve."
+      ],
+      "realWorldExample": "If P = Q, the tangent line at P is drawn (point doubling)."
+    },
+    {
+      "id": "c15_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the 'Point at Infinity' (O) in Elliptic Curve arithmetic?",
+      "options": [
+        "The additive identity element of the group (equivalent to 0: P + O = P)",
+        "A point that crashes the computer",
+        "A point located at coordinates (9999, 9999)",
+        "A point outside the universe"
+      ],
+      "correctIndex": 0,
+      "explanation": "The point at infinity O acts as the identity element of the group, just like 0 in ordinary addition: P + (-P) = O.",
+      "wrongExplanations": [
+        "Correct! The point at infinity is the group identity element.",
+        "It is cleanly handled by software as an identity flag.",
+        "It is an ideal geometric point, not a literal coordinate.",
+        "It is standard projective geometry."
+      ],
+      "realWorldExample": "Vertical lines intersect the curve at (x, y), (x, -y), and the point at infinity O."
+    },
+    {
+      "id": "c15_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the hard mathematical problem that protects Elliptic Curve Cryptography?",
+      "options": [
+        "The Elliptic Curve Discrete Logarithm Problem (ECDLP)",
+        "Factoring two prime numbers",
+        "Sorting an array in O(1) time",
+        "Finding the perimeter of a rectangle"
+      ],
+      "correctIndex": 0,
+      "explanation": "Given curve points P and Q = k * P, finding the scalar integer k is the Elliptic Curve Discrete Logarithm Problem (ECDLP).",
+      "wrongExplanations": [
+        "Correct! Solving k in Q = k * P takes fully exponential Pollard's rho time O(sqrt(n)).",
+        "Factoring primes protects RSA, not ECC.",
+        "Array sorting is unrelated.",
+        "Perimeter calculation is elementary."
+      ],
+      "realWorldExample": "The best known classical attacks against ECDLP take exponential time, whereas RSA factoring takes sub-exponential time."
+    },
+    {
+      "id": "c15_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which popular cryptocurrency uses the Koblitz curve 'secp256k1' for public address generation and transaction signing?",
+      "options": [
+        "Bitcoin",
+        "Visa Credit Card",
+        "PayPal",
+        "Fedwire"
+      ],
+      "correctIndex": 0,
+      "explanation": "Satoshi Nakamoto selected the secp256k1 curve (y^2 = x^3 + 7 mod p) for all Bitcoin ECDSA key pairs and digital signatures.",
+      "wrongExplanations": [
+        "Correct! Bitcoin and Ethereum use secp256k1.",
+        "Visa utilizes EMV chip smart cards.",
+        "PayPal is a payment processor.",
+        "Fedwire is an interbank transfer network."
+      ],
+      "realWorldExample": "secp256k1 features efficient endomorphisms that allow faster point multiplication."
+    }
+  ],
+  "ashRecap": "Elliptic curves give you bank-grade security with tiny 256-bit keys. Points bounce across the curve to create the world's most efficient crypto locks!"
+}

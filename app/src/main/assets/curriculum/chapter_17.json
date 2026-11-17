@@ -1,0 +1,164 @@
+{
+  "id": 17,
+  "number": 17,
+  "realmId": 4,
+  "realmTitle": "Trust & Proof",
+  "title": "MAC, HMAC and AEAD",
+  "syllabusUnit": "Unit IV: Message Authentication Codes & HMAC",
+  "covers": "MAC, HMAC, CMAC, authenticated encryption (GCM)",
+  "visualizerId": "hmac",
+  "visualizerTitle": "HMAC Inner & Outer Key Lab",
+  "prerequisites": "Chapter 16",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain why a hash alone does NOT provide message authentication.",
+    "You will be able to diagram the HMAC nested hashing structure with ipad and opad.",
+    "You will be able to distinguish CMAC from HMAC."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Why Hashes Need Keys: The MAC",
+      "analogy": "A seal on a letter: anyone can press wax, but only a king with the royal signet ring can stamp a valid seal.",
+      "coreConcept": "A hash function has no secret key: an attacker can alter the message and recompute a valid hash! A Message Authentication Code (MAC) mixes in a secret key.",
+      "example": "MAC = H(Key || Message) ensures only parties holding the secret key can generate or verify the tag."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The HMAC Construction (RFC 2104)",
+      "analogy": "Double-wrapping a package with two layers of tape and two distinct secret key stamps.",
+      "coreConcept": "HMAC(K, M) = H((K XOR opad) || H((K XOR ipad) || M)). This nested structure completely defeats length-extension attacks that break simple H(K || M).",
+      "example": "ipad = 0x36 repeating; opad = 0x5C repeating. Used in AWS API signatures and JWT authentication tokens."
+    },
+    {
+      "cardIndex": 3,
+      "title": "CMAC & Authenticated Encryption",
+      "analogy": "A lock that encrypts and seals in one swift turn, instead of locking then taping separately.",
+      "coreConcept": "Cipher-based MAC (CMAC) builds a secure MAC using a block cipher like AES. Authenticated Encryption (AES-GCM) integrates encryption and MAC into a single unified pass.",
+      "example": "Avoids the 'Encrypt-and-MAC' vs 'MAC-then-Encrypt' vulnerabilities that plagued older SSL versions."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c17_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is sending a standard hash H(M) alongside message M insufficient to guarantee message authenticity?",
+      "options": [
+        "An attacker in the middle can alter M to M' and simply recalculate H(M') to match",
+        "Hashes are too short",
+        "Hashes can only be sent on Saturdays",
+        "Hash functions always produce 0"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because standard hash functions like SHA-256 use NO secret keys; anyone can calculate a valid hash for any altered payload.",
+      "wrongExplanations": [
+        "Correct! Without a secret key, an attacker recomputes the hash after tampering.",
+        "256 bits is plenty long, but lacks a secret key.",
+        "Time of transmission is irrelevant.",
+        "Hashes produce pseudo-random non-zero digests."
+      ],
+      "realWorldExample": "This is why message integrity requires a shared secret key (HMAC) or a private key (Digital Signature)."
+    },
+    {
+      "id": "c17_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In the HMAC formula HMAC(K, M) = H((K XOR opad) || H((K XOR ipad) || M)), what are 'ipad' and 'opad'?",
+      "options": [
+        "Fixed constant padding byte sequences (0x36 and 0x5C) that create two distinct derived keys",
+        "Passwords entered by the user",
+        "Apple iPad tablet devices",
+        "Random numbers that change on every message"
+      ],
+      "correctIndex": 0,
+      "explanation": "ipad (inner pad, byte 0x36 repeated) and opad (outer pad, byte 0x5C repeated) ensure the inner and outer hash passes use cryptographically independent subkeys.",
+      "wrongExplanations": [
+        "Correct! Constant byte masks that decorrelate inner and outer hashing rounds.",
+        "They are defined RFC 2104 constants, not user passwords.",
+        "They have zero relation to consumer hardware.",
+        "They are fixed constants, not dynamic nonces."
+      ],
+      "realWorldExample": "Mihir Bellare, Ran Canetti, and Hugo Krawczyk designed HMAC in 1996; it remains uncompromised today."
+    },
+    {
+      "id": "c17_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What vulnerability affects naive hash constructions like H(Key || Message) in Merkle-Damgård hashes?",
+      "options": [
+        "Length-Extension Attack",
+        "Avalanche Failure",
+        "Bit Flip Collision",
+        "Buffer Overflow"
+      ],
+      "correctIndex": 0,
+      "explanation": "In Merkle-Damgård hashes, an attacker can append data to the message and extend the hash state without knowing the secret key.",
+      "wrongExplanations": [
+        "Correct! Length-extension allows attackers to forge valid authentication tags for extended payloads.",
+        "Avalanche properties are preserved.",
+        "Bit flips are detected.",
+        "Buffer overflow is a memory safety flaw, not an algorithmic hash flaw."
+      ],
+      "realWorldExample": "Flickr API suffered a vulnerability where API signatures using H(Secret || Params) were forged via length-extension."
+    },
+    {
+      "id": "c17_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What does a Cipher-based Message Authentication Code (CMAC) use as its underlying building block?",
+      "options": [
+        "A symmetric block cipher like AES",
+        "A public-key RSA algorithm",
+        "A random number generator",
+        "An unencrypted text file"
+      ],
+      "correctIndex": 0,
+      "explanation": "NIST SP 800-38B defines CMAC, which builds a secure MAC using a block cipher (AES) in a CBC-like construction with subkey derivation.",
+      "wrongExplanations": [
+        "Correct! CMAC uses AES to generate authentication tags.",
+        "RSA is used for asymmetric digital signatures.",
+        "RNGs generate randomness, not authentication tags.",
+        "Text files store data."
+      ],
+      "realWorldExample": "CMAC is widely used in automotive CAN bus networks and IPsec."
+    },
+    {
+      "id": "c17_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "When combining encryption and authentication, which order is proven to be the most secure according to modern cryptography?",
+      "options": [
+        "Encrypt-then-MAC (EtM)",
+        "MAC-then-Encrypt (MtE)",
+        "Encrypt-and-MAC",
+        "Neither"
+      ],
+      "correctIndex": 0,
+      "explanation": "Encrypt-then-MAC encrypts plaintext first, then computes a MAC over the ciphertext. The receiver verifies the MAC before touching decryption, preventing oracle attacks.",
+      "wrongExplanations": [
+        "Correct! Encrypt-then-MAC prevents padding oracles because invalid packets are dropped before decryption.",
+        "MAC-then-Encrypt was used in legacy TLS and caused POODLE and Lucky13 attacks.",
+        "Encrypt-and-MAC was used in SSH and can leak plaintext equality.",
+        "Authenticated encryption is strictly required."
+      ],
+      "realWorldExample": "Modern AEAD ciphers like AES-GCM and ChaCha20-Poly1305 inherently implement Encrypt-then-MAC internally."
+    },
+    {
+      "id": "c17_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the purpose of the 'Associated Data' in Authenticated Encryption with Associated Data (AEAD)?",
+      "options": [
+        "Data like packet headers that must be authenticated for integrity, but left unencrypted so routers can inspect it",
+        "Encrypted pictures",
+        "User passwords",
+        "Temporary cache files"
+      ],
+      "correctIndex": 0,
+      "explanation": "Network routers need to read IP headers to forward packets, so headers are authenticated to prevent tampering, but left unencrypted.",
+      "wrongExplanations": [
+        "Correct! Associated Data is verified for integrity without being encrypted.",
+        "Images are payload data.",
+        "Passwords are never sent in Associated Data.",
+        "Cache files are OS storage."
+      ],
+      "realWorldExample": "In TLS 1.3, sequence numbers and record headers are authenticated as Associated Data in AES-GCM."
+    }
+  ],
+  "ashRecap": "A hash proves data wasn't accidentally corrupted, but a MAC proves it wasn't maliciously forged by an attacker holding no key!"
+}

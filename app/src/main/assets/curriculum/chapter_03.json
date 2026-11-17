@@ -1,0 +1,164 @@
+{
+  "id": 3,
+  "number": 3,
+  "realmId": 1,
+  "realmTitle": "Secrets 101",
+  "title": "Swapping letters",
+  "syllabusUnit": "Unit I: Classical Ciphers & Substitution Techniques",
+  "covers": "Caesar, Monoalphabetic, Playfair, Hill, Vigenère",
+  "visualizerId": "caesar_wheel",
+  "visualizerTitle": "Caesar Wheel & Playfair Grid",
+  "prerequisites": "Chapter 2",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to encrypt and decrypt messages with the Caesar shift.",
+    "You will be able to construct a 5x5 Playfair cipher matrix.",
+    "You will be able to use a keyword table in the Vigenère polyalphabetic cipher."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Caesar & Monoalphabetic Ciphers",
+      "analogy": "Rotating an alphabet decoder ring so A turns into D and B turns into E.",
+      "coreConcept": "Caesar shifts every letter by a fixed key k: C = (P + k) mod 26. Monoalphabetic replaces each character with a fixed substitute.",
+      "example": "With shift key 3, 'HELLO' shifts to 'KHOOR'."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The Playfair 5x5 Grid",
+      "analogy": "Pairing letters like dance partners and swapping them using a square coordinate grid.",
+      "coreConcept": "Playfair encrypts pairs of letters (digraphs) using a 5x5 matrix filled with a keyword (merging I and J into one cell).",
+      "example": "Letters in the same row shift right; letters in the same column shift down; rectangles swap corners."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Vigenère: Polyalphabetic Armor",
+      "analogy": "Using a secret password where each letter provides a different Caesar shift dial.",
+      "coreConcept": "Vigenère uses a repeating keyword. Each keyword letter selects a different Caesar shift, flattening single-letter frequency peaks.",
+      "example": "Key 'KEY' shifts letter 1 by 10, letter 2 by 4, and letter 3 by 24 repeatedly."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c3_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Using a Caesar cipher with key k = 3, what is the encryption of the word 'SECURITY'?",
+      "options": [
+        "VHFXULWB",
+        "TFDUJUZ",
+        "WIGYVMX",
+        "RDDFSJSX"
+      ],
+      "correctIndex": 0,
+      "explanation": "S->V, E->H, C->F, U->X, R->U, I->L, T->W, Y->B (wrapping around Z).",
+      "wrongExplanations": [
+        "Correct! Every letter shifted forward by 3 modulo 26.",
+        "This option applied key = 1.",
+        "This option applied key = 4.",
+        "This option shifted backwards by 1."
+      ],
+      "realWorldExample": "Julius Caesar historically used key = 3 to protect military orders sent to his generals in Gaul."
+    },
+    {
+      "id": "c3_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does the Playfair cipher handle duplicate letters within the same digraph pair (e.g. 'LL' in 'BALLOON')?",
+      "options": [
+        "It inserts an uncommon filler letter like 'X' between them",
+        "It ignores the duplicate letter completely",
+        "It deletes the entire word",
+        "It converts both letters into digits 00"
+      ],
+      "correctIndex": 0,
+      "explanation": "Playfair rules require inserting a dummy filler letter (usually 'X' or 'Q') between identical letters in a pair.",
+      "wrongExplanations": [
+        "Correct! 'LL' becomes 'LX' and 'LO' to ensure distinct matrix lookups.",
+        "Ignoring duplicates destroys clean decryption.",
+        "Playfair never deletes words.",
+        "Classical Playfair operates on a 5x5 alphabet grid."
+      ],
+      "realWorldExample": "The British military used Playfair in the Boer War and WWI because it required no mechanical machinery."
+    },
+    {
+      "id": "c3_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is the Vigenère cipher called 'polyalphabetic'?",
+      "options": [
+        "It uses multiple shift alphabets determined by the repeating keyword",
+        "It requires 26 computers running in parallel",
+        "It translates text into multiple spoken languages",
+        "It only operates on polygons"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because each character in the repeating key defines a different Caesar alphabet shift for successive characters.",
+      "wrongExplanations": [
+        "Correct! Polyalphabetic means many alphabets are applied in rotation.",
+        "Classical Vigenère was calculated by hand using a tableau.",
+        "It operates on single-language character sets.",
+        "Geometry has nothing to do with it."
+      ],
+      "realWorldExample": "Vigenère was hailed as 'le chiffre indéchiffrable' for over two centuries."
+    },
+    {
+      "id": "c3_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In a 5x5 Playfair grid, how many total letters can fit, and how is the 26-letter English alphabet accommodated?",
+      "options": [
+        "25 letters fit; I and J share a single combined cell",
+        "24 letters fit; vowels are removed",
+        "30 letters fit; punctuation marks are added",
+        "26 letters fit; the grid uses non-square cells"
+      ],
+      "correctIndex": 0,
+      "explanation": "5x5 = 25 cells. The letters I and J are merged into one cell to fit the 26-letter Latin alphabet.",
+      "wrongExplanations": [
+        "Correct! Standard Playfair merges 'I' and 'J' in the same square.",
+        "Vowels are essential to decryption.",
+        "A 5x5 grid contains 25 positions.",
+        "A grid with 26 cells cannot be a 5x5 square."
+      ],
+      "realWorldExample": "John F. Kennedy's PT-109 rescue message was encoded with a Playfair cipher variant in WWII."
+    },
+    {
+      "id": "c3_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which classical cipher uses linear algebra and matrix multiplication (C = K * P mod 26) to encrypt blocks of letters?",
+      "options": [
+        "Hill Cipher",
+        "Caesar Cipher",
+        "Rail Fence Cipher",
+        "Atbash Cipher"
+      ],
+      "correctIndex": 0,
+      "explanation": "Lester Hill invented the Hill cipher in 1929, using matrix multiplication modulo 26 to encrypt polygraphic blocks.",
+      "wrongExplanations": [
+        "Correct! Hill cipher encrypts m letters simultaneously using an m x m matrix key.",
+        "Caesar cipher uses simple single-letter addition.",
+        "Rail fence is a transposition cipher.",
+        "Atbash is a Hebrew reversal cipher."
+      ],
+      "realWorldExample": "Hill cipher was the first polygraphic cipher practical to operate on more than 3 symbols at once."
+    },
+    {
+      "id": "c3_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary weakness of all simple monoalphabetic substitution ciphers?",
+      "options": [
+        "They preserve the natural letter frequency distribution of the language",
+        "They require keys longer than the internet",
+        "They produce ciphertexts twice as long as the plaintext",
+        "They can only be decrypted at night"
+      ],
+      "correctIndex": 0,
+      "explanation": "If 'E' is the most frequent letter in English, its substitute will also appear most frequently in the ciphertext.",
+      "wrongExplanations": [
+        "Correct! Frequency analysis quickly breaks monoalphabetic ciphers by counting symbol occurrences.",
+        "Monoalphabetic keys are only 26 characters long.",
+        "Substitution replaces 1 letter with 1 letter.",
+        "Time of day has no influence on cryptographic mathematics."
+      ],
+      "realWorldExample": "Arab mathematician Al-Kindi discovered frequency cryptanalysis in the 9th century to break substitution ciphers."
+    }
+  ],
+  "ashRecap": "Substitution swaps letters for other letters. Vigenère uses a keyword to make letter frequencies much harder to trace!"
+}

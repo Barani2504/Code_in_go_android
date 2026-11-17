@@ -1,0 +1,164 @@
+{
+  "id": 23,
+  "number": 23,
+  "realmId": 5,
+  "realmTitle": "Real-World Defense",
+  "title": "Firewalls, IDS and intruders",
+  "syllabusUnit": "Unit V: Firewalls, Intrusion Detection & Intruders",
+  "covers": "Packet filters, stateful inspection, IDS/IPS, intruders, honeypots",
+  "visualizerId": "firewall_rules",
+  "visualizerTitle": "Firewall Rule Builder & Honeypot Lab",
+  "prerequisites": "Chapter 22",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to construct packet filtering and stateful inspection firewall rules.",
+    "You will be able to distinguish an Intrusion Detection System (IDS) from an Intrusion Prevention System (IPS).",
+    "You will be able to explain how Honeypots lure and analyze attackers."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Network Bouncer: Firewalls",
+      "analogy": "A security guard at a building lobby checking badges against a strict entry list.",
+      "coreConcept": "Packet Filtering firewalls inspect IP addresses and port numbers in isolation. Stateful Inspection tracks live TCP connection states (SYN, ESTABLISHED), blocking unsolicited packets.",
+      "example": "Default policy: Deny All incoming traffic; allow only established outbound replies."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Watchtowers: IDS vs IPS",
+      "analogy": "An alarm bell ringing when a burglar climbs the fence (IDS) vs an automated gate that slams shut (IPS).",
+      "coreConcept": "An Intrusion Detection System (IDS) monitors traffic for known attack signatures or anomalies and raises alerts. An Intrusion Prevention System (IPS) sits inline and drops malicious packets in real time.",
+      "example": "Signature-based detection spots known exploits (Snort rules); anomaly-based detection spots unusual traffic spikes."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Honeypots: The Decoy Vault",
+      "analogy": "A fake bank safe filled with marked monopoly money and hidden motion-detector cameras.",
+      "coreConcept": "A honeypot is an intentionally vulnerable decoy server designed to lure attackers, detect zero-day techniques, and waste adversary resources without exposing real assets.",
+      "example": "Honeynets provide early threat intelligence on automated scanner botnets."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c23_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the key advantage of a 'Stateful Inspection' firewall over a stateless packet filter?",
+      "options": [
+        "Stateful firewalls track TCP connection states, automatically allowing response packets for established outbound connections",
+        "Stateful firewalls never need rules",
+        "Stateful firewalls run on batteries",
+        "Stateful firewalls decrypt all RSA keys"
+      ],
+      "correctIndex": 0,
+      "explanation": "A stateful firewall knows when an internal client initiated an outbound request, allowing inbound response packets on dynamic ports without leaving ports permanently open.",
+      "wrongExplanations": [
+        "Correct! Stateful inspection maintains a dynamic state table of active sessions.",
+        "Firewalls require explicit security rule configurations.",
+        "Power source is unrelated to packet inspection logic.",
+        "Firewalls do not crack RSA keys."
+      ],
+      "realWorldExample": "Linux iptables/nftables and Cisco ASA firewalls operate stateful connection tracking engines."
+    },
+    {
+      "id": "c23_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the critical operational difference between an Intrusion Detection System (IDS) and an Intrusion Prevention System (IPS)?",
+      "options": [
+        "An IDS passively alerts on suspicious traffic; an IPS sits inline and actively drops malicious packets",
+        "An IDS only runs on Linux; an IPS runs on Mac",
+        "An IDS is hardware; an IPS is a word document",
+        "An IPS cannot inspect packets"
+      ],
+      "correctIndex": 0,
+      "explanation": "An IDS receives a mirrored copy of network packets (SPAN port) and generates alerts. An IPS sits directly inline in the packet flow to actively block attacks.",
+      "wrongExplanations": [
+        "Correct! IDS alerts defenders; IPS blocks threats in real time.",
+        "Both systems deploy across Linux, BSD, and proprietary network appliances.",
+        "Both are advanced network security systems.",
+        "Both perform deep packet inspection."
+      ],
+      "realWorldExample": "Snort and Suricata can run in either passive IDS mode or active inline IPS mode."
+    },
+    {
+      "id": "c23_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'DMZ' (Demilitarized Zone) in network security architecture?",
+      "options": [
+        "A screened perimeter subnet hosting public-facing servers (web, mail) isolated from the internal corporate network",
+        "A zone where security rules are disabled",
+        "A computer with no operating system",
+        "A private chatroom for hackers"
+      ],
+      "correctIndex": 0,
+      "explanation": "A DMZ places internet-accessible servers behind an external firewall so if a web server is compromised, attackers cannot directly pivot into internal databases.",
+      "wrongExplanations": [
+        "Correct! Dual-firewall DMZ architectures segment public services from internal LAN assets.",
+        "Security rules are strictly enforced in DMZs.",
+        "DMZ hosts run hardened operating systems.",
+        "DMZ is an enterprise network architecture."
+      ],
+      "realWorldExample": "Standard enterprise designs place web servers in the DMZ and database servers in the protected internal tier."
+    },
+    {
+      "id": "c23_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary function of a 'Honeypot' in a defensive security operations center?",
+      "options": [
+        "To act as an attractive decoy system that traps attackers and gathers intelligence on exploit methods",
+        "To store company honey inventory",
+        "To encrypt user passwords",
+        "To speed up internet connectivity"
+      ],
+      "correctIndex": 0,
+      "explanation": "Honeypots have no legitimate production value; any interaction with a honeypot is by definition suspicious or malicious, providing clean threat telemetry.",
+      "wrongExplanations": [
+        "Correct! Decoys detect automated scanners, zero-days, and lateral movement.",
+        "Agricultural tracking is unrelated.",
+        "Honeypots do not handle authentication.",
+        "Honeypots do not route user traffic."
+      ],
+      "realWorldExample": "Canary tokens and Cowrie SSH honeypots alert defenders the moment an intruder probes an internal network."
+    },
+    {
+      "id": "c23_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the recommended 'Default Firewall Stance' for securing high-risk network interfaces?",
+      "options": [
+        "Default Deny: drop all traffic unless explicitly permitted by an authorized rule",
+        "Default Allow: permit all traffic and block only known bad websites",
+        "Allow all traffic on weekends",
+        "Randomly drop 50% of all packets"
+      ],
+      "correctIndex": 0,
+      "explanation": "A Default Deny (whitelist) stance ensures that new ports or unapproved protocols are automatically blocked unless an administrator explicitly opens them.",
+      "wrongExplanations": [
+        "Correct! Whitelisting minimizes attack surface by blocking all unauthorized ingress.",
+        "Default Allow exposes all services to scanning and zero-day attacks.",
+        "Calendar-based policies leave systems vulnerable on weekends.",
+        "Random dropping destroys network reliability."
+      ],
+      "realWorldExample": "PCI-DSS and ISO 27001 mandate Default Deny policies on all corporate network boundaries."
+    },
+    {
+      "id": "c23_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does an 'Anomaly-Based' Intrusion Detection System detect potential zero-day attacks?",
+      "options": [
+        "It establishes a statistical baseline of normal network behavior and flags significant deviations",
+        "It searches for exact matching antivirus signatures",
+        "It asks the user if they are a hacker",
+        "It scans for misspelled words in emails"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because zero-day attacks have no existing signatures, anomaly detection spots abnormal traffic volume, unusual port combinations, or foreign protocols.",
+      "wrongExplanations": [
+        "Correct! Baseline deviations allow detecting novel attacks before signatures exist.",
+        "Signature matching only spots previously documented exploits.",
+        "Attackers do not self-identify.",
+        "Spelling checks are text processing."
+      ],
+      "realWorldExample": "Modern SIEM and XDR platforms use machine learning models for anomaly detection on network telemetry."
+    }
+  ],
+  "ashRecap": "Firewalls are your castle gates; default to 'Deny All'! IDS and IPS watch the perimeter day and night to spot intruders before they breach the keep!"
+}

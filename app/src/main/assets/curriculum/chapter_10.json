@@ -1,0 +1,164 @@
+{
+  "id": 10,
+  "number": 10,
+  "realmId": 2,
+  "realmTitle": "Symmetric Forge",
+  "title": "Modes & stream ciphers",
+  "syllabusUnit": "Unit II: Block Cipher Modes & RC4 Stream Cipher",
+  "covers": "ECB/CBC/CTR/GCM, RC4, pseudo-random numbers, key distribution",
+  "visualizerId": "block_modes",
+  "visualizerTitle": "Block Modes & RC4 Keystream",
+  "prerequisites": "Chapter 9",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain why Electronic Codebook (ECB) mode leaks data patterns.",
+    "You will be able to diagram Cipher Block Chaining (CBC) with an Initialization Vector (IV).",
+    "You will be able to contrast CTR mode and GCM authenticated encryption."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The ECB Penguin Problem",
+      "analogy": "Coloring every white pixel red and every black pixel blue leaves the penguin silhouette perfectly visible.",
+      "coreConcept": "Electronic Codebook (ECB) encrypts each 128-bit block independently. Identical plaintext blocks produce identical ciphertext blocks, leaking visual patterns.",
+      "example": "Encrypting a bitmap photo in ECB preserves the clear outline of the image."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Cipher Block Chaining (CBC) & IV",
+      "analogy": "Locking each box with a chain link hooked to the previous box's locked padlock.",
+      "coreConcept": "Cipher Block Chaining XORs each plaintext block with the previous ciphertext block before encryption. The first block uses a random Initialization Vector (IV).",
+      "example": "Even if all plaintext blocks are identical, CBC outputs totally random-looking ciphertext."
+    },
+    {
+      "cardIndex": 3,
+      "title": "CTR Mode & GCM Authenticated Encryption",
+      "analogy": "Turning a block cipher into a super-fast stream cipher by encrypting a ticking counter.",
+      "coreConcept": "Counter (CTR) mode encrypts Nonce + Counter to create a keystream, enabling parallel processing. Galois/Counter Mode (GCM) adds an authentication tag (AEAD).",
+      "example": "TLS 1.3 requires AEAD modes like AES-GCM to prevent padding oracle tampering."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c10_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is Electronic Codebook (ECB) mode considered unsafe for encrypting files larger than one block?",
+      "options": [
+        "Identical plaintext blocks produce identical ciphertext blocks, exposing data patterns",
+        "ECB keys expire after 5 seconds",
+        "ECB only runs on 8-bit computers",
+        "ECB deletes the file header"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because identical input blocks always map to identical output blocks, images and repeating records remain clearly discernible.",
+      "wrongExplanations": [
+        "Correct! The famous ECB Linux Penguin demo shows visual patterns remain visible.",
+        "Keys do not expire based on block mode.",
+        "ECB works on any block cipher width.",
+        "Headers are encrypted, not deleted."
+      ],
+      "realWorldExample": "In 2013, Adobe suffered a breach where password hints and repeated passwords were exposed due to ECB mode."
+    },
+    {
+      "id": "c10_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In Cipher Block Chaining (CBC) mode, what is the role of the Initialization Vector (IV)?",
+      "options": [
+        "To randomize the first block so identical messages produce different ciphertexts",
+        "To store the user's password",
+        "To double the encryption speed",
+        "To compress the plaintext file"
+      ],
+      "correctIndex": 0,
+      "explanation": "An unpredictable, unique IV ensures that two identical plaintexts encrypted with the same key produce completely different ciphertexts.",
+      "wrongExplanations": [
+        "Correct! The IV randomizes the start of the CBC chain.",
+        "Passwords must never be stored in an unencrypted IV.",
+        "IV calculation adds a slight overhead, not speed.",
+        "Block ciphers do not compress data."
+      ],
+      "realWorldExample": "In CBC mode, the IV is transmitted in the clear alongside the ciphertext; it needs to be unique, not secret."
+    },
+    {
+      "id": "c10_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What major performance advantage does Counter (CTR) mode have over CBC mode?",
+      "options": [
+        "Blocks can be encrypted and decrypted in parallel across multiple CPU cores",
+        "CTR mode requires no secret key",
+        "CTR mode compresses data by 80%",
+        "CTR mode does not use electricity"
+      ],
+      "correctIndex": 0,
+      "explanation": "Since the input to each block is simply Nonce + Counter, all blocks can be calculated simultaneously on independent processor threads.",
+      "wrongExplanations": [
+        "Correct! CTR mode is fully parallelizable for massive multi-gigabit throughput.",
+        "CTR mode strictly requires a symmetric secret key.",
+        "CTR does not compress data.",
+        "All computing requires power."
+      ],
+      "realWorldExample": "AES-CTR is the foundation of high-speed NVMe disk encryption."
+    },
+    {
+      "id": "c10_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What critical security feature does Galois/Counter Mode (GCM) provide that CBC and CTR alone do NOT?",
+      "options": [
+        "Built-in cryptographic authentication and integrity (AEAD)",
+        "Smaller file sizes",
+        "Resistance to quantum computers",
+        "Self-healing file recovery"
+      ],
+      "correctIndex": 0,
+      "explanation": "GCM is an Authenticated Encryption with Associated Data (AEAD) mode; it generates a GMAC tag detecting any bit tampering.",
+      "wrongExplanations": [
+        "Correct! GCM proves confidentiality AND message authenticity simultaneously.",
+        "Output size is identical plus a 16-byte authentication tag.",
+        "AES-GCM is symmetric, vulnerable to Grover's algorithm if keys are small.",
+        "GCM detects tampering; it does not repair damaged files."
+      ],
+      "realWorldExample": "TLS 1.3 completely banned plain CBC mode, mandating AEAD modes like AES-GCM and ChaCha20-Poly1305."
+    },
+    {
+      "id": "c10_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is RC4?",
+      "options": [
+        "A famous byte-oriented stream cipher designed by Ron Rivest in 1987",
+        "A block cipher with 128 rounds",
+        "A hashing algorithm used in Bitcoin",
+        "A public-key digital signature standard"
+      ],
+      "correctIndex": 0,
+      "explanation": "RC4 is a variable key-size stream cipher with byte-oriented operations based on a 256-byte state permutation array S.",
+      "wrongExplanations": [
+        "Correct! RC4 was widely used in SSL and WEP before statistical keystream biases retired it.",
+        "RC4 is a stream cipher, not a block cipher.",
+        "Bitcoin uses SHA-256 for hashing.",
+        "RC4 is symmetric, not a digital signature."
+      ],
+      "realWorldExample": "RC4 was officially prohibited in all versions of TLS by RFC 7465 due to keystream biases in initial bytes."
+    },
+    {
+      "id": "c10_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'Padding Oracle' attack?",
+      "options": [
+        "An exploit where server error messages reveal whether decrypted CBC padding is valid",
+        "A machine that predicts future lottery numbers",
+        "A hardware Trojan inserted into CPUs",
+        "A technique to bypass passwords by entering spaces"
+      ],
+      "correctIndex": 0,
+      "explanation": "When servers return different errors for invalid PKCS#7 padding vs invalid decryption, attackers decrypt ciphertext byte by byte without the key.",
+      "wrongExplanations": [
+        "Correct! The POODLE attack exploited SSL 3.0 CBC padding oracle flaws.",
+        "Oracle in cryptography refers to an entity that answers queries.",
+        "Padding oracle is an algorithmic flaw, not hardware.",
+        "Padding is mathematical byte alignment."
+      ],
+      "realWorldExample": "The POODLE and Lucky Thirteen attacks demonstrated why AEAD must be used instead of unauthenticated CBC."
+    }
+  ],
+  "ashRecap": "Never use ECB mode! Use CBC with a random IV, or modern AES-GCM so you get ironclad encryption AND tamper-proof authentication in one pass!"
+}

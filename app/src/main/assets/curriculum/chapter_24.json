@@ -1,0 +1,164 @@
+{
+  "id": 24,
+  "number": 24,
+  "realmId": 5,
+  "realmTitle": "Real-World Defense",
+  "title": "Malware, web attacks, cloud & IoT",
+  "syllabusUnit": "Unit V: Software Vulnerabilities, Web Exploits & Emerging Threats",
+  "covers": "Viruses/worms/ransomware, DoS/DDoS, SQL injection, XSS, cloud and IoT security basics",
+  "visualizerId": "sqli_sandbox",
+  "visualizerTitle": "SQLi 'Break the Login' & DoS Meter",
+  "prerequisites": "Chapter 23",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to distinguish viruses, worms, and ransomware.",
+    "You will be able to demonstrate how parameterized queries prevent SQL Injection (SQLi).",
+    "You will be able to explain Cross-Site Scripting (XSS) and IoT security constraints."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Malware Zoo: Viruses vs Worms",
+      "analogy": "A virus needs a host file to hitchhike; a worm is an autonomous creature that crawls across network cables on its own.",
+      "coreConcept": "Viruses attach to legitimate executable files. Worms self-replicate and spread across network vulnerabilities without user interaction. Ransomware encrypts files and demands cryptocurrency extortion.",
+      "example": "WannaCry in 2017 was a worm-ransomware hybrid that infected 200,000 systems in hours using EternalBlue."
+    },
+    {
+      "cardIndex": 2,
+      "title": "SQL Injection: Break the Query",
+      "analogy": "Tricking a bank teller by writing 'Give me Alice's balance OR 1=1 (which is always true!)' on the deposit slip.",
+      "coreConcept": "SQL Injection occurs when untrusted user input is directly concatenated into database queries: ' OR '1'='1 -- bypasses authentication entirely.",
+      "example": "Defense: Always use Parameterized Queries (Prepared Statements) so input is treated as literal data, never executable code."
+    },
+    {
+      "cardIndex": 3,
+      "title": "XSS & The Internet of Fragile Things",
+      "analogy": "Sneaking a malicious JavaScript post-it note into a shared bulletin board that executes in every visitor's browser.",
+      "coreConcept": "Stored and Reflected Cross-Site Scripting (XSS) injects malicious scripts into web apps to steal session cookies. IoT devices (cameras, smart plugs) have weak CPUs, hardcoded default passwords, and no automatic updates.",
+      "example": "The Mirai botnet enslaved 300,000 IoT devices with default logins to launch historic 1 Tbps DDoS floods."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c24_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the single most effective defense against SQL Injection (SQLi) vulnerabilities in web applications?",
+      "options": [
+        "Using Parameterized Queries (Prepared Statements)",
+        "Using complex CSS styles",
+        "Shortening user passwords to 4 characters",
+        "Running database servers on port 80"
+      ],
+      "correctIndex": 0,
+      "explanation": "Parameterized queries pre-compile SQL commands, ensuring user input is strictly treated as variable values, completely preventing input from altering SQL logic.",
+      "wrongExplanations": [
+        "Correct! Prepared statements make SQL injection mathematically impossible in application code.",
+        "CSS only changes visual styling.",
+        "Short passwords drastically weaken authentication.",
+        "Databases should never be exposed to public web ports."
+      ],
+      "realWorldExample": "OWASP lists injection flaws as a top perennial threat in the OWASP Top 10 web security risks."
+    },
+    {
+      "id": "c24_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does a computer 'Worm' differ from a classic computer 'Virus'?",
+      "options": [
+        "A worm is self-replicating and spreads autonomously across networks without requiring user execution of a host file",
+        "A worm only attacks wooden computers",
+        "A virus only runs on Android",
+        "A worm requires clicking a link"
+      ],
+      "correctIndex": 0,
+      "explanation": "Viruses require a human to run an infected file. Worms scan networks, exploit unpatched vulnerabilities, and copy themselves without any human intervention.",
+      "wrongExplanations": [
+        "Correct! Autonomous network propagation defines a worm.",
+        "Physical humor.",
+        "Viruses infect all operating systems.",
+        "Clicking links describes trojan or phishing delivery."
+      ],
+      "realWorldExample": "The 1988 Morris Worm was the first internet worm; it accidentally brought down 10% of the ARPANET."
+    },
+    {
+      "id": "c24_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In Cross-Site Scripting (XSS), what is the attacker's primary objective inside the victim's web browser?",
+      "options": [
+        "To execute unauthorized JavaScript in the victim's session (e.g. stealing session cookies or authentication tokens)",
+        "To format the victim's hard drive",
+        "To download more RAM",
+        "To change the computer's wallpaper"
+      ],
+      "correctIndex": 0,
+      "explanation": "XSS allows attackers to execute client-side scripts in the security context of the victim's browser session, accessing document.cookie and impersonating the user.",
+      "wrongExplanations": [
+        "Correct! Executing rogue JavaScript to hijack sessions is the core goal of XSS.",
+        "Browsers run in sandboxes and cannot format hard drives directly.",
+        "RAM is physical hardware.",
+        "Wallpapers are local OS settings."
+      ],
+      "realWorldExample": "Content Security Policy (CSP) headers and context-aware output encoding neutralize XSS attacks."
+    },
+    {
+      "id": "c24_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What technique is used in a Distributed Denial of Service (DDoS) 'Amplification Attack' (e.g. NTP or DNS amplification)?",
+      "options": [
+        "Sending small requests with spoofed victim source IPs to public servers that reply with massive data streams to the victim",
+        "Sending encrypted emails to friends",
+        "Overclocking computer monitors",
+        "Running antivirus scans repeatedly"
+      ],
+      "correctIndex": 0,
+      "explanation": "Attackers forge the victim's return IP address in small UDP requests; intermediate servers send huge multi-kilobyte responses flooding the victim's bandwidth.",
+      "wrongExplanations": [
+        "Correct! UDP spoofing + high response-to-request size multiplier creates massive amplification floods.",
+        "Email is unrelated.",
+        "Monitors do not generate network bandwidth.",
+        "Antivirus runs locally."
+      ],
+      "realWorldExample": "Memcached UDP amplification attacks achieved historic traffic reflection ratios of over 50,000 to 1."
+    },
+    {
+      "id": "c24_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why are consumer Internet of Things (IoT) devices frequently hijacked into massive botnets?",
+      "options": [
+        "They often ship with hardcoded default credentials, lack automatic firmware patches, and run minimal unmonitored Linux builds",
+        "Because IoT devices are too expensive",
+        "Because smart lightbulbs have supercomputers inside",
+        "Because IoT devices use quantum encryption"
+      ],
+      "correctIndex": 0,
+      "explanation": "Consumers rarely update or change default factory passwords on smart cameras and routers, leaving them permanently exposed to automated scanning scripts.",
+      "wrongExplanations": [
+        "Correct! Weak security defaults and lack of patching make IoT devices prime targets for botnet recruitment.",
+        "Cost does not prevent patching.",
+        "IoT devices use cheap low-power microcontrollers.",
+        "IoT devices rarely feature post-quantum crypto."
+      ],
+      "realWorldExample": "The Mirai botnet scanned the internet for busybox devices with default logins 'admin:admin' to build a 600 Gbps DDoS weapon."
+    },
+    {
+      "id": "c24_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does modern 'Ransomware' extort victim organizations?",
+      "options": [
+        "It encrypts victim databases with strong symmetric ciphers and demands cryptocurrency payment in exchange for the private decryption key",
+        "It deletes all emails from last year",
+        "It changes all file names to upper-case",
+        "It plays loud music through computer speakers"
+      ],
+      "correctIndex": 0,
+      "explanation": "Ransomware generates local symmetric keys to encrypt enterprise file servers, encrypts those keys with the attacker's public RSA key, and demands ransom.",
+      "wrongExplanations": [
+        "Correct! Strong encryption locks access to operational data until ransom is paid.",
+        "Ransomware holds active files hostage, not just old archives.",
+        "Case renaming is cosmetic.",
+        "Audio tricks are harmless pranks."
+      ],
+      "realWorldExample": "The Colonial Pipeline ransomware attack in 2021 halted fuel delivery across the US East Coast for days."
+    }
+  ],
+  "ashRecap": "Never concatenate user input directly into SQL queries—always use Parameterized Statements! Keep your IoT devices patched and change default passwords immediately!"
+}

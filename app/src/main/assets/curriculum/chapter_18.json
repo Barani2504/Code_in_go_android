@@ -1,0 +1,164 @@
+{
+  "id": 18,
+  "number": 18,
+  "realmId": 4,
+  "realmTitle": "Trust & Proof",
+  "title": "Digital signatures",
+  "syllabusUnit": "Unit IV: Digital Signature Standards & Verification",
+  "covers": "Signing & verifying, DSS/DSA, RSA signatures, non-repudiation",
+  "visualizerId": "sign_verify",
+  "visualizerTitle": "Sign & Verify Digital Signature Lab",
+  "prerequisites": "Chapter 17",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain how digital signatures provide authenticity and non-repudiation.",
+    "You will be able to trace the Sign(Hash, PrivateKey) and Verify(Hash, Signature, PublicKey) workflow.",
+    "You will be able to contrast RSA signatures with the Digital Signature Standard (DSS/DSA)."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Digital Wax Seal",
+      "analogy": "A physical handwritten signature can be forged with tracing paper, but a mathematical signature cannot be forged without the private key.",
+      "coreConcept": "A digital signature binds an identity to a specific message: Signer hashes the document and encrypts the hash with their private key. Anyone with the public key can verify.",
+      "example": "Guarantees three things: Message Integrity, Sender Authentication, and Non-repudiation."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The Sign & Verify Dance",
+      "analogy": "Locking the seal with your private stamp; the entire world uses your public viewer to check the seal matches.",
+      "coreConcept": "Signing: S = Sign(H(M), PrivateKey). Verification: Compute H(M), decrypt signature with PublicKey, and check if both hash digests match exactly.",
+      "example": "If even a single comma in M is altered, H(M) completely changes and verification fails instantly."
+    },
+    {
+      "cardIndex": 3,
+      "title": "DSA & ECDSA: The Signature Standard",
+      "analogy": "A protocol designed specifically to sign fast without being used for general encryption.",
+      "coreConcept": "NIST Digital Signature Algorithm (DSA) operates over discrete logs; Elliptic Curve DSA (ECDSA) operates over elliptic curves.",
+      "example": "Crucial rule: the random nonce k used during signing must NEVER be reused or leaked (Sony PS3 hack)."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c18_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What key is used to CREATE a digital signature, and what key is used to VERIFY it?",
+      "options": [
+        "Created with the sender's Private Key; verified with the sender's Public Key",
+        "Created with Public Key; verified with Private Key",
+        "Created with AES key; verified with password",
+        "Created with Wi-Fi password; verified with router"
+      ],
+      "correctIndex": 0,
+      "explanation": "Only the private key owner can create the valid mathematical signature, but anyone possessing their public key can confirm its validity.",
+      "wrongExplanations": [
+        "Correct! Private key signs; public key verifies.",
+        "Reversing keys is encryption, not digital signing.",
+        "AES is symmetric and cannot provide non-repudiation.",
+        "Wi-Fi passwords are unrelated."
+      ],
+      "realWorldExample": "Software operating system updates are signed by developer private keys to verify legitimacy."
+    },
+    {
+      "id": "c18_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is the message HASHED before being signed, rather than signing the raw document directly?",
+      "options": [
+        "Hashing produces a small fixed-size digest (e.g. 256 bits), making signature computation fast and preventing algebraic attacks",
+        "Because documents cannot be read by computers",
+        "Signing hashes makes files invisible",
+        "To delete old versions of the file"
+      ],
+      "correctIndex": 0,
+      "explanation": "Public key mathematics is slow; hashing megabyte-sized contracts down to 32 bytes enables sub-millisecond signing.",
+      "wrongExplanations": [
+        "Correct! Hashing provides speed, efficiency, and security against existential forgery.",
+        "Computers process raw documents easily.",
+        "Signatures do not hide document text.",
+        "Version control is an application feature."
+      ],
+      "realWorldExample": "RSA-PSS (Probabilistic Signature Scheme) hashes messages with salt before signing."
+    },
+    {
+      "id": "c18_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What disastrous security failure caused the Sony PlayStation 3 ECDSA signature key to be completely compromised in 2010?",
+      "options": [
+        "Sony used a static constant number instead of a fresh random nonce k for every signature",
+        "The PS3 ran out of storage space",
+        "A hacker guessed the password 'password'",
+        "Sony used 512-bit RSA"
+      ],
+      "correctIndex": 0,
+      "explanation": "In ECDSA, signing two distinct messages with the same nonce k allows an attacker to solve simple linear equations and extract the private signing key!",
+      "wrongExplanations": [
+        "Correct! Nonce reuse in ECDSA immediately leaks the master private key.",
+        "Storage space does not compromise private keys.",
+        "ECDSA private keys are huge 256-bit numbers, not dictionary words.",
+        "Sony used ECDSA, not RSA."
+      ],
+      "realWorldExample": "Fail0verflow extracted Sony's master root key because Sony's developers set nonce k = 4 (a constant)."
+    },
+    {
+      "id": "c18_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What critical legal and technical property do digital signatures provide that symmetric MACs CANNOT?",
+      "options": [
+        "Non-Repudiation (proof to a third-party judge that only the private key holder could have signed)",
+        "Data compression",
+        "Faster download speeds",
+        "Virus detection"
+      ],
+      "correctIndex": 0,
+      "explanation": "Since symmetric MACs share the same secret key between sender and receiver, either party could have generated the tag. Digital signatures prove origin to any neutral third party.",
+      "wrongExplanations": [
+        "Correct! Non-repudiation ensures the sender cannot falsely deny signing.",
+        "Signatures slightly increase file size, not compress.",
+        "Network speeds depend on bandwidth.",
+        "Signatures verify origin, not malware absence."
+      ],
+      "realWorldExample": "Under the US ESIGN Act and EU eIDAS regulation, cryptographic digital signatures have full legal standing."
+    },
+    {
+      "id": "c18_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In RSA signature verification, if the decrypted signature value does not match the computed hash of the received message, what does it mean?",
+      "options": [
+        "The message was modified in transit OR the signature was forged",
+        "The server clock is fast",
+        "The user needs to restart Windows",
+        "The signature has expired"
+      ],
+      "correctIndex": 0,
+      "explanation": "A signature mismatch proves mathematically that either the message bits were altered, or the signature was created by a different private key.",
+      "wrongExplanations": [
+        "Correct! Either data tampering or fraudulent sender identity occurred.",
+        "Clock drift does not change mathematical hash equality.",
+        "OS restarts do not fix corrupted cryptographic hashes.",
+        "Signature expiration is checked via certificate timestamps."
+      ],
+      "realWorldExample": "Package managers like apt and pacman reject update packages if signature verification fails."
+    },
+    {
+      "id": "c18_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is Ed25519?",
+      "options": [
+        "A modern high-speed Edwards-curve digital signature algorithm (EdDSA) that resists side-channel attacks",
+        "An old DES cipher mode",
+        "A hash algorithm from 1980",
+        "A router protocol"
+      ],
+      "correctIndex": 0,
+      "explanation": "Designed by Daniel J. Bernstein, Ed25519 uses Curve25519 to provide fast, constant-time signatures resilient to cache-timing attacks and nonce failures.",
+      "wrongExplanations": [
+        "Correct! Ed25519 is the modern standard for SSH keys, Git commits, and blockchain nodes.",
+        "DES is obsolete symmetric encryption.",
+        "SHA is hashing.",
+        "BGP is a routing protocol."
+      ],
+      "realWorldExample": "GitHub and OpenSSH recommend Ed25519 keys as the modern default over legacy RSA."
+    }
+  ],
+  "ashRecap": "A digital signature is your unbreakable personal stamp. You sign with your secret Private Key, and the whole world verifies it with your Public Key!"
+}

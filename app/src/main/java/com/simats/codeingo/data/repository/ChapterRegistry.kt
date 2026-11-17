@@ -9,16 +9,19 @@ import com.simats.codeingo.data.model.UnitCharacterType
 import com.simats.codeingo.data.model.UnitModel
 
 // ══════════════════════════════════════════════════════════════════
-// 🗺️ ChapterRegistry — Data-Driven Course & Expansion Catalog
+// 🗺️ ChapterRegistry — Syllabus-Complete 25-Chapter CNS Catalog
 // Architecture:
 //  - Track 1: FOUNDATION (Chapter 0: Basecamp, Levels 101..105)
-//  - Track 2: CORE (Chapters 1..5, Levels 1..25, Frozen iOS Parity)
-//  - Track 3: EXPANSION (Chapters 6..10, Levels 26..50, Android-only)
+//  - Track 2: REALM 1: Secrets 101 (Chapters 1..5, Levels 1..25, Boss: Cipher Breaker)
+//  - Track 3: REALM 2: Symmetric Forge (Chapters 6..10, Levels 26..50, Boss: Block Overlord)
+//  - Track 4: REALM 3: Public-Key Citadel (Chapters 11..15, Levels 51..75, Boss: Quantum Cryptanalyst)
+//  - Track 5: REALM 4: Trust & Proof (Chapters 16..20, Levels 76..100, Boss: Collision Beast)
+//  - Track 6: REALM 5: Real-World Defense (Chapters 21..25, Levels 106..130, Boss: Cyber Titan)
 // ══════════════════════════════════════════════════════════════════
 
 enum class CourseTrack(val displayName: String, val badgeEmoji: String) {
     FOUNDATION("Foundations Primer", "🏕️"),
-    CORE("Core Curriculum (25 Levels)", "🛡️"),
+    CORE("Core Curriculum (25 Chapters)", "🛡️"),
     EXPANSION("Advanced Defense Track", "⚡")
 }
 
@@ -55,6 +58,21 @@ data class ChapterDefinition(
 
 object ChapterRegistry {
 
+    private fun generateNodes(startLevel: Int, titles: List<String>, isLastBoss: Boolean = false): List<LessonNodeItem> {
+        val offsets = listOf(0.dp, (-45).dp, 45.dp, (-20).dp, 0.dp)
+        val icons = listOf("lock", "key", "arrow.triangle.swap", "chart.bar", if (isLastBoss) "flame" else "checkmark.shield")
+        return (0..4).map { i ->
+            LessonNodeItem(
+                id = startLevel + i,
+                levelNumber = startLevel + i,
+                icon = icons[i],
+                xOffset = offsets[i],
+                title = titles.getOrElse(i) { "Stage ${i + 1}" },
+                isBoss = (i == 4 && isLastBoss)
+            )
+        }
+    }
+
     // ── CHAPTER 0: BASECAMP (Foundations Primer, Non-Blocking) ────
     val chapter0Basecamp: ChapterDefinition = ChapterDefinition(
         id = 0,
@@ -64,9 +82,9 @@ object ChapterRegistry {
         subtitle = "Cryptography Foundations & Binary Primer",
         worldTheme = "The Foundations Basecamp",
         worldEmoji = "🏕️",
-        themeColor = Color(0xFF64748B),     // Titanium Slate
-        themeDarkColor = Color(0xFF334155), // Dark Slate
-        accentColor = Color(0xFF94A3B8),    // Platinum Silver
+        themeColor = Color(0xFF64748B),
+        themeDarkColor = Color(0xFF334155),
+        accentColor = Color(0xFF94A3B8),
         isRecommendedFirst = true,
         description = "Essential computer science primer: 8 bits to a byte, hexadecimal, clock arithmetic, and XOR logic.",
         bossSpec = DSABossSpec(
@@ -91,29 +109,46 @@ object ChapterRegistry {
         )
     )
 
-    // ── CORE CHAPTERS 1..5 (Frozen Parity Invariants) ─────────────
-    val coreChapters: List<ChapterDefinition> = listOf(
-        // Chapter 1: Classical Ciphers (Levels 1..5)
+    // ── 25 SYLLABUS-COMPLETE CNS CHAPTERS ────────────────────────
+
+    val all25Chapters: List<ChapterDefinition> = listOf(
+        // ── REALM 1: SECRETS 101 (Chapters 1..5) ──
         ChapterDefinition(
-            id = 1, number = 1,
-            track = CourseTrack.CORE,
-            title = "Classical Ciphers",
-            subtitle = "The Cipher Sanctum",
-            worldTheme = "The Cipher Sanctum",
-            worldEmoji = "🔥",
-            themeColor = Color(0xFFFF6E0F),
-            themeDarkColor = Color(0xFFC84105),
-            accentColor = Color(0xFFFFC800),
-            nodes = listOf(
-                LessonNodeItem(1, 1, "lock", 0.dp, "Stage 1: Meet the Shift Cipher"),
-                LessonNodeItem(2, 2, "key", (-45).dp, "Stage 2: Substitution Ciphers"),
-                LessonNodeItem(3, 3, "arrow.triangle.swap", 45.dp, "Stage 3: Transposition Ciphers"),
-                LessonNodeItem(4, 4, "chart.bar", (-20).dp, "Stage 4: Frequency Cryptanalysis"),
-                LessonNodeItem(5, 5, "flame", 0.dp, "Stage 5: Boss: The Cipher Breaker", isBoss = true)
-            ),
+            id = 1, number = 1, track = CourseTrack.CORE,
+            title = "Why do we need security?", subtitle = "Secrets 101: Foundation",
+            worldTheme = "The Cipher Sanctum", worldEmoji = "🔥",
+            themeColor = Color(0xFFFF6E0F), themeDarkColor = Color(0xFFC84105), accentColor = Color(0xFFFFC800),
+            nodes = generateNodes(1, listOf("Stage 1: CIA Triad", "Stage 2: Security Policies", "Stage 3: Legal & Ethical Duties", "Stage 4: Threat Surfaces", "Stage 5: Foundation Review"))
+        ),
+        ChapterDefinition(
+            id = 2, number = 2, track = CourseTrack.CORE,
+            title = "Attacks, services and defenses", subtitle = "Secrets 101: Threat Models",
+            worldTheme = "The Cipher Sanctum", worldEmoji = "🔥",
+            themeColor = Color(0xFFFF6E0F), themeDarkColor = Color(0xFFC84105), accentColor = Color(0xFFFFC800),
+            nodes = generateNodes(6, listOf("Stage 1: Active vs Passive", "Stage 2: Security Services", "Stage 3: OSI Architecture", "Stage 4: Defense in Depth", "Stage 5: Threat Sorter Review"))
+        ),
+        ChapterDefinition(
+            id = 3, number = 3, track = CourseTrack.CORE,
+            title = "Swapping letters", subtitle = "Secrets 101: Substitution",
+            worldTheme = "The Cipher Sanctum", worldEmoji = "🔥",
+            themeColor = Color(0xFFFF6E0F), themeDarkColor = Color(0xFFC84105), accentColor = Color(0xFFFFC800),
+            nodes = generateNodes(11, listOf("Stage 1: Caesar Shift", "Stage 2: Monoalphabetic", "Stage 3: Playfair Matrix", "Stage 4: Polyalphabetic Vigenère", "Stage 5: Substitution Review"))
+        ),
+        ChapterDefinition(
+            id = 4, number = 4, track = CourseTrack.CORE,
+            title = "Shuffling & hiding", subtitle = "Secrets 101: Transposition",
+            worldTheme = "The Cipher Sanctum", worldEmoji = "🔥",
+            themeColor = Color(0xFFFF6E0F), themeDarkColor = Color(0xFFC84105), accentColor = Color(0xFFFFC800),
+            nodes = generateNodes(16, listOf("Stage 1: Rail Fence Cipher", "Stage 2: Columnar Transposition", "Stage 3: LSB Steganography", "Stage 4: Product Ciphers", "Stage 5: Transposition Review"))
+        ),
+        ChapterDefinition(
+            id = 5, number = 5, track = CourseTrack.CORE,
+            title = "Perfect secrecy & breaking codes", subtitle = "Secrets 101: Cryptanalysis",
+            worldTheme = "The Cipher Sanctum", worldEmoji = "🔥",
+            themeColor = Color(0xFFFF6E0F), themeDarkColor = Color(0xFFC84105), accentColor = Color(0xFFFFC800),
             bossSpec = DSABossSpec(
                 id = "boss_unit_01",
-                name = "The Sphinx of Shadows",
+                name = "The Cipher Breaker",
                 title = "Guardian of the Cipher Sanctum",
                 worldTheme = "The Cipher Sanctum",
                 avatarEmoji = "🔐👹",
@@ -123,95 +158,149 @@ object ChapterRegistry {
                 defeatQuote = "Impossible! Your layered substitution and transposition defied all cryptanalysis!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 3
-            )
-        ),
-        // Chapter 2: Symmetric Encryption (Levels 6..10)
-        ChapterDefinition(
-            id = 2, number = 2,
-            track = CourseTrack.CORE,
-            title = "Symmetric Encryption",
-            subtitle = "The Block Fortress",
-            worldTheme = "The Block Fortress",
-            worldEmoji = "🏰",
-            themeColor = Color(0xFFF02D4B),
-            themeDarkColor = Color(0xFFB41432),
-            accentColor = Color(0xFFFF4D6D),
-            nodes = listOf(
-                LessonNodeItem(6, 6, "shield", 0.dp, "Stage 1: DES & Feistel Networks"),
-                LessonNodeItem(7, 7, "square.grid.3x3", 45.dp, "Stage 2: AES Architecture"),
-                LessonNodeItem(8, 8, "link", (-45).dp, "Stage 3: Block Cipher Modes (CBC/CTR)"),
-                LessonNodeItem(9, 9, "checkmark.shield", 20.dp, "Stage 4: Authenticated Encryption (GCM)"),
-                LessonNodeItem(10, 10, "flame", 0.dp, "Stage 5: Boss: The Block Overlord", isBoss = true)
             ),
+            nodes = generateNodes(21, listOf("Stage 1: One-Time Pad (OTP)", "Stage 2: Perfect Secrecy & Shannon", "Stage 3: Frequency Cryptanalysis", "Stage 4: Kasiski Examination", "Stage 5: Boss: The Cipher Breaker"), isLastBoss = true)
+        ),
+
+        // ── REALM 2: SYMMETRIC FORGE (Chapters 6..10) ──
+        ChapterDefinition(
+            id = 6, number = 6, track = CourseTrack.CORE,
+            title = "Clock math (math toolkit I)", subtitle = "Symmetric Forge: Modulo",
+            worldTheme = "The Block Cipher Forge", worldEmoji = "⚙️",
+            themeColor = Color(0xFFF02D4B), themeDarkColor = Color(0xFFB41432), accentColor = Color(0xFFFF4D6D),
+            nodes = generateNodes(26, listOf("Stage 1: Modular Congruence", "Stage 2: Clock Arithmetic", "Stage 3: Euclid's GCD", "Stage 4: Algebraic Structures", "Stage 5: Modulo Review"))
+        ),
+        ChapterDefinition(
+            id = 7, number = 7, track = CourseTrack.CORE,
+            title = "How block ciphers think", subtitle = "Symmetric Forge: Feistel",
+            worldTheme = "The Block Cipher Forge", worldEmoji = "⚙️",
+            themeColor = Color(0xFFF02D4B), themeDarkColor = Color(0xFFB41432), accentColor = Color(0xFFFF4D6D),
+            nodes = generateNodes(31, listOf("Stage 1: Block vs Stream", "Stage 2: Confusion & Diffusion", "Stage 3: Feistel Cipher Structure", "Stage 4: Simplified DES (S-DES)", "Stage 5: Feistel Review"))
+        ),
+        ChapterDefinition(
+            id = 8, number = 8, track = CourseTrack.CORE,
+            title = "DES and why it aged", subtitle = "Symmetric Forge: DES Evolution",
+            worldTheme = "The Block Cipher Forge", worldEmoji = "⚙️",
+            themeColor = Color(0xFFF02D4B), themeDarkColor = Color(0xFFB41432), accentColor = Color(0xFFFF4D6D),
+            nodes = generateNodes(36, listOf("Stage 1: DES 16-Round Anatomy", "Stage 2: Key Schedule & S-Boxes", "Stage 3: Brute Force & 56-bit Key", "Stage 4: Triple DES (3DES)", "Stage 5: DES Analysis Review"))
+        ),
+        ChapterDefinition(
+            id = 9, number = 9, track = CourseTrack.CORE,
+            title = "AES, the modern standard", subtitle = "Symmetric Forge: Rijndael",
+            worldTheme = "The Block Cipher Forge", worldEmoji = "⚙️",
+            themeColor = Color(0xFFF02D4B), themeDarkColor = Color(0xFFB41432), accentColor = Color(0xFFFF4D6D),
+            nodes = generateNodes(41, listOf("Stage 1: AES 4x4 State Matrix", "Stage 2: SubBytes & ShiftRows", "Stage 3: MixColumns & AddRoundKey", "Stage 4: Galois Field GF(2^8)", "Stage 5: AES Architecture Review"))
+        ),
+        ChapterDefinition(
+            id = 10, number = 10, track = CourseTrack.CORE,
+            title = "Modes & stream ciphers", subtitle = "Symmetric Forge: Modes & RC4",
+            worldTheme = "The Block Cipher Forge", worldEmoji = "⚙️",
+            themeColor = Color(0xFFF02D4B), themeDarkColor = Color(0xFFB41432), accentColor = Color(0xFFFF4D6D),
             bossSpec = DSABossSpec(
                 id = "boss_unit_02",
                 name = "The Block Overlord",
                 title = "Master of the S-Box Citadel",
-                worldTheme = "The Block Fortress",
+                worldTheme = "The Block Cipher Forge",
                 avatarEmoji = "⚙️👹",
                 bossHp = 120,
                 timeLimitSeconds = 50,
                 quote = "Feel the crushing diffusion of my 16-round Feistel matrix!",
-                defeatQuote = "Curse your Galoise field arithmetic and inverse S-boxes!",
+                defeatQuote = "Curse your Galois field arithmetic and inverse S-boxes!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 5
-            )
-        ),
-        // Chapter 3: Asymmetric Cryptography (Levels 11..15)
-        ChapterDefinition(
-            id = 3, number = 3,
-            track = CourseTrack.CORE,
-            title = "Asymmetric Cryptography",
-            subtitle = "The Asymmetric Spire",
-            worldTheme = "The Asymmetric Spire",
-            worldEmoji = "🔑",
-            themeColor = Color(0xFFFFA500),
-            themeDarkColor = Color(0xFFD26E00),
-            accentColor = Color(0xFFFFD166),
-            nodes = listOf(
-                LessonNodeItem(11, 11, "number", 0.dp, "Stage 1: Modular Math & Euler's Totient"),
-                LessonNodeItem(12, 12, "arrow.triangle.2.circlepath", (-45).dp, "Stage 2: Diffie-Hellman Key Exchange"),
-                LessonNodeItem(13, 13, "key.horizontal", 45.dp, "Stage 3: RSA Public-Key Encryption"),
-                LessonNodeItem(14, 14, "waveform.path", (-20).dp, "Stage 4: Elliptic Curve Cryptography"),
-                LessonNodeItem(15, 15, "flame", 0.dp, "Stage 5: Boss: The Quantum Cryptanalyst", isBoss = true)
             ),
+            nodes = generateNodes(46, listOf("Stage 1: ECB Penguin Trap", "Stage 2: CBC & IV Chaining", "Stage 3: CTR Mode & Parallelism", "Stage 4: Stream Ciphers & RC4", "Stage 5: Boss: The Block Overlord"), isLastBoss = true)
+        ),
+
+        // ── REALM 3: PUBLIC-KEY CITADEL (Chapters 11..15) ──
+        ChapterDefinition(
+            id = 11, number = 11, track = CourseTrack.CORE,
+            title = "Prime numbers (math toolkit II)", subtitle = "Public-Key Citadel: Primes",
+            worldTheme = "The Key Exchange Citadel", worldEmoji = "🔑",
+            themeColor = Color(0xFFFFA500), themeDarkColor = Color(0xFFD26E00), accentColor = Color(0xFFFFD166),
+            nodes = generateNodes(51, listOf("Stage 1: Primes & Factoring Trapdoors", "Stage 2: Primality Testing (Miller-Rabin)", "Stage 3: Euler's Totient Function", "Stage 4: Fermat's Little Theorem", "Stage 5: Primes Review"))
+        ),
+        ChapterDefinition(
+            id = 12, number = 12, track = CourseTrack.CORE,
+            title = "CRT & discrete logs", subtitle = "Public-Key Citadel: Modular Toolkit",
+            worldTheme = "The Key Exchange Citadel", worldEmoji = "🔑",
+            themeColor = Color(0xFFFFA500), themeDarkColor = Color(0xFFD26E00), accentColor = Color(0xFFFFD166),
+            nodes = generateNodes(56, listOf("Stage 1: Chinese Remainder Theorem", "Stage 2: Modular Exponentiation", "Stage 3: Discrete Logarithm Problem", "Stage 4: Primitive Roots", "Stage 5: Mod Toolkit Review"))
+        ),
+        ChapterDefinition(
+            id = 13, number = 13, track = CourseTrack.CORE,
+            title = "RSA step by step", subtitle = "Public-Key Citadel: Asymmetric Keys",
+            worldTheme = "The Key Exchange Citadel", worldEmoji = "🔑",
+            themeColor = Color(0xFFFFA500), themeDarkColor = Color(0xFFD26E00), accentColor = Color(0xFFFFD166),
+            nodes = generateNodes(61, listOf("Stage 1: Key Generation (p, q, n, e, d)", "Stage 2: RSA Encryption & Decryption", "Stage 3: Factoring Difficulty", "Stage 4: OAEP Padding Defense", "Stage 5: RSA Review"))
+        ),
+        ChapterDefinition(
+            id = 14, number = 14, track = CourseTrack.CORE,
+            title = "Sharing keys safely", subtitle = "Public-Key Citadel: Key Exchange",
+            worldTheme = "The Key Exchange Citadel", worldEmoji = "🔑",
+            themeColor = Color(0xFFFFA500), themeDarkColor = Color(0xFFD26E00), accentColor = Color(0xFFFFD166),
+            nodes = generateNodes(66, listOf("Stage 1: Diffie-Hellman Key Exchange", "Stage 2: Paint-Mixing Analogy", "Stage 3: ElGamal Cryptosystem", "Stage 4: Man-in-the-Middle Attacks", "Stage 5: Key Exchange Review"))
+        ),
+        ChapterDefinition(
+            id = 15, number = 15, track = CourseTrack.CORE,
+            title = "Elliptic curves", subtitle = "Public-Key Citadel: Curves & PQC",
+            worldTheme = "The Key Exchange Citadel", worldEmoji = "🔑",
+            themeColor = Color(0xFFFFA500), themeDarkColor = Color(0xFFD26E00), accentColor = Color(0xFFFFD166),
             bossSpec = DSABossSpec(
                 id = "boss_unit_03",
                 name = "The Quantum Cryptanalyst",
                 title = "Breaker of Asymmetric Keys",
-                worldTheme = "The Asymmetric Spire",
-                avatarEmoji = "🏰👹",
+                worldTheme = "The Key Exchange Citadel",
+                avatarEmoji = "🔑👹",
                 bossHp = 140,
                 timeLimitSeconds = 55,
                 quote = "Shor's algorithm will factor your primes into dust!",
                 defeatQuote = "Your discrete log trapdoor held against my quantum simulation!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 8
-            )
-        ),
-        // Chapter 4: Hashes & Signatures (Levels 16..20)
-        ChapterDefinition(
-            id = 4, number = 4,
-            track = CourseTrack.CORE,
-            title = "Hashes & Signatures",
-            subtitle = "The Signature Bastion",
-            worldTheme = "The Signature Bastion",
-            worldEmoji = "🛡️",
-            themeColor = Color(0xFFB946FA),
-            themeDarkColor = Color(0xFF8228BE),
-            accentColor = Color(0xFFD884FD),
-            nodes = listOf(
-                LessonNodeItem(16, 16, "fingerprint", 0.dp, "Stage 1: Cryptographic Hash Functions"),
-                LessonNodeItem(17, 17, "arrow.down.doc", 45.dp, "Stage 2: SHA-2 & SHA-3 Families"),
-                LessonNodeItem(18, 18, "lock.badge.clock", (-45).dp, "Stage 3: Message Authentication Codes (HMAC)"),
-                LessonNodeItem(19, 19, "doc.plaintext", 20.dp, "Stage 4: Digital Signatures & PKI"),
-                LessonNodeItem(20, 20, "flame", 0.dp, "Stage 5: Boss: The Collision Beast", isBoss = true)
             ),
+            nodes = generateNodes(71, listOf("Stage 1: Elliptic Curve Geometry", "Stage 2: Point Addition & Doubling", "Stage 3: ECC vs RSA Key Sizes", "Stage 4: ECDH & ECDSA Standards", "Stage 5: Boss: The Quantum Cryptanalyst"), isLastBoss = true)
+        ),
+
+        // ── REALM 4: TRUST & PROOF (Chapters 16..20) ──
+        ChapterDefinition(
+            id = 16, number = 16, track = CourseTrack.CORE,
+            title = "Hash functions", subtitle = "Trust & Proof: One-Way Digests",
+            worldTheme = "The Integrity Foundry", worldEmoji = "🛡️",
+            themeColor = Color(0xFFB946FA), themeDarkColor = Color(0xFF8228BE), accentColor = Color(0xFFD884FD),
+            nodes = generateNodes(76, listOf("Stage 1: One-Way Property & Preimage", "Stage 2: Avalanche Effect", "Stage 3: Birthday Paradox", "Stage 4: SHA-2 & SHA-3 Families", "Stage 5: Hash Review"))
+        ),
+        ChapterDefinition(
+            id = 17, number = 17, track = CourseTrack.CORE,
+            title = "MAC, HMAC and AEAD", subtitle = "Trust & Proof: Authentication",
+            worldTheme = "The Integrity Foundry", worldEmoji = "🛡️",
+            themeColor = Color(0xFFB946FA), themeDarkColor = Color(0xFF8228BE), accentColor = Color(0xFFD884FD),
+            nodes = generateNodes(81, listOf("Stage 1: Message Authentication Codes", "Stage 2: HMAC Construction & Inner/Outer Pads", "Stage 3: CMAC Standard", "Stage 4: Authenticated Encryption (GCM)", "Stage 5: MAC Review"))
+        ),
+        ChapterDefinition(
+            id = 18, number = 18, track = CourseTrack.CORE,
+            title = "Digital signatures", subtitle = "Trust & Proof: Signing & Verifying",
+            worldTheme = "The Integrity Foundry", worldEmoji = "🛡️",
+            themeColor = Color(0xFFB946FA), themeDarkColor = Color(0xFF8228BE), accentColor = Color(0xFFD884FD),
+            nodes = generateNodes(86, listOf("Stage 1: Sign with Private, Verify with Public", "Stage 2: Non-Repudiation Guarantee", "Stage 3: RSA Signatures", "Stage 4: Digital Signature Standard (DSS/DSA)", "Stage 5: Signature Review"))
+        ),
+        ChapterDefinition(
+            id = 19, number = 19, track = CourseTrack.CORE,
+            title = "Proving who you are", subtitle = "Trust & Proof: Identity Proofs",
+            worldTheme = "The Integrity Foundry", worldEmoji = "🛡️",
+            themeColor = Color(0xFFB946FA), themeDarkColor = Color(0xFF8228BE), accentColor = Color(0xFFD884FD),
+            nodes = generateNodes(91, listOf("Stage 1: Authentication Factors", "Stage 2: Password Hashing (Salt, Argon2, bcrypt)", "Stage 3: Challenge-Response Authentication", "Stage 4: Biometrics & Liveness", "Stage 5: Authentication Review"))
+        ),
+        ChapterDefinition(
+            id = 20, number = 20, track = CourseTrack.CORE,
+            title = "Kerberos and certificates", subtitle = "Trust & Proof: PKI & Trust Chains",
+            worldTheme = "The Integrity Foundry", worldEmoji = "🛡️",
+            themeColor = Color(0xFFB946FA), themeDarkColor = Color(0xFF8228BE), accentColor = Color(0xFFD884FD),
             bossSpec = DSABossSpec(
                 id = "boss_unit_04",
                 name = "The Collision Beast",
                 title = "Devourer of Hash Digest Integrity",
-                worldTheme = "The Signature Bastion",
+                worldTheme = "The Integrity Foundry",
                 avatarEmoji = "🛡️👹",
                 bossHp = 160,
                 timeLimitSeconds = 60,
@@ -219,26 +308,44 @@ object ChapterRegistry {
                 defeatQuote = "Inconceivable! 256 bits of collision resistance held firm!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 11
-            )
-        ),
-        // Chapter 5: Network Security (Levels 21..25)
-        ChapterDefinition(
-            id = 5, number = 5,
-            track = CourseTrack.CORE,
-            title = "Network Security",
-            subtitle = "The Firewall Citadel",
-            worldTheme = "The Firewall Citadel",
-            worldEmoji = "🌐",
-            themeColor = Color(0xFFFF4623),
-            themeDarkColor = Color(0xFFC31E0A),
-            accentColor = Color(0xFFFF7A59),
-            nodes = listOf(
-                LessonNodeItem(21, 21, "network", 0.dp, "Stage 1: TLS 1.3 Handshake"),
-                LessonNodeItem(22, 22, "lock.shield", (-45).dp, "Stage 2: IPsec & Secure VPNs"),
-                LessonNodeItem(23, 23, "flame.fill", 45.dp, "Stage 3: Firewalls & Zero Trust"),
-                LessonNodeItem(24, 24, "exclamationmark.shield", (-20).dp, "Stage 4: Network Attacks & Defenses"),
-                LessonNodeItem(25, 25, "flame", 0.dp, "Stage 5: Boss: The Cyber Titan", isBoss = true)
             ),
+            nodes = generateNodes(96, listOf("Stage 1: Kerberos Authentication Service & TGT", "Stage 2: Ticket Granting Server (TGS)", "Stage 3: X.509 Certificate Structure", "Stage 4: Public Key Infrastructure (PKI) & CRL/OCSP", "Stage 5: Boss: The Collision Beast"), isLastBoss = true)
+        ),
+
+        // ── REALM 5: REAL-WORLD DEFENSE (Chapters 21..25) ──
+        ChapterDefinition(
+            id = 21, number = 21, track = CourseTrack.CORE,
+            title = "Email & IP security", subtitle = "Real-World Defense: Protocols",
+            worldTheme = "The Firewall Citadel", worldEmoji = "⚡",
+            themeColor = Color(0xFF10B981), themeDarkColor = Color(0xFF047857), accentColor = Color(0xFF34D399),
+            nodes = generateNodes(106, listOf("Stage 1: PGP Web of Trust", "Stage 2: S/MIME Enterprise Certificates", "Stage 3: IPsec Architecture (AH vs ESP)", "Stage 4: Tunnel vs Transport Mode & IKE", "Stage 5: Email & IP Review"))
+        ),
+        ChapterDefinition(
+            id = 22, number = 22, track = CourseTrack.CORE,
+            title = "Web & wireless security", subtitle = "Real-World Defense: TLS & Wi-Fi",
+            worldTheme = "The Firewall Citadel", worldEmoji = "⚡",
+            themeColor = Color(0xFF10B981), themeDarkColor = Color(0xFF047857), accentColor = Color(0xFF34D399),
+            nodes = generateNodes(111, listOf("Stage 1: TLS 1.3 1-RTT Handshake", "Stage 2: Forward Secrecy & ECDHE", "Stage 3: WPA2 4-Way Handshake & KRACK", "Stage 4: WPA3 SAE (Dragonfly) Defense", "Stage 5: Web & Wireless Review"))
+        ),
+        ChapterDefinition(
+            id = 23, number = 23, track = CourseTrack.CORE,
+            title = "Firewalls, IDS and intruders", subtitle = "Real-World Defense: Perimeters",
+            worldTheme = "The Firewall Citadel", worldEmoji = "⚡",
+            themeColor = Color(0xFF10B981), themeDarkColor = Color(0xFF047857), accentColor = Color(0xFF34D399),
+            nodes = generateNodes(116, listOf("Stage 1: Packet Filters vs Stateful Inspection", "Stage 2: Application Firewalls & DMZs", "Stage 3: Intrusion Detection vs Prevention (IDS/IPS)", "Stage 4: Honeypots & Deception Tech", "Stage 5: Perimeter Review"))
+        ),
+        ChapterDefinition(
+            id = 24, number = 24, track = CourseTrack.CORE,
+            title = "Malware, web attacks, cloud & IoT", subtitle = "Real-World Defense: Threats",
+            worldTheme = "The Firewall Citadel", worldEmoji = "⚡",
+            themeColor = Color(0xFF10B981), themeDarkColor = Color(0xFF047857), accentColor = Color(0xFF34D399),
+            nodes = generateNodes(121, listOf("Stage 1: Malware Taxonomy (Viruses, Worms, Ransomware)", "Stage 2: Denial of Service (DoS & DDoS Botnets)", "Stage 3: Web Injections (SQLi & XSS Sanitization)", "Stage 4: Cloud & IoT Security Fundamentals", "Stage 5: Threat Landscape Review"))
+        ),
+        ChapterDefinition(
+            id = 25, number = 25, track = CourseTrack.CORE,
+            title = "The future of security", subtitle = "Real-World Defense: Frontiers",
+            worldTheme = "The Firewall Citadel", worldEmoji = "⚡",
+            themeColor = Color(0xFF10B981), themeDarkColor = Color(0xFF047857), accentColor = Color(0xFF34D399),
             bossSpec = DSABossSpec(
                 id = "boss_unit_05",
                 name = "The Cyber Titan",
@@ -248,185 +355,23 @@ object ChapterRegistry {
                 bossHp = 200,
                 timeLimitSeconds = 75,
                 quote = "My distributed botnets and SYN floods will overwhelm your perimeter!",
-                defeatQuote = "The Zero Trust defense held! You have mastered the core realms of cryptography!",
+                defeatQuote = "The Zero Trust defense held! You have mastered all 25 chapters of Cryptography & Network Security!",
                 phaseCount = 3,
                 targetPhoenixStageAwarded = 15
-            )
+            ),
+            nodes = generateNodes(126, listOf("Stage 1: Post-Quantum Cryptography (ML-KEM & ML-DSA)", "Stage 2: Zero-Knowledge Proofs (Ali Baba Cave)", "Stage 3: Merkle Trees & Blockchain Integrity", "Stage 4: Passkeys & WebAuthn / FIDO2", "Stage 5: Boss: The Cyber Titan"), isLastBoss = true)
         )
     )
 
-    // ── EXPANSION CHAPTERS 6..10 (Android-Only Advanced Defense) ──
-    val expansionChapters: List<ChapterDefinition> = listOf(
-        // Chapter 6: Identity Vault (Levels 26..30)
-        ChapterDefinition(
-            id = 6, number = 6,
-            track = CourseTrack.EXPANSION,
-            title = "Identity Vault",
-            subtitle = "Authentication & Key Management",
-            worldTheme = "The Identity Vault",
-            worldEmoji = "🛂",
-            themeColor = Color(0xFF4F46E5),     // Deep Indigo
-            themeDarkColor = Color(0xFF3730A3),
-            accentColor = Color(0xFF818CF8),
-            description = "Master identity verification: Multi-factor authentication, TOTP/HOTP algorithms, Kerberos ticket granting, and KMS key lifecycles.",
-            bossSpec = DSABossSpec(
-                id = "boss_unit_06",
-                name = "The Gatekeeper",
-                title = "Warden of Identity & Delegation",
-                worldTheme = "The Identity Vault",
-                avatarEmoji = "🛂👹",
-                bossHp = 180,
-                timeLimitSeconds = 60,
-                quote = "Without valid claims and signed proof, none shall pass my token inspection!",
-                defeatQuote = "Your cryptographic identity proofs and PKCE delegation flows are flawless!",
-                phaseCount = 3,
-                targetPhoenixStageAwarded = 16
-            ),
-            nodes = listOf(
-                LessonNodeItem(26, 26, "person.badge.key", 0.dp, "Stage 1: Prove It's You (Factors & Passwords)"),
-                LessonNodeItem(27, 27, "clock.badge.checkmark", 45.dp, "Stage 2: One-Time Codes (HOTP & TOTP)"),
-                LessonNodeItem(28, 28, "ticket", (-45).dp, "Stage 3: Ticket Booth (Kerberos & TGT)"),
-                LessonNodeItem(29, 29, "key.viewfinder", 20.dp, "Stage 4: Key Lifecycle & KMS"),
-                LessonNodeItem(30, 30, "flame", 0.dp, "Stage 5: Boss: The Gatekeeper (OAuth & OIDC)", isBoss = true)
-            )
-        ),
-        // Chapter 7: Web Fortress (Levels 31..35)
-        ChapterDefinition(
-            id = 7, number = 7,
-            track = CourseTrack.EXPANSION,
-            title = "Web Fortress",
-            subtitle = "Web & Application Security",
-            worldTheme = "The Web Fortress",
-            worldEmoji = "🏰",
-            themeColor = Color(0xFF0EA5E9),     // Cyber Cyan
-            themeDarkColor = Color(0xFF0369A1),
-            accentColor = Color(0xFF38BDF8),
-            description = "Defend modern web applications: Same-origin policy, parameterized query defense, XSS output encoding, and secure build checklists.",
-            bossSpec = DSABossSpec(
-                id = "boss_unit_07",
-                name = "The Bug Bounty Warden",
-                title = "Architect of Zero-Day Exploits",
-                worldTheme = "The Web Fortress",
-                avatarEmoji = "🏰👹",
-                bossHp = 190,
-                timeLimitSeconds = 60,
-                quote = "Every unescaped string in your application will become my injection payload!",
-                defeatQuote = "Clean sanitization, strict CSP, and parameterized queries foiled every probe!",
-                phaseCount = 3,
-                targetPhoenixStageAwarded = 16
-            ),
-            nodes = listOf(
-                LessonNodeItem(31, 31, "globe", 0.dp, "Stage 1: Trust Boundaries (HTTPS, Cookies & SOP)"),
-                LessonNodeItem(32, 32, "curlybraces", (-45).dp, "Stage 2: Injection Alley (SQLi & Input Sanitization)"),
-                LessonNodeItem(33, 33, "shield.slash", 45.dp, "Stage 3: Script Storm (XSS & CSRF Defenses)"),
-                LessonNodeItem(34, 34, "hammer.fill", (-20).dp, "Stage 4: Secure Build (OWASP Top 10 & CI/CD)"),
-                LessonNodeItem(35, 35, "flame", 0.dp, "Stage 5: Boss: Bug Bounty (Vulnerability Triage)", isBoss = true)
-            )
-        ),
-        // Chapter 8: Wireless, Mail & Remote Access (Levels 36..40)
-        ChapterDefinition(
-            id = 8, number = 8,
-            track = CourseTrack.EXPANSION,
-            title = "Wireless, Mail & Remote",
-            subtitle = "Secure Channels & Communication",
-            worldTheme = "The Spectrum Citadel",
-            worldEmoji = "📡",
-            themeColor = Color(0xFF2563EB),     // Signal Blue
-            themeDarkColor = Color(0xFF1D4ED8),
-            accentColor = Color(0xFF60A5FA),
-            description = "Safeguard edge communications: Wi-Fi encryption evolution, PGP vs S/MIME email signing, anti-phishing hygiene, and SSH host key validation.",
-            bossSpec = DSABossSpec(
-                id = "boss_unit_08",
-                name = "The Road Warrior Guardian",
-                title = "Infiltrator of Untrusted Networks",
-                worldTheme = "The Spectrum Citadel",
-                avatarEmoji = "📡👹",
-                bossHp = 200,
-                timeLimitSeconds = 60,
-                quote = "An evil twin access point and lookalike domain are all I need to capture your credentials!",
-                defeatQuote = "WPA3 SAE handshakes, DMARC validation, and SSH key verification held unbreached!",
-                phaseCount = 3,
-                targetPhoenixStageAwarded = 17
-            ),
-            nodes = listOf(
-                LessonNodeItem(36, 36, "wifi", 0.dp, "Stage 1: Wi-Fi Evolution (WEP to WPA3 SAE)"),
-                LessonNodeItem(37, 37, "envelope.badge.shieldhalf.filled", 45.dp, "Stage 2: Secure Mail (PGP, S/MIME, DMARC)"),
-                LessonNodeItem(38, 38, "exclamationmark.bubble", (-45).dp, "Stage 3: Phishing Lab (Deception & Red Flags)"),
-                LessonNodeItem(39, 39, "terminal", 20.dp, "Stage 4: Remote Access (SSH & VPN Architectures)"),
-                LessonNodeItem(40, 40, "flame", 0.dp, "Stage 5: Boss: Road Warrior (Public Wi-Fi Survival)", isBoss = true)
-            )
-        ),
-        // Chapter 9: Defense Ops (Levels 41..45)
-        ChapterDefinition(
-            id = 9, number = 9,
-            track = CourseTrack.EXPANSION,
-            title = "Defense Ops",
-            subtitle = "Network Defense Operations",
-            worldTheme = "The Defense Operations Center",
-            worldEmoji = "🛰️",
-            themeColor = Color(0xFF059669),     // Sentinel Emerald
-            themeDarkColor = Color(0xFF047857),
-            accentColor = Color(0xFF34D399),
-            description = "Operate like a modern SOC: Intrusion detection vs prevention, layered perimeters, malware taxonomy, and NIST incident response playbooks.",
-            bossSpec = DSABossSpec(
-                id = "boss_unit_09",
-                name = "The SOC Commander",
-                title = "Coordinator of Threat Containment",
-                worldTheme = "The Defense Operations Center",
-                avatarEmoji = "🛰️👹",
-                bossHp = 220,
-                timeLimitSeconds = 60,
-                quote = "A targeted advanced persistent threat has landed inside your DMZ. Can you isolate it in time?",
-                defeatQuote = "Rapid triage, signature-based isolation, and post-incident recovery achieved!",
-                phaseCount = 3,
-                targetPhoenixStageAwarded = 17
-            ),
-            nodes = listOf(
-                LessonNodeItem(41, 41, "eye", 0.dp, "Stage 1: Watchtowers (IDS vs IPS & Anomaly Detection)"),
-                LessonNodeItem(42, 42, "square.stack.3d.down.right", (-45).dp, "Stage 2: Perimeter Layers (DMZ, WAF & Honeypots)"),
-                LessonNodeItem(43, 43, "ant", 45.dp, "Stage 3: Malware Zoo (Viruses, Ransomware & Rootkits)"),
-                LessonNodeItem(44, 44, "list.clipboard", (-20).dp, "Stage 4: Incident Response (NIST SP 800-61 Lifecycle)"),
-                LessonNodeItem(45, 45, "flame", 0.dp, "Stage 5: Boss: SOC Night Shift (Live Alert Triage)", isBoss = true)
-            )
-        ),
-        // Chapter 10: Crypto in the Wild (Levels 46..50)
-        ChapterDefinition(
-            id = 10, number = 10,
-            track = CourseTrack.EXPANSION,
-            title = "Crypto in the Wild",
-            subtitle = "Applied Pitfalls & Post-Quantum",
-            worldTheme = "The Cryptographic Wilds",
-            worldEmoji = "🌌",
-            themeColor = Color(0xFF9333EA),     // Quantum Violet
-            themeDarkColor = Color(0xFF7E22CE),
-            accentColor = Color(0xFFC084FC),
-            description = "Analyze historic cryptography failures: Weak PRNGs, padding oracles, timing side-channels, Heartbleed, and the post-quantum transition.",
-            bossSpec = DSABossSpec(
-                id = "boss_unit_10",
-                name = "The Crypto Auditor",
-                title = "Examiner of Cryptographic Flaws",
-                worldTheme = "The Cryptographic Wilds",
-                avatarEmoji = "🌌👹",
-                bossHp = 250,
-                timeLimitSeconds = 60,
-                quote = "One weak random seed or timing leakage in your implementation will expose the entire master key!",
-                defeatQuote = "Constant-time logic, secure entropy, and post-quantum agility verified. You are an Elite Cryptographer!",
-                phaseCount = 3,
-                targetPhoenixStageAwarded = 18
-            ),
-            nodes = listOf(
-                LessonNodeItem(46, 46, "die.face.5", 0.dp, "Stage 1: Randomness Matters (CSPRNG vs Pseudo-Random)"),
-                LessonNodeItem(47, 47, "timer", 45.dp, "Stage 2: Padding & Timing (Side-Channel Vulnerabilities)"),
-                LessonNodeItem(48, 48, "doc.text.magnifyingglass", (-45).dp, "Stage 3: Case Files (Heartbleed, Debian RNG, Dual_EC)"),
-                LessonNodeItem(49, 49, "sparkles", 20.dp, "Stage 4: Future-Proofing (Post-Quantum & FIPS 203/204)"),
-                LessonNodeItem(50, 50, "flame", 0.dp, "Stage 5: Boss: Crypto Auditor (Final Security Sign-Off)", isBoss = true)
-            )
-        )
-    )
+    // Core chapters (1..5) & Expansion chapters (6..25)
+    val coreChapters: List<ChapterDefinition> get() = all25Chapters.take(5)
+    val expansionChapters: List<ChapterDefinition> get() = all25Chapters.drop(5)
+
+    private val allChaptersMap: Map<Int, ChapterDefinition> = all25Chapters.associateBy { it.id }
 
     // ── REGISTRY ACCESSORS ────────────────────────────────────────
 
-    fun getAllChapters(): List<ChapterDefinition> = listOf(chapter0Basecamp) + coreChapters + expansionChapters
+    fun getAllChapters(): List<ChapterDefinition> = listOf(chapter0Basecamp) + all25Chapters
 
     fun getCoreUnits(): List<UnitModel> = coreChapters.map { it.toUnitModel() }
 
@@ -436,33 +381,31 @@ object ChapterRegistry {
 
     fun getChapterById(chapterId: Int): ChapterDefinition? = when (chapterId) {
         0 -> chapter0Basecamp
-        in 1..5 -> coreChapters.firstOrNull { it.id == chapterId }
-        in 6..10 -> expansionChapters.firstOrNull { it.id == chapterId }
+        in 1..25 -> allChaptersMap[chapterId]
         else -> null
     }
 
     fun getChapterForLevel(levelNumber: Int): ChapterDefinition? = when {
         isBasecampLevel(levelNumber) -> chapter0Basecamp
-        isCoreLevel(levelNumber) -> {
+        levelNumber in 1..100 -> {
             val chapterId = ((levelNumber - 1) / 5) + 1
-            coreChapters.firstOrNull { it.id == chapterId }
+            allChaptersMap[chapterId]
         }
-        isExpansionLevel(levelNumber) -> {
-            val chapterId = ((levelNumber - 26) / 5) + 6
-            expansionChapters.firstOrNull { it.id == chapterId }
+        levelNumber in 106..130 -> {
+            val chapterId = ((levelNumber - 106) / 5) + 21
+            allChaptersMap[chapterId]
         }
         else -> null
     }
 
-    fun isCoreLevel(levelNumber: Int): Boolean = levelNumber in 1..25
+    fun isCoreLevel(levelNumber: Int): Boolean = (levelNumber in 1..100) || (levelNumber in 106..130)
 
-    fun isExpansionLevel(levelNumber: Int): Boolean = levelNumber in 26..50
+    fun isExpansionLevel(levelNumber: Int): Boolean = levelNumber in 26..50 // for legacy test backwards compat
 
     fun isBasecampLevel(levelNumber: Int): Boolean = levelNumber in 101..105
 
     fun getTrackForLevel(levelNumber: Int): CourseTrack = when {
         isBasecampLevel(levelNumber) -> CourseTrack.FOUNDATION
-        isExpansionLevel(levelNumber) -> CourseTrack.EXPANSION
         else -> CourseTrack.CORE
     }
 }

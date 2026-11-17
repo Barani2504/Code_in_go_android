@@ -1,0 +1,164 @@
+{
+  "id": 7,
+  "number": 7,
+  "realmId": 2,
+  "realmTitle": "Symmetric Forge",
+  "title": "How block ciphers think",
+  "syllabusUnit": "Unit II: Block Cipher Principles & Feistel Structure",
+  "covers": "Block vs stream, confusion & diffusion, Feistel, S-DES, design principles",
+  "visualizerId": "feistel_builder",
+  "visualizerTitle": "Feistel Builder Lab",
+  "prerequisites": "Chapter 6",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to distinguish block ciphers from stream ciphers.",
+    "You will be able to define Shannon's concepts of Confusion and Diffusion.",
+    "You will be able to trace a round through a Feistel network."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Block vs Stream Ciphers",
+      "analogy": "A shipping container loaded in 64-bit crates vs a garden hose spraying bits continuously.",
+      "coreConcept": "Block ciphers process fixed-size chunks of data (e.g. 128 bits) at a time. Stream ciphers encrypt one bit or byte at a time on the fly.",
+      "example": "AES processes 128-bit blocks; ChaCha20 generates a continuous keystream."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Confusion and Diffusion",
+      "analogy": "Confusion is turning letters into a foggy puzzle; Diffusion is dropping food dye that spreads across the entire pool.",
+      "coreConcept": "Confusion obscures the relationship between the key and the ciphertext (via S-boxes). Diffusion spreads single plaintext bit changes across all ciphertext bits (via P-boxes).",
+      "example": "Changing 1 bit in the input scrambles ~64 bits in the output."
+    },
+    {
+      "cardIndex": 3,
+      "title": "The Feistel Network",
+      "analogy": "Splitting a deck into left and right halves, transforming one half, and swapping them round by round.",
+      "coreConcept": "Horst Feistel's brilliant design: splits data into L and R. R_new = L XOR F(R, RoundKey); L_new = R. Decryption runs the exact same code with keys reversed!",
+      "example": "DES, Blowfish, and Twofish all use Feistel networks."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c7_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What makes a Feistel cipher network uniquely practical for hardware implementation?",
+      "options": [
+        "Decryption uses the identical circuit architecture as encryption, just reversing subkeys",
+        "It does not require electricity",
+        "It has zero mathematical operations",
+        "It only works on 4-bit numbers"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because L and R swap each round with XOR, the round function F does NOT need to be invertible; running keys in reverse order decrypts automatically.",
+      "wrongExplanations": [
+        "Correct! The exact same hardware handles encryption and decryption.",
+        "All silicon circuits require electric power.",
+        "Feistel rounds apply XOR, substitution, and permutation.",
+        "Feistel structures scale to 64, 128, and 256 bits."
+      ],
+      "realWorldExample": "DES and Triple-DES use 16-round Feistel structures."
+    },
+    {
+      "id": "c7_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In cryptographic design, what component is primarily responsible for introducing CONFUSION?",
+      "options": [
+        "Non-linear Substitution boxes (S-boxes)",
+        "Linear wiring permutations (P-boxes)",
+        "XOR operations with 0",
+        "Adding 1 to a counter"
+      ],
+      "correctIndex": 0,
+      "explanation": "S-boxes provide non-linear substitution, making the mathematical relationship between key and ciphertext complicated and non-linear.",
+      "wrongExplanations": [
+        "Correct! S-boxes provide confusion.",
+        "Permutation P-boxes provide diffusion.",
+        "XOR with 0 leaves bits unchanged.",
+        "Counters are used in CTR mode."
+      ],
+      "realWorldExample": "S-box design determines a block cipher's resistance to differential cryptanalysis."
+    },
+    {
+      "id": "c7_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What component is primarily responsible for introducing DIFFUSION in a block cipher?",
+      "options": [
+        "Permutation P-boxes and bit transposition",
+        "S-boxes only",
+        "Clock frequency oscillators",
+        "Random number seeds"
+      ],
+      "correctIndex": 0,
+      "explanation": "Permutations and linear transformations spread the influence of single input bits across multiple output bits.",
+      "wrongExplanations": [
+        "Correct! Permutations distribute influence across the entire block.",
+        "S-boxes specialize in local non-linear confusion.",
+        "Clock oscillators control CPU timing.",
+        "Random seeds initialize PRNGs."
+      ],
+      "realWorldExample": "AES uses ShiftRows and MixColumns to achieve complete block diffusion in two rounds."
+    },
+    {
+      "id": "c7_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In a standard Feistel round with input halves (L0, R0), what is the formula for the right output half R1?",
+      "options": [
+        "R1 = L0 XOR F(R0, K1)",
+        "R1 = R0 + L0",
+        "R1 = L0 * K1",
+        "R1 = R0 XOR K1"
+      ],
+      "correctIndex": 0,
+      "explanation": "R1 = L0 XOR F(R0, K1), while L1 = R0.",
+      "wrongExplanations": [
+        "Correct! The round function output is XORed with the left half.",
+        "Simple addition overflows without Feistel properties.",
+        "Multiplication is not standard Feistel logic.",
+        "L0 must be combined with the function output."
+      ],
+      "realWorldExample": "This exact formula was designed by Horst Feistel at IBM in the 1970s."
+    },
+    {
+      "id": "c7_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How many bits are in a single standard block processed by DES and Simplified DES (S-DES)?",
+      "options": [
+        "DES is 64 bits; S-DES is 8 bits",
+        "DES is 1024 bits; S-DES is 512 bits",
+        "DES is 1 bit; S-DES is 2 bits",
+        "Both are 256 bits"
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard DES processes 64-bit blocks. Educational S-DES processes 8-bit blocks with 10-bit keys.",
+      "wrongExplanations": [
+        "Correct! DES = 64-bit block; S-DES = 8-bit block.",
+        "1024 bits is common for RSA keys, not DES blocks.",
+        "1 bit is a stream cipher unit.",
+        "256 bits is common for AES-256."
+      ],
+      "realWorldExample": "S-DES was created by Edward Schaefer to teach students Feistel rounds without massive 64-bit tables."
+    },
+    {
+      "id": "c7_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why does a pure stream cipher require that a keystream NEVER repeat?",
+      "options": [
+        "Reusing keystream allows attackers to XOR ciphertexts and recover plaintexts",
+        "A repeating keystream deletes hard drives",
+        "Stream ciphers only run on Saturdays",
+        "Keystreams can only have 10 bits"
+      ],
+      "correctIndex": 0,
+      "explanation": "Like the One-Time Pad, reusing keystream K on messages A and B allows calculating (A XOR K) XOR (B XOR K) = A XOR B.",
+      "wrongExplanations": [
+        "Correct! Keystream reuse destroys confidentiality.",
+        "Software does not erase hardware.",
+        "Days of the week are irrelevant.",
+        "Keystreams can generate millions of bytes."
+      ],
+      "realWorldExample": "The WEP Wi-Fi protocol was broken because IVs were too short, causing keystream reuse."
+    }
+  ],
+  "ashRecap": "Block ciphers mix Confusion (S-boxes) and Diffusion (P-boxes). Feistel networks make decrypting as easy as running the round keys backward!"
+}

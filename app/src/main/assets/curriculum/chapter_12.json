@@ -1,0 +1,164 @@
+{
+  "id": 12,
+  "number": 12,
+  "realmId": 3,
+  "realmTitle": "Public-Key Citadel",
+  "title": "CRT & discrete logs",
+  "syllabusUnit": "Unit III: Chinese Remainder Theorem & Discrete Logarithms",
+  "covers": "Chinese Remainder Theorem, exponentiation, discrete logarithm",
+  "visualizerId": "crt_clock",
+  "visualizerTitle": "CRT Clock Visualizer",
+  "prerequisites": "Chapter 11",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to solve simultaneous modular equations using the Chinese Remainder Theorem.",
+    "You will be able to calculate fast modular exponentiation using Square-and-Multiply.",
+    "You will be able to explain the Discrete Logarithm Problem."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Chinese Remainder Theorem (CRT)",
+      "analogy": "Three clocks running at different speeds (mod 3, mod 5, mod 7) all align at a unique hour.",
+      "coreConcept": "If moduli m1, m2, ..., mk are pairwise coprime, a system of congruences x = a_i (mod m_i) has a single unique solution modulo M = m1 * m2 * ... * mk.",
+      "example": "CRT speeds up RSA private key decryption by up to 4x by splitting calculations modulo p and modulo q."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Square-and-Multiply Exponentiation",
+      "analogy": "Instead of multiplying 2 thirty times, square 2 five times: 2 -> 4 -> 16 -> 256.",
+      "coreConcept": "Fast exponentiation computes a^b mod n in O(log b) steps by scanning exponent bits: square on every bit, multiply if the bit is 1.",
+      "example": "Computes 3^1000 mod 77 in milliseconds instead of billions of operations."
+    },
+    {
+      "cardIndex": 3,
+      "title": "The Discrete Logarithm Problem (DLP)",
+      "analogy": "Spinning a roulette wheel 50 clicks is easy; looking at the ball and guessing the clicks is hard.",
+      "coreConcept": "Given base g, modulus p, and result y = g^x mod p, finding x is the Discrete Logarithm Problem. There is no known fast classical shortcut.",
+      "example": "Diffie-Hellman and ElGamal rely directly on the hardness of DLP."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c12_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What does the Chinese Remainder Theorem (CRT) guarantee when moduli m1, m2, ..., mk are pairwise coprime?",
+      "options": [
+        "There exists a unique solution x modulo the product M = m1 * m2 * ... * mk",
+        "The equations have zero solutions",
+        "All numbers become negative",
+        "The answer is always 0"
+      ],
+      "correctIndex": 0,
+      "explanation": "CRT guarantees an exact, unique simultaneous solution modulo the product M = m1 * m2 * ... * mk.",
+      "wrongExplanations": [
+        "Correct! A unique solution exists modulo the product of coprime moduli.",
+        "Solutions are guaranteed to exist.",
+        "Moduli remain positive integers.",
+        "The solution depends on the system remainders."
+      ],
+      "realWorldExample": "Sunzi Suanjing (Sun Tzu's Mathematical Classic) described this theorem in 3rd century AD China."
+    },
+    {
+      "id": "c12_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does RSA hardware decryption benefit from using the Chinese Remainder Theorem?",
+      "options": [
+        "It splits 2048-bit exponentiation into two faster 1024-bit operations modulo p and q (approx. 4x speedup)",
+        "It eliminates the need for prime numbers",
+        "It doubles the key size to 4096 bits automatically",
+        "It makes encryption unneeded"
+      ],
+      "correctIndex": 0,
+      "explanation": "Since modular multiplication scales quadratically O(n^2), two half-sized operations execute four times faster than one full-sized operation.",
+      "wrongExplanations": [
+        "Correct! CRT provides a dramatic 4x speedup in RSA private key signing and decryption.",
+        "Primes p and q are strictly required to use CRT.",
+        "Key size is unchanged.",
+        "Encryption remains separate."
+      ],
+      "realWorldExample": "Almost all production cryptographic hardware (smart cards, HSMs) uses RSA-CRT decryption."
+    },
+    {
+      "id": "c12_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the 'Discrete Logarithm Problem' in a finite cyclic group Z_p*?",
+      "options": [
+        "Given g, p, and y = g^x mod p, find secret integer exponent x",
+        "Find the square root of 2",
+        "Divide two prime numbers by zero",
+        "Multiply two numbers modulo 10"
+      ],
+      "correctIndex": 0,
+      "explanation": "While computing y = g^x mod p is fast via square-and-multiply, computing x = log_g(y) mod p is computationally intractable for large primes.",
+      "wrongExplanations": [
+        "Correct! Finding the exponent x is the Discrete Logarithm Problem.",
+        "Square roots are quadratic residues, not DLP.",
+        "Division by zero is undefined.",
+        "Basic multiplication is trivial."
+      ],
+      "realWorldExample": "Diffie-Hellman key exchange security depends entirely on the hardness of discrete logs."
+    },
+    {
+      "id": "c12_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How many multiplications does the Square-and-Multiply algorithm require to compute a^b mod n, where b has k bits?",
+      "options": [
+        "At most 2k multiplications (proportional to log2(b))",
+        "Exactly b multiplications (linear)",
+        "b^2 multiplications",
+        "Zero multiplications"
+      ],
+      "correctIndex": 0,
+      "explanation": "For each bit in exponent b, one square is performed, and at most one multiply if the bit is 1, totaling at most 2 * log2(b) operations.",
+      "wrongExplanations": [
+        "Correct! O(log b) complexity makes huge 2048-bit powers computationally practical.",
+        "Linear b multiplications would freeze computers on large exponents.",
+        "b^2 is exponential in bit length.",
+        "Multiplications are required."
+      ],
+      "realWorldExample": "RSA decryption a^d mod n computes 2048-bit exponents in under 2 milliseconds."
+    },
+    {
+      "id": "c12_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'primitive root' or 'generator' g of a prime modulus p?",
+      "options": [
+        "A number whose powers g^1, g^2, ..., g^(p-1) generate all integers from 1 to p-1 modulo p",
+        "A number that divides p evenly",
+        "The square root of p",
+        "A number that is negative"
+      ],
+      "correctIndex": 0,
+      "explanation": "A generator g produces the entire multiplicative group of units modulo p without missing any non-zero element.",
+      "wrongExplanations": [
+        "Correct! g generates every non-zero remainder modulo p.",
+        "Primes have no divisors other than 1 and p.",
+        "Generators are integers, not irrational roots.",
+        "Generators in Z_p* are positive integers."
+      ],
+      "realWorldExample": "In Diffie-Hellman, generator g = 2 or g = 5 is commonly selected."
+    },
+    {
+      "id": "c12_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why must the moduli in the Chinese Remainder Theorem be pairwise coprime (gcd(m_i, m_j) = 1)?",
+      "options": [
+        "To guarantee that modular inverses exist during the reconstruction step",
+        "Because prime numbers are illegal otherwise",
+        "So the numbers add up to 100",
+        "To make remainder division fail"
+      ],
+      "correctIndex": 0,
+      "explanation": "If moduli share common factors, modular inverses cannot be computed and conflicting congruence constraints may arise.",
+      "wrongExplanations": [
+        "Correct! Pairwise coprimality ensures unique modular inverses exist for each base M_i.",
+        "Moduli do not need to be prime, only pairwise coprime.",
+        "Sum has no mathematical requirement.",
+        "Division succeeds cleanly."
+      ],
+      "realWorldExample": "CRT is widely used in error-correcting codes, digital signal processing, and cryptography."
+    }
+  ],
+  "ashRecap": "CRT lets us solve big problems by breaking them into smaller clock pieces. Discrete logs are easy to spin forward, but impossible to run backward!"
+}

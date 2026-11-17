@@ -1,0 +1,164 @@
+{
+  "id": 11,
+  "number": 11,
+  "realmId": 3,
+  "realmTitle": "Public-Key Citadel",
+  "title": "Prime numbers (math toolkit II)",
+  "syllabusUnit": "Unit III: Number Theory & Primality Testing",
+  "covers": "Primes, primality testing (Fermat/Miller-Rabin), factorization, Euler's totient, Fermat & Euler theorems",
+  "visualizerId": "prime_sieve",
+  "visualizerTitle": "Prime Sieve & Is It Prime?",
+  "prerequisites": "Chapter 6",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain why prime factorization is computationally hard.",
+    "You will be able to calculate Euler's totient function phi(n) for prime products.",
+    "You will be able to describe how Miller-Rabin tests large numbers for primality."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Building Blocks of Math",
+      "analogy": "Prime numbers are like indivisible chemical atoms: you can multiply atoms to make molecules, but splitting them is hard.",
+      "coreConcept": "A prime number is divisible only by 1 and itself. Multiplying two large primes p and q takes milliseconds; finding p and q from their product n takes centuries.",
+      "example": "Multiplying 61 * 53 = 3233 is easy; factoring 3233 by hand is slow."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Euler's Totient Function: phi(n)",
+      "analogy": "Counting how many numbers on a clock face don't share any gears with the total hours.",
+      "coreConcept": "Euler's totient phi(n) counts integers from 1 to n coprime to n. If p is prime, phi(p) = p - 1. For n = p * q, phi(n) = (p - 1)(q - 1).",
+      "example": "For primes 3 and 7: n = 21, and phi(21) = (3 - 1)(7 - 1) = 2 * 6 = 12."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Fermat & Miller-Rabin Primality",
+      "analogy": "Shaking a locked box: if it rattles a certain way, it's definitely not a solid stone.",
+      "coreConcept": "Fermat's Little Theorem: a^(p-1) = 1 (mod p). Miller-Rabin tests odd numbers with random bases; passing 40 rounds makes probability of being composite < 2^-80.",
+      "example": "Used by cryptographic libraries to generate safe 2048-bit prime numbers quickly."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c11_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "If p = 7 and q = 11 are two prime numbers, what is Euler's totient phi(n) where n = p * q = 77?",
+      "options": [
+        "60",
+        "70",
+        "76",
+        "18"
+      ],
+      "correctIndex": 0,
+      "explanation": "For the product of two distinct primes: phi(n) = (p - 1)(q - 1) = (7 - 1)(11 - 1) = 6 * 10 = 60.",
+      "wrongExplanations": [
+        "Correct! (7 - 1) * (11 - 1) = 6 * 10 = 60.",
+        "70 is (p * (q - 1)).",
+        "76 is (n - 1), which only applies if n itself were prime.",
+        "18 is p + q."
+      ],
+      "realWorldExample": "In RSA, phi(n) is secret and used to calculate the private decryption key d."
+    },
+    {
+      "id": "c11_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary computational asymmetry that protects RSA encryption?",
+      "options": [
+        "Multiplying primes is fast O(n^2), but factoring their product has no known polynomial-time classical algorithm",
+        "Addition is faster than subtraction",
+        "Prime numbers cannot be stored in RAM",
+        "Computers cannot calculate odd numbers"
+      ],
+      "correctIndex": 0,
+      "explanation": "Multiplying large numbers is trivial, but the General Number Field Sieve (GNFS) takes sub-exponential time to factor large composite semiprimes.",
+      "wrongExplanations": [
+        "Correct! The one-way trapdoor function relies on factoring difficulty.",
+        "Addition and subtraction execute in identical CPU cycles.",
+        "RAM stores any binary integer.",
+        "CPUs process odd and even numbers identically."
+      ],
+      "realWorldExample": "RSA-2048 keys require testing numbers with over 600 decimal digits."
+    },
+    {
+      "id": "c11_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What does Fermat's Little Theorem state for any prime p and integer a not divisible by p?",
+      "options": [
+        "a^(p - 1) ≡ 1 (mod p)",
+        "a^p ≡ 0 (mod p)",
+        "a + p ≡ 1 (mod p)",
+        "a * p ≡ a (mod p)"
+      ],
+      "correctIndex": 0,
+      "explanation": "Fermat's Little Theorem states that if p is prime, then a^(p-1) mod p = 1 for any a where gcd(a, p) = 1.",
+      "wrongExplanations": [
+        "Correct! a^(p - 1) mod p = 1 is Fermat's Little Theorem.",
+        "a^p mod p equals a, not 0.",
+        "Addition does not equal 1.",
+        "a * p mod p equals 0, not a."
+      ],
+      "realWorldExample": "Fermat's theorem forms the basis of Fermat and Miller-Rabin primality tests."
+    },
+    {
+      "id": "c11_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why does cryptography use probabilistic primality tests like Miller-Rabin instead of trial division?",
+      "options": [
+        "Trial division would take billions of years on 1024-bit primes; Miller-Rabin finishes in milliseconds",
+        "Trial division is illegal",
+        "Miller-Rabin only works on even numbers",
+        "Trial division requires supercomputers to add"
+      ],
+      "correctIndex": 0,
+      "explanation": "Trial division requires testing factors up to sqrt(n) (~2^512 operations). Miller-Rabin verifies primality probabilistically in polynomial time O(k * log^3 n).",
+      "wrongExplanations": [
+        "Correct! Miller-Rabin generates cryptographically verified primes almost instantly.",
+        "Mathematical trial division is completely legal.",
+        "Miller-Rabin specifically tests odd candidates.",
+        "Trial division is slow due to operation count, not addition complexity."
+      ],
+      "realWorldExample": "OpenSSL uses Miller-Rabin iterations to generate RSA and Diffie-Hellman parameters."
+    },
+    {
+      "id": "c11_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'Carmichael Number'?",
+      "options": [
+        "A composite number that passes Fermat's primality test for all coprime bases",
+        "A prime number ending in 9",
+        "A number that cannot be factored",
+        "A negative prime"
+      ],
+      "correctIndex": 0,
+      "explanation": "Carmichael numbers (like 561) are composite numbers n that satisfy a^(n-1) = 1 (mod n) for all coprime a, fooling simple Fermat tests.",
+      "wrongExplanations": [
+        "Correct! Carmichael numbers are pseudoprimes that fool Fermat's test, which is why Miller-Rabin is preferred.",
+        "Prime endings do not define pseudoprimes.",
+        "Carmichael numbers have known prime factors (561 = 3 * 11 * 17).",
+        "Primes in cryptography are positive integers."
+      ],
+      "realWorldExample": "The Miller-Rabin test checks square roots of 1 modulo n to catch all Carmichael numbers."
+    },
+    {
+      "id": "c11_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "If p is a prime number, what is the value of Euler's totient phi(p)?",
+      "options": [
+        "p - 1",
+        "p",
+        "p + 1",
+        "p / 2"
+      ],
+      "correctIndex": 0,
+      "explanation": "Since every number from 1 to p-1 is coprime to p, phi(p) = p - 1.",
+      "wrongExplanations": [
+        "Correct! For any prime p, exactly p - 1 numbers are coprime to it.",
+        "p is not coprime to itself (gcd(p, p) = p).",
+        "p + 1 exceeds the count of integers up to p.",
+        "p / 2 is incorrect."
+      ],
+      "realWorldExample": "For prime 13, phi(13) = 12."
+    }
+  ],
+  "ashRecap": "Primes are easy to multiply together, but nearly impossible to factor apart. That one-way trapdoor protects all public-key ciphers!"
+}

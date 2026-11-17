@@ -1,0 +1,164 @@
+{
+  "id": 13,
+  "number": 13,
+  "realmId": 3,
+  "realmTitle": "Public-Key Citadel",
+  "title": "RSA step by step",
+  "syllabusUnit": "Unit III: RSA Algorithm & Trapdoor One-Way Functions",
+  "covers": "Key generation, encrypt/decrypt, why factoring is hard",
+  "visualizerId": "rsa",
+  "visualizerTitle": "RSA Tiny Primes Visualizer",
+  "prerequisites": "Chapter 12",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to calculate RSA keys from tiny primes p and q.",
+    "You will be able to encrypt plaintext C = M^e mod n and decrypt M = C^d mod n.",
+    "You will be able to explain why OAEP padding is required to prevent textbook RSA attacks."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "RSA Key Generation",
+      "analogy": "Two secret keys: one public padlock that anyone can snap shut, and one private key that only you hold to open it.",
+      "coreConcept": "Pick primes p, q. Compute n = p * q and phi(n) = (p - 1)(q - 1). Pick e coprime to phi(n). Find d = e⁻¹ mod phi(n). Public key is (e, n); private key is d.",
+      "example": "With p = 3, q = 11: n = 33, phi(n) = 20. If e = 3, d = 7 (3 * 7 = 21 = 1 mod 20)."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Encrypting & Decrypting",
+      "analogy": "Closing the public padlock with math power e; opening it with secret key power d.",
+      "coreConcept": "Encryption: Ciphertext C = M^e mod n. Decryption: Message M = C^d mod n. Euler's theorem guarantees (M^e)^d = M^(e*d) = M^1 = M mod n.",
+      "example": "Encrypting M = 7: C = 7^3 mod 33 = 343 mod 33 = 13. Decrypting: 13^7 mod 33 = 7."
+    },
+    {
+      "cardIndex": 3,
+      "title": "The Textbook RSA Trap: OAEP Padding",
+      "analogy": "Never send a naked secret: wrap it in random bubble-wrap before locking it in the box.",
+      "coreConcept": "Textbook RSA is deterministic: encrypting 'YES' always produces the same ciphertext. Optimal Asymmetric Encryption Padding (OAEP) adds random noise before encrypting.",
+      "example": "PKCS#1 v2.1 OAEP padding prevents chosen-ciphertext and Bleichenbacher attacks."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c13_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In RSA with p = 5 and q = 11, what is the modulus n and totient phi(n)?",
+      "options": [
+        "n = 55, phi(n) = 40",
+        "n = 55, phi(n) = 54",
+        "n = 50, phi(n) = 40",
+        "n = 16, phi(n) = 10"
+      ],
+      "correctIndex": 0,
+      "explanation": "n = p * q = 5 * 11 = 55. phi(n) = (p - 1)(q - 1) = (5 - 1)(11 - 1) = 4 * 10 = 40.",
+      "wrongExplanations": [
+        "Correct! n = 55, phi(n) = 40.",
+        "54 would assume n is prime.",
+        "5 * 11 does not equal 50.",
+        "16 is the sum."
+      ],
+      "realWorldExample": "Rivest, Shamir, and Adleman published RSA in 1977 at MIT."
+    },
+    {
+      "id": "c13_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Given public exponent e = 3 and phi(n) = 40, what is the private decryption exponent d (such that (e * d) mod phi(n) = 1)?",
+      "options": [
+        "d = 27",
+        "d = 3",
+        "d = 13",
+        "d = 7"
+      ],
+      "correctIndex": 0,
+      "explanation": "3 * 27 = 81. 81 mod 40 = 1. Therefore, d = 27.",
+      "wrongExplanations": [
+        "Correct! (3 * 27) = 81 = (2 * 40) + 1.",
+        "3 * 3 = 9 mod 40 = 9.",
+        "3 * 13 = 39 mod 40 = 39.",
+        "3 * 7 = 21 mod 40 = 21."
+      ],
+      "realWorldExample": "Extended Euclidean algorithm calculates d from e and phi(n) in logarithmic steps."
+    },
+    {
+      "id": "c13_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is 'Textbook RSA' (encrypting raw message M without padding) completely insecure in production systems?",
+      "options": [
+        "It is deterministic (same message yields same ciphertext) and vulnerable to chosen-ciphertext attacks",
+        "Textbook RSA keys delete themselves",
+        "Because 65537 is an even number",
+        "Computers refuse to compile textbook formulas"
+      ],
+      "correctIndex": 0,
+      "explanation": "Without randomized padding, attackers can guess small messages or multiply ciphertexts together due to RSA's multiplicative homomorphic property.",
+      "wrongExplanations": [
+        "Correct! Unpadded RSA leaks equality of plaintexts and allows Bleichenbacher oracle attacks.",
+        "Keys do not expire automatically.",
+        "65537 (2^16 + 1) is prime and odd.",
+        "Compilers execute the arithmetic without awareness of context."
+      ],
+      "realWorldExample": "OAEP padding (Optimal Asymmetric Encryption Padding) is mandated by RFC 8017."
+    },
+    {
+      "id": "c13_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the most common public exponent e chosen in modern production RSA implementations?",
+      "options": [
+        "65537 (F4 = 2^16 + 1)",
+        "3",
+        "2",
+        "1000000"
+      ],
+      "correctIndex": 0,
+      "explanation": "e = 65537 has only two '1' bits in binary (10000000000000001), allowing fast encryption in only 17 operations while resisting small-exponent attacks.",
+      "wrongExplanations": [
+        "Correct! 65537 is the global industry standard public exponent.",
+        "e = 3 was historical but vulnerable to broadcast Coppersmith attacks when padding is weak.",
+        "e cannot be even because it must be coprime to phi(n).",
+        "Arbitrary round numbers offer no binary speed advantages."
+      ],
+      "realWorldExample": "Fermat prime F4 = 65537 balances high speed with strong security."
+    },
+    {
+      "id": "c13_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "If an attacker can factor the public modulus n into primes p and q, what secret can they immediately calculate?",
+      "options": [
+        "They can calculate phi(n) = (p-1)(q-1) and derive the private key d",
+        "They can read the server's hard drive directly",
+        "They can change the server's IP address",
+        "They can disable the internet"
+      ],
+      "correctIndex": 0,
+      "explanation": "Knowing p and q reveals phi(n), allowing the attacker to compute modular inverse d = e^-1 mod phi(n), totally compromising the private key.",
+      "wrongExplanations": [
+        "Correct! Factoring n instantly destroys RSA private key secrecy.",
+        "Factoring does not give remote disk access.",
+        "Network routing is unaffected.",
+        "Internet operations continue."
+      ],
+      "realWorldExample": "This is why RSA keys must be at least 2048 bits (and recommended 3072 bits today)."
+    },
+    {
+      "id": "c13_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How are public and private keys shared in RSA?",
+      "options": [
+        "The public key (e, n) is shared with everyone; the private key d is kept strictly secret",
+        "Both keys are posted publicly on Twitter",
+        "Both keys are kept secret and never shared",
+        "The private key is sent in clear HTTP"
+      ],
+      "correctIndex": 0,
+      "explanation": "Public key cryptography allows anyone to encrypt using (e, n), while only the owner can decrypt using private key d.",
+      "wrongExplanations": [
+        "Correct! Public keys are openly distributed; private keys must never leave secure storage.",
+        "Publishing the private key allows anyone to decrypt your data.",
+        "If both are secret, nobody can send you encrypted data.",
+        "Sending private keys over clear HTTP causes immediate compromise."
+      ],
+      "realWorldExample": "SSL/TLS certificates openly publish RSA public keys to every connecting browser."
+    }
+  ],
+  "ashRecap": "RSA locks data with public numbers (e, n) and unlocks it with private key d. Padding with OAEP keeps it bulletproof against eavesdroppers!"
+}

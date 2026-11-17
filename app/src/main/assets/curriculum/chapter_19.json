@@ -1,0 +1,164 @@
+{
+  "id": 19,
+  "number": 19,
+  "realmId": 4,
+  "realmTitle": "Trust & Proof",
+  "title": "Proving who you are",
+  "syllabusUnit": "Unit IV: User Authentication & Password Security",
+  "covers": "Passwords, biometrics, challenge-response, password hashing (salt, Argon2)",
+  "visualizerId": "challenge_response",
+  "visualizerTitle": "Password Hashing & Challenge-Response",
+  "prerequisites": "Chapter 18",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain why databases must store salted, slow hashes (Argon2, bcrypt) instead of plain SHA-256.",
+    "You will be able to describe how Challenge-Response prevents password replay attacks.",
+    "You will be able to evaluate the strengths and weaknesses of Biometric authentication."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Password Salt & Slow Hashing",
+      "analogy": "Sprinkling random seasoning onto every dish so even identical recipes produce totally different meals.",
+      "coreConcept": "Never hash passwords with fast hashes (SHA-256 is designed to be fast, making brute-force easy). Use slow, memory-hard key derivation functions like Argon2 or bcrypt with a unique Salt.",
+      "example": "A 16-byte random salt defeats pre-computed rainbow table databases."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Challenge-Response Authentication",
+      "analogy": "A sentry yells 'Thunder!' You reply 'Flash!' You prove you know the password without shouting it out loud.",
+      "coreConcept": "The server issues a random challenge Nonce R. The client replies with Response = H(Password || R). The server verifies the match without the password ever traveling across the wire.",
+      "example": "An eavesdropper capturing the response cannot reuse it because the next challenge will be totally different."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Biometrics: What You Are",
+      "analogy": "Your face or thumbprint is your username, not your secret key: you cannot change your thumbprint if it gets leaked.",
+      "coreConcept": "Biometrics (fingerprint, FaceID, iris) measure physical traits. They provide high convenience and non-transferability, but false acceptance rates and revocability limitations require secure hardware enclaves.",
+      "example": "Fingerprint templates are stored as fuzzy mathematical hashes in device Secure Elements, never sent to cloud servers."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c19_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is hashing passwords with plain SHA-256 or MD5 considered a severe security vulnerability?",
+      "options": [
+        "Fast general-purpose hashes can be brute-forced at billions of guesses per second using consumer GPUs",
+        "SHA-256 cannot hash letters",
+        "MD5 makes database files too large",
+        "SHA-256 only works on numbers"
+      ],
+      "correctIndex": 0,
+      "explanation": "Modern graphics cards test over 10 billion SHA-256 hashes per second. Password storage requires slow, memory-hard algorithms like Argon2id or bcrypt.",
+      "wrongExplanations": [
+        "Correct! Fast hashing enables rapid offline brute-force and dictionary attacks.",
+        "SHA-256 processes arbitrary text strings.",
+        "MD5 output is only 16 bytes.",
+        "SHA-256 handles all binary data."
+      ],
+      "realWorldExample": "In the 2012 LinkedIn breach, 117 million unsalted SHA-1 password hashes were cracked in days."
+    },
+    {
+      "id": "c19_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary cryptographic purpose of adding a unique 'Salt' to every password before hashing?",
+      "options": [
+        "To defeat pre-computed Rainbow Table lookup dictionaries and ensure identical passwords have different hashes",
+        "To encrypt the database hard drive",
+        "To make passwords shorter",
+        "To translate passwords into English"
+      ],
+      "correctIndex": 0,
+      "explanation": "A random salt ensures that if two users choose 'password123', their stored database hashes are totally different, forcing attackers to crack each user individually.",
+      "wrongExplanations": [
+        "Correct! Salt forces attackers to compute separate dictionaries for every single user.",
+        "Full-disk encryption uses BitLocker or LUKS.",
+        "Salting lengthens the hashed input string.",
+        "Languages are unchanged."
+      ],
+      "realWorldExample": "A standard salt is at least 16 random bytes stored alongside the hash in the database."
+    },
+    {
+      "id": "c19_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which modern password hashing algorithm was the winner of the Password Hashing Competition (PHC) and is recommended by OWASP?",
+      "options": [
+        "Argon2 (specifically Argon2id)",
+        "SHA-1",
+        "DES",
+        "Rot13"
+      ],
+      "correctIndex": 0,
+      "explanation": "Argon2 provides configurable execution time, memory hardness, and parallel thread cost to resist GPU and ASIC attacks.",
+      "wrongExplanations": [
+        "Correct! Argon2id is the state-of-the-art memory-hard password hashing standard.",
+        "SHA-1 is deprecated and broken.",
+        "DES is an obsolete block cipher.",
+        "Rot13 is a toy Caesar shift by 13."
+      ],
+      "realWorldExample": "Argon2 was selected as the winner of the international Password Hashing Competition in 2015."
+    },
+    {
+      "id": "c19_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In a challenge-response authentication protocol, why can't an attacker replay the captured response to log in later?",
+      "options": [
+        "The server generates a fresh, unique random challenge (nonce) for every single authentication attempt",
+        "The server powers off after every login",
+        "Passwords change every minute automatically",
+        "Responses are encrypted by the monitor"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because the server issues a new random nonce R every time, an old response computed over a previous nonce will be rejected immediately.",
+      "wrongExplanations": [
+        "Correct! Nonce freshness prevents replay attacks across the wire.",
+        "Servers remain continuously online.",
+        "User passwords remain fixed unless manually reset.",
+        "Display hardware does not perform network crypto."
+      ],
+      "realWorldExample": "Kerberos, CHAP (Challenge Handshake Authentication Protocol), and WebAuthn rely on challenge-response."
+    },
+    {
+      "id": "c19_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a major inherent drawback of biometric authentication compared to passwords or hardware tokens?",
+      "options": [
+        "Biometrics cannot be revoked or changed if compromised (you cannot issue yourself a new fingerprint)",
+        "Biometrics only work in daylight",
+        "Biometrics require internet connection",
+        "Biometrics take 10 minutes to scan"
+      ],
+      "correctIndex": 0,
+      "explanation": "If a database of thumbprint or iris scans is leaked, users cannot change their biometric features like they can reset a password.",
+      "wrongExplanations": [
+        "Correct! Biometrics are permanent identifiers that cannot be re-issued upon breach.",
+        "Optical and capacitive sensors work in total darkness.",
+        "Local authentication occurs completely offline on the device.",
+        "Modern phone sensors unlock in under 200 milliseconds."
+      ],
+      "realWorldExample": "In 2015, the US Office of Personnel Management (OPM) breach exposed 5.6 million federal employee fingerprint records."
+    },
+    {
+      "id": "c19_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What are the three classic authentication factors defined in identity security?",
+      "options": [
+        "Something you know (password), something you have (phone/token), something you are (biometrics)",
+        "Username, email, and home address",
+        "First name, last name, and middle name",
+        "Browser, operating system, and IP address"
+      ],
+      "correctIndex": 0,
+      "explanation": "Multi-Factor Authentication (MFA) requires proof from at least two distinct categories: Knowledge, Possession, and Inherence.",
+      "wrongExplanations": [
+        "Correct! Knowledge (passwords), Possession (tokens), and Inherence (biometrics).",
+        "Profile fields are public knowledge.",
+        "Names are public information.",
+        "Device fingerprints can be spoofed."
+      ],
+      "realWorldExample": "Enforcing MFA blocks over 99% of automated account takeover attacks according to Microsoft Threat Intelligence."
+    }
+  ],
+  "ashRecap": "Never store plain passwords! Always use slow, salted hashes like Argon2, and add a second factor like an authenticator token to stay safe!"
+}

@@ -1,0 +1,164 @@
+{
+  "id": 6,
+  "number": 6,
+  "realmId": 2,
+  "realmTitle": "Symmetric Forge",
+  "title": "Clock math (math toolkit I)",
+  "syllabusUnit": "Unit II: Finite Fields & Number Theory Basics",
+  "covers": "Modular arithmetic, Euclid's GCD, groups/rings/fields in plain words",
+  "visualizerId": "clock_arithmetic",
+  "visualizerTitle": "Clock Arithmetic & Euclid Steps",
+  "prerequisites": "Chapter 5",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to calculate modular addition and multiplication on a clock circle.",
+    "You will be able to compute Greatest Common Divisor (GCD) using the Euclidean algorithm.",
+    "You will be able to explain what a mathematical Field is in plain words."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Modular Arithmetic: The Clock Circle",
+      "analogy": "If it is 10:00 AM now, 5 hours later it is 3:00 PM, not 15:00.",
+      "coreConcept": "Modular arithmetic wraps numbers around a fixed modulus n. 15 mod 12 = 3. In computing, mod 2^8 wraps byte values from 0 to 255.",
+      "example": "25 mod 7 = 4, because 25 = (3 * 7) + 4."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Euclid's GCD & Extended Euclid",
+      "analogy": "Finding the largest square tile that perfectly paves a rectangular floor without cutting.",
+      "coreConcept": "Euclid's algorithm finds GCD(a, b) by repeated remainder division: GCD(a, b) = GCD(b, a mod b). The extended version finds multiplicative modular inverses.",
+      "example": "GCD(54, 24) -> GCD(24, 6) -> GCD(6, 0) = 6."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Groups, Rings & Fields in Plain English",
+      "analogy": "A playground with rules: Groups let you add and subtract; Rings add multiplication; Fields let you divide cleanly.",
+      "coreConcept": "A Galois Field GF(2^8) allows computers to perform addition, subtraction, multiplication, and division on 8-bit bytes without ever exceeding 255.",
+      "example": "AES operates inside GF(2^8) to ensure byte substitutions never produce fractional or overflow numbers."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c6_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the value of 38 mod 7?",
+      "options": [
+        "3",
+        "5",
+        "1",
+        "7"
+      ],
+      "correctIndex": 0,
+      "explanation": "38 divided by 7 equals 5 with a remainder of 3. (5 * 7 = 35; 38 - 35 = 3).",
+      "wrongExplanations": [
+        "Correct! 38 = (5 * 7) + 3.",
+        "5 is the quotient, not the remainder.",
+        "1 is incorrect.",
+        "The remainder modulo 7 can never equal or exceed 7."
+      ],
+      "realWorldExample": "Modulo 26 is used to wrap letters in alphabet ciphers like Caesar."
+    },
+    {
+      "id": "c6_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Using the Euclidean algorithm, what is GCD(48, 18)?",
+      "options": [
+        "6",
+        "12",
+        "3",
+        "2"
+      ],
+      "correctIndex": 0,
+      "explanation": "48 mod 18 = 12 -> 18 mod 12 = 6 -> 12 mod 6 = 0. The last non-zero remainder is 6.",
+      "wrongExplanations": [
+        "Correct! 6 is the greatest common divisor.",
+        "12 does not divide 18 evenly.",
+        "3 is a divisor, but not the greatest common divisor.",
+        "2 is a divisor, but 6 is greater."
+      ],
+      "realWorldExample": "Euclid's algorithm runs in logarithmic time O(log(min(a,b)))."
+    },
+    {
+      "id": "c6_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Two numbers a and b are called 'coprime' or 'relatively prime' when:",
+      "options": [
+        "Their GCD is 1: GCD(a, b) = 1",
+        "Both numbers are even",
+        "Both numbers end in 5",
+        "Their sum is 100"
+      ],
+      "correctIndex": 0,
+      "explanation": "Relatively prime integers share no common positive factors other than 1.",
+      "wrongExplanations": [
+        "Correct! GCD(a, b) = 1 means they are coprime.",
+        "Even numbers share factor 2.",
+        "Numbers ending in 5 share factor 5.",
+        "Sum is irrelevant to common factors."
+      ],
+      "realWorldExample": "In RSA, public exponent e must be coprime to Euler's totient phi(n)."
+    },
+    {
+      "id": "c6_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the modular multiplicative inverse of 3 modulo 7 (find x such that (3 * x) mod 7 = 1)?",
+      "options": [
+        "5",
+        "2",
+        "4",
+        "6"
+      ],
+      "correctIndex": 0,
+      "explanation": "(3 * 5) = 15. 15 mod 7 = 1. Therefore, 5 is the modular inverse of 3 mod 7.",
+      "wrongExplanations": [
+        "Correct! 3 * 5 = 15 = (2 * 7) + 1.",
+        "3 * 2 = 6 mod 7 = 6.",
+        "3 * 4 = 12 mod 7 = 5.",
+        "3 * 6 = 18 mod 7 = 4."
+      ],
+      "realWorldExample": "Modular inverse calculation is required to decrypt RSA and ElGamal."
+    },
+    {
+      "id": "c6_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why does cryptography use finite fields like GF(2^8) instead of ordinary real numbers?",
+      "options": [
+        "Finite fields prevent floating-point rounding errors and arithmetic overflow",
+        "Finite fields make numbers negative",
+        "Real numbers are illegal in software",
+        "Finite fields have only 2 numbers"
+      ],
+      "correctIndex": 0,
+      "explanation": "In a finite field of 256 elements, every operation (+, -, *, /) produces an exact 8-bit integer with zero rounding loss.",
+      "wrongExplanations": [
+        "Correct! Cryptography requires 100% deterministic, reversible arithmetic.",
+        "Finite fields do not produce negative floating values.",
+        "Real numbers are common in engineering, but too imprecise for exact crypto.",
+        "GF(2^8) contains 256 distinct elements."
+      ],
+      "realWorldExample": "AES Rijndael polynomial arithmetic takes place in Galois Field GF(2^8)."
+    },
+    {
+      "id": "c6_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the result of 14 mod 5?",
+      "options": [
+        "4",
+        "2",
+        "3",
+        "1"
+      ],
+      "correctIndex": 0,
+      "explanation": "14 = (2 * 5) + 4. The remainder is 4.",
+      "wrongExplanations": [
+        "Correct! 14 divided by 5 leaves remainder 4.",
+        "2 is the quotient.",
+        "3 is incorrect.",
+        "1 is incorrect."
+      ],
+      "realWorldExample": "Clock arithmetic underpins all cyclic group cryptography."
+    }
+  ],
+  "ashRecap": "Clock math wraps numbers in a neat loop. Finite fields let computers multiply and divide bytes without ever losing a single bit!"
+}

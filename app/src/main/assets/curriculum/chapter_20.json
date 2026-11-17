@@ -1,0 +1,164 @@
+{
+  "id": 20,
+  "number": 20,
+  "realmId": 4,
+  "realmTitle": "Trust & Proof",
+  "title": "Kerberos and certificates",
+  "syllabusUnit": "Unit IV: Key Distribution, Kerberos & X.509 PKI",
+  "covers": "Kerberos tickets, X.509, PKI & chain of trust, revocation",
+  "visualizerId": "kerberos_x509",
+  "visualizerTitle": "Kerberos Tickets & X.509 Chain",
+  "prerequisites": "Chapter 19",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to trace the Kerberos ticket workflow (AS -> TGS -> Service).",
+    "You will be able to verify an X.509 certificate chain of trust up to a Root CA.",
+    "You will be able to compare CRLs and OCSP for certificate revocation."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Three-Headed Dog: Kerberos",
+      "analogy": "Buying a day-pass at the amusement park gate, then trading it for ride tickets at each roller-coaster booth.",
+      "coreConcept": "Kerberos uses symmetric keys and tickets: 1. Authentication Server (AS) issues a Ticket Granting Ticket (TGT). 2. Ticket Granting Server (TGS) trades TGT for Service Tickets. 3. Client presents Service Ticket to the file server.",
+      "example": "User passwords never travel across the enterprise network; timestamps prevent replay attacks."
+    },
+    {
+      "cardIndex": 2,
+      "title": "X.509 Certificates & Chain of Trust",
+      "analogy": "A passport stamped by your state authority, which is certified by the federal embassy, which is recognized globally.",
+      "coreConcept": "An X.509 certificate binds a domain name to a public key, signed by a Certificate Authority (CA). Browsers verify the digital signature chain up to pre-installed Root CAs.",
+      "example": "Let's Encrypt and DigiCert act as trusted root authorities embedded inside your operating system."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Revocation: CRLs vs OCSP",
+      "analogy": "Checking a printed list of cancelled credit cards vs calling the card hotline live at the cash register.",
+      "coreConcept": "If a private key is compromised, the certificate must be revoked before its expiration date. Certificate Revocation Lists (CRLs) download bulk blacklist files. Online Certificate Status Protocol (OCSP) queries CA status live.",
+      "example": "OCSP Stapling lets the web server provide a time-stamped CA verification directly to connecting clients."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c20_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In the Kerberos authentication protocol, what ticket does the client receive from the Authentication Server (AS)?",
+      "options": [
+        "Ticket Granting Ticket (TGT)",
+        "An SSL certificate",
+        "A Google OAuth token",
+        "A Bitcoin private key"
+      ],
+      "correctIndex": 0,
+      "explanation": "The Authentication Server validates the user's password hash and returns an encrypted Ticket Granting Ticket (TGT) valid for several hours.",
+      "wrongExplanations": [
+        "Correct! The TGT allows the user to request individual service tickets without re-entering their password.",
+        "SSL certificates belong to PKI.",
+        "OAuth is a web authorization protocol.",
+        "Bitcoins are unrelated."
+      ],
+      "realWorldExample": "Microsoft Windows Active Directory domains rely on Kerberos v5 for single sign-on (SSO)."
+    },
+    {
+      "id": "c20_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is strict clock synchronization (usually via NTP) mandatory across all Kerberos servers and clients?",
+      "options": [
+        "Kerberos tickets contain timestamps to prevent replay attacks; clock skew exceeding 5 minutes causes authentication failure",
+        "To make screensavers sync up",
+        "Because CPU transistors only count seconds",
+        "To ensure backup tapes run at midnight"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kerberos uses timestamps in authenticators to defeat replay attacks without storing past message caches; clocks must stay within 5 minutes.",
+      "wrongExplanations": [
+        "Correct! Timestamps expire quickly to invalidate intercepted authentication packets.",
+        "Screensavers have no security role.",
+        "Silicon clocks measure arbitrary cycles.",
+        "Backup scheduling is separate."
+      ],
+      "realWorldExample": "If a workstation clock drifts by more than 5 minutes from the Domain Controller, login fails with KRB_AP_ERR_SKEW."
+    },
+    {
+      "id": "c20_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In an X.509 Public Key Infrastructure (PKI), how does your browser verify that 'https://google.com' is authentic?",
+      "options": [
+        "It follows digital signatures up the chain of trust until reaching a trusted Root CA pre-installed in the OS",
+        "It pings the website's IP address",
+        "It checks if the website has a green logo",
+        "It sends an email to the webmaster"
+      ],
+      "correctIndex": 0,
+      "explanation": "The server certificate is signed by an Intermediate CA, which is signed by a Root CA. The browser verifies each signature mathematically using the signer's public key.",
+      "wrongExplanations": [
+        "Correct! The cryptographic signature chain of trust anchors into local root trust stores.",
+        "Ping only verifies network routing.",
+        "Logos are easily cloned by phishing sites.",
+        "Email verification is manual and unauthenticated."
+      ],
+      "realWorldExample": "Operating systems maintain trusted Root CA stores (e.g. Mozilla, Apple, Microsoft root stores)."
+    },
+    {
+      "id": "c20_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What critical information is contained inside an X.509 digital certificate?",
+      "options": [
+        "Subject domain name, Subject public key, Issuer CA, Validity dates, and Issuer's digital signature",
+        "The user's credit card number",
+        "The server's root password",
+        "The source code of the website"
+      ],
+      "correctIndex": 0,
+      "explanation": "RFC 5280 defines X.509 v3 fields: Subject identity, Public key, Issuer identity, Serial number, Validity period, and CA cryptographic signature.",
+      "wrongExplanations": [
+        "Correct! Identity bound to public key, verified by CA signature.",
+        "Certificates never contain private financial data.",
+        "Private passwords must NEVER appear in public certificates.",
+        "Source code is hosted on servers."
+      ],
+      "realWorldExample": "Inspect any padlock icon in your browser to view the X.509 certificate fields and issuer chain."
+    },
+    {
+      "id": "c20_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary advantage of Online Certificate Status Protocol (OCSP) over Certificate Revocation Lists (CRLs)?",
+      "options": [
+        "OCSP queries real-time status of a single certificate without downloading massive multi-megabyte revocation lists",
+        "OCSP encrypts all network cables",
+        "OCSP eliminates the need for Certificate Authorities",
+        "OCSP makes web servers 100% immune to malware"
+      ],
+      "correctIndex": 0,
+      "explanation": "CRLs grow continually larger, wasting bandwidth and mobile data; OCSP allows checking a single certificate's status on demand in milliseconds.",
+      "wrongExplanations": [
+        "Correct! OCSP provides lightweight, real-time revocation status checks.",
+        "OCSP does not encrypt physical cables.",
+        "OCSP responders are operated by Certificate Authorities.",
+        "Revocation checking does not prevent web server malware."
+      ],
+      "realWorldExample": "OCSP Stapling (RFC 6066) speeds up TLS handshakes by attaching the signed OCSP response directly to the server certificate."
+    },
+    {
+      "id": "c20_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What happens if a Certificate Authority's master private key is stolen by a malicious adversary?",
+      "options": [
+        "The attacker can forge valid certificates for any domain on earth and execute undetectable Man-in-the-Middle attacks",
+        "Nothing happens because certificates are free",
+        "All web browsers turn red",
+        "Internet cables automatically shut down"
+      ],
+      "correctIndex": 0,
+      "explanation": "A compromised Root CA allows adversaries to generate counterfeit certificates for google.com or bank domains that all browsers accept as genuine.",
+      "wrongExplanations": [
+        "Correct! Root CA compromise shatters the foundation of web PKI trust.",
+        "Financial cost is irrelevant to cryptographic trust.",
+        "Browsers accept validly signed fake certs without warning.",
+        "Network hardware cannot discern key theft."
+      ],
+      "realWorldExample": "In 2011, Dutch CA DigiNotar was hacked and issued 500+ fraudulent certificates, resulting in the entire CA being distrusted and declared bankrupt."
+    }
+  ],
+  "ashRecap": "Kerberos gives you trusted day-passes across the office network. X.509 certificates give websites trusted digital passports signed by Root Authorities!"
+}

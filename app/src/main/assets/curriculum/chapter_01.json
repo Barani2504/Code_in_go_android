@@ -1,0 +1,164 @@
+{
+  "id": 1,
+  "number": 1,
+  "realmId": 1,
+  "realmTitle": "Secrets 101",
+  "title": "Why do we need security?",
+  "syllabusUnit": "Unit I: Security Concepts & Policies",
+  "covers": "CIA triad, security trends, security policies, legal & ethical aspects",
+  "visualizerId": "cia_triad",
+  "visualizerTitle": "CIA Triad Tap-Game",
+  "prerequisites": "None",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to distinguish Confidentiality, Integrity, and Availability.",
+    "You will be able to evaluate real-world trade-offs in security policies.",
+    "You will be able to identify ethical and legal duties under cybersecurity laws."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Golden Rule: The CIA Triad",
+      "analogy": "Imagine a bank vault: locks protect secrets, seals detect stolen gold, and doors permit access.",
+      "coreConcept": "Security rests on three pillars: Confidentiality hides secrets, Integrity guards data accuracy, and Availability guarantees access.",
+      "example": "Medical records require privacy (C), tamper-proof logs (I), and 24/7 doctor access (A)."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Security Policies & Enforcement",
+      "analogy": "A fire drill rules manual tells employees where to walk before smoke appears.",
+      "coreConcept": "A security policy is a formal plan of rules governing data access, passcodes, and breach response.",
+      "example": "Mandating password rotation every 90 days or enforcing zero-trust badge swipes at every door."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Ethics & Law in Cyberspace",
+      "analogy": "A locksmith possesses lockpicks to fix broken doors, never to burgle houses.",
+      "coreConcept": "Ethical hackers operate under strict authorization. Accessing systems without written permission violates global cybercrime acts.",
+      "example": "Penetration testers sign a formal Rules of Engagement document before probing corporate firewalls."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c1_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which pillar of the CIA triad is broken when an attacker alters medical dosage records in a hospital database?",
+      "options": [
+        "Confidentiality",
+        "Integrity",
+        "Availability",
+        "Authentication"
+      ],
+      "correctIndex": 1,
+      "explanation": "Integrity guarantees that information remains accurate and unaltered by unauthorized parties.",
+      "wrongExplanations": [
+        "Confidentiality is about hiding secrets.",
+        "Correct! Modifying stored values breaks integrity.",
+        "Availability is about uptime.",
+        "Authentication verifies user identity."
+      ],
+      "realWorldExample": "In 2016, attackers altered Bangladesh Bank transfer records."
+    },
+    {
+      "id": "c1_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "A ransomware group launches a massive DDoS attack against an emergency dispatch center. Which security pillar is directly targeted?",
+      "options": [
+        "Availability",
+        "Confidentiality",
+        "Non-repudiation",
+        "Integrity"
+      ],
+      "correctIndex": 0,
+      "explanation": "Availability ensures services and resources remain accessible to authorized users when needed.",
+      "wrongExplanations": [
+        "Correct! Knocking dispatch systems offline directly destroys availability.",
+        "Confidentiality was not breached.",
+        "Non-repudiation proves authorship.",
+        "Integrity relates to altered data."
+      ],
+      "realWorldExample": "The 2016 Dyn DNS attack took major services offline across North America."
+    },
+    {
+      "id": "c1_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What distinguishes an ethical white-hat security researcher from an unauthorized hacker?",
+      "options": [
+        "The coding language used",
+        "Written permission and authorization",
+        "Internet speed",
+        "Using Linux instead of Windows"
+      ],
+      "correctIndex": 1,
+      "explanation": "Explicit, legal written authorization from the system owner defines ethical security operations.",
+      "wrongExplanations": [
+        "Coding languages are neutral tools.",
+        "Correct! Without written permission, accessing computer systems is illegal.",
+        "Network speed has zero bearing.",
+        "Operating systems are tools, not legal definitions."
+      ],
+      "realWorldExample": "The US Computer Fraud and Abuse Act (CFAA) prosecutes unauthorized access."
+    },
+    {
+      "id": "c1_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which security policy rule best prevents employees from leaking customer database backups on USB sticks?",
+      "options": [
+        "Disabling removable media via endpoint management",
+        "Increasing screen monitor brightness",
+        "Changing Wi-Fi passwords yearly",
+        "Using larger font sizes"
+      ],
+      "correctIndex": 0,
+      "explanation": "Endpoint controls disable unauthorized USB storage devices.",
+      "wrongExplanations": [
+        "Correct! Disabling mass storage interfaces blocks hardware-based exfiltration.",
+        "Brightness has no impact.",
+        "Wi-Fi passwords do not prevent physical USB copying.",
+        "Typography has no security impact."
+      ],
+      "realWorldExample": "Stuxnet was transported into air-gapped facilities on infected USB sticks."
+    },
+    {
+      "id": "c1_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "An employee reads their coworker's confidential performance review without permission. Which principle is violated?",
+      "options": [
+        "Confidentiality",
+        "Availability",
+        "Redundancy",
+        "Fault Tolerance"
+      ],
+      "correctIndex": 0,
+      "explanation": "Confidentiality ensures that only authorized individuals can view sensitive information.",
+      "wrongExplanations": [
+        "Correct! Unauthorized reading directly compromises confidentiality.",
+        "The document remained online.",
+        "Redundancy refers to duplicate hardware.",
+        "Fault tolerance allows systems to survive hardware crashes."
+      ],
+      "realWorldExample": "Insider unauthorized snooping causes over 30% of enterprise privacy breaches."
+    },
+    {
+      "id": "c1_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the primary objective of the Principle of Least Privilege?",
+      "options": [
+        "Grant users only minimal permissions required for their tasks",
+        "Give all developers root administrator access",
+        "Allow all employees to share passwords",
+        "Keep all firewall ports open"
+      ],
+      "correctIndex": 0,
+      "explanation": "Least privilege limits user and service account rights to strictly what is essential.",
+      "wrongExplanations": [
+        "Correct! Minimal permissions restrict blast radius if an account is compromised.",
+        "Root access for all drastically increases security risk.",
+        "Password sharing destroys accountability.",
+        "Open firewall ports create attack surfaces."
+      ],
+      "realWorldExample": "The 2013 Target breach began with compromised HVAC vendor credentials having excessive access."
+    }
+  ],
+  "ashRecap": "Confidentiality hides secrets, Integrity guards truth, and Availability keeps the lights on!"
+}

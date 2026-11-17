@@ -1,0 +1,164 @@
+{
+  "id": 25,
+  "number": 25,
+  "realmId": 5,
+  "realmTitle": "Real-World Defense",
+  "title": "The future of security",
+  "syllabusUnit": "Unit V: Post-Quantum Cryptography & Modern Primitives",
+  "covers": "Post-quantum (Kyber/Dilithium), zero-knowledge intuition, blockchain hashing & Merkle, passkeys/WebAuthn",
+  "visualizerId": "zkp_cave",
+  "visualizerTitle": "Zero-Knowledge Cave & Post-Quantum Lab",
+  "prerequisites": "Chapter 24",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain how quantum computers (Shor's algorithm) threaten RSA and ECC.",
+    "You will be able to illustrate Zero-Knowledge Proofs using the Ali Baba Cave analogy.",
+    "You will be able to describe how FIDO2 / WebAuthn passkeys replace passwords with public keys."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Quantum Threat: Shor vs Grover",
+      "analogy": "A quantum super-key that unlocks all classical factoring padlocks in seconds.",
+      "coreConcept": "Peter Shor proved in 1994 that quantum computers running Shor's algorithm can factor integers and solve discrete logarithms in polynomial time, breaking RSA, DH, and ECC.",
+      "example": "Grover's algorithm halves symmetric security (AES-128 becomes 64-bit strength, but AES-256 remains safe at 128-bit quantum strength)."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Post-Quantum Cryptography (PQC)",
+      "analogy": "Building locks out of high-dimensional multi-directional crystal lattices instead of simple numbers.",
+      "coreConcept": "NIST standardized lattice-based post-quantum algorithms in 2024: ML-KEM (Kyber) for key encapsulation and ML-DSA (Dilithium) for digital signatures.",
+      "example": "Lattice problems remain computationally intractable for both classical and quantum computers."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Zero-Knowledge & Passkeys (WebAuthn)",
+      "analogy": "Proving you know the secret cave password by walking in one entrance and emerging from the other without ever saying the word.",
+      "coreConcept": "Zero-Knowledge Proofs (ZKPs) mathematically prove a statement is true without revealing any secret data. FIDO2 / WebAuthn replaces passwords with hardware-backed public keys.",
+      "example": "Passkeys use device TouchID/FaceID to sign challenges, making phishing completely impossible."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c25_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What impact will large-scale, fault-tolerant quantum computers running Shor's algorithm have on modern classical cryptography?",
+      "options": [
+        "They will completely break RSA, Diffie-Hellman, and Elliptic Curve Cryptography (ECC) in polynomial time",
+        "They will break symmetric AES-256 completely",
+        "They will have zero impact on security",
+        "They will make the internet 100x slower"
+      ],
+      "correctIndex": 0,
+      "explanation": "Shor's algorithm solves both prime factorization and the discrete logarithm problem in polynomial time O(n^3), dismantling classical public-key cryptography.",
+      "wrongExplanations": [
+        "Correct! Shor's algorithm renders RSA and ECC insecure.",
+        "Grover's algorithm only halves symmetric key space; AES-256 retains 128 bits of security.",
+        "The impact is profound and requires global migration to PQC.",
+        "Quantum processing does not affect optical network transit speed."
+      ],
+      "realWorldExample": "NIST initiated the Post-Quantum Cryptography standardization project in 2016 to replace RSA and ECC."
+    },
+    {
+      "id": "c25_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which mathematical structure forms the foundation of the newly standardized NIST Post-Quantum algorithms ML-KEM (Kyber) and ML-DSA (Dilithium)?",
+      "options": [
+        "High-dimensional Lattice-based cryptography (Learning With Errors / LWE)",
+        "Basic clock arithmetic",
+        "Monoalphabetic substitution",
+        "Simple binary XOR"
+      ],
+      "correctIndex": 0,
+      "explanation": "Lattice-based cryptography relies on the hardness of finding the shortest vector in high-dimensional geometric grids, which quantum computers cannot solve efficiently.",
+      "wrongExplanations": [
+        "Correct! Module-Lattice cryptography provides post-quantum security.",
+        "Modular clock math is broken by Shor's algorithm.",
+        "Substitution is trivial classical crypto.",
+        "XOR alone is symmetric."
+      ],
+      "realWorldExample": "FIPS 203 (ML-KEM) and FIPS 204 (ML-DSA) were finalized by NIST in August 2024."
+    },
+    {
+      "id": "c25_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In the famous 'Ali Baba Cave' parable, what does the story illustrate about Zero-Knowledge Proofs (ZKPs)?",
+      "options": [
+        "Peggy proves to Victor that she knows the secret magic word to open the door without ever speaking the word to Victor",
+        "Ali Baba finds stolen gold in an open desert",
+        "A password is sent in clear HTTP text",
+        "A computer encrypts files with a key"
+      ],
+      "correctIndex": 0,
+      "explanation": "By repeatedly entering the circular cave through path A or B and emerging from whichever path Victor shouts, Peggy proves she can unlock the door without revealing the secret word.",
+      "wrongExplanations": [
+        "Correct! Zero-Knowledge Proofs confirm truth without leaking private data.",
+        "Folktales are analogies.",
+        "ZKPs prevent cleartext transmission.",
+        "Encryption is distinct from zero-knowledge verification."
+      ],
+      "realWorldExample": "ZK-SNARKs enable private cryptocurrency transactions and privacy-preserving identity verification."
+    },
+    {
+      "id": "c25_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What makes FIDO2 / WebAuthn 'Passkeys' completely immune to credential phishing attacks?",
+      "options": [
+        "Passkeys bind public-key signatures directly to the browser's verified website origin domain",
+        "Passkeys require typing a 100-character master key",
+        "Passkeys are written on paper cards",
+        "Passkeys turn off website links"
+      ],
+      "correctIndex": 0,
+      "explanation": "The browser validates the cryptographic domain origin; if you visit a fake lookalike phishing site, your hardware key will refuse to sign the challenge.",
+      "wrongExplanations": [
+        "Correct! Domain binding eliminates phishing because keys never respond to spoofed domains.",
+        "Users authenticate with biometrics (FaceID/fingerprint) without typing passwords.",
+        "Passkeys reside in hardware secure enclaves.",
+        "Links remain clickable."
+      ],
+      "realWorldExample": "Apple, Google, and Microsoft have deployed passkeys as the passwordless successor to legacy logins."
+    },
+    {
+      "id": "c25_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'Merkle Tree' and where is it fundamentally used in modern computing?",
+      "options": [
+        "A hierarchical tree of cryptographic hashes where every parent node is the hash of its children, enabling efficient tamper-proof verification",
+        "A tree planted in computer server rooms",
+        "A sorting algorithm used in databases",
+        "A tree of symmetric AES keys"
+      ],
+      "correctIndex": 0,
+      "explanation": "Ralph Merkle patented Merkle trees in 1979; they allow verifying whether a specific transaction exists in a huge block with only O(log n) hash proofs.",
+      "wrongExplanations": [
+        "Correct! Merkle trees enable cryptographic verification of huge datasets in Git, Bitcoin, and Certificate Transparency.",
+        "Trees are metaphorical data structures.",
+        "Sorting is an algorithm.",
+        "AES keys are symmetric strings."
+      ],
+      "realWorldExample": "Git commit integrity and Bitcoin block headers rely directly on Merkle trees."
+    },
+    {
+      "id": "c25_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the 'Store Now, Decrypt Later' (SNDL) threat posed by hostile state adversaries today?",
+      "options": [
+        "Adversaries intercept and record encrypted government and health data today, planning to decrypt it once quantum computers arrive",
+        "Adversaries destroy cloud data centers",
+        "Adversaries sell hard drives on eBay",
+        "Adversaries wait until night to hack computers"
+      ],
+      "correctIndex": 0,
+      "explanation": "Adversaries intercept encrypted military and financial traffic now, banking on the certainty that quantum hardware in 10-15 years will factor the keys.",
+      "wrongExplanations": [
+        "Correct! Data with long shelf-lives (20-30 years) must migrate to post-quantum encryption immediately.",
+        "SNDL is passive harvesting, not physical destruction.",
+        "Hardware auctions are unrelated.",
+        "Harvesting occurs 24/7 across internet backbones."
+      ],
+      "realWorldExample": "This threat is why NSA and NIST are urgently accelerating the transition to PQC standards today."
+    }
+  ],
+  "ashRecap": "The future of security is already here! Lattice crystals protect against quantum computers, Zero-Knowledge proves truth without revealing secrets, and Passkeys kill phishing forever!"
+}

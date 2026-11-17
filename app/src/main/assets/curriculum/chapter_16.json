@@ -1,0 +1,164 @@
+{
+  "id": 16,
+  "number": 16,
+  "realmId": 4,
+  "realmTitle": "Trust & Proof",
+  "title": "Hash functions",
+  "syllabusUnit": "Unit IV: Cryptographic Hash Functions & Hash Algorithms",
+  "covers": "Properties, avalanche, birthday paradox, SHA family, collisions",
+  "visualizerId": "sha256",
+  "visualizerTitle": "SHA-256 & Avalanche Meter",
+  "prerequisites": "Chapter 15",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to state the three core properties of cryptographic hash functions.",
+    "You will be able to demonstrate the Avalanche Effect with a 1-bit input flip.",
+    "You will be able to explain why the Birthday Paradox requires 256-bit digests."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Digital Fingerprint",
+      "analogy": "A blender that takes an entire encyclopedia or a single word and produces an exact 64-character smoothie.",
+      "coreConcept": "A cryptographic hash function H(M) maps variable-length input to a fixed-length digest. It is strictly one-way (irreversible).",
+      "example": "SHA-256 turns any data into exactly 256 bits (64 hex characters)."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The Three Sacred Properties",
+      "analogy": "1. Impossible to reverse. 2. Impossible to find another text matching a target. 3. Impossible to find ANY two matching texts.",
+      "coreConcept": "Pre-image resistance (one-way). Second pre-image resistance (given M1, cannot find M2 such that H(M1)=H(M2)). Collision resistance (cannot find any pair M1 != M2 with H(M1)=H(M2)).",
+      "example": "Breaking collision resistance breaks digital signatures."
+    },
+    {
+      "cardIndex": 3,
+      "title": "The Avalanche Effect & Birthday Attack",
+      "analogy": "Dropping one pebble starts an avalanche that changes 50% of the mountain.",
+      "coreConcept": "Flipping a single bit in the input changes ~50% of all output digest bits unpredictably. Due to the Birthday Paradox, finding a collision in an n-bit hash takes only 2^(n/2) operations.",
+      "example": "An 80-bit hash can be cracked in 2^40 operations; a 256-bit hash requires 2^128 operations (safe)."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c16_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is 'Pre-Image Resistance' in a cryptographic hash function?",
+      "options": [
+        "Given a hash digest h, it is computationally infeasible to find any original message m such that H(m) = h",
+        "The hash function produces outputs of variable length",
+        "The hash function can be decrypted with a password",
+        "The hash function deletes duplicate files"
+      ],
+      "correctIndex": 0,
+      "explanation": "Pre-image resistance guarantees that the hash function is a one-way street: you cannot reverse the digest back to the input.",
+      "wrongExplanations": [
+        "Correct! One-way property: infeasible to calculate input from output.",
+        "Hash digests are always fixed length.",
+        "Hashes have no keys and cannot be decrypted.",
+        "Hashes do not delete files."
+      ],
+      "realWorldExample": "Password storage relies on pre-image resistance so leaked database hashes cannot be easily inverted."
+    },
+    {
+      "id": "c16_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In a cryptographic hash function, what does the 'Avalanche Effect' mean?",
+      "options": [
+        "A 1-bit change in the input flips approximately 50% of the output digest bits",
+        "The computer processor speeds up over time",
+        "Hash digests get longer as files get larger",
+        "Files are deleted like falling snow"
+      ],
+      "correctIndex": 0,
+      "explanation": "A strong hash function ensures that even the tiniest change cascades through compression rounds, totally scrambling the output.",
+      "wrongExplanations": [
+        "Correct! High diffusion causes ~50% of bits to invert unpredictably.",
+        "CPU clocks remain constant.",
+        "Digest length is strictly fixed (e.g. 256 bits).",
+        "Files are unaffected."
+      ],
+      "realWorldExample": "Hashing 'hello' vs 'Hello' in SHA-256 produces completely unrecognizable hex strings."
+    },
+    {
+      "id": "c16_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why does the 'Birthday Paradox' reduce the security of an n-bit hash function from 2^n to 2^(n/2) against collisions?",
+      "options": [
+        "In a group of only 23 people, there is a 50% probability two people share a birthday; comparing pairs requires far fewer trials",
+        "Because computers crash on birthdays",
+        "Birthdays are always even numbers",
+        "Because calendar months have 30 days"
+      ],
+      "correctIndex": 0,
+      "explanation": "Finding ANY collision between two random inputs compares pairs (n choose 2), reaching a 50% chance of a match in only O(sqrt(N)) = 2^(n/2) steps.",
+      "wrongExplanations": [
+        "Correct! The birthday bound means finding ANY collision requires only 2^(n/2) operations.",
+        "Hardware stability is unrelated.",
+        "Calendar dates are arbitrary.",
+        "Months do not dictate mathematical probability."
+      ],
+      "realWorldExample": "MD5 (128-bit) was broken in practice because its birthday attack bound is only 2^64 operations."
+    },
+    {
+      "id": "c16_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What happened to the MD5 and SHA-1 hash functions in modern cybersecurity?",
+      "options": [
+        "They suffered collision attacks in practice and were officially retired from security use",
+        "They were purchased by Google and made private",
+        "They were converted into block ciphers",
+        "They were upgraded to 1024 bits"
+      ],
+      "correctIndex": 0,
+      "explanation": "Researchers demonstrated practical SHA-1 collisions in 2017 (SHAttered) and MD5 collisions in 2004 (Flame malware), causing NIST to deprecate both.",
+      "wrongExplanations": [
+        "Correct! MD5 and SHA-1 are cryptographically broken; use SHA-256, SHA-384, or SHA-3.",
+        "They remain open public algorithms.",
+        "Hash functions cannot become block ciphers.",
+        "Their digest lengths remain 128 and 160 bits."
+      ],
+      "realWorldExample": "Google and CWI Amsterdam produced the first real SHA-1 collision in two distinct PDF documents in 2017."
+    },
+    {
+      "id": "c16_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How many bits are in a SHA-256 hash digest?",
+      "options": [
+        "256 bits (32 bytes / 64 hexadecimal characters)",
+        "128 bits",
+        "512 bits",
+        "64 bits"
+      ],
+      "correctIndex": 0,
+      "explanation": "SHA-256 outputs exactly 256 bits of digest, typically displayed as 64 hexadecimal characters.",
+      "wrongExplanations": [
+        "Correct! 256 bits = 32 bytes = 64 hex characters.",
+        "128 bits is MD5.",
+        "512 bits is SHA-512.",
+        "64 bits is a tiny checksum."
+      ],
+      "realWorldExample": "Bitcoin block headers are hashed with double SHA-256 (SHA-256(SHA-256(Block)))."
+    },
+    {
+      "id": "c16_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the internal design structure used by SHA-256 to process blocks of data?",
+      "options": [
+        "Merkle-Damgård construction with Davies-Meyer compression function",
+        "Feistel network",
+        "Vigenère table",
+        "Caesar dial"
+      ],
+      "correctIndex": 0,
+      "explanation": "SHA-256 splits padded messages into 512-bit chunks, feeding each into a Davies-Meyer compression function operating on eight 32-bit state words.",
+      "wrongExplanations": [
+        "Correct! Merkle-Damgård construction processes sequential chunks through a compression function.",
+        "Feistel networks are used in block ciphers like DES.",
+        "Vigenère is a classical cipher.",
+        "Caesar is a 1-byte shift."
+      ],
+      "realWorldExample": "SHA-3 uses a fundamentally different 'sponge construction' (Keccak) to avoid length-extension attacks."
+    }
+  ],
+  "ashRecap": "A cryptographic hash is a one-way digital fingerprint. Change even one single letter, and the entire fingerprint explodes into something completely new!"
+}

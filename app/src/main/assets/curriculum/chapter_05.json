@@ -1,0 +1,164 @@
+{
+  "id": 5,
+  "number": 5,
+  "realmId": 1,
+  "realmTitle": "Secrets 101",
+  "title": "Perfect secrecy & breaking codes",
+  "syllabusUnit": "Unit I: Information Entropy & Cryptanalysis",
+  "covers": "One-time pad, entropy, frequency analysis, cryptanalysis",
+  "visualizerId": "frequency_analysis",
+  "visualizerTitle": "Frequency Lab & OTP",
+  "prerequisites": "Chapter 4",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to explain why the One-Time Pad achieves mathematically perfect secrecy.",
+    "You will be able to perform frequency analysis to crack simple ciphers.",
+    "You will be able to differentiate ciphertext-only, known-plaintext, and chosen-plaintext attacks."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The One-Time Pad (OTP)",
+      "analogy": "A secret key as long as the book itself, used once on a single page, then burned in fire.",
+      "coreConcept": "A truly random key of equal length to the plaintext, used exactly once, provides unbreakable perfect secrecy (proven by Claude Shannon).",
+      "example": "A 5-letter word XORed with 5 truly random bytes produces ciphertext that could equally decrypt to any 5-letter word."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Why Reusing OTP is Catastrophic",
+      "analogy": "Writing two letters on the same carbon copy paper leaves visible overlapping pencil grooves.",
+      "coreConcept": "If key K is reused: C1 XOR C2 = (P1 XOR K) XOR (P2 XOR K) = P1 XOR P2. The secret key cancels out entirely!",
+      "example": "Soviet code clerks reused OTP pages in the 1940s, allowing the Venona project to decrypt sensitive diplomatic cables."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Cryptanalysis Attack Models",
+      "analogy": "A detective with only a locked letter vs a detective who also found the sender's rough draft.",
+      "coreConcept": "Ciphertext-only is the hardest attack. Known-plaintext pairs sample input and output. Chosen-plaintext lets the attacker inject custom plaintexts.",
+      "example": "Chosen-plaintext is standard for evaluating modern ciphers: if you can choose the input, can you recover the key?"
+    }
+  ],
+  "questions": [
+    {
+      "id": "c5_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "According to Claude Shannon, why is a properly implemented One-Time Pad mathematically UNBREAKABLE?",
+      "options": [
+        "Every possible plaintext of that length is equally probable to an eavesdropper",
+        "The key is encrypted by RSA first",
+        "Computers crash when calculating XOR",
+        "The ciphertext is always 0"
+      ],
+      "correctIndex": 0,
+      "explanation": "Given ciphertext C, brute-forcing all possible keys produces every valid English sentence of that length with zero information about which was real.",
+      "wrongExplanations": [
+        "Correct! With a truly random key used once, ciphertext gives zero information about plaintext.",
+        "OTP requires no public-key encryption.",
+        "XOR is the fastest CPU instruction available.",
+        "Ciphertext consists of uniformly distributed random bytes."
+      ],
+      "realWorldExample": "The Washington-Moscow hotline used One-Time Pad teleprinters during the Cold War."
+    },
+    {
+      "id": "c5_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What fatal flaw happens if an operator reuses the same One-Time Pad key K on two different messages P1 and P2?",
+      "options": [
+        "XORing the two ciphertexts together cancels the key: C1 XOR C2 = P1 XOR P2",
+        "The computer processor overheats",
+        "The messages turn into blank whitespace",
+        "The encryption speed drops by 50%"
+      ],
+      "correctIndex": 0,
+      "explanation": "C1 XOR C2 = (P1 XOR K) XOR (P2 XOR K) = P1 XOR P2. The key disappears, allowing frequency analysis of P1 and P2.",
+      "wrongExplanations": [
+        "Correct! Reusing a one-time pad leaks the XOR of the plaintexts directly.",
+        "Processing XOR has no abnormal thermal impact on hardware.",
+        "Data remains binary values.",
+        "XOR throughput is unchanged."
+      ],
+      "realWorldExample": "The US Venona project decrypted thousands of Soviet spy cables because codebooks were duplicated."
+    },
+    {
+      "id": "c5_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In cryptanalysis, what is a 'Chosen-Plaintext Attack' (CPA)?",
+      "options": [
+        "The attacker chooses arbitrary plaintext messages and obtains matching ciphertexts",
+        "The attacker has only intercept access to ciphertext bytes",
+        "The attacker already knows the secret master key",
+        "The attacker bribes the system administrator"
+      ],
+      "correctIndex": 0,
+      "explanation": "In a chosen-plaintext attack, the cryptanalyst feeds crafted inputs into the black-box cipher to observe how outputs change.",
+      "wrongExplanations": [
+        "Correct! CPA allows defenders to test whether differential patterns leak secret key bits.",
+        "Having only ciphertext is a Ciphertext-Only Attack.",
+        "If the key is already known, no cryptanalysis attack is needed.",
+        "Bribing administrators is social engineering."
+      ],
+      "realWorldExample": "Modern block cipher standards like AES must be mathematically proven secure against Chosen-Plaintext Attacks."
+    },
+    {
+      "id": "c5_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the most frequent single letter in standard English prose used in frequency analysis?",
+      "options": [
+        "E (approx. 12.7%)",
+        "Z (approx. 15%)",
+        "X (approx. 20%)",
+        "Q (approx. 18%)"
+      ],
+      "correctIndex": 0,
+      "explanation": "Letter 'E' occurs most frequently in English text (approx. 12.7%), followed by 'T', 'A', and 'O'.",
+      "wrongExplanations": [
+        "Correct! 'E' is the highest frequency letter in standard English.",
+        "'Z' is one of the rarest letters (< 0.1%).",
+        "'X' is extremely rare (< 0.2%).",
+        "'Q' is also extremely rare (< 0.1%)."
+      ],
+      "realWorldExample": "Arthur Conan Doyle's Sherlock Holmes story 'The Dancing Men' used letter 'E' frequency to crack the code."
+    },
+    {
+      "id": "c5_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What practical obstacle prevents the One-Time Pad from being used for all internet web traffic?",
+      "options": [
+        "Key distribution: securely sharing keys as long as every message is impractical",
+        "XOR arithmetic is too slow for mobile phones",
+        "Fiber-optic cables cannot carry pad bits",
+        "Browsers do not support addition"
+      ],
+      "correctIndex": 0,
+      "explanation": "If you already have a secure channel to transmit gigabytes of random OTP keys, you could just send the message itself on that channel!",
+      "wrongExplanations": [
+        "Correct! Securely distributing huge quantities of pre-shared keys at global scale is logistically impossible.",
+        "XOR is the fastest mathematical operation possible.",
+        "Fiber optics carry arbitrary binary data.",
+        "Browsers execute complete cryptographic suites."
+      ],
+      "realWorldExample": "Modern SSL/TLS solves key distribution by using asymmetric cryptography instead of bulk pre-shared pads."
+    },
+    {
+      "id": "c5_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is 'Kerckhoffs's Principle', the foundation of modern cryptography?",
+      "options": [
+        "A cryptosystem must be secure even if everything about it is public, except the key",
+        "Security algorithms must always be kept secret commercial property",
+        "Keys should never exceed 8 bits",
+        "Only government military officials may read cipher code"
+      ],
+      "correctIndex": 0,
+      "explanation": "Auguste Kerckhoffs stated in 1883 that security through obscurity fails; security must depend solely on key secrecy.",
+      "wrongExplanations": [
+        "Correct! Public algorithms peer-reviewed by global mathematicians prove security without hidden secrets.",
+        "Security through obscurity is widely condemned.",
+        "8-bit keys can be cracked in less than a microsecond.",
+        "Open public standards protect civil liberties and online banking."
+      ],
+      "realWorldExample": "AES and RSA are completely open public standards; knowing their code provides zero help in guessing the key."
+    }
+  ],
+  "ashRecap": "The One-Time Pad is the only truly unbreakable cipher, but only if the key is completely random, as long as the message, and never reused!"
+}

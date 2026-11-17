@@ -1,0 +1,164 @@
+{
+  "id": 22,
+  "number": 22,
+  "realmId": 5,
+  "realmTitle": "Real-World Defense",
+  "title": "Web & wireless security",
+  "syllabusUnit": "Unit V: Transport-Level & Wireless Security",
+  "covers": "SSL/TLS 1.3 handshake, HTTPS, WPA2/WPA3",
+  "visualizerId": "tls_handshake",
+  "visualizerTitle": "TLS 1.3 & Wi-Fi Handshake Lab",
+  "prerequisites": "Chapter 21",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to diagram the 1-RTT TLS 1.3 cryptographic handshake.",
+    "You will be able to explain how HTTPS protects web traffic against tampering and eavesdropping.",
+    "You will be able to describe the WPA3 Dragonfly (SAE) handshake protecting Wi-Fi."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The 1-RTT TLS 1.3 Handshake",
+      "analogy": "A lightning-fast secret introduction: client and server agree on keys in just one round-trip exchange.",
+      "coreConcept": "TLS 1.3 replaced slow legacy protocols: 1. ClientHello sends supported ciphers and Diffie-Hellman key share. 2. ServerHello replies with its key share and digital certificate. 3. Both compute session keys and encrypt immediately.",
+      "example": "Reduces connection latency from 2-RTT to 1-RTT (and supports 0-RTT resumption)."
+    },
+    {
+      "cardIndex": 2,
+      "title": "HTTPS: The Padlock of the Web",
+      "analogy": "Wrapping standard HTTP web traffic in an unbreakable TLS encryption envelope.",
+      "coreConcept": "HTTPS (port 443) runs HTTP over TLS. It guarantees Confidentiality (preventing ISPs and coffee shops from sniffing passwords) and Authenticity (proving you connected to your real bank).",
+      "example": "Modern browsers flag plain unencrypted HTTP sites as 'Not Secure'."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Wireless Security: WPA2 vs WPA3",
+      "analogy": "WPA2 checked passwords like a loud shouted whisper; WPA3 Dragonfly handshake checks passwords without leaking them.",
+      "coreConcept": "WPA2 used a 4-way handshake vulnerable to offline dictionary cracking (KRACK attack). WPA3 uses Simultaneous Authentication of Equals (SAE), defeating offline password cracking even on weak passphrases.",
+      "example": "WPA3 also enforces Protected Management Frames (PMF) to prevent Wi-Fi deauthentication attacks."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c22_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How many round-trip times (RTT) does a full handshake take in modern TLS 1.3 compared to legacy TLS 1.2?",
+      "options": [
+        "TLS 1.3 takes 1-RTT (50% faster than TLS 1.2's 2-RTT)",
+        "TLS 1.3 takes 10-RTT",
+        "Both take 5-RTT",
+        "TLS 1.3 takes zero seconds"
+      ],
+      "correctIndex": 0,
+      "explanation": "TLS 1.3 sends the client's Diffie-Hellman key share speculatively in the very first ClientHello packet, completing key exchange in a single round trip.",
+      "wrongExplanations": [
+        "Correct! 1-RTT handshake dramatically speeds up web page load times.",
+        "10-RTT would make web browsing intolerably slow.",
+        "Legacy TLS 1.2 required 2-RTT.",
+        "Handshakes take physical network transit time."
+      ],
+      "realWorldExample": "RFC 8446 standardized TLS 1.3 in 2018, deprecating RSA key exchange and broken CBC ciphers."
+    },
+    {
+      "id": "c22_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which ancient cryptographic feature was completely REMOVED from TLS 1.3 to guarantee Forward Secrecy?",
+      "options": [
+        "Static RSA key exchange",
+        "Diffie-Hellman key exchange",
+        "AES encryption",
+        "SHA-256 hashing"
+      ],
+      "correctIndex": 0,
+      "explanation": "In TLS 1.3, RSA key exchange was completely abolished; all key exchanges MUST use Ephemeral Diffie-Hellman (ECDHE) to guarantee forward secrecy.",
+      "wrongExplanations": [
+        "Correct! RSA key exchange allowed anyone holding the server's private key to decrypt all past recorded traffic.",
+        "Diffie-Hellman is mandatory in TLS 1.3.",
+        "AES-GCM is standard.",
+        "SHA-256 is the default hash."
+      ],
+      "realWorldExample": "Removing static RSA prevents government surveillance agencies from storing encrypted traffic to decrypt years later."
+    },
+    {
+      "id": "c22_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What vulnerability allowed attackers to capture WPA2 Wi-Fi handshakes and crack home passwords offline?",
+      "options": [
+        "WPA2's 4-way handshake exposed cryptographic hashes derived directly from the pre-shared key (PSK)",
+        "Wi-Fi routers do not use radio waves",
+        "WPA2 keys only have 4 letters",
+        "Wi-Fi passwords expire every hour"
+      ],
+      "correctIndex": 0,
+      "explanation": "Attackers capture the 4-way EAPOL handshake frames over the air and run dictionary attacks on their GPU clusters at billions of guesses per second.",
+      "wrongExplanations": [
+        "Correct! EAPOL frames leak the verification hash for offline brute-forcing without touching the router.",
+        "Wi-Fi transmits via 2.4GHz and 5GHz radio.",
+        "PSK passwords can be up to 63 characters.",
+        "Passphrases stay valid until changed."
+      ],
+      "realWorldExample": "Tools like Aircrack-ng and Hashcat routinely crack captured WPA2 handshakes."
+    },
+    {
+      "id": "c22_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does WPA3's Simultaneous Authentication of Equals (SAE, 'Dragonfly') protocol defeat offline dictionary attacks?",
+      "options": [
+        "It uses zero-knowledge password proofs: an attacker cannot verify a guessed password without active interactive router participation",
+        "It forces all passwords to be 100 characters",
+        "It disables radio signals",
+        "It requires smart cards for home routers"
+      ],
+      "correctIndex": 0,
+      "explanation": "SAE executes an interactive zero-knowledge exchange; a captured passive handshake provides zero mathematical proof of whether a password guess is correct.",
+      "wrongExplanations": [
+        "Correct! Attackers cannot test password guesses offline against captured packets.",
+        "WPA3 supports standard user-chosen passphrases.",
+        "Radio signals are untouched.",
+        "Home WPA3 Personal requires no smart cards."
+      ],
+      "realWorldExample": "WPA3 dragonfly handshake is based on RFC 7664."
+    },
+    {
+      "id": "c22_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is HTTP Strict Transport Security (HSTS)?",
+      "options": [
+        "A security header that instructs browsers to ONLY connect via HTTPS, preventing SSL stripping attacks",
+        "A firewall that blocks games",
+        "A protocol that speeds up downloads",
+        "A tool to compress JPEG images"
+      ],
+      "correctIndex": 0,
+      "explanation": "HSTS (Strict-Transport-Security header) forces browsers to automatically convert http:// to https:// before sending any network packets.",
+      "wrongExplanations": [
+        "Correct! HSTS stops SSL-Strip attacks where adversaries downgrade connections to plain HTTP.",
+        "HSTS is a browser policy header, not a firewall.",
+        "HSTS enforces encryption, not download acceleration.",
+        "Compression is unrelated."
+      ],
+      "realWorldExample": "Major domains are included in browser 'HSTS Preload lists', ensuring connections are encrypted from the very first visit."
+    },
+    {
+      "id": "c22_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'Wi-Fi Deauthentication Attack'?",
+      "options": [
+        "An attacker sends spoofed management frames commanding the victim's device to disconnect from the access point",
+        "An attacker cuts the router's physical power cord",
+        "An attacker jams the entire 5GHz frequency band",
+        "An attacker changes the router's brand name"
+      ],
+      "correctIndex": 0,
+      "explanation": "Because management frames were unencrypted in legacy Wi-Fi (802.11), attackers spoof disconnect packets to kick users off or force handshakes.",
+      "wrongExplanations": [
+        "Correct! Spoofed deauth frames disconnect victims from Wi-Fi networks.",
+        "Physical sabotage is vandalism, not a protocol exploit.",
+        "Frequency jamming requires radio noise transmitters.",
+        "SSID broadcasting is separate."
+      ],
+      "realWorldExample": "WPA3 mandates Protected Management Frames (802.11w PMF) to cryptographically sign deauth packets."
+    }
+  ],
+  "ashRecap": "TLS 1.3 gives the web a lightning-fast 1-round handshake with forward secrecy. WPA3 shields your Wi-Fi from eavesdroppers and offline password crackers!"
+}

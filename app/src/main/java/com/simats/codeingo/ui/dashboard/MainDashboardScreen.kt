@@ -352,10 +352,10 @@ fun MainDashboardScreen(
         }
     }
 
-    // Sequential curriculum flow from Chapter 1 to 5 (plus unlocked expansion chapters)
+    // Sequential curriculum flow across all 25 chapters
     val visibleUnits = remember(maxUnlockedChapter, masterUnits) {
         masterUnits.filter { unit ->
-            unit.id in 1..5 || unit.id <= maxUnlockedChapter + 1
+            unit.id in 1..25 || unit.id <= maxUnlockedChapter + 1
         }
     }
 
@@ -559,10 +559,9 @@ fun MainDashboardScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
 
-                                val currentChapterModel = remember(maxUnlockedChapter) {
-                                    com.simats.codeingo.data.model.DSA5ChapterData.chapters.firstOrNull { it.id == maxUnlockedChapter }
+                                val currentChapterTitle = remember(maxUnlockedChapter) {
+                                    ChapterRegistry.getChapterById(maxUnlockedChapter)?.title ?: "Cryptographic Security Foundations"
                                 }
-                                val currentChapterTitle = currentChapterModel?.title ?: "Cryptographic Security Foundations"
 
                                 ContinueHeroCard(
                                     activeLevelIndex = activeLevelIndex,

@@ -1,0 +1,164 @@
+{
+  "id": 4,
+  "number": 4,
+  "realmId": 1,
+  "realmTitle": "Secrets 101",
+  "title": "Shuffling & hiding",
+  "syllabusUnit": "Unit I: Transposition & Steganography",
+  "covers": "Rail fence, columnar transposition, steganography, product ciphers",
+  "visualizerId": "rail_fence",
+  "visualizerTitle": "Rail Fence & Stego Lab",
+  "prerequisites": "Chapter 3",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to write and read messages along a Rail Fence zig-zag.",
+    "You will be able to perform Columnar Transposition using a numeric key.",
+    "You will be able to explain how Steganography hides data inside image pixels."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The Rail Fence Zig-Zag",
+      "analogy": "Writing words down and up along wooden fence rails, then reading off row by row.",
+      "coreConcept": "Transposition rearranges letter positions without changing identity. Rail fence writes characters diagonally and reads horizontally.",
+      "example": "'DEFEND' on 2 rails becomes row 1 'DFN' + row 2 'EED' = 'DFNEED'."
+    },
+    {
+      "cardIndex": 2,
+      "title": "Columnar Transposition",
+      "analogy": "Writing text into columns under a numbered header, then reading out columns by key order.",
+      "coreConcept": "Characters fill a matrix row by row. Columns are then extracted according to the alphabetical rank of the secret key word.",
+      "example": "Key 'CAT' orders columns: 2 (A), 1 (C), 3 (T)."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Steganography: Hiding in Plain Sight",
+      "analogy": "Writing with invisible lemon juice between the lines of a normal shopping list.",
+      "coreConcept": "Steganography hides the very existence of a secret message by replacing least significant bits (LSBs) of media files.",
+      "example": "Altering the last bit of RGB pixel values creates color changes invisible to the human eye."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c4_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the key difference between Cryptography and Steganography?",
+      "options": [
+        "Cryptography scrambles messages; Steganography hides the message's existence",
+        "Cryptography uses software; Steganography only uses paper",
+        "Steganography is mathematical; Cryptography is not",
+        "Cryptography is illegal in modern times"
+      ],
+      "correctIndex": 0,
+      "explanation": "Cryptography makes data unreadable; steganography conceals the fact that communication is occurring at all.",
+      "wrongExplanations": [
+        "Correct! Cryptography hides content; steganography hides existence.",
+        "Both techniques are implemented in modern software.",
+        "Both leverage computer science.",
+        "Cryptography is standard legal technology."
+      ],
+      "realWorldExample": "Spies have embedded secret text into digital image EXIF tags and low-order audio bits."
+    },
+    {
+      "id": "c4_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In a 2-rail Rail Fence cipher, how is the plaintext 'ATTACK' written across the rails?",
+      "options": [
+        "Rail 1: A T A, Rail 2: T A K",
+        "Rail 1: A T T, Rail 2: A C K",
+        "Rail 1: A C, Rail 2: T T A K",
+        "Rail 1: K C A, Rail 2: T T A"
+      ],
+      "correctIndex": 0,
+      "explanation": "Positions alternate: 0(A)->R1, 1(T)->R2, 2(T)->R1, 3(A)->R2, 4(C)->R1, 5(K)->R2. R1='ATC', R2='TAK'. Result: 'ATCTAK'.",
+      "wrongExplanations": [
+        "Correct! Letters alternate across top and bottom rails in a zig-zag.",
+        "This divides the word in half linearly without zig-zagging.",
+        "This uneven division violates standard rail fence progression.",
+        "This reversed the characters."
+      ],
+      "realWorldExample": "American Civil War scouts used rail fence ciphers to quickly encode battlefield telegrams."
+    },
+    {
+      "id": "c4_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In digital image steganography, what does 'LSB insertion' stand for?",
+      "options": [
+        "Least Significant Bit insertion",
+        "Longest Secret Byte insertion",
+        "Level Security Block insertion",
+        "Linear Shift Buffer insertion"
+      ],
+      "correctIndex": 0,
+      "explanation": "LSB replaces the least significant bit of each color byte (0-255), changing pixel color values by at most 1 unit.",
+      "wrongExplanations": [
+        "Correct! Modifying the least significant bit makes visual color shifts imperceptible to human eyes.",
+        "The acronym specifically references bit significance in binary numbers.",
+        "Security block is unrelated.",
+        "Buffer shifts refer to memory queues."
+      ],
+      "realWorldExample": "A 24-bit 1920x1080 wallpaper image can hide over 700 KB of secret files in its LSB layer."
+    },
+    {
+      "id": "c4_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What happens to the letter frequency distribution in a pure transposition cipher?",
+      "options": [
+        "Letter frequencies remain 100% identical to the plaintext",
+        "Letter frequencies become completely flat like white noise",
+        "Vowels vanish from the ciphertext",
+        "Every character becomes a random number"
+      ],
+      "correctIndex": 0,
+      "explanation": "Transposition only rearranges letter positions. The total count of every 'E', 'T', and 'A' remains completely unchanged.",
+      "wrongExplanations": [
+        "Correct! Shuffling characters preserves exact letter frequencies.",
+        "Flattened frequencies are the goal of polyalphabetic substitution.",
+        "Letters are never removed.",
+        "Characters remain letters."
+      ],
+      "realWorldExample": "Cryptanalysts immediately suspect transposition when letter frequencies match ordinary English text."
+    },
+    {
+      "id": "c4_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is a 'Product Cipher'?",
+      "options": [
+        "A cipher that combines two or more ciphers in sequence (like substitution + transposition)",
+        "A commercial cipher sold in retail stores",
+        "A cipher that multiplies numbers without modular division",
+        "A cipher designed only for grocery barcodes"
+      ],
+      "correctIndex": 0,
+      "explanation": "Claude Shannon defined product ciphers as the alternating combination of substitution (confusion) and transposition (diffusion).",
+      "wrongExplanations": [
+        "Correct! Chaining substitution and transposition builds modern block ciphers like DES and AES.",
+        "Commercial licensing has nothing to do with it.",
+        "Product refers to functional composition.",
+        "Barcodes are visual encoding schemes."
+      ],
+      "realWorldExample": "Feistel networks alternate substitution S-boxes with permutation P-boxes to implement product ciphers."
+    },
+    {
+      "id": "c4_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How can an investigator detect that an image file contains hidden LSB steganography?",
+      "options": [
+        "Statistical chi-square analysis of pixel value frequencies",
+        "Zooming in with a magnifying glass",
+        "Renaming the file extension to .txt",
+        "Checking the file creation date in Windows Explorer"
+      ],
+      "correctIndex": 0,
+      "explanation": "Natural images have smooth color transitions. Steganography disrupts natural bit pairing, creating detectable statistical anomalies.",
+      "wrongExplanations": [
+        "Correct! Steganalysis tools use statistical frequency tests to detect modified bit distributions.",
+        "Human vision cannot detect a 1/255 color shade change.",
+        "Renaming file extensions does not analyze internal binary entropy.",
+        "File timestamps reflect OS actions."
+      ],
+      "realWorldExample": "StegExpose and Stegdetect are popular forensic tools used by law enforcement to detect hidden payloads."
+    }
+  ],
+  "ashRecap": "Transposition shuffles letters like a deck of cards. Steganography hides the secret in plain view so nobody even suspects it's there!"
+}

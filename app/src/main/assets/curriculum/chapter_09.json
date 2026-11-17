@@ -1,0 +1,164 @@
+{
+  "id": 9,
+  "number": 9,
+  "realmId": 2,
+  "realmTitle": "Symmetric Forge",
+  "title": "AES, the modern standard",
+  "syllabusUnit": "Unit II: Advanced Encryption Standard & Rijndael",
+  "covers": "AES structure, 4 round steps, key expansion, finite field GF(2^8) in plain words",
+  "visualizerId": "aes_matrix",
+  "visualizerTitle": "AES State Matrix Visualizer",
+  "prerequisites": "Chapter 8",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to describe the 4x4 State Matrix of AES.",
+    "You will be able to explain the 4 transformations: SubBytes, ShiftRows, MixColumns, AddRoundKey.",
+    "You will be able to state the key sizes and round counts for AES-128, AES-192, and AES-256."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "The 4x4 State Matrix",
+      "analogy": "A 16-seat auditorium arranged in a 4-by-4 grid where 128 bits sit as 16 individual bytes.",
+      "coreConcept": "AES (Rijndael) processes 128-bit blocks organized as a 4x4 matrix of bytes: 16 bytes = 128 bits. Unlike DES, AES is a substitution-permutation network, not a Feistel cipher.",
+      "example": "Every round transforms all 16 bytes simultaneously across rows and columns."
+    },
+    {
+      "cardIndex": 2,
+      "title": "The 4 AES Transformations",
+      "analogy": "1. Swap cards (SubBytes), 2. Slide rows (ShiftRows), 3. Mix blenders (MixColumns), 4. Stamp secret key (AddRoundKey).",
+      "coreConcept": "SubBytes provides non-linear confusion via an S-box in GF(2^8). ShiftRows slides rows cyclically. MixColumns multiplies columns by a fixed matrix. AddRoundKey XORs round subkeys.",
+      "example": "The final round omits MixColumns to allow symmetric reverse decryption."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Key Sizes & Round Counts",
+      "analogy": "Longer keys require more rounds of mixing: 10 rounds for 128-bit, 12 rounds for 192-bit, 14 rounds for 256-bit.",
+      "coreConcept": "AES-128 uses 10 rounds; AES-192 uses 12 rounds; AES-256 uses 14 rounds. Even with the fastest supercomputers, brute-forcing AES-128 would take billions of years.",
+      "example": "AES-256 is certified by NSA for top-secret classified government communication."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c9_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the block size processed by the Advanced Encryption Standard (AES)?",
+      "options": [
+        "128 bits (16 bytes)",
+        "64 bits (8 bytes)",
+        "256 bits (32 bytes)",
+        "512 bits (64 bytes)"
+      ],
+      "correctIndex": 0,
+      "explanation": "AES strictly operates on 128-bit blocks (arranged as a 4x4 byte state matrix), regardless of whether key length is 128, 192, or 256 bits.",
+      "wrongExplanations": [
+        "Correct! AES block size is always 128 bits.",
+        "64 bits was the legacy DES block size.",
+        "256 bits is a possible AES key length, but block size remains 128.",
+        "512 bits is used in SHA-512 hashes."
+      ],
+      "realWorldExample": "The Rijndael cipher was created by Belgian cryptographers Joan Daemen and Vincent Rijmen."
+    },
+    {
+      "id": "c9_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How many rounds are performed in AES-128, AES-192, and AES-256 respectively?",
+      "options": [
+        "10, 12, and 14 rounds",
+        "16, 32, and 64 rounds",
+        "8, 16, and 24 rounds",
+        "5, 10, and 15 rounds"
+      ],
+      "correctIndex": 0,
+      "explanation": "AES uses 10 rounds for 128-bit keys, 12 rounds for 192-bit keys, and 14 rounds for 256-bit keys.",
+      "wrongExplanations": [
+        "Correct! 10 (128-bit), 12 (192-bit), 14 (256-bit).",
+        "16 rounds was used by DES.",
+        "These numbers do not match NIST FIPS 197 standards.",
+        "5 rounds would be vulnerable to cryptanalysis."
+      ],
+      "realWorldExample": "NIST selected Rijndael after a 3-year international competition evaluating security, efficiency, and hardware performance."
+    },
+    {
+      "id": "c9_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Which transformation in an AES round provides NON-LINEAR CONFUSION?",
+      "options": [
+        "SubBytes",
+        "ShiftRows",
+        "MixColumns",
+        "AddRoundKey"
+      ],
+      "correctIndex": 0,
+      "explanation": "SubBytes substitutes each byte with an S-box derived from multiplicative inverse in GF(2^8) combined with an affine transformation.",
+      "wrongExplanations": [
+        "Correct! SubBytes provides non-linear substitution.",
+        "ShiftRows provides diffusion by rotating rows.",
+        "MixColumns provides diffusion by mixing column matrix vectors.",
+        "AddRoundKey is linear bitwise XOR."
+      ],
+      "realWorldExample": "AES hardware acceleration instructions (AES-NI) execute SubBytes and MixColumns in a single CPU clock cycle."
+    },
+    {
+      "id": "c9_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "In the ShiftRows step of AES, how many bytes are cyclically shifted to the left in row 0, row 1, row 2, and row 3?",
+      "options": [
+        "Row 0 shifts 0; Row 1 shifts 1; Row 2 shifts 2; Row 3 shifts 3",
+        "All rows shift by 2 bytes",
+        "Row 0 shifts 1; Row 1 shifts 2; Row 2 shifts 3; Row 3 shifts 4",
+        "Rows do not shift"
+      ],
+      "correctIndex": 0,
+      "explanation": "Row 0 is not shifted. Row 1 rotates left by 1 byte. Row 2 rotates left by 2 bytes. Row 3 rotates left by 3 bytes.",
+      "wrongExplanations": [
+        "Correct! Row 0: 0, Row 1: 1, Row 2: 2, Row 3: 3 bytes.",
+        "Shifting uniformly would not disperse byte positions across columns.",
+        "Row 0 must stay aligned for diffusion across multiple rounds.",
+        "Rows shift on every round."
+      ],
+      "realWorldExample": "Combined with MixColumns, ShiftRows ensures that after 4 rounds, every ciphertext bit depends on every plaintext bit."
+    },
+    {
+      "id": "c9_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why is the MixColumns step omitted in the final round of AES?",
+      "options": [
+        "To make the decryption process architecturally symmetrical and faster",
+        "Because the computer runs out of memory",
+        "MixColumns produces errors on the 10th round",
+        "Because the key is exhausted"
+      ],
+      "correctIndex": 0,
+      "explanation": "Omitting MixColumns in the final round allows inverse AES decryption to mirror encryption without requiring extra round overhead.",
+      "wrongExplanations": [
+        "Correct! It aligns encryption and decryption structures.",
+        "Memory usage in AES is tiny (under 1 KB for S-box tables).",
+        "MixColumns is mathematically sound across all rounds.",
+        "The key schedule produces round keys for all rounds."
+      ],
+      "realWorldExample": "Decryption reverses operations: InvShiftRows, InvSubBytes, InvAddRoundKey, InvMixColumns."
+    },
+    {
+      "id": "c9_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What mathematical operation is executed during the AddRoundKey step?",
+      "options": [
+        "Bitwise XOR between the 128-bit state matrix and the 128-bit round subkey",
+        "Modular exponentiation",
+        "Floating point division",
+        "Alphabet substitution"
+      ],
+      "correctIndex": 0,
+      "explanation": "AddRoundKey performs a simple, fast bitwise XOR between each byte of the state matrix and the corresponding byte of the expanded round key.",
+      "wrongExplanations": [
+        "Correct! AddRoundKey is an XOR operation.",
+        "Exponentiation is used in RSA, not AES.",
+        "Floating point math is never used in block ciphers.",
+        "Substitution occurs in SubBytes."
+      ],
+      "realWorldExample": "AES Key Expansion generates (Nr + 1) round keys using RotWord, SubWord, and Rcon constants."
+    }
+  ],
+  "ashRecap": "AES turns 16 bytes into an unbreakable dance: SubBytes swaps, ShiftRows slides, MixColumns blends, and AddRoundKey locks it in with the key!"
+}

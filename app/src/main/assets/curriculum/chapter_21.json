@@ -1,0 +1,164 @@
+{
+  "id": 21,
+  "number": 21,
+  "realmId": 5,
+  "realmTitle": "Real-World Defense",
+  "title": "Email & IP security",
+  "syllabusUnit": "Unit V: IP Security & Electronic Mail Security",
+  "covers": "PGP, S/MIME, IPsec (AH, ESP, IKE), tunnel vs transport",
+  "visualizerId": "pgp_ipsec",
+  "visualizerTitle": "PGP Flow & IPsec Tunnel Lab",
+  "prerequisites": "Chapter 20",
+  "estimatedMinutes": 5,
+  "learningGoals": [
+    "You will be able to compare PGP's Web of Trust with S/MIME's hierarchical CA structure.",
+    "You will be able to distinguish IPsec Authentication Header (AH) from Encapsulating Security Payload (ESP).",
+    "You will be able to contrast IPsec Transport mode and Tunnel mode."
+  ],
+  "lessonCards": [
+    {
+      "cardIndex": 1,
+      "title": "Secure Email: PGP vs S/MIME",
+      "analogy": "Sealing letters in wax stamped by friends (PGP Web of Trust) vs stamped by a notary public (S/MIME CA).",
+      "coreConcept": "Pretty Good Privacy (PGP) encrypts email using hybrid crypto and user-signed keyrings. S/MIME uses standard X.509 certificates issued by commercial CAs.",
+      "example": "Both encrypt the email body and attachments, but leave email subject lines and metadata in the clear."
+    },
+    {
+      "cardIndex": 2,
+      "title": "IPsec: AH vs ESP Protocols",
+      "analogy": "AH puts a tamper-proof barcode on the envelope. ESP puts the letter inside a bulletproof armored briefcase.",
+      "coreConcept": "IPsec operates at Network Layer 3. Authentication Header (AH) provides integrity and authentication (no encryption). Encapsulating Security Payload (ESP) provides confidentiality AND authentication.",
+      "example": "ESP protocol 50 is the modern standard for VPN tunnels."
+    },
+    {
+      "cardIndex": 3,
+      "title": "Transport Mode vs Tunnel Mode",
+      "analogy": "Transport mode protects passenger mail; Tunnel mode drives the entire mail truck onto an armored bulletproof train.",
+      "coreConcept": "Transport mode encrypts only the IP payload (data), leaving original IP headers visible (host-to-host). Tunnel mode encrypts the ENTIRE original IP packet and adds a new outer IP header (gateway-to-gateway).",
+      "example": "Enterprise site-to-site VPNs connect branch offices using IPsec Tunnel mode."
+    }
+  ],
+  "questions": [
+    {
+      "id": "c21_q1",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What is the key difference between IPsec Transport Mode and IPsec Tunnel Mode?",
+      "options": [
+        "Transport mode encrypts only the payload; Tunnel mode encrypts the entire original IP packet and adds a new outer header",
+        "Transport mode is for airplanes; Tunnel mode is for subways",
+        "Transport mode uses passwords; Tunnel mode uses biometrics",
+        "Tunnel mode cannot carry web traffic"
+      ],
+      "correctIndex": 0,
+      "explanation": "Transport mode protects end-to-end host communication; Tunnel mode encapsulates the entire IP packet inside a new IP wrapper for gateway-to-gateway VPNs.",
+      "wrongExplanations": [
+        "Correct! Tunnel mode protects whole packets between VPN gateways.",
+        "Mode names refer to IP packet encapsulation architecture.",
+        "Both modes negotiate keys using IKE.",
+        "Tunnel mode carries all IP protocols (TCP, UDP, ICMP)."
+      ],
+      "realWorldExample": "Corporate branch office routers use IPsec Tunnel mode to interconnect private subnets over the public internet."
+    },
+    {
+      "id": "c21_q2",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Between the two core IPsec protocols, Authentication Header (AH) and Encapsulating Security Payload (ESP), which provides CONFIDENTIALITY (encryption)?",
+      "options": [
+        "ESP only (AH does not encrypt data)",
+        "AH only",
+        "Both AH and ESP encrypt data",
+        "Neither encrypts data"
+      ],
+      "correctIndex": 0,
+      "explanation": "AH (IP protocol 51) provides data integrity and anti-replay, but zero encryption. ESP (IP protocol 50) provides encryption, integrity, and authentication.",
+      "wrongExplanations": [
+        "Correct! ESP provides confidentiality and optional integrity; AH provides integrity only.",
+        "AH never encrypts payload bytes.",
+        "AH cannot encrypt.",
+        "ESP encrypts payload data."
+      ],
+      "realWorldExample": "Because NAT routers modify IP header addresses, AH fails across NAT, making ESP with NAT-Traversal (NAT-T) the modern default."
+    },
+    {
+      "id": "c21_q3",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What protocol is used by IPsec to dynamically negotiate security associations (SAs) and exchange cryptographic keys?",
+      "options": [
+        "Internet Key Exchange (IKE / IKEv2)",
+        "HTTP",
+        "FTP",
+        "Telnet"
+      ],
+      "correctIndex": 0,
+      "explanation": "IKE (running over UDP port 500/4500) uses Diffie-Hellman to authenticate endpoints and negotiate symmetric encryption and integrity keys.",
+      "wrongExplanations": [
+        "Correct! IKEv2 negotiates encryption keys and security associations.",
+        "HTTP is an unencrypted application protocol.",
+        "FTP transfers files.",
+        "Telnet is unencrypted remote terminal access."
+      ],
+      "realWorldExample": "IKEv2 supports MOBIKE, allowing mobile phone VPN connections to switch between Wi-Fi and 5G cellular without dropping."
+    },
+    {
+      "id": "c21_q4",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "How does Pretty Good Privacy (PGP) solve key authenticity without relying on centralized Certificate Authorities?",
+      "options": [
+        "The Web of Trust: users cryptographically sign each other's public keys based on personal trust",
+        "PGP keys are published in local newspapers",
+        "PGP does not use public keys",
+        "By assigning keys based on social security numbers"
+      ],
+      "correctIndex": 0,
+      "explanation": "In PGP's decentralized Web of Trust, users verify identities in person (key signing parties) and sign public keys, creating a distributed web of endorsements.",
+      "wrongExplanations": [
+        "Correct! The Web of Trust decentralizes identity verification without root CAs.",
+        "Newspapers are manual and non-cryptographic.",
+        "PGP is an asymmetric public-key system.",
+        "National IDs are not used in PGP keyrings."
+      ],
+      "realWorldExample": "Phil Zimmermann created PGP in 1991 to protect human rights activists and dissidents."
+    },
+    {
+      "id": "c21_q5",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Why do PGP and S/MIME still leak who you are emailing and what time you sent the message?",
+      "options": [
+        "Email headers (From, To, Subject, Date) must remain unencrypted so mail servers (MTA) can route the message",
+        "Because encryption algorithms don't know how to encrypt text",
+        "Email protocols are illegal to encrypt completely",
+        "Because mail servers delete encrypted headers"
+      ],
+      "correctIndex": 0,
+      "explanation": "SMTP mail routers need cleartext To/From header fields to deliver email across the internet; only the email body payload is encrypted.",
+      "wrongExplanations": [
+        "Correct! Email metadata remains unencrypted in transit.",
+        "Algorithms encrypt all binary data.",
+        "Full payload encryption is standard.",
+        "Servers forward headers, not delete them."
+      ],
+      "realWorldExample": "Metadata analysis (who talks to whom and when) can reveal sensitive relationships even when message bodies are encrypted."
+    },
+    {
+      "id": "c21_q6",
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "What email authentication framework uses DNS records to specify which mail servers are authorized to send email on behalf of a domain?",
+      "options": [
+        "Sender Policy Framework (SPF) & DKIM",
+        "IPsec",
+        "PGP",
+        "Kerberos"
+      ],
+      "correctIndex": 0,
+      "explanation": "SPF DNS records define authorized sending IP addresses, while DKIM provides cryptographic digital signatures to block email spoofing.",
+      "wrongExplanations": [
+        "Correct! SPF and DKIM combined with DMARC prevent domain spoofing and phishing.",
+        "IPsec protects network packets.",
+        "PGP encrypts message bodies.",
+        "Kerberos handles enterprise local SSO."
+      ],
+      "realWorldExample": "DMARC policies instruct receiving mailboxes (like Gmail) to quarantine or reject emails that fail SPF and DKIM checks."
+    }
+  ],
+  "ashRecap": "IPsec shields raw network packets in armored tunnels. PGP and S/MIME lock your emails in digital envelopes so eavesdroppers can't read your mail!"
+}
