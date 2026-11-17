@@ -52,8 +52,38 @@ enum class AshButtonStyle {
         val Danger = DANGER
         val Disabled = DISABLED
         val PRIMARY = BRAND
+        val SECONDARY = SURFACE
+        val TERTIARY = SURFACE
         val OUTLINE = SURFACE
     }
+}
+
+typealias AshButtonVariant = AshButtonStyle
+
+enum class AshButtonSize(val height: Dp) {
+    SMALL(38.dp),
+    REGULAR(50.dp),
+    LARGE(56.dp)
+}
+
+@Composable
+fun AshButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    variant: AshButtonStyle = AshButtonStyle.BRAND,
+    size: AshButtonSize = AshButtonSize.REGULAR,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    isEnabled: Boolean = true
+) {
+    AshButton(
+        title = text,
+        modifier = modifier,
+        style = variant,
+        isEnabled = isEnabled,
+        height = size.height,
+        onClick = onClick
+    )
 }
 
 @Composable

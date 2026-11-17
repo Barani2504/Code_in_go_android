@@ -99,8 +99,8 @@ data class AshTypography(
     val bodyMedium: TextStyle = TextStyle(
         fontFamily = NunitoFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp
+        fontSize = 15.sp,
+        lineHeight = 21.sp
     ),
     val labelLarge: TextStyle = TextStyle(
         fontFamily = NunitoFontFamily,
@@ -117,8 +117,8 @@ data class AshTypography(
     val labelSmall: TextStyle = TextStyle(
         fontFamily = NunitoFontFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 11.sp,
-        lineHeight = 15.sp
+        fontSize = 12.sp,
+        lineHeight = 16.sp
     )
 )
 

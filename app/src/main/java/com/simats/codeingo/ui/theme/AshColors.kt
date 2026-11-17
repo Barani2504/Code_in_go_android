@@ -55,9 +55,20 @@ val AshLightPalette = AshPalette(
 
 val LocalAshColors = staticCompositionLocalOf { AshDarkPalette }
 
+val AshPalette.background: Color get() = bg
+val AshPalette.border: Color get() = if (isDark) Color(0xFF262D38) else Color(0xFFE2E8F0)
+val AshPalette.subtle: Color get() = inkMuted
+val AshPalette.accentContainer: Color get() = accent.copy(alpha = 0.15f)
+val AshPalette.surfaceContainer: Color get() = if (isDark) Color(0xFF1E2530) else Color(0xFFF1F5F9)
+val AshPalette.statusSuccess: Color get() = success
+val AshPalette.statusError: Color get() = danger
+
 object AshTheme {
     val colors: AshPalette
         @Composable
         @ReadOnlyComposable
         get() = LocalAshColors.current
+
+    val typography: AshTypography
+        get() = AshType
 }
