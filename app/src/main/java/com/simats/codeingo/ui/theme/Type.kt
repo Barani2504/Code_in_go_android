@@ -12,17 +12,6 @@ import androidx.compose.ui.unit.sp
 
 import com.simats.codeingo.R
 
-// Modern, ultra-readable typography inspired by iOS .system(.rounded) and modern dev platforms
-val AppFontFamily = FontFamily(
-    Font(R.font.outfit, weight = FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
-    Font(R.font.outfit, weight = FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
-    Font(R.font.outfit, weight = FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
-    Font(R.font.outfit, weight = FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
-    Font(R.font.outfit, weight = FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
-    Font(R.font.outfit, weight = FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),
-    Font(R.font.outfit, weight = FontWeight.Black, variationSettings = FontVariation.Settings(FontVariation.weight(900)))
-)
-
 val RoundedFontFamily = FontFamily(
     Font(R.font.nunito, weight = FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
     Font(R.font.nunito, weight = FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
@@ -32,6 +21,9 @@ val RoundedFontFamily = FontFamily(
     Font(R.font.nunito, weight = FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),
     Font(R.font.nunito, weight = FontWeight.Black, variationSettings = FontVariation.Settings(FontVariation.weight(900)))
 )
+
+// Modern, ultra-readable typography — One Font (Nunito) across all UI text
+val AppFontFamily = RoundedFontFamily
 
 val CodeFontFamily = FontFamily.Monospace
 

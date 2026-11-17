@@ -72,8 +72,8 @@ import com.simats.codeingo.R
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
 import com.simats.codeingo.ui.theme.DarkBackground
@@ -614,10 +614,10 @@ private fun PhoenixStageDetailSheet(
         Spacer(modifier = Modifier.height(10.dp))
 
         // Equip 3D Button
-        Duolingo3DButton(
+        AshButton(
             title = if (isEquipped) "ACTIVE COMPANION EQUIPPED" else "EQUIP THIS COMPANION",
             onClick = { onEquip() },
-            style = if (isEquipped) Duolingo3DButtonStyle.GREEN else Duolingo3DButtonStyle.AMBER,
+            style = if (isEquipped) AshButtonStyle.SUCCESS else AshButtonStyle.BRAND,
             modifier = Modifier.fillMaxWidth()
         )
     }

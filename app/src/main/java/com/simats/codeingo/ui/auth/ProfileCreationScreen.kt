@@ -87,8 +87,8 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.R
 import com.simats.codeingo.domain.LocalizationManager
 import com.simats.codeingo.domain.PhoenixEmotionManager
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.components.GoogleLogoView
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView

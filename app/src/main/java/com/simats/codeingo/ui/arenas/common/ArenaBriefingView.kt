@@ -47,8 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
@@ -225,9 +225,9 @@ fun ArenaBriefingView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Duolingo3DButton(
+            AshButton(
                 title = "Engage Now",
-                style = if (isBoss) Duolingo3DButtonColor.AMBER else Duolingo3DButtonColor.GREEN,
+                style = if (isBoss) AshButtonStyle.BRAND else AshButtonStyle.SUCCESS,
                 onClick = onStartLevel,
                 modifier = Modifier.fillMaxWidth()
             )

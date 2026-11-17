@@ -152,7 +152,9 @@ enum class XPActivity(val title: String, val xpReward: Int, val iconName: String
     SEVEN_DAY_STREAK("7-Day Streak", 100, "flame.fill")
 }
 
-// MARK: - CNS Visualizer Type (Dual-Skin Parity)
+// MARK: - Visualizer Type
+typealias VisualizerType = DSAVisualizerType
+
 enum class DSAVisualizerType(val title: String, val iconName: String) {
     ARRAY("Caesar & Substitution Cipher", "lock"),
     STACK("DES Feistel Network", "layers"),

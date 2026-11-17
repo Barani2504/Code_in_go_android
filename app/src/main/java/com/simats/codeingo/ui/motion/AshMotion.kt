@@ -346,50 +346,27 @@ class SoundEffectsManager private constructor(context: Context) {
     private val soundScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     fun playTap() {
-        if (!shouldPlaySound()) return
-        try {
-            toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 25)
-        } catch (_: Throwable) {}
+        com.simats.codeingo.ui.sound.AshSoundPool.playTap()
     }
 
     fun playCorrect() {
-        if (!shouldPlaySound()) return
-        try {
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 90)
-        } catch (_: Throwable) {}
+        com.simats.codeingo.ui.sound.AshSoundPool.playCorrect()
     }
 
     fun playWrong() {
-        if (!shouldPlaySound()) return
-        try {
-            toneGenerator?.startTone(ToneGenerator.TONE_PROP_NACK, 120)
-        } catch (_: Throwable) {}
+        com.simats.codeingo.ui.sound.AshSoundPool.playWrong()
     }
 
     fun playCombo(multiplier: Int) {
-        if (!shouldPlaySound()) return
-        try {
-            val duration = (60 + multiplier * 15).coerceAtMost(160)
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, duration)
-        } catch (_: Throwable) {}
+        com.simats.codeingo.ui.sound.AshSoundPool.playCombo(multiplier)
     }
 
     fun playLevelUp() {
-        if (!shouldPlaySound()) return
-        soundScope.launch {
-            try {
-                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PIP, 60)
-                delay(80)
-                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 120)
-            } catch (_: Throwable) {}
-        }
+        com.simats.codeingo.ui.sound.AshSoundPool.playLevelUp()
     }
 
     fun playChest() {
-        if (!shouldPlaySound()) return
-        try {
-            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 150)
-        } catch (_: Throwable) {}
+        com.simats.codeingo.ui.sound.AshSoundPool.playChest()
     }
 
     private fun shouldPlaySound(): Boolean {

@@ -39,8 +39,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
@@ -236,9 +236,9 @@ fun ArenaLoadoutSheet(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            Duolingo3DButton(
+            AshButton(
                 title = if (selectedTool != null) "Equip ${selectedTool.title}" else "Proceed Without Tool",
-                style = Duolingo3DButtonColor.GREEN,
+                style = AshButtonStyle.SUCCESS,
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             )

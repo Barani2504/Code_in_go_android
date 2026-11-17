@@ -52,6 +52,27 @@ import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.tilt3D
 
+@Composable
+fun FinalJourneyView(
+    totalXP: Int = 1250,
+    totalLessons: Int = 25,
+    correctAnswers: Int = 48,
+    perfectLessons: Int = 18,
+    currentStreak: Int = 3,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DSAFinalMasterJourneyView(
+        totalXP = totalXP,
+        totalLessons = totalLessons,
+        correctAnswers = correctAnswers,
+        perfectLessons = perfectLessons,
+        currentStreak = currentStreak,
+        onDismiss = onDismiss,
+        modifier = modifier
+    )
+}
+
 /**
  * DSAFinalMasterJourneyView
  * Faithful Android Jetpack Compose counterpart to iOS DSAFinalMasterJourneyView.swift:

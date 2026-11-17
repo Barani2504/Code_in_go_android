@@ -38,6 +38,7 @@ class CodeingoApp : Application(), ImageLoaderFactory {
         }
 
         CrashLogStore.initialize(this)
+        com.simats.codeingo.ui.sound.AshSoundPool.initialize(this)
         PhoenixEmotionManager.instance.initialize(this)
         ThemeManager.instance.initialize(this)
         LocalizationManager.instance.initialize(this)

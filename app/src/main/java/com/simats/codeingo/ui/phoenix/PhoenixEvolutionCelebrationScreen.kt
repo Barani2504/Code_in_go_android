@@ -49,8 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.SubtextGray
 import kotlinx.coroutines.coroutineScope
@@ -317,9 +317,9 @@ fun PhoenixEvolutionCelebrationScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Ascend With Companion 3D Button
-            Duolingo3DButton(
+            AshButton(
                 title = "✨ ASCEND WITH COMPANION",
-                style = Duolingo3DButtonStyle.GREEN,
+                style = AshButtonStyle.SUCCESS,
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             )

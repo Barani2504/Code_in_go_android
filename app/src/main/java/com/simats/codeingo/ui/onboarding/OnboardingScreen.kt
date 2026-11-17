@@ -38,7 +38,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -72,8 +75,8 @@ import androidx.compose.ui.unit.sp
 import com.simats.codeingo.R
 import com.simats.codeingo.data.model.Language
 import com.simats.codeingo.domain.LocalizationManager
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonStyle
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.phoenix.AnimatedGIFView
 import com.simats.codeingo.ui.components.HeaderView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
@@ -149,25 +152,25 @@ fun OnboardingScreen(
                     when (page) {
                         0 -> HeroPageSlide()
                         1 -> FeatureSlide(
-                            icon = Icons.Default.SportsEsports,
-                            badgeText = "DSA ADVENTURE",
+                            icon = Icons.Default.Lock,
+                            badgeText = "CIPHERS & CODES",
                             badgeColor = AmberGoldText,
-                            title = "Gamified Roadmaps",
-                            subtitle = "Level up step-by-step through interactive 3D worlds from Arrays to Dynamic Programming."
+                            title = "Crack the Secrets",
+                            subtitle = "Watch secrets turn into scrambled text, then crack them yourself."
                         )
                         2 -> FeatureSlide(
-                            icon = Icons.Default.AutoAwesome,
-                            badgeText = "LIVE ALGORITHMS",
+                            icon = Icons.Default.Shield,
+                            badgeText = "CYBER BATTLES",
                             badgeColor = Color(0xFFFF731A),
-                            title = "Interactive Visualizer",
-                            subtitle = "Watch algorithms execute in real time with step-through pointer tracking and visual memory registers."
+                            title = "5 Threat Arenas",
+                            subtitle = "Battle hackers in 5 arenas and protect the network."
                         )
                         3 -> FeatureSlide(
-                            icon = Icons.Default.EmojiEvents,
-                            badgeText = "LEADERBOARDS & STREAKS",
+                            icon = Icons.Default.Bolt,
+                            badgeText = "DAILY HABIT",
                             badgeColor = AmberGoldText,
-                            title = "Climb the Leagues",
-                            subtitle = "Compete with coders worldwide, protect your daily streak, and unlock legendary Phoenix ranks."
+                            title = "Daily Power-Up",
+                            subtitle = "Just 5 minutes a day. Ready?"
                         )
                     }
                 }
@@ -266,7 +269,7 @@ private fun HeroPageSlide() {
         Spacer(modifier = Modifier.height(18.dp))
 
         Text(
-            text = "Rise with AshCrypt",
+            text = "Meet Ash",
             fontSize = 28.sp,
             fontWeight = FontWeight.Black,
             color = LocalDynamicThemeColors.current.textPrimary,
@@ -276,12 +279,12 @@ private fun HeroPageSlide() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "The fiery, fun, and gamified way to master Cryptography & Network Security!",
-            fontSize = 14.sp,
+            text = "I'll guide you through the secret world of codes.",
+            fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
-            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.70f),
+            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.80f),
             textAlign = TextAlign.Center,
-            lineHeight = 20.sp,
+            lineHeight = 22.sp,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
     }

@@ -1,56 +1,19 @@
 package com.simats.codeingo.ui.components
 
-import android.view.HapticFeedbackConstants
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.foundation.border
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.AmberGoldDark
-import com.simats.codeingo.ui.theme.AppFontFamily
-import com.simats.codeingo.ui.theme.PhoenixPlaceholder
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
-// ══════════════════════════════════════════════════════════════════
-// 🔘 Duolingo 3D Tactile Push Button (Exact Parity with iOS)
-// Features: 4dp physical bevel shadow, smooth 4dp depression on press,
-// authentic color schemes, and tactile feedback.
-// ══════════════════════════════════════════════════════════════════
-
+@Deprecated("Use AshButtonStyle instead", ReplaceWith("AshButtonStyle"))
 typealias Duolingo3DButtonStyle = Duolingo3DButtonColor
+@Deprecated("Use AshButtonStyle instead", ReplaceWith("AshButtonStyle"))
 typealias Tactile3DButtonStyle = Duolingo3DButtonColor
+@Deprecated("Use AshButtonStyle instead", ReplaceWith("AshButtonStyle"))
 typealias Tactile3DButtonColor = Duolingo3DButtonColor
 
+@Deprecated("Use AshButtonStyle instead")
 enum class Duolingo3DButtonColor {
     GREEN,
     BLUE,
@@ -66,45 +29,16 @@ enum class Duolingo3DButtonColor {
         val Disabled = DISABLED
     }
 
-    val surfaceColor: Color
-        @Composable
-        get() {
-            val isDark = LocalDynamicThemeColors.current.isDark
-            return when (this) {
-                GREEN -> Color(0xFF58CC02)
-                BLUE -> Color(0xFF1CB0F6)
-                AMBER -> AmberGold
-                WHITE -> if (isDark) Color(0xFF243240) else Color.White
-                DISABLED -> if (isDark) Color(0xFF283644) else Color(0xFFE5E5E5)
-            }
-        }
-
-    val shadowColor: Color
-        @Composable
-        get() {
-            val isDark = LocalDynamicThemeColors.current.isDark
-            return when (this) {
-                GREEN -> Color(0xFF46A302)
-                BLUE -> Color(0xFF188ECE)
-                AMBER -> AmberGoldDark
-                WHITE -> if (isDark) Color(0xFF19232D) else Color(0xFFD7DEEB)
-                DISABLED -> if (isDark) Color(0xFF1E2832) else Color(0xFFCCCCCC)
-            }
-        }
-
-    val textColor: Color
-        @Composable
-        get() {
-            val isDark = LocalDynamicThemeColors.current.isDark
-            return when (this) {
-                GREEN, BLUE -> Color.White
-                AMBER -> Color(0xFF1A1205)
-                WHITE -> if (isDark) Color(0xFF1CB0F6) else Color(0xFF1CB0F6)
-                DISABLED -> if (isDark) PhoenixPlaceholder else Color(0xFFAFAFAF)
-            }
-        }
+    fun toAshButtonStyle(): AshButtonStyle = when (this) {
+        GREEN -> AshButtonStyle.SUCCESS
+        BLUE -> AshButtonStyle.BRAND
+        AMBER -> AshButtonStyle.BRAND
+        WHITE -> AshButtonStyle.SURFACE
+        DISABLED -> AshButtonStyle.DISABLED
+    }
 }
 
+@Deprecated("Use AshButton instead", ReplaceWith("AshButton(title, modifier, icon, style.toAshButtonStyle(), isEnabled, height, action, onClick)"))
 @Composable
 fun Duolingo3DButton(
     title: String,
@@ -116,112 +50,35 @@ fun Duolingo3DButton(
     action: (() -> Unit)? = null,
     onClick: () -> Unit = {}
 ) {
-    val activeStyle = if (isEnabled) style else Duolingo3DButtonColor.DISABLED
-    val depth = 4.dp
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val view = LocalView.current
-
-    val currentOffset by animateDpAsState(
-        targetValue = if (isPressed && isEnabled) depth else 0.dp,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 1200f),
-        label = "btnOffset"
+    AshButton(
+        title = title,
+        modifier = modifier,
+        icon = icon,
+        style = style.toAshButtonStyle(),
+        isEnabled = isEnabled,
+        height = height,
+        action = action,
+        onClick = onClick
     )
-
-    LaunchedEffect(isPressed) {
-        if (isPressed && isEnabled) {
-            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height + depth)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = isEnabled
-            ) {
-                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                action?.invoke()
-                onClick()
-            },
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        val isDark = LocalDynamicThemeColors.current.isDark
-        val shape = RoundedCornerShape(16.dp)
-
-        // Bottom 3D Bevel Shadow
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height)
-                .clip(shape)
-                .background(activeStyle.shadowColor)
-        )
-
-        // Top Button Surface
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height)
-                .offset(y = currentOffset - depth)
-                .clip(shape)
-                .background(activeStyle.surfaceColor)
-                .then(
-                    if (activeStyle == Duolingo3DButtonColor.WHITE) {
-                        Modifier.border(1.2.dp, if (isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFD7DEEB), shape)
-                    } else Modifier
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = activeStyle.textColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = title.uppercase(),
-                    color = activeStyle.textColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = AppFontFamily,
-                    letterSpacing = 0.8.sp
-                )
-            }
-        }
-    }
 }
 
-/**
- * Neutral brand alias for tactile push buttons with physics depression,
- * satisfying defect 20 brand neutralization while preserving 100% parity.
- */
+@Deprecated("Use AshButton instead", ReplaceWith("AshButton(title, modifier, icon, style.toAshButtonStyle(), isEnabled, height, action, onClick)"))
 @Composable
 fun Tactile3DButton(
     title: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    style: Tactile3DButtonColor = Tactile3DButtonColor.GREEN,
+    style: Duolingo3DButtonColor = Duolingo3DButtonColor.GREEN,
     isEnabled: Boolean = true,
     height: Dp = 50.dp,
     action: (() -> Unit)? = null,
     onClick: () -> Unit = {}
 ) {
-    Duolingo3DButton(
+    AshButton(
         title = title,
         modifier = modifier,
         icon = icon,
-        style = style,
+        style = style.toAshButtonStyle(),
         isEnabled = isEnabled,
         height = height,
         action = action,

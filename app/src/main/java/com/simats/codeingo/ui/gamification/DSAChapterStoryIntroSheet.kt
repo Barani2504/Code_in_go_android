@@ -48,6 +48,21 @@ import com.simats.codeingo.ui.components.AppButtonStyle
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 import com.simats.codeingo.ui.theme.pressScale
 
+@Composable
+fun ChapterIntroSheet(
+    chapter: DSAChapterModel,
+    onStartFirstLevel: () -> Unit = {},
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DSAChapterStoryIntroSheet(
+        chapter = chapter,
+        onStartFirstLevel = onStartFirstLevel,
+        onDismiss = onDismiss,
+        modifier = modifier
+    )
+}
+
 /**
  * DSAChapterStoryIntroSheet
  * Faithful Android Jetpack Compose counterpart to iOS DSAChapterStoryIntroSheet.swift:

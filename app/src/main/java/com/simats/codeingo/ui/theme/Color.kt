@@ -5,63 +5,35 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 
 // ══════════════════════════════════════════════════════
-// PHOENIX BIRD LIFE — CORE PALETTE
-// Mirrors iOS Core/Theme.swift exactly (pt → dp 1:1)
+// ASHCRYPT CORE 7-COLOR PALETTE TOKENS (Phase 1)
 // ══════════════════════════════════════════════════════
 
-/** Midnight volcanic obsidian — deepest background layer.  iOS: 7,13,23 */
-val PhoenixObsidian      = Color(0xFF07_0D_17)
+val PhoenixObsidian      = Color(0xFF0E_11_16) // AshDarkPalette.bg
+val PhoenixDeepNavy      = Color(0xFF17_1C_24) // AshDarkPalette.surface
+val PhoenixCard          = Color(0xFF17_1C_24) // AshDarkPalette.surface
+val PhoenixInput         = Color(0xFF0E_11_16) // AshDarkPalette.bg
+val PhoenixBorder        = Color(0xFFFF_7A_3D).copy(alpha = 0.25f)
+val PhoenixSubtext       = Color(0xFFA6_B0_BF) // AshDarkPalette.inkMuted
+val PhoenixPlaceholder   = Color(0xFFA6_B0_BF).copy(alpha = 0.6f)
 
-/** Deep space navy — secondary background / tab bar.  iOS: 13,20,38 */
-val PhoenixDeepNavy      = Color(0xFF0D_14_26)
+// Light Mode Tokens
+val PhoenixLightBg         = Color(0xFFFA_F7_F2) // AshLightPalette.bg
+val PhoenixLightHeaderBg   = Color(0xFFFF_FF_FF) // AshLightPalette.surface
+val PhoenixLightCard       = Color(0xFFFF_FF_FF) // AshLightPalette.surface
+val PhoenixLightInput      = Color(0xFFFA_F7_F2) // AshLightPalette.bg
+val PhoenixLightBorder     = Color(0xFF4B_55_65).copy(alpha = 0.25f)
+val PhoenixLightText       = Color(0xFF14_18_1F) // AshLightPalette.ink
+val PhoenixLightSubtext    = Color(0xFF4B_55_65) // AshLightPalette.inkMuted
+val PhoenixLightPlaceholder= Color(0xFF4B_55_65).copy(alpha = 0.6f)
 
-/** Glassmorphic card surface — all cards / sheets.  iOS: 17,26,48 */
-val PhoenixCard          = Color(0xFF11_1A_30)
-
-/** Input field fill — slightly lighter than card.  iOS: 20,30,55 */
-val PhoenixInput         = Color(0xFF14_1E_37)
-
-/** Subtle border line on cards / inputs — 22 % amber.  iOS: 255,138,20 @ 0.22 */
-val PhoenixBorder        = Color(0xFF_FF8A14).copy(alpha = 0.22f)
-
-/** Muted subtext — warm slate.  iOS: 180,165,140 */
-val PhoenixSubtext       = Color(0xFFB4_A5_8C)
-
-/** Placeholder text in fields.  iOS: 140,125,105 */
-val PhoenixPlaceholder   = Color(0xFF8C_7D_69)
-
-// Light Mode Tokens (iOS Core/Theme.swift)
-val PhoenixLightBg         = Color(0xFFF5_F7_FC)
-val PhoenixLightHeaderBg   = Color(0xFFFF_FF_FF)
-val PhoenixLightCard       = Color(0xFFFF_FF_FF)
-val PhoenixLightInput      = Color(0xFFF1_F4_FA)
-val PhoenixLightBorder     = Color(0xFFD7_DE_EB)
-val PhoenixLightText       = Color(0xFF12_18_26)
-val PhoenixLightSubtext    = Color(0xFF64_70_80)
-val PhoenixLightPlaceholder= Color(0xFF9B_A2_AF)
-
-// ── ACCENT PALETTE ────────────────────────────────────
-
-/** Primary amber gold — headings, icons, CTA.  iOS: FFC800 */
-val AmberGold            = Color(0xFFFF_C8_00)
-
-/** Volcanic gold (darker amber) — shadows, pressed states.  iOS: CC8C00 */
-val AmberGoldDark        = Color(0xFFCC_8C_00)
-
-/** Solar crimson — fire, danger, boss battle.  iOS: E82410 */
-val PhoenixCrimson       = Color(0xFFE8_24_10)
-
-/** Ember orange — progress bars, streaks.  iOS: FF5712 */
-val PhoenixEmber         = Color(0xFFFF_57_12)
-
-/** Phoenix green — correct answers, success.  iOS: 33D966 */
-val PhoenixGreen         = Color(0xFF33_D9_66)
-
-/** Liquid glass tint overlay.  iOS: 0x141E38 */
-val LiquidGlassTint      = Color(0xFF14_1E_38)
-
-/** Emerald green — BinaryTree Forest world accent */
-val EmeraldGreen         = Color(0xFF00_C8_5A)
+// ── ACCENT & BRAND PALETTE ─────────────────────────────
+val AmberGold            = Color(0xFFFF_7A_3D) // Brand Ember (Dark)
+val AmberGoldDark        = Color(0xFFC2_41_0C) // Brand Ember (Light)
+val PhoenixCrimson       = Color(0xFFFF_6B_7A) // Danger Status (Dark)
+val PhoenixEmber         = Color(0xFFFF_7A_3D) // Brand
+val PhoenixGreen         = Color(0xFF34_D3_99) // Success Status (Dark)
+val LiquidGlassTint      = Color(0xFF17_1C_24)
+val EmeraldGreen         = Color(0xFF34_D3_99)
 
 // ══════════════════════════════════════════════════════
 // THEME-ADAPTIVE LEGACY ALIASES — Phoenix equivalents
@@ -234,8 +206,8 @@ val DsaGreenDark         = SuccessDark
 val DsaBlue              = Info
 @Deprecated("Use InfoDark")
 val DsaBlueDark          = InfoDark
-val DsaPurple            = Color(0xFFA0_5A_FF)
-val DsaPurpleDark        = Color(0xFF82_3C_DC)
+val DsaPurple            = Color(0xFF3D_D9_C4) // Accent Teal
+val DsaPurpleDark        = Color(0xFF0B_7F_74) // Accent Teal Dark
 @Deprecated("Use Warning")
 val DsaOrange            = Warning
 @Deprecated("Use WarningDark")
@@ -244,7 +216,7 @@ val DsaOrangeDark        = WarningDark
 val DsaRed               = Danger
 @Deprecated("Use DangerDark")
 val DsaRedDark           = DangerDark
-val DsaTeal              = Color(0xFF00_CD_9C)
+val DsaTeal              = Color(0xFF3D_D9_C4) // Accent Teal
 
 // ══════════════════════════════════════════════════════
 // GOOGLE AUTH COLORS  (unchanged)

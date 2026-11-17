@@ -45,8 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.components.motion.CelebrationOverlay
 import com.simats.codeingo.ui.components.motion.shimmerGlossSweep
 import com.simats.codeingo.ui.components.motion.unlumenNeonGlow
@@ -362,16 +362,16 @@ fun ArenaDebriefView(
 
             // Primary Action Button (Retry / Continue)
             if (isVictory) {
-                Duolingo3DButton(
+                AshButton(
                     title = "NEXT CHALLENGE →",
-                    style = Duolingo3DButtonColor.GREEN,
+                    style = AshButtonStyle.SUCCESS,
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
-                Duolingo3DButton(
+                AshButton(
                     title = "RETRY CHALLENGE 🔄",
-                    style = Duolingo3DButtonColor.AMBER,
+                    style = AshButtonStyle.BRAND,
                     onClick = onRetry,
                     modifier = Modifier.fillMaxWidth()
                 )

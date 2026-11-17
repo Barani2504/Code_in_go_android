@@ -165,6 +165,8 @@ data class DSALevelSpec(
 
 // ── Chapter Definition ────────────────────────────────────────────
 
+typealias ChapterModel = DSAChapterModel
+
 data class DSAChapterModel(
     val id: Int,
     val number: Int,
@@ -188,6 +190,7 @@ data class DSAChapterModel(
 // 5-CHAPTER MASTER CATALOG
 // ══════════════════════════════════════════════════════════════════
 typealias DSA5ChapterCourse = DSA5ChapterData
+typealias CurriculumData = DSA5ChapterData
 
 object DSA5ChapterData {
 

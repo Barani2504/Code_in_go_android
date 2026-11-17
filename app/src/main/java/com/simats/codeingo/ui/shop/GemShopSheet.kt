@@ -83,8 +83,8 @@ import com.simats.codeingo.domain.PhoenixEmotionManager
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import com.simats.codeingo.ui.components.AppDialog
-import com.simats.codeingo.ui.components.Duolingo3DButton
-import com.simats.codeingo.ui.components.Duolingo3DButtonColor
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
 import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
@@ -138,8 +138,8 @@ object CosmeticsCatalog {
         CosmeticItem("cap_grad", "Graduation Cap", CosmeticCategory.HATS, "🎓", 250, "Degree in Algorithm Optimization"),
         CosmeticItem("hat_wizard", "Wizard Hat", CosmeticCategory.HATS, "🧙‍♂️", 400, "Casts O(1) constant time optimization spells"),
         CosmeticItem("hat_party", "Party Hat", CosmeticCategory.HATS, "🥳", 100, "Celebrates unbroken practice streaks"),
-        CosmeticItem("hat_bubble", "Bubble Hat", CosmeticCategory.HATS, "🫧", 0, "Floating soap bubbles of sorted elements", unlockRequirement = "Complete Bubble Sort"),
-        CosmeticItem("crown_tree", "Tree Crown", CosmeticCategory.HATS, "🌳", 0, "Living leaves from the root of a balanced BST", unlockRequirement = "Master Binary Tree"),
+        CosmeticItem("hat_bubble", "Cipher Laurels", CosmeticCategory.HATS, "🌿", 0, "Golden laurels of ancient Caesar cipher decoders", unlockRequirement = "Master Realm 1: Secrets 101"),
+        CosmeticItem("crown_tree", "Key Crown", CosmeticCategory.HATS, "👑", 0, "Forged from the golden master keys of symmetric ciphers", unlockRequirement = "Master Realm 2: Symmetric Forge"),
 
         // ── 2. OUTFITS ─────────────────────────────────────────────────────
         CosmeticItem("none_outfit", "No Outfit", CosmeticCategory.OUTFITS, "✖️", 0, "Classic wild bird plumage"),
@@ -147,7 +147,7 @@ object CosmeticsCatalog {
         CosmeticItem("outfit_cape", "Superhero Cape", CosmeticCategory.OUTFITS, "🦸", 450, "Flows heroically through pointer traversals"),
         CosmeticItem("outfit_vest", "Refactor Vest", CosmeticCategory.OUTFITS, "🦺", 200, "High visibility caution while cleaning legacy code"),
         CosmeticItem("outfit_belt", "Black Belt Gi", CosmeticCategory.OUTFITS, "🥋", 550, "Grandmaster of competitive programming"),
-        CosmeticItem("outfit_wings", "Link Wings", CosmeticCategory.OUTFITS, "🪽", 0, "Nodes linked together into shining wings", unlockRequirement = "Master Linked List"),
+        CosmeticItem("outfit_wings", "Cipher Cloak", CosmeticCategory.OUTFITS, "🪽", 0, "Invisibility weave that shields plaintext from prying eyes", unlockRequirement = "Master Realm 3: Public-Key Citadel"),
 
         // ── 3. ACCESSORIES ─────────────────────────────────────────────────
         CosmeticItem("none_acc", "No Accessory", CosmeticCategory.ACCESSORIES, "✖️", 0, "Clear and unadorned companion"),
@@ -155,8 +155,8 @@ object CosmeticsCatalog {
         CosmeticItem("shades_cool", "Cool Shades", CosmeticCategory.ACCESSORIES, "🕶️", 300, "Ultra-chill O(1) lookup confidence"),
         CosmeticItem("scarf_red", "Warm Scarf", CosmeticCategory.ACCESSORIES, "🧣", 180, "Shields against freezing stack overflows"),
         CosmeticItem("bowtie_ruby", "Ruby Bowtie", CosmeticCategory.ACCESSORIES, "🎀", 220, "Dapper style for your linked-list nodes"),
-        CosmeticItem("acc_pack", "Stack Backpack", CosmeticCategory.ACCESSORIES, "🎒", 0, "Holds an infinite LIFO stack of study books", unlockRequirement = "Master Stack"),
-        CosmeticItem("acc_train", "Train Accessory", CosmeticCategory.ACCESSORIES, "🚂", 0, "Little engine that keeps all queue passengers moving", unlockRequirement = "Master Queue"),
+        CosmeticItem("acc_pack", "Shield Wings", CosmeticCategory.ACCESSORIES, "🛡️", 0, "Impenetrable cryptographic defense against MitM tampering", unlockRequirement = "Master Realm 4: Trust & Proof"),
+        CosmeticItem("acc_train", "Hash Halo", CosmeticCategory.ACCESSORIES, "✨", 0, "Radiant collision-resistant digital fingerprint crown", unlockRequirement = "Master Realm 5: Real-World Defense"),
 
         // ── 4. EFFECTS ─────────────────────────────────────────────────────
         CosmeticItem("none_aura", "No Effect", CosmeticCategory.EFFECTS, "✖️", 0, "Natural peaceful aura"),
@@ -283,12 +283,13 @@ fun GemShopSheet(
     }
 
     fun isLearningRequirementMet(item: CosmeticItem): Boolean {
+        val userKey = com.simats.codeingo.domain.AuthService.shared.currentUserId ?: "guest"
         return when (item.id) {
-            "hat_bubble" -> completedChapters.contains(1) || prefs.getBoolean("completedBubbleSort", false)
-            "outfit_wings" -> completedChapters.contains(2) || prefs.getBoolean("masteredLinkedList", false)
-            "acc_pack" -> completedChapters.contains(3) || prefs.getBoolean("masteredStack", false)
-            "acc_train" -> completedChapters.contains(4) || prefs.getBoolean("masteredQueue", false)
-            "crown_tree" -> completedChapters.contains(5) || prefs.getBoolean("masteredBinaryTree", false)
+            "hat_bubble" -> completedChapters.contains(1) || prefs.getBoolean("mastered_realm_1_$userKey", false)
+            "crown_tree" -> completedChapters.contains(2) || prefs.getBoolean("mastered_realm_2_$userKey", false)
+            "outfit_wings" -> completedChapters.contains(3) || prefs.getBoolean("mastered_realm_3_$userKey", false)
+            "acc_pack" -> completedChapters.contains(4) || prefs.getBoolean("mastered_realm_4_$userKey", false)
+            "acc_train" -> completedChapters.contains(5) || prefs.getBoolean("mastered_realm_5_$userKey", false)
             else -> false
         }
     }
@@ -1082,9 +1083,9 @@ fun GemShopSheet(
                     // Action Buttons (Equip / Try / Buy)
                     when {
                         item.category == CosmeticCategory.LIVES -> {
-                            Duolingo3DButton(
+                            AshButton(
                                 title = "BUY & RESTORE HEARTS 💎 ${item.price}",
-                                style = Duolingo3DButtonColor.AMBER,
+                                style = AshButtonStyle.BRAND,
                                 onClick = {
                                     buy(item)
                                     previewItem = null
@@ -1175,9 +1176,9 @@ fun GemShopSheet(
                                     )
                                 }
 
-                                Duolingo3DButton(
+                                AshButton(
                                     title = "EQUIP",
-                                    style = Duolingo3DButtonColor.GREEN,
+                                    style = AshButtonStyle.SUCCESS,
                                     onClick = {
                                         equip(item)
                                         previewItem = null
@@ -1213,9 +1214,9 @@ fun GemShopSheet(
                                     )
                                 }
 
-                                Duolingo3DButton(
+                                AshButton(
                                     title = "BUY 💎 ${item.price}",
-                                    style = Duolingo3DButtonColor.BLUE,
+                                    style = AshButtonStyle.BRAND,
                                     onClick = {
                                         buy(item)
                                         previewItem = null
@@ -1259,9 +1260,9 @@ fun GemShopSheet(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Duolingo3DButton(
+                    AshButton(
                         title = "OK",
-                        style = Duolingo3DButtonColor.GREEN,
+                        style = AshButtonStyle.SUCCESS,
                         onClick = { showAlert = false },
                         modifier = Modifier.fillMaxWidth()
                     )
