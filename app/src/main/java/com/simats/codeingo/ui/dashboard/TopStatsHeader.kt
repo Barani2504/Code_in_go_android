@@ -77,11 +77,14 @@ fun TopStatsHeader(
     isBossActive: Boolean = false,
     onMenuClick: () -> Unit,
     onPhoenixClick: () -> Unit = {},
+    onAskAshClick: () -> Unit = {},
     onStreakClick: () -> Unit = {},
     onStarsClick: () -> Unit = {},
     onXpClick: () -> Unit = {},
     onHeartsClick: () -> Unit = {},
     onGemsClick: () -> Unit = {},
+    modifierStreak: Modifier = Modifier,
+    modifierHearts: Modifier = Modifier,
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
@@ -140,6 +143,11 @@ fun TopStatsHeader(
                 onTap = onPhoenixClick
             )
 
+            // Permanent "Ask Ash" Button
+            com.simats.codeingo.ui.components.guide.AskAshButton(
+                onClick = onAskAshClick
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
             // Stats Pill Row
@@ -155,7 +163,7 @@ fun TopStatsHeader(
                 val streakColor = if (isStreakPendingRestore) Color(0xFF22D3EE) else (if (isDark) Color(0xFFFF9500) else Color(0xFFE66600))
 
                 Row(
-                    modifier = Modifier
+                    modifier = modifierStreak
                         .pressScale(0.92f)
                         .clip(CircleShape)
                         .background(pillBg)
@@ -246,6 +254,7 @@ fun TopStatsHeader(
                     heartTimerString = heartTimerString,
                     isDark = isDark,
                     pillBg = pillBg,
+                    modifier = modifierHearts,
                     onHeartsClick = onHeartsClick
                 )
             }
@@ -259,6 +268,7 @@ private fun HeartPill(
     heartTimerString: String?,
     isDark: Boolean,
     pillBg: Color,
+    modifier: Modifier = Modifier,
     onHeartsClick: () -> Unit
 ) {
     var timerRemainingSeconds by remember { mutableIntStateOf(300) }
@@ -285,7 +295,7 @@ private fun HeartPill(
     val isHeartLow = heartsCount <= 3
     val isCritical = heartsCount <= 1
     Row(
-        modifier = Modifier
+        modifier = modifier
             .pressScale(0.92f)
             .then(if (isCritical) Modifier.dangerHeartbeatShake(true) else if (isHeartLow) Modifier.pulse(0.92f..1.15f) else Modifier)
             .clip(CircleShape)

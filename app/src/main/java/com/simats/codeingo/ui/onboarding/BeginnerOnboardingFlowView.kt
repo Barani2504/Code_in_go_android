@@ -1,22 +1,13 @@
 package com.simats.codeingo.ui.onboarding
 
-import android.view.HapticFeedbackConstants
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -40,12 +30,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,65 +52,62 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simats.codeingo.ui.components.AppButton
-import com.simats.codeingo.ui.components.AppButtonStyle
-import com.simats.codeingo.ui.components.AppCard
-import com.simats.codeingo.ui.components.CandyCrushStarsView
-import com.simats.codeingo.ui.components.DuolingoSpeechBubbleView
+import com.simats.codeingo.R
+import com.simats.codeingo.data.model.phoenixEmotion
+import com.simats.codeingo.domain.AuthService
+import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.domain.guide.PhoenixPose
+import com.simats.codeingo.ui.components.AshButton
+import com.simats.codeingo.ui.components.AshButtonStyle
+import com.simats.codeingo.ui.components.AshMono
+import com.simats.codeingo.ui.components.guide.SpeechBubble
+import com.simats.codeingo.ui.components.guide.SpeechBubbleTail
 import com.simats.codeingo.ui.phoenix.Phoenix3DLiveWavingMascotView
-import com.simats.codeingo.ui.phoenix.PhoenixAnimatedMascotView
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
-import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
-import com.simats.codeingo.ui.theme.AmberGold
-import com.simats.codeingo.ui.theme.AppFontFamily
-import com.simats.codeingo.ui.theme.DarkBackground
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.AshTheme
+import com.simats.codeingo.ui.theme.AshType
 import com.simats.codeingo.ui.theme.PhoenixMotion
-import com.simats.codeingo.ui.theme.pressScale
-import com.simats.codeingo.ui.theme.staggeredAppear
 import kotlinx.coroutines.delay
-
-// ══════════════════════════════════════════════════════════════════
-// 🚀 BeginnerOnboardingFlowView — 12-Step Journey with Phoenix
-// Exact Parity with iOS BeginnerOnboardingFlowView.swift
-// ══════════════════════════════════════════════════════════════════
 
 enum class OnboardingStep(val stepIndex: Int) {
     WELCOME(0),
-    TEN_QUESTIONS_INTRO(1),
-    LANGUAGE_SELECTION(2),
-    REFERRAL_SOURCE(3),
-    TEMPERATURE_GAME(4),
-    FIRST_LESSON_INTRO(5),
-    SENTENCE_COMPLETION(6),
-    PROUD_CELEBRATION(7),
-    STREAK_EARNED(8),
-    STREAK_GOAL(9),
-    WIDGET_CHEER(10),
-    LOADING_CEFR(11)
+    GOAL_SELECTION(1),
+    DAILY_TIME(2),
+    PRIOR_LEVEL(3),
+    CAESAR_INTRO(4),
+    CAESAR_LESSON(5),
+    FIRST_SUCCESS(6),
+    INITIALIZING(7)
 }
 
+/**
+ * BeginnerOnboardingFlowView — 8-step guided journey with Ash the Phoenix mascot:
+ * 1. Welcome (Ash says hello)
+ * 2. Goal Selection (exam / career / curiosity)
+ * 3. Daily Time (5 / 10 / 15 min)
+ * 4. Prior Level (beginner / a little / comfortable)
+ * 5. First Lesson Intro: Caesar's Secret Note
+ * 6. Interactive Caesar Shift Dial (solve KHOOR -> HELLO)
+ * 7. First Success Celebration (+20 XP & Day 1 streak)
+ * 8. Initializing & Transition to Home
+ */
 @Composable
 fun BeginnerOnboardingFlowView(
     onCompleteOnboarding: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     var currentStep by remember { mutableStateOf(OnboardingStep.WELCOME) }
-    var selectedLanguage by remember { mutableStateOf<String?>("Python 🐍") }
-    var selectedReferral by remember { mutableStateOf<String?>("LeetCode & Tech Interviews 💼") }
-    var placedWord by remember { mutableStateOf<String?>(null) }
-    var isSentenceChecked by remember { mutableStateOf(false) }
-    var isSentenceCorrect by remember { mutableStateOf(false) }
-    var streakCountDisplay by remember { mutableIntStateOf(0) }
-    var selectedStreakGoalDays by remember { mutableIntStateOf(7) }
+    var selectedGoal by remember { mutableStateOf<String?>("🎓 Ace University Exams (CS8792 / CNS)") }
+    var selectedTimeMinutes by remember { mutableIntStateOf(10) }
+    var selectedPriorLevel by remember { mutableStateOf<String?>("🌱 Complete Beginner (Never heard of it)") }
 
     val totalSteps = OnboardingStep.entries.size
     val currentProgress = (currentStep.stepIndex + 1).toFloat() / totalSteps.toFloat()
@@ -131,6 +122,21 @@ fun BeginnerOnboardingFlowView(
         if (nextIdx < totalSteps) {
             currentStep = OnboardingStep.entries[nextIdx]
         } else {
+            // Persist learner preferences per user
+            val userId = AuthService.shared.currentUserId ?: "guest"
+            val prefs = context.getSharedPreferences("ashcrypt_onboarding_prefs", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString("user_goal_$userId", selectedGoal)
+                .putInt("daily_minutes_$userId", selectedTimeMinutes)
+                .putString("prior_level_$userId", selectedPriorLevel)
+                .putBoolean("onboarding_completed_$userId", true)
+                .apply()
+
+            // Award starting XP and ignite streak
+            try {
+                GameManager.instance.addXP(20)
+            } catch (_: Throwable) {}
+
             onCompleteOnboarding()
         }
     }
@@ -138,7 +144,7 @@ fun BeginnerOnboardingFlowView(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalDynamicThemeColors.current.background)
+            .background(AshTheme.colors.bg)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -148,146 +154,96 @@ fun BeginnerOnboardingFlowView(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // Top Bar: Back button + Animated Progress Bar
-            if (currentStep != OnboardingStep.LOADING_CEFR) {
+            // Top Navigation & Progress Bar
+            if (currentStep != OnboardingStep.INITIALIZING) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (currentStep.stepIndex > 0) {
                         IconButton(
                             onClick = {
-                                if (currentStep.stepIndex > 0) {
-                                    currentStep = OnboardingStep.entries[currentStep.stepIndex - 1]
+                                val prevIdx = currentStep.stepIndex - 1
+                                if (prevIdx >= 0) {
+                                    currentStep = OnboardingStep.entries[prevIdx]
                                 }
-                            },
-                            modifier = Modifier.size(32.dp)
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ChevronLeft,
                                 contentDescription = "Back",
-                                tint = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.85f)
+                                tint = AshTheme.colors.ink
                             )
                         }
                     } else {
-                        Spacer(modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.size(48.dp))
                     }
 
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    // Segmented / Glowing Progress Bar
+                    // Rounded Progress Bar
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(12.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(if (LocalDynamicThemeColors.current.isDark) Color(0xFF14_12_24).copy(alpha = 0.85f) else Color(0xFFE2E8F0))
-                            .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.15f), RoundedCornerShape(50))
+                            .height(10.dp)
+                            .clip(CircleShape)
+                            .background(AshTheme.colors.surface)
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(animatedProgress.coerceAtLeast(0.06f))
-                                .height(12.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(AmberGold, Color(0xFFFF8C1A))
-                                    )
-                                )
+                                .fillMaxWidth(animatedProgress)
+                                .height(10.dp)
+                                .clip(CircleShape)
+                                .background(AshTheme.colors.brand)
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(48.dp))
                 }
             }
 
-            // Step Content Router
             AnimatedContent(
                 targetState = currentStep,
-                transitionSpec = {
-                    slideInHorizontally(
-                        initialOffsetX = { it },
-                        animationSpec = tween(380, easing = FastOutSlowInEasing)
-                    ) + fadeIn(tween(380)) togetherWith
-                            slideOutHorizontally(
-                                targetOffsetX = { -it },
-                                animationSpec = tween(380, easing = FastOutSlowInEasing)
-                            ) + fadeOut(tween(380))
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                label = "onboardingRouter"
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "onboardingRouter",
+                modifier = Modifier.weight(1f)
             ) { step ->
                 when (step) {
                     OnboardingStep.WELCOME -> {
-                        WelcomeStepView(onContinue = { advanceStep() })
+                        WelcomeStep(onContinue = { advanceStep() })
                     }
-                    OnboardingStep.TEN_QUESTIONS_INTRO -> {
-                        TenQuestionsStepView(onContinue = { advanceStep() })
-                    }
-                    OnboardingStep.LANGUAGE_SELECTION -> {
-                        LanguageSelectionStepView(
-                            selected = selectedLanguage,
-                            onSelect = { selectedLanguage = it },
+                    OnboardingStep.GOAL_SELECTION -> {
+                        GoalSelectionStep(
+                            selected = selectedGoal,
+                            onSelect = { selectedGoal = it },
                             onContinue = { advanceStep() }
                         )
                     }
-                    OnboardingStep.REFERRAL_SOURCE -> {
-                        ReferralStepView(
-                            selected = selectedReferral,
-                            onSelect = { selectedReferral = it },
+                    OnboardingStep.DAILY_TIME -> {
+                        DailyTimeStep(
+                            selectedMinutes = selectedTimeMinutes,
+                            onSelectMinutes = { selectedTimeMinutes = it },
                             onContinue = { advanceStep() }
                         )
                     }
-                    OnboardingStep.TEMPERATURE_GAME -> {
-                        CreativeTemperatureGaugeView(
-                            onCorrectAnswer = { advanceStep() }
-                        )
-                    }
-                    OnboardingStep.FIRST_LESSON_INTRO -> {
-                        FirstLessonIntroStepView(onContinue = { advanceStep() })
-                    }
-                    OnboardingStep.SENTENCE_COMPLETION -> {
-                        SentenceCompletionStepView(
-                            placedWord = placedWord,
-                            isChecked = isSentenceChecked,
-                            isCorrect = isSentenceCorrect,
-                            onPlaceWord = { placedWord = it },
-                            onCheck = {
-                                isSentenceChecked = true
-                                isSentenceCorrect = (placedWord == "0")
-                            },
-                            onContinue = { advanceStep() },
-                            onRetry = {
-                                isSentenceChecked = false
-                                isSentenceCorrect = false
-                                placedWord = null
-                            }
-                        )
-                    }
-                    OnboardingStep.PROUD_CELEBRATION -> {
-                        ProudCelebrationStepView(onContinue = { advanceStep() })
-                    }
-                    OnboardingStep.STREAK_EARNED -> {
-                        StreakEarnedStepView(
-                            streakCount = streakCountDisplay,
-                            onStartOdometer = { streakCountDisplay = 1 },
+                    OnboardingStep.PRIOR_LEVEL -> {
+                        PriorLevelStep(
+                            selected = selectedPriorLevel,
+                            onSelect = { selectedPriorLevel = it },
                             onContinue = { advanceStep() }
                         )
                     }
-                    OnboardingStep.STREAK_GOAL -> {
-                        StreakGoalStepView(
-                            selectedDays = selectedStreakGoalDays,
-                            onSelectDays = { selectedStreakGoalDays = it },
-                            onContinue = { advanceStep() }
-                        )
+                    OnboardingStep.CAESAR_INTRO -> {
+                        CaesarIntroStep(onContinue = { advanceStep() })
                     }
-                    OnboardingStep.WIDGET_CHEER -> {
-                        WidgetCheerStepView(onContinue = { advanceStep() })
+                    OnboardingStep.CAESAR_LESSON -> {
+                        CaesarDialLessonStep(onDecodedSuccessfully = { advanceStep() })
                     }
-                    OnboardingStep.LOADING_CEFR -> {
-                        LoadingCefrStepView(onComplete = { onCompleteOnboarding() })
+                    OnboardingStep.FIRST_SUCCESS -> {
+                        FirstSuccessCelebrationStep(onContinue = { advanceStep() })
+                    }
+                    OnboardingStep.INITIALIZING -> {
+                        InitializingStep(onReady = { advanceStep() })
                     }
                 }
             }
@@ -295,12 +251,11 @@ fun BeginnerOnboardingFlowView(
     }
 }
 
-// ══════════════════════════════════════════════════════════════════
-// Step Composable Views
-// ══════════════════════════════════════════════════════════════════
-
+// ─────────────────────────────────────────────────────────────────
+// STEP 1: WELCOME
+// ─────────────────────────────────────────────────────────────────
 @Composable
-private fun WelcomeStepView(onContinue: () -> Unit) {
+private fun WelcomeStep(onContinue: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -308,486 +263,555 @@ private fun WelcomeStepView(onContinue: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        DuolingoSpeechBubbleView(text = "Hi there! I'm Phoenix!")
-        Spacer(modifier = Modifier.height(20.dp))
-        // 3D Live-Action Phoenix Mascot (100% Transparent Alpha, Zero Background, Ground Shadow & Voice)
-        Phoenix3DLiveWavingMascotView(size = 260.dp)
-        Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
-    }
-}
 
-@Composable
-private fun TenQuestionsStepView(onContinue: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        DuolingoSpeechBubbleView(text = "Just 10 quick questions before we start your first lesson!")
-        Spacer(modifier = Modifier.height(24.dp))
-        PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
-        Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
-    }
-}
-
-@Composable
-private fun LanguageSelectionStepView(
-    selected: String?,
-    onSelect: (String) -> Unit,
-    onContinue: () -> Unit
-) {
-    val languages = listOf("Python 🐍", "Swift 🦅", "C++ ⚡", "Java ☕", "Go / Golang 🐹", "JavaScript 🌐")
-    val isDark = LocalDynamicThemeColors.current.isDark
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Noting(isWriting = selected != null), size = 100.dp)
-            Spacer(modifier = Modifier.width(10.dp))
-            DuolingoSpeechBubbleView(text = "Which language do you code in?", modifier = Modifier.weight(1f))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            languages.forEachIndexed { index, lang ->
-                val isSelected = selected == lang
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .staggeredAppear(index, baseDelayMs = 35)
-                        .pressScale(targetScale = 0.97f)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.22f else 0.15f) else (if (isDark) Color(0xFF141F38).copy(alpha = 0.8f) else Color.White))
-                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(14.dp))
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(lang) }
-                        .padding(horizontal = 18.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = lang,
-                        color = LocalDynamicThemeColors.current.textPrimary,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = AppFontFamily
-                    )
-                }
-            }
-        }
-
-        AppButton(
-            title = "CONTINUE",
-            style = if (selected != null) AppButtonStyle.PRIMARY_AMBER else AppButtonStyle.DISABLED,
-            isEnabled = selected != null,
-            onClick = onContinue
+        SpeechBubble(
+            text = "Hi, I'm Ash! Your fiery guide to cryptography and network security. Together, we'll turn secret codes into superpowers!",
+            actionLabel = "Hi Ash!",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Phoenix3DLiveWavingMascotView(size = 240.dp)
+
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
+// ─────────────────────────────────────────────────────────────────
+// STEP 2: GOAL SELECTION
+// ─────────────────────────────────────────────────────────────────
 @Composable
-private fun ReferralStepView(
+private fun GoalSelectionStep(
     selected: String?,
     onSelect: (String) -> Unit,
     onContinue: () -> Unit
 ) {
     val goals = listOf(
-        "LeetCode & Tech Interviews 💼",
-        "Computer Science Course 🎓",
-        "Competitive Programming 🏆",
-        "High-Performance Engineering 🚀",
-        "Brain Training & Problem Solving 🧠"
+        "🎓 Ace University Exams (CS8792 / CNS)",
+        "💼 Tech Career & Security Analyst Jobs",
+        "🕵️‍♂️ Curiosity & Ethical Hacking",
+        "🧠 Master Modern Number Theory & Ciphers"
     )
-    val isDark = LocalDynamicThemeColors.current.isDark
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Noting(isWriting = selected != null), size = 100.dp)
-            Spacer(modifier = Modifier.width(10.dp))
-            DuolingoSpeechBubbleView(text = "Why are you learning Cryptography & Network Security?", modifier = Modifier.weight(1f))
-        }
+        SpeechBubble(
+            text = "What brings you to cryptography? I'll tune your study path to match your target.",
+            actionLabel = "Continue",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            goals.forEachIndexed { index, goal ->
+            goals.forEach { goal ->
                 val isSelected = selected == goal
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .staggeredAppear(index, baseDelayMs = 35)
-                        .pressScale(targetScale = 0.97f)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.22f else 0.15f) else (if (isDark) Color(0xFF141F38).copy(alpha = 0.8f) else Color.White))
-                        .border(if (isSelected) 1.8.dp else 1.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(14.dp))
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(goal) }
-                        .padding(horizontal = 18.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isSelected) AshTheme.colors.brand.copy(alpha = 0.15f) else AshTheme.colors.surface)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) AshTheme.colors.brand else AshTheme.colors.accent.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onSelect(goal) }
+                        .padding(horizontal = 18.dp, vertical = 16.dp)
                 ) {
-                    Text(
-                        text = goal,
-                        color = LocalDynamicThemeColors.current.textPrimary,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = AppFontFamily
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = goal,
+                            style = AshType.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            ),
+                            color = AshTheme.colors.ink,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = AshTheme.colors.brand,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        AppButton(
-            title = "CONTINUE",
-            style = if (selected != null) AppButtonStyle.PRIMARY_AMBER else AppButtonStyle.DISABLED,
-            isEnabled = selected != null,
-            onClick = onContinue
+        AshButton(
+            text = "Continue",
+            onClick = onContinue,
+            style = if (selected != null) AshButtonStyle.PRIMARY else AshButtonStyle.OUTLINE,
+            modifier = Modifier.fillMaxWidth().height(52.dp)
         )
     }
 }
 
+// ─────────────────────────────────────────────────────────────────
+// STEP 3: DAILY TIME
+// ─────────────────────────────────────────────────────────────────
 @Composable
-private fun FirstLessonIntroStepView(onContinue: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        DuolingoSpeechBubbleView(
-            text = "Okay! Here's your first 2 minute lesson.",
-            highlightedText = "2 minute",
-            highlightColor = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        PhoenixAnimatedMascotView(pose = PhoenixMascotPose.Welcoming, size = 210.dp)
-        Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
-    }
-}
-
-@Composable
-private fun SentenceCompletionStepView(
-    placedWord: String?,
-    isChecked: Boolean,
-    isCorrect: Boolean,
-    onPlaceWord: (String) -> Unit,
-    onCheck: () -> Unit,
-    onContinue: () -> Unit,
-    onRetry: () -> Unit
+private fun DailyTimeStep(
+    selectedMinutes: Int,
+    onSelectMinutes: (Int) -> Unit,
+    onContinue: () -> Unit
 ) {
-    val choices = listOf("0", "1", "NULL", "n - 1")
-    val isDark = LocalDynamicThemeColors.current.isDark
+    val times = listOf(
+        Pair(5, "⚡ 5 min / day (Casual Ember)"),
+        Pair(10, "🔥 10 min / day (Steady Flame)"),
+        Pair(15, "🌟 15 min / day (Blazing Phoenix)")
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(if (isDark) AmberGold.copy(alpha = 0.18f) else Color(0xFFFEF3C7))
-                .border(1.dp, if (isDark) AmberGold.copy(alpha = 0.35f) else Color(0xFFF59E0B).copy(alpha = 0.45f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 10.dp, vertical = 5.dp)
-        ) {
-            Text(
-                text = "SECURITY LAB: ZERO-BASED INDEX",
-                color = if (isDark) AmberGold else Color(0xFFB45309),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = AppFontFamily
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "Complete the Crypto Protocol",
-            color = if (isDark) Color.White else Color(0xFF12_18_26),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = AppFontFamily
+        SpeechBubble(
+            text = "Consistency beats cramming every single time. How much daily time works best for you?",
+            actionLabel = "Lock It In",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Sentence Card
-        AppCard(
-            modifier = Modifier.fillMaxWidth(),
-            cornerRadius = 18.dp,
-            accentGlow = AmberGold.copy(alpha = 0.15f),
-            contentPadding = 18.dp
-        ) {
-            Column {
-                Text(
-                    text = "In cryptographic buffer memory, an array's first cipher byte is stored at index",
-                    color = if (isDark) Color.White else Color(0xFF12_18_26),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = AppFontFamily,
-                    lineHeight = 22.sp
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (placedWord != null) AmberGold else (if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0)))
-                        .border(1.5.dp, if (placedWord != null) AmberGold else LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 20.dp, vertical = 10.dp)
-                ) {
-                    Text(
-                        text = placedWord ?: "  [ ? ]  ",
-                        color = if (placedWord != null) Color(0xFF1A1205) else (if (isDark) LocalDynamicThemeColors.current.placeholder else Color(0xFF64748B)),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Word Bank
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            for (word in choices) {
-                val isUsed = placedWord == word
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .pressScale(targetScale = 0.93f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isUsed) Color.Transparent else (if (isDark) Color(0xFF14_1F_38) else Color(0xFFE2_E8_F0)))
-                        .border(1.5.dp, if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.1f) else AmberGold.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
-                        .clickable(enabled = !isChecked, interactionSource = remember { MutableInteractionSource() }, indication = null) { onPlaceWord(word) }
-                        .padding(vertical = 12.dp)
-                ) {
-                    Text(
-                        text = word,
-                        color = if (isUsed) LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.25f) else (if (isDark) Color.White else Color(0xFF12_18_26)),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Feedback Text
-        if (isChecked) {
-            Text(
-                text = if (isCorrect) "Awesome! In programming, array indexing starts at 0!" else "Not quite! Remember: base offset starts at index 0.",
-                color = if (isCorrect) (if (isDark) AmberGold else Color(0xFFB45309)) else Color(0xFFFF4B4B),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = AppFontFamily,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-        }
-
-        AppButton(
-            title = if (isChecked) (if (isCorrect) "CONTINUE" else "TRY AGAIN") else "CHECK",
-            style = if (isChecked) (if (isCorrect) AppButtonStyle.SUCCESS_GREEN else AppButtonStyle.DANGER_CRIMSON) else AppButtonStyle.PRIMARY_AMBER,
-            isEnabled = placedWord != null,
-            onClick = {
-                if (!isChecked) onCheck()
-                else if (isCorrect) onContinue()
-                else onRetry()
-            }
-        )
-    }
-}
-
-@Composable
-private fun ProudCelebrationStepView(onContinue: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        CandyCrushStarsView(earnedStars = 5)
-        Spacer(modifier = Modifier.height(24.dp))
-        DuolingoSpeechBubbleView(text = "Incredible work! You crushed your first Cryptography concept!")
-        Spacer(modifier = Modifier.height(20.dp))
-        PhoenixAnimatedMascotView(pose = PhoenixMascotPose.StarryEyes, size = 190.dp)
-        Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
-    }
-}
-
-@Composable
-private fun StreakEarnedStepView(
-    streakCount: Int,
-    onStartOdometer: () -> Unit,
-    onContinue: () -> Unit
-) {
-    LaunchedEffect(Unit) {
-        delay(300)
-        onStartOdometer()
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        val isDark = LocalDynamicThemeColors.current.isDark
-        Icon(
-            imageVector = Icons.Default.LocalFireDepartment,
-            contentDescription = "Streak Flame",
-            tint = if (isDark) AmberGold else Color(0xFFEA580C),
-            modifier = Modifier.size(72.dp)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "$streakCount",
-            color = if (isDark) AmberGold else Color(0xFFB45309),
-            fontSize = 54.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = AppFontFamily
-        )
-
-        Text(
-            text = "DAY STREAK!",
-            color = LocalDynamicThemeColors.current.textPrimary,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = AppFontFamily,
-            letterSpacing = 1.sp
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        DuolingoSpeechBubbleView(text = "Practice every day to keep your fire burning strong!")
-
-        Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "CONTINUE", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
-    }
-}
-
-@Composable
-private fun StreakGoalStepView(
-    selectedDays: Int,
-    onSelectDays: (Int) -> Unit,
-    onContinue: () -> Unit
-) {
-    val options = listOf(7, 14, 30, 50)
-    val isDark = LocalDynamicThemeColors.current.isDark
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-    ) {
-        DuolingoSpeechBubbleView(text = "Set your streak goal to build unstoppable coding momentum!")
         Spacer(modifier = Modifier.height(20.dp))
 
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            for (days in options) {
-                val isSelected = selectedDays == days
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+            times.forEach { (mins, label) ->
+                val isSelected = selectedMinutes == mins
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .pressScale(targetScale = 0.97f)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSelected) AmberGold.copy(alpha = if (isDark) 0.20f else 0.15f) else (if (isDark) Color(0xFF141F38) else Color.White))
-                        .border(1.5.dp, if (isSelected) (if (isDark) AmberGold else Color(0xFFB45309)) else (if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFD7DEEB)), RoundedCornerShape(16.dp))
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelectDays(days) }
-                        .padding(horizontal = 18.dp, vertical = 16.dp)
+                        .background(if (isSelected) AshTheme.colors.brand.copy(alpha = 0.15f) else AshTheme.colors.surface)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) AshTheme.colors.brand else AshTheme.colors.accent.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onSelectMinutes(mins) }
+                        .padding(horizontal = 18.dp, vertical = 18.dp)
                 ) {
-                    Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "$days-Day Streak Challenge",
-                            color = LocalDynamicThemeColors.current.textPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = AppFontFamily
+                            text = label,
+                            style = AshType.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            ),
+                            color = AshTheme.colors.ink
                         )
-                        Text(
-                            text = if (days == 7) "Casual" else if (days == 14) "Regular" else if (days == 30) "Serious" else "Master",
-                            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.6f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = AppFontFamily
-                        )
-                    }
 
-                    if (isSelected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = if (isDark) AmberGold else Color(0xFFB45309),
-                            modifier = Modifier.size(22.dp)
-                        )
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = AshTheme.colors.brand,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
         }
 
-        AppButton(title = "SET GOAL", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
+        AshButton(
+            text = "Set Daily Goal",
+            onClick = onContinue,
+            style = AshButtonStyle.PRIMARY,
+            modifier = Modifier.fillMaxWidth().height(52.dp)
+        )
     }
 }
 
+// ─────────────────────────────────────────────────────────────────
+// STEP 4: PRIOR LEVEL
+// ─────────────────────────────────────────────────────────────────
 @Composable
-private fun WidgetCheerStepView(onContinue: () -> Unit) {
+private fun PriorLevelStep(
+    selected: String?,
+    onSelect: (String) -> Unit,
+    onContinue: () -> Unit
+) {
+    val levels = listOf(
+        Pair("beginner", "🌱 Complete Beginner\nNever heard of cryptography before"),
+        Pair("little", "🔑 A Little Experience\nKnow basic passwords and HTTPS padlocks"),
+        Pair("comfortable", "🛡️ Comfortable\nKnow modular math or basic classic ciphers")
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+    ) {
+        SpeechBubble(
+            text = "Where are you starting from? No matter your background, we build from ground zero.",
+            actionLabel = "Continue",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            levels.forEach { (id, label) ->
+                val isSelected = selected?.contains(id, ignoreCase = true) == true
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isSelected) AshTheme.colors.brand.copy(alpha = 0.15f) else AshTheme.colors.surface)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) AshTheme.colors.brand else AshTheme.colors.accent.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onSelect(label) }
+                        .padding(horizontal = 18.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = AshType.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp
+                        ),
+                        color = AshTheme.colors.ink
+                    )
+                }
+            }
+        }
+
+        AshButton(
+            text = "Let's Begin!",
+            onClick = onContinue,
+            style = AshButtonStyle.PRIMARY,
+            modifier = Modifier.fillMaxWidth().height(52.dp)
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STEP 5: CAESAR INTRO
+// ─────────────────────────────────────────────────────────────────
+@Composable
+private fun CaesarIntroStep(onContinue: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        DuolingoSpeechBubbleView(text = "Add the Phoenix widget to your Home Screen to never lose your streak!")
+
+        SpeechBubble(
+            text = "Over 2,000 years ago, Julius Caesar sent secret battle orders by shifting every letter by 3. Let's crack an intercepted message right now!",
+            actionLabel = "Decode The Note",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
-        PhoenixAnimatedMascotView(pose = PhoenixMascotPose.StreakFlame, size = 190.dp)
+
+        Image(
+            painter = painterResource(id = R.drawable.phoenix_emotion_4), // Curious Ash
+            contentDescription = "Ash Curious",
+            modifier = Modifier.size(190.dp)
+        )
+
         Spacer(modifier = Modifier.weight(1f))
-        AppButton(title = "LET'S CODE!", style = AppButtonStyle.PRIMARY_AMBER, onClick = onContinue)
     }
 }
 
+// ─────────────────────────────────────────────────────────────────
+// STEP 6: INTERACTIVE CAESAR SHIFT DIAL
+// ─────────────────────────────────────────────────────────────────
 @Composable
-private fun LoadingCefrStepView(onComplete: () -> Unit) {
+private fun CaesarDialLessonStep(onDecodedSuccessfully: () -> Unit) {
+    // Original ciphertext is "KHOOR" (shifted +3 from "HELLO")
+    val ciphertext = "KHOOR"
+    var shiftDial by remember { mutableIntStateOf(0) } // shift offset applied by user
+
+    // Function shifting character in alphabet
+    fun shiftChar(c: Char, shift: Int): Char {
+        if (c !in 'A'..'Z') return c
+        val originalPos = c - 'A'
+        val newPos = (originalPos + shift + 26) % 26
+        return 'A' + newPos
+    }
+
+    val liveDecoded = ciphertext.map { shiftChar(it, shiftDial) }.joinToString("")
+    val isCorrect = liveDecoded == "HELLO"
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "CAESAR'S SECRET SCROLL",
+            style = AshType.labelSmall.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 12.sp,
+                letterSpacing = 1.sp
+            ),
+            color = AshTheme.colors.brand
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Rotate the dial until the secret message makes sense!",
+            style = AshType.bodyMedium.copy(fontSize = 14.sp),
+            color = AshTheme.colors.inkMuted,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Intercepted Cipher Display Box
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(AshTheme.colors.surface)
+                .border(2.dp, if (isCorrect) AshTheme.colors.brand else AshTheme.colors.accent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "ORIGINAL CIPHERTEXT: K H O O R",
+                    style = AshType.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = AshTheme.colors.inkMuted
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    liveDecoded.forEach { ch ->
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isCorrect) AshTheme.colors.brand else AshTheme.colors.accent.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AshMono(
+                                text = ch.toString(),
+                                fontSize = 24.sp,
+                                color = if (isCorrect) AshTheme.colors.onBrand else AshTheme.colors.ink
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (isCorrect) {
+                    Text(
+                        text = "🎉 MATCH! Message decrypted: HELLO",
+                        style = AshType.labelMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 13.sp
+                        ),
+                        color = AshTheme.colors.brand
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Dial Controls
+        Text(
+            text = "Alphabet Shift: ${if (shiftDial > 0) "+$shiftDial" else "$shiftDial"}",
+            style = AshType.titleMedium.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 18.sp
+            ),
+            color = AshTheme.colors.ink
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { if (shiftDial > -6) shiftDial -= 1 },
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(AshTheme.colors.surface)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "Shift Left",
+                    tint = AshTheme.colors.brand
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Slider(
+                value = shiftDial.toFloat(),
+                onValueChange = { shiftDial = it.toInt() },
+                valueRange = -6f..6f,
+                steps = 11,
+                colors = SliderDefaults.colors(
+                    thumbColor = AshTheme.colors.brand,
+                    activeTrackColor = AshTheme.colors.brand,
+                    inactiveTrackColor = AshTheme.colors.surface
+                ),
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            IconButton(
+                onClick = { if (shiftDial < 6) shiftDial += 1 },
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(AshTheme.colors.surface)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Shift Right",
+                    tint = AshTheme.colors.brand
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        AshButton(
+            text = if (isCorrect) "DECODE & VERIFY ✓" else "Try Shift -3 (Left 3)",
+            onClick = {
+                if (isCorrect) {
+                    onDecodedSuccessfully()
+                } else {
+                    shiftDial = -3
+                }
+            },
+            style = if (isCorrect) AshButtonStyle.PRIMARY else AshButtonStyle.OUTLINE,
+            modifier = Modifier.fillMaxWidth().height(52.dp)
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STEP 7: FIRST SUCCESS CELEBRATION
+// ─────────────────────────────────────────────────────────────────
+@Composable
+private fun FirstSuccessCelebrationStep(onContinue: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 20.dp)
+    ) {
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = Icons.Default.LocalFireDepartment,
+            contentDescription = "Fire",
+            tint = AshTheme.colors.brand,
+            modifier = Modifier.size(64.dp)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "FIRST CIPHER CRACKED!",
+            style = AshType.titleLarge.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 24.sp
+            ),
+            color = AshTheme.colors.ink
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "+20 XP Earned • 1-Day Streak Ignited",
+            style = AshType.bodyMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            ),
+            color = AshTheme.colors.brand
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SpeechBubble(
+            text = "You cracked your first cryptographic message! Julius Caesar's secret note was indeed 'HELLO'. You're officially a codebreaker!",
+            actionLabel = "Enter Sanctuary",
+            onActionClick = onContinue,
+            tail = SpeechBubbleTail.BOTTOM_LEFT
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.phoenix_emotion_2), // Celebrating Ash
+            contentDescription = "Ash Celebrating",
+            modifier = Modifier.size(170.dp)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STEP 8: INITIALIZING
+// ─────────────────────────────────────────────────────────────────
+@Composable
+private fun InitializingStep(onReady: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(2200)
-        onComplete()
+        delay(1800)
+        onReady()
     }
 
     Column(
@@ -798,26 +822,24 @@ private fun LoadingCefrStepView(onComplete: () -> Unit) {
             .padding(24.dp)
     ) {
         CircularProgressIndicator(
-            color = if (LocalDynamicThemeColors.current.isDark) AmberGold else Color(0xFFB45309),
+            color = AshTheme.colors.brand,
             strokeWidth = 4.dp,
             modifier = Modifier.size(54.dp)
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "COMPILING ENVIRONMENT...",
-            color = LocalDynamicThemeColors.current.textPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Black,
-            fontFamily = AppFontFamily,
-            letterSpacing = 1.sp
+            text = "IGNITING ASHCRYPT...",
+            style = AshType.titleMedium.copy(
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            ),
+            color = AshTheme.colors.ink
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Tailoring algorithms to your selected language",
-            color = LocalDynamicThemeColors.current.textPrimary.copy(alpha = 0.7f),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            fontFamily = AppFontFamily
+            text = "Preparing Realm 1: Secrets 101",
+            style = AshType.bodyMedium.copy(fontSize = 13.sp),
+            color = AshTheme.colors.inkMuted
         )
     }
 }

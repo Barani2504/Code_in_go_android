@@ -51,7 +51,30 @@ enum class AshButtonStyle {
         val Success = SUCCESS
         val Danger = DANGER
         val Disabled = DISABLED
+        val PRIMARY = BRAND
+        val OUTLINE = SURFACE
     }
+}
+
+@Composable
+fun AshButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    style: AshButtonStyle = AshButtonStyle.BRAND,
+    isEnabled: Boolean = true,
+    height: Dp = 50.dp
+) {
+    AshButton(
+        title = text,
+        modifier = modifier,
+        icon = icon,
+        style = style,
+        isEnabled = isEnabled,
+        height = height,
+        onClick = onClick
+    )
 }
 
 /**

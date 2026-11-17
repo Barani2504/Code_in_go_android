@@ -7,6 +7,14 @@ import com.simats.codeingo.ui.dashboard.DailyRewardChestCard
 import com.simats.codeingo.ui.mascot.MascotView
 import com.simats.codeingo.ui.mascot.MascotEmotion
 import com.simats.codeingo.ui.mascot.PhoenixStage
+import com.simats.codeingo.domain.guide.PhoenixGuideDirector
+import com.simats.codeingo.ui.components.guide.CoachMarkOverlay
+import com.simats.codeingo.ui.components.guide.CoachMarkState
+import com.simats.codeingo.ui.components.guide.coachMarkTarget
+import com.simats.codeingo.ui.components.guide.AskAshBottomSheet
+import com.simats.codeingo.ui.components.guide.ScreenGuideCatalog
+import androidx.compose.ui.platform.LocalContext
+import com.simats.codeingo.domain.AuthService
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -242,6 +250,17 @@ fun MainDashboardScreen(
     var showHeartsSheet by remember { mutableStateOf(false) }
     var showGemShopSheet by remember { mutableStateOf(false) }
     var showFinalMasterJourney by remember { mutableStateOf(false) }
+    var showAskAshSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val currentUserId = remember { AuthService.shared.currentUserId ?: "guest" }
+    val coachMarkState = remember { CoachMarkState() }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(700)
+        if (!PhoenixGuideDirector.isTourSeen(context, PhoenixGuideDirector.HOME_TOUR.id, currentUserId)) {
+            coachMarkState.startTour(PhoenixGuideDirector.HOME_TOUR)
+        }
+    }
     var storySelectedChapter by remember { mutableStateOf<com.simats.codeingo.data.model.DSAChapterModel?>(null) }
     var guideSelectedUnit by remember { mutableStateOf<UnitModel?>(null) }
     var activeWorldArena by remember { mutableStateOf<String?>(null) }
@@ -378,7 +397,8 @@ fun MainDashboardScreen(
                             }
                             selectedTab = tab
                         },
-                        swipePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                        swipePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction,
+                        modifier = Modifier.coachMarkTarget("tour_bottom_nav", coachMarkState)
                     )
                 }
             }
@@ -414,7 +434,8 @@ fun MainDashboardScreen(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .widthIn(max = 680.dp),
+                                        .widthIn(max = 680.dp)
+                                        .coachMarkTarget("tour_path", coachMarkState),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                 // Common Backend Sync & Offline Status Indicator
@@ -550,7 +571,9 @@ fun MainDashboardScreen(
                                     onContinueClick = {
                                         onStartLesson(maxUnlockedChapter, activeLevelIndex, 5, false)
                                     },
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                    modifier = Modifier
+                                        .coachMarkTarget("tour_continue_btn", coachMarkState)
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
 
                                 DailyGoalAndStreakPill(
@@ -813,10 +836,13 @@ fun MainDashboardScreen(
                                 heartTimerString = null,
                                 onMenuClick = { showSideMenu = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
+                                onAskAshClick = { showAskAshSheet = true },
                                 onStreakClick = { showStreakSheet = true },
                                 onXpClick = { selectedTab = DashboardTab.VISUALIZER },
                                 onHeartsClick = { showHeartsSheet = true },
-                                onGemsClick = { showGemShopSheet = true }
+                                onGemsClick = { showGemShopSheet = true },
+                                modifierStreak = Modifier.coachMarkTarget("tour_streak", coachMarkState),
+                                modifierHearts = Modifier.coachMarkTarget("tour_hearts", coachMarkState)
                             )
 
                             // Dynamic Pill Notch HUD (Device-aware Cutout HUD)
@@ -1263,6 +1289,36 @@ fun MainDashboardScreen(
                     "xor" -> XorBoardLab(onDismiss = { activeMicroLab = null })
                 }
             }
+        }
+
+        // ── Ash The Phoenix Guide Engine Overlay ──
+        CoachMarkOverlay(
+            state = coachMarkState,
+            userId = currentUserId
+        )
+
+        // ── "Ask Ash" Contextual Field Guide Sheet ──
+        if (showAskAshSheet) {
+            val currentScreenGuide = when (selectedTab) {
+                DashboardTab.LEARN -> ScreenGuideCatalog.HOME
+                DashboardTab.VISUALIZER -> ScreenGuideCatalog.VISUALIZER
+                DashboardTab.ARENAS -> ScreenGuideCatalog.ARENA
+                DashboardTab.PRACTICE -> ScreenGuideCatalog.PRACTICE
+                DashboardTab.LEADERBOARDS -> ScreenGuideCatalog.LEADERBOARD
+                DashboardTab.SHOP -> ScreenGuideCatalog.SHOP
+                DashboardTab.PROFILE -> ScreenGuideCatalog.PROFILE
+                else -> ScreenGuideCatalog.HOME
+            }
+            AskAshBottomSheet(
+                guideContext = currentScreenGuide,
+                userId = currentUserId,
+                onReplayTour = { scriptId ->
+                    PhoenixGuideDirector.getTourById(scriptId)?.let { tour ->
+                        coachMarkState.startTour(tour)
+                    }
+                },
+                onDismiss = { showAskAshSheet = false }
+            )
         }
     }
 }

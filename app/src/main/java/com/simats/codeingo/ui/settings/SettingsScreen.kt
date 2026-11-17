@@ -1409,6 +1409,90 @@ private fun PreferencesTab(
 
     Spacer(modifier = Modifier.height(24.dp))
 
+    // Ask Ash to show me around
+    SectionHeader("Ask Ash to show me around", textSecondary)
+    Spacer(modifier = Modifier.height(10.dp))
+    SettingsCard(cardBg = cardBg, cardBorder = cardBorder) {
+        val tabContext = LocalContext.current
+        val currentUserId = remember { com.simats.codeingo.domain.AuthService.shared.currentUserId ?: "guest" }
+        val guideDirector = com.simats.codeingo.domain.guide.PhoenixGuideDirector
+
+        guideDirector.ALL_TOURS.forEachIndexed { index, tour ->
+            if (index > 0) SettingsDivider(cardBorder)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        guideDirector.resetTour(tabContext, tour.id, currentUserId)
+                        android.widget.Toast.makeText(tabContext, "${tour.title} reset! Visit that screen to view it.", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = when (tour.id) {
+                        "HOME_TOUR" -> "🏡"
+                        "VISUALIZER_TOUR" -> "🔬"
+                        "ARENA_TOUR" -> "⚔️"
+                        "PRACTICE_TOUR" -> "🛠️"
+                        "LEADERBOARD_TOUR" -> "🛡️"
+                        "SHOP_TOUR" -> "🦴"
+                        "PROFILE_TOUR" -> "👤"
+                        else -> "🪶"
+                    },
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = tour.title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textPrimary
+                    )
+                    Text(
+                        text = "${tour.steps.size} guided coach marks with Ash",
+                        fontSize = 12.sp,
+                        color = textSecondary
+                    )
+                }
+                Text("Replay", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AmberGold)
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
+        SettingsDivider(cardBorder)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    guideDirector.resetAllTours(tabContext, currentUserId)
+                    android.widget.Toast.makeText(tabContext, "All screen tours reset! Ash will guide you everywhere.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🔄", fontSize = 20.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                "Reset All Ash Tours",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = com.simats.codeingo.ui.theme.DuolingoRed,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
     // Daily Fire Streak
     SectionHeader("Daily Fire Streak", textSecondary)
     Spacer(modifier = Modifier.height(10.dp))

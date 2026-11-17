@@ -64,6 +64,61 @@ data class AshTypography(
         fontWeight = FontWeight.SemiBold, // 600
         fontSize = 12.sp,
         lineHeight = 16.sp
+    ),
+    // Material 3 semantic mappings bound directly to Nunito
+    val displayLarge: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        lineHeight = 38.sp
+    ),
+    val titleLarge: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp
+    ),
+    val titleMedium: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp
+    ),
+    val titleSmall: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 22.sp
+    ),
+    val bodyLarge: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        lineHeight = 24.sp
+    ),
+    val bodyMedium: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+    val labelLarge: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 18.sp
+    ),
+    val labelMedium: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        lineHeight = 17.sp
+    ),
+    val labelSmall: TextStyle = TextStyle(
+        fontFamily = NunitoFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 11.sp,
+        lineHeight = 15.sp
     )
 )
 
