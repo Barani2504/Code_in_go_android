@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="40dp"
+    android:viewportWidth="64"
+    android:viewportHeight="40">
+    <!-- Warm Crimson Scarf -->
+    <path
+        android:pathData="M10,10 C18,16 46,16 54,10 L52,22 C44,28 20,28 12,22 Z"
+        android:fillColor="#EF4444"
+        android:strokeWidth="1.8"
+        android:strokeColor="#B91C1C" />
+    <!-- Trailing Tail -->
+    <path
+        android:pathData="M38,20 L48,20 L52,36 L40,36 Z"
+        android:fillColor="#DC2626"
+        android:strokeWidth="1.5"
+        android:strokeColor="#B91C1C" />
+</vector>

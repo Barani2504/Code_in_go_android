@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="44dp"
+    android:viewportWidth="64"
+    android:viewportHeight="44">
+    <!-- Cap Dome -->
+    <path
+        android:pathData="M12,30 C12,14 22,8 34,8 C46,8 52,16 52,30 Z"
+        android:fillColor="#2563EB"
+        android:strokeWidth="2"
+        android:strokeColor="#1D4ED8" />
+    <!-- Visor Brim -->
+    <path
+        android:pathData="M10,29 L56,29 C60,29 60,35 52,35 L10,34 Z"
+        android:fillColor="#1E40AF" />
+    <!-- Phoenix Emblem -->
+    <path
+        android:pathData="M30,17 L34,17 L32,23 Z"
+        android:fillColor="#FBBF24" />
+</vector>

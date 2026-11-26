@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="52dp"
+    android:viewportWidth="64"
+    android:viewportHeight="52">
+    <!-- Tactical Safety Vest -->
+    <path
+        android:pathData="M16,10 L26,10 L32,20 L38,10 L48,10 L52,44 L12,44 Z"
+        android:fillColor="#F97316"
+        android:strokeWidth="2"
+        android:strokeColor="#C2410C" />
+    <!-- Reflective Stripes -->
+    <path
+        android:pathData="M14,28 L50,28 L51,33 L13,33 Z"
+        android:fillColor="#FDE047" />
+</vector>

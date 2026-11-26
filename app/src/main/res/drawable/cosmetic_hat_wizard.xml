@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="52dp"
+    android:viewportWidth="64"
+    android:viewportHeight="52">
+    <!-- Wizard Cone -->
+    <path
+        android:pathData="M16,38 L34,6 L48,38 Z"
+        android:fillColor="#6D28D9"
+        android:strokeWidth="2"
+        android:strokeColor="#4C1D95" />
+    <!-- Brim -->
+    <path
+        android:pathData="M6,38 C6,34 58,34 58,38 C58,43 6,43 6,38 Z"
+        android:fillColor="#5B21B6"
+        android:strokeWidth="1.5"
+        android:strokeColor="#4C1D95" />
+    <!-- Gold Star -->
+    <path
+        android:pathData="M33,20 L35,25 L40,25 L36,28 L37,33 L33,30 L29,33 L30,28 L26,25 L31,25 Z"
+        android:fillColor="#FBBF24" />
+</vector>

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -128,14 +129,15 @@ fun PhoenixDynamicLogoView(
             )
 
             if (equippedCosmetics.headwearId != "none_head") {
-                val hatEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.headwearId)?.emoji
-                if (hatEmoji != null) {
-                    Text(
-                        text = hatEmoji,
-                        fontSize = 11.sp,
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-                }
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = AshCosmeticAssets.drawableForId(equippedCosmetics.headwearId)),
+                    contentDescription = "Equipped Headwear",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier
+                        .size(size * 0.48f)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-2).dp)
+                )
             }
         }
 

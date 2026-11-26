@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="40dp"
+    android:viewportWidth="64"
+    android:viewportHeight="40">
+    <!-- Left & Right Golden Laurel Leaves -->
+    <path
+        android:pathData="M14,32 C8,22 10,10 22,6 C18,16 18,24 26,32 Z"
+        android:fillColor="#22C55E"
+        android:strokeWidth="1.5"
+        android:strokeColor="#15803D" />
+    <path
+        android:pathData="M50,32 C56,22 54,10 42,6 C46,16 46,24 38,32 Z"
+        android:fillColor="#22C55E"
+        android:strokeWidth="1.5"
+        android:strokeColor="#15803D" />
+    <path
+        android:pathData="M24,32 C28,34 36,34 40,32"
+        android:strokeWidth="2.5"
+        android:strokeColor="#F59E0B"
+        android:fillColor="#00000000" />
+</vector>

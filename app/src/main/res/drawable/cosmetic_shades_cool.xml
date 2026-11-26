@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="28dp"
+    android:viewportWidth="64"
+    android:viewportHeight="28">
+    <!-- Left & Right Cool Shades -->
+    <path
+        android:pathData="M6,8 L28,8 L26,22 C24,24 10,24 8,20 Z"
+        android:fillColor="#0F172A"
+        android:strokeWidth="1.8"
+        android:strokeColor="#38BDF8" />
+    <path
+        android:pathData="M36,8 L58,8 L56,20 C54,24 40,24 38,22 Z"
+        android:fillColor="#0F172A"
+        android:strokeWidth="1.8"
+        android:strokeColor="#38BDF8" />
+    <path
+        android:pathData="M28,11 L36,11"
+        android:strokeWidth="2.5"
+        android:strokeColor="#38BDF8" />
+    <!-- Specular Glint -->
+    <path
+        android:pathData="M11,11 L17,11 L13,18 L10,18 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4" />
+</vector>

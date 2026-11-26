@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="56dp"
+    android:viewportWidth="64"
+    android:viewportHeight="56">
+    <!-- Heroic Crimson Cape -->
+    <path
+        android:pathData="M18,12 L46,12 L56,50 C44,44 32,52 32,52 C32,52 20,44 8,50 Z"
+        android:fillColor="#DC2626"
+        android:strokeWidth="2"
+        android:strokeColor="#991B1B" />
+    <!-- Gold Clasp -->
+    <path
+        android:pathData="M24,10 L40,10 L38,16 L26,16 Z"
+        android:fillColor="#F59E0B" />
+</vector>

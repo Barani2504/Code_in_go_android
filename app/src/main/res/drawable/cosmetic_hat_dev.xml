@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="48dp"
+    android:viewportWidth="64"
+    android:viewportHeight="48">
+    <!-- Top Hat Crown -->
+    <path
+        android:pathData="M18,34 L20,10 L44,10 L46,34 Z"
+        android:fillColor="#1E293B"
+        android:strokeWidth="2"
+        android:strokeColor="#0F172A" />
+    <!-- Gold Ribbon -->
+    <path
+        android:pathData="M18.5,28 L45.5,28 L46,34 L18,34 Z"
+        android:fillColor="#F59E0B" />
+    <!-- Brim -->
+    <path
+        android:pathData="M8,34 L56,34 C58,34 58,39 54,39 L10,39 C6,39 6,34 8,34 Z"
+        android:fillColor="#1E293B"
+        android:strokeWidth="1.5"
+        android:strokeColor="#334155" />
+</vector>

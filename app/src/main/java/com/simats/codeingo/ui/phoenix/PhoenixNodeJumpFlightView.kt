@@ -449,45 +449,14 @@ fun PhoenixNodeJumpFlightView(
                 )
             }
 
-            // Equipped Headwear Overlay
-            if (equippedCosmetics.headwearId != "none_head") {
-                val hatEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.headwearId)?.emoji
-                if (hatEmoji != null) {
-                    androidx.compose.material3.Text(
-                        text = hatEmoji,
-                        fontSize = 22.sp,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-4).dp)
-                    )
-                }
-            }
-            // Equipped Accessory Overlay
-            if (equippedCosmetics.accessoryId != "none_acc") {
-                val accEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.accessoryId)?.emoji
-                if (accEmoji != null) {
-                    androidx.compose.material3.Text(
-                        text = accEmoji,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .offset(x = (-10).dp, y = (-8).dp)
-                    )
-                }
-            }
-            // Equipped Outfit Overlay
-            if (equippedCosmetics.outfitId != "none_outfit") {
-                val outfitEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.outfitId)?.emoji
-                if (outfitEmoji != null) {
-                    androidx.compose.material3.Text(
-                        text = outfitEmoji,
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .offset(x = 12.dp, y = (-20).dp)
-                    )
-                }
-            }
+            // Equipped Gem Shop Cosmetics fitted onto Ash
+            AshCosmeticOverlay(
+                headwearId = equippedCosmetics.headwearId,
+                outfitId = equippedCosmetics.outfitId,
+                accessoryId = equippedCosmetics.accessoryId,
+                mascotWidth = width,
+                mascotHeight = height
+            )
         }
     }
 }

@@ -37,6 +37,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -621,7 +622,11 @@ fun GemShopSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Text("💎", fontSize = 16.sp)
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = com.simats.codeingo.R.drawable.cosmetic_gem_icon),
+                            contentDescription = "Diamonds",
+                            modifier = Modifier.size(18.dp)
+                        )
                         Text(
                             text = formattedNumber(gemsCount),
                             fontSize = 16.sp,
@@ -692,15 +697,23 @@ fun GemShopSheet(
                                     .background(Color.Black.copy(alpha = 0.12f))
                             )
 
-                            // Animated Bird Mascot with sinusoidal idle kinematics
+                            // Animated Bird Mascot with sinusoidal idle kinematics + Live Equipped/Tried Cosmetics
                             Box(
                                 modifier = Modifier.graphicsLayer {
                                     translationY = birdHoverOffset * density
-                                }
+                                },
+                                contentAlignment = Alignment.Center
                             ) {
                                 PhoenixAnimatedMascotView(
                                     pose = PhoenixMascotPose.Welcoming,
                                     size = 155.dp
+                                )
+                                com.simats.codeingo.ui.phoenix.AshCosmeticOverlay(
+                                    headwearId = activeHeadwear,
+                                    outfitId = activeOutfit,
+                                    accessoryId = activeAccessory,
+                                    mascotWidth = 155.dp,
+                                    mascotHeight = 155.dp
                                 )
                             }
                         }
@@ -911,7 +924,19 @@ fun GemShopSheet(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(category.iconEmoji, fontSize = 13.sp)
+                                val catDrawable = when (category) {
+                                    CosmeticCategory.HATS -> com.simats.codeingo.R.drawable.cosmetic_crown_gold
+                                    CosmeticCategory.OUTFITS -> com.simats.codeingo.R.drawable.cosmetic_outfit_cape
+                                    CosmeticCategory.ACCESSORIES -> com.simats.codeingo.R.drawable.cosmetic_shades_cool
+                                    CosmeticCategory.EFFECTS -> com.simats.codeingo.R.drawable.cosmetic_aura_quantum
+                                    CosmeticCategory.LIVES -> com.simats.codeingo.R.drawable.cosmetic_heart_full
+                                    CosmeticCategory.POWERUPS -> com.simats.codeingo.R.drawable.cosmetic_xp_boost
+                                }
+                                androidx.compose.foundation.Image(
+                                    painter = painterResource(id = catDrawable),
+                                    contentDescription = category.label,
+                                    modifier = Modifier.size(16.dp)
+                                )
                                 Text(
                                     text = category.label,
                                     fontSize = 13.sp,
@@ -1078,7 +1103,7 @@ fun GemShopSheet(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Item Emoji Circle Display
+                    // Item Artwork Circle Display
                     Box(
                         modifier = Modifier
                             .size(84.dp)
@@ -1087,7 +1112,12 @@ fun GemShopSheet(
                             .border(1.5.dp, Color.Black.copy(alpha = 0.08f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(item.emoji, fontSize = 46.sp)
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = com.simats.codeingo.ui.phoenix.AshCosmeticAssets.drawableForId(item.id)),
+                            contentDescription = item.name,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                            modifier = Modifier.size(52.dp)
+                        )
                     }
 
                     // Name & Description
@@ -1351,7 +1381,11 @@ private fun HeartRefillCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text(emoji, fontSize = 26.sp)
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = com.simats.codeingo.R.drawable.cosmetic_heart_full),
+                contentDescription = title,
+                modifier = Modifier.size(28.dp)
+            )
 
             Text(
                 text = title,
@@ -1429,7 +1463,12 @@ private fun FeaturedItemCard(
                     .background(if (isDark) Color.White.copy(alpha = 0.06f) else Color.Black.copy(alpha = 0.04f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(item.emoji, fontSize = 34.sp)
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = com.simats.codeingo.ui.phoenix.AshCosmeticAssets.drawableForId(item.id)),
+                    contentDescription = item.name,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier.size(44.dp)
+                )
             }
 
             // Name
@@ -1517,10 +1556,13 @@ private fun ItemRowCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = item.emoji,
-                    fontSize = 32.sp,
-                    modifier = Modifier.scale(if (isLocked) 0.85f else 1f)
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = com.simats.codeingo.ui.phoenix.AshCosmeticAssets.drawableForId(item.id)),
+                    contentDescription = item.name,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .scale(if (isLocked) 0.85f else 1f)
                 )
 
                 if (isLocked) {

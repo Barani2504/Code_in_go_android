@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="36dp"
+    android:viewportWidth="64"
+    android:viewportHeight="36">
+    <!-- Cyber Visor Frame -->
+    <path
+        android:pathData="M8,12 C8,8 14,6 32,6 C50,6 56,8 56,12 L52,26 C50,30 40,28 32,24 C24,28 14,30 12,26 Z"
+        android:fillColor="#0F172A"
+        android:strokeWidth="2"
+        android:strokeColor="#06B6D4" />
+    <!-- Glowing HUD Lens -->
+    <path
+        android:pathData="M13,13 L51,13 L48,22 C42,25 36,22 32,20 C28,22 22,25 16,22 Z"
+        android:fillColor="#22D3EE"
+        android:fillAlpha="0.85" />
+    <!-- Scanner Line -->
+    <path
+        android:pathData="M16,16 L48,16"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF" />
+</vector>
