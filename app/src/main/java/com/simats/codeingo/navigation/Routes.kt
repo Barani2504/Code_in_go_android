@@ -1,5 +1,7 @@
 package com.simats.codeingo.navigation
 
+import com.simats.codeingo.data.network.repository.LessonIdAdapter
+
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
@@ -9,7 +11,18 @@ sealed class Screen(val route: String) {
     object Assessment : Screen("assessment/{unitId}/{levelNumber}/{totalLevelsInUnit}/{isBoss}") {
         fun createRoute(unitId: Int, levelNumber: Int, totalLevelsInUnit: Int = 6, isBoss: Boolean = false) =
             "assessment/$unitId/$levelNumber/$totalLevelsInUnit/$isBoss"
-        fun createRoute(lessonId: String) = "assessment/1/1/6/false"
+
+        fun createRoute(lessonId: String): String {
+            val localIndex = LessonIdAdapter.toLocalLevelIndex(lessonId) ?: 1
+            return if (localIndex in 101..105) {
+                val stage = localIndex - 100
+                createRoute(unitId = 0, levelNumber = stage, totalLevelsInUnit = 5, isBoss = stage == 5)
+            } else {
+                val unitId = ((localIndex - 1) / 5) + 1
+                val stageInUnit = ((localIndex - 1) % 5) + 1
+                createRoute(unitId = unitId, levelNumber = localIndex, totalLevelsInUnit = 5, isBoss = stageInUnit == 5)
+            }
+        }
     }
     object BossBattle : Screen("boss_battle/{bossId}") {
         fun createRoute(bossId: String) = "boss_battle/$bossId"

@@ -72,16 +72,19 @@ object DhEngine {
 
     /** Modular exponentiation */
     fun modPow(base: Long, exp: Long, mod: Long): Long {
+        if (mod <= 0L || exp < 0L) return 0L
         return BigInteger.valueOf(base).modPow(BigInteger.valueOf(exp), BigInteger.valueOf(mod)).toLong()
     }
 
     /** Verifies whether g is a primitive root modulo p */
     fun isPrimitiveRoot(g: Long, p: Long): Boolean {
-        if (p <= 1L) return false
+        if (p <= 1L || p > 100_000L) return false
         val seen = BooleanArray(p.toInt())
         var cur = 1L
+        val normalizedG = ((g % p) + p) % p
+        if (normalizedG == 0L) return false
         for (i in 1 until p) {
-            cur = (cur * g) % p
+            cur = (cur * normalizedG) % p
             if (cur == 0L || seen[cur.toInt()]) return false
             seen[cur.toInt()] = true
         }

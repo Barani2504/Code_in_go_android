@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.ui.theme.AmberGold
@@ -167,27 +168,54 @@ fun KerberosVisualizer(modifier: Modifier = Modifier) {
                 // Node Flow Animation (Sender -> Receiver)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
+                            .weight(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(text = activeStep.sender, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                        Text(
+                            text = activeStep.sender,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = dynamicColors.textPrimary,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2
+                        )
                     }
 
-                    Text(text = "──▶ ${activeStep.packetName} ──▶", fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = PhoenixGreen)
+                    Text(
+                        text = "▶ ${activeStep.packetName} ▶",
+                        modifier = Modifier.weight(1.2f),
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = PhoenixGreen,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
 
                     Box(
                         modifier = Modifier
+                            .weight(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(text = activeStep.receiver, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                        Text(
+                            text = activeStep.receiver,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = dynamicColors.textPrimary,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2
+                        )
                     }
                 }
 

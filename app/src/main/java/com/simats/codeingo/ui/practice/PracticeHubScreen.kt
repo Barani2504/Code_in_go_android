@@ -1,5 +1,6 @@
 package com.simats.codeingo.ui.practice
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -56,13 +58,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.simats.codeingo.R
 import com.simats.codeingo.data.model.MistakeVaultItem
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.ui.challenge.DailyCipherChallengeCard
 import com.simats.codeingo.ui.components.motion.FlipCard
 import com.simats.codeingo.ui.components.motion.CardFace
 import com.simats.codeingo.ui.components.AppButton
 import com.simats.codeingo.ui.components.AppButtonStyle
+import com.simats.codeingo.ui.practice.viewmodel.MistakeVaultViewModel
 import com.simats.codeingo.ui.phoenix.PhoenixAtmosphericBackgroundView
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
@@ -91,27 +96,46 @@ data class InterviewProblem(
     val sampleCode: String
 )
 
+/**
+ * Interactive Practice Hub hosting Mistake Vault (Room + MistakeVaultViewModel),
+ * Daily Spaced Repetition & Cipher Challenge, and Security Interview Prep.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM`
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE`
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL`
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY`
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION`
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeHubScreen(
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
     onOpenArrayKingdom: (() -> Unit)? = null,
     onOpenStackTower: (() -> Unit)? = null,
     onOpenQueueStation: (() -> Unit)? = null,
     onOpenLinkedListRoad: (() -> Unit)? = null,
-    onOpenBinaryTreeForest: (() -> Unit)? = null
+    onOpenBinaryTreeForest: (() -> Unit)? = null,
+    viewModel: MistakeVaultViewModel = hiltViewModel()
 ) {
     val gameManager = GameManager.instance
-    val mistakes by gameManager.mistakeVault.collectAsState()
+    val mistakes by viewModel.mistakeVaultItems.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Mistake Vault, 1: Daily Review, 2: Interview Prep
 
     var repairingMistake by remember { mutableStateOf<MistakeVaultItem?>(null) }
     var selectedProblem by remember { mutableStateOf<InterviewProblem?>(null) }
 
+    if (onBack != null) {
+        BackHandler(enabled = repairingMistake == null && selectedProblem == null) {
+            onBack()
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(LocalDynamicThemeColors.current.background)
     ) {
         PhoenixAtmosphericBackgroundView()
 
@@ -127,6 +151,16 @@ fun PracticeHubScreen(
                     .padding(horizontal = 20.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (onBack != null) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = LocalDynamicThemeColors.current.textPrimary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
                 Box(
                     modifier = Modifier
                         .size(46.dp)
@@ -308,6 +342,7 @@ fun PracticeHubScreen(
                             style = AppButtonStyle.SUCCESS_GREEN,
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {
+                                viewModel.markMistakeRepaired(item.id)
                                 gameManager.repairMistake(item.id)
                                 repairingMistake = null
                             }
@@ -646,6 +681,7 @@ private fun DailyReviewTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -688,6 +724,8 @@ private fun DailyReviewTab(
                     )
                 }
             }
+
+            DailyCipherChallengeCard(modifier = Modifier.fillMaxWidth())
         }
     }
 }

@@ -92,15 +92,16 @@ object SafeCryptoEngine {
 
     // ── 4. RSA WITH TINY PRIMES ──────────────────────────────────
     fun safeRsaTiny(pInput: Long, qInput: Long, eInput: Long, messageInput: Long): Result<RsaTinyResult> = runCatching {
-        // Clamp primes to small prime candidates
-        val safeP = clampToPrime(pInput.coerceIn(2, 97))
-        val rawQ = clampToPrime(qInput.coerceIn(2, 97))
+        // Clamp primes to >= 3 so phi(n) is at least 8 and always has a valid coprime e
+        val safeP = clampToPrime(pInput.coerceIn(3, 97))
+        val rawQ = clampToPrime(qInput.coerceIn(3, 97))
         val safeQ = if (rawQ == safeP) getNextPrime(rawQ) else rawQ
 
         val n = safeP * safeQ
         val phi = (safeP - 1) * (safeQ - 1)
 
-        val safeE = findValidE(eInput.coerceIn(3, phi - 1), phi)
+        val maxE = (phi - 1).coerceAtLeast(3L)
+        val safeE = findValidE(eInput.coerceIn(3L, maxE), phi)
         val d = BigInteger.valueOf(safeE).modInverse(BigInteger.valueOf(phi)).toLong()
 
         val safeM = messageInput.coerceIn(0, n - 1)

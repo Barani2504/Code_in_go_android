@@ -170,7 +170,10 @@ private fun SHA256ExploreView() {
                             "E" to activeRoundState.e, "F" to activeRoundState.f,
                             "G" to activeRoundState.g, "H" to activeRoundState.h
                         ).forEach { (reg, valInt) ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(text = reg, fontSize = 10.sp, fontWeight = FontWeight.Black, color = purpleColor)
                                 Text(text = "%04X".format((valInt ushr 16) and 0xFFFF), fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                             }

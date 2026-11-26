@@ -75,14 +75,23 @@ fun VisualizerPlaybackController(
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
     val isDark = dynamicColors.isDark
+    val safeTotalSteps = totalSteps.coerceAtLeast(1)
+    val safeCurrentStep = currentStep.coerceIn(1, safeTotalSteps)
+
+    LaunchedEffect(safeTotalSteps, currentStep) {
+        if (currentStep != safeCurrentStep) {
+            onStepChange(safeCurrentStep)
+        }
+    }
 
     // Auto-advance loop when playing
-    LaunchedEffect(isPlaying, currentStep, playbackSpeed, totalSteps) {
-        if (isPlaying && totalSteps > 1) {
-            val delayMs = (1000L / playbackSpeed).toLong().coerceIn(250L, 2000L)
+    LaunchedEffect(isPlaying, safeCurrentStep, playbackSpeed, safeTotalSteps) {
+        if (isPlaying && safeTotalSteps > 1) {
+            val safeSpeed = playbackSpeed.coerceAtLeast(0.25f)
+            val delayMs = (1000L / safeSpeed).toLong().coerceIn(250L, 2000L)
             delay(delayMs)
-            if (currentStep < totalSteps) {
-                onStepChange(currentStep + 1)
+            if (safeCurrentStep < safeTotalSteps) {
+                onStepChange(safeCurrentStep + 1)
             } else {
                 // Loop back to start or pause
                 onStepChange(1)
@@ -119,7 +128,7 @@ fun VisualizerPlaybackController(
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "$stepLabel $currentStep / $totalSteps",
+                            text = "$stepLabel $safeCurrentStep / $safeTotalSteps",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
@@ -169,22 +178,42 @@ fun VisualizerPlaybackController(
                             )
                         }
                     }
+                    if (safeCurrentStep > 1) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f))
+                                .clickable {
+                                    FeedbackManager.tap()
+                                    if (isPlaying) onPlayPauseToggle()
+                                    onStepChange(1)
+                                }
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "RESET",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isDark) SubtextGray else dynamicColors.textSecondary
+                            )
+                        }
+                    }
                 }
             }
 
             // Timeline Scrubber Slider
-            if (totalSteps > 1) {
+            if (safeTotalSteps > 1) {
                 Slider(
-                    value = currentStep.toFloat(),
+                    value = safeCurrentStep.toFloat(),
                     onValueChange = { newVal ->
-                        val next = newVal.roundToInt().coerceIn(1, totalSteps)
-                        if (next != currentStep) {
+                        val next = newVal.roundToInt().coerceIn(1, safeTotalSteps)
+                        if (next != safeCurrentStep) {
                             FeedbackManager.tap()
                             onStepChange(next)
                         }
                     },
-                    valueRange = 1f..totalSteps.toFloat(),
-                    steps = (totalSteps - 2).coerceAtLeast(0),
+                    valueRange = 1f..safeTotalSteps.toFloat(),
+                    steps = (safeTotalSteps - 2).coerceAtLeast(0),
                     colors = SliderDefaults.colors(
                         thumbColor = accentColor,
                         activeTrackColor = accentColor,
@@ -206,9 +235,9 @@ fun VisualizerPlaybackController(
                         .weight(1f)
                         .height(42.dp)
                         .pressSquish {
-                            if (currentStep > 1) {
+                            if (safeCurrentStep > 1) {
                                 FeedbackManager.tap()
-                                onStepChange(currentStep - 1)
+                                onStepChange(safeCurrentStep - 1)
                             }
                         }
                         .clip(RoundedCornerShape(12.dp))
@@ -223,14 +252,14 @@ fun VisualizerPlaybackController(
                         Icon(
                             imageVector = Icons.Default.SkipPrevious,
                             contentDescription = "Step Back",
-                            tint = if (currentStep > 1) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f),
+                            tint = if (safeCurrentStep > 1) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f),
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = "BACK",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (currentStep > 1) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f)
+                            color = if (safeCurrentStep > 1) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f)
                         )
                     }
                 }
@@ -273,9 +302,9 @@ fun VisualizerPlaybackController(
                         .weight(1f)
                         .height(42.dp)
                         .pressSquish {
-                            if (currentStep < totalSteps) {
+                            if (safeCurrentStep < safeTotalSteps) {
                                 FeedbackManager.tap()
-                                onStepChange(currentStep + 1)
+                                onStepChange(safeCurrentStep + 1)
                             }
                         }
                         .clip(RoundedCornerShape(12.dp))
@@ -291,12 +320,12 @@ fun VisualizerPlaybackController(
                             text = "NEXT",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (currentStep < totalSteps) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f)
+                            color = if (safeCurrentStep < safeTotalSteps) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f)
                         )
                         Icon(
                             imageVector = Icons.Default.SkipNext,
                             contentDescription = "Step Forward",
-                            tint = if (currentStep < totalSteps) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f),
+                            tint = if (safeCurrentStep < safeTotalSteps) dynamicColors.textPrimary else dynamicColors.textSecondary.copy(alpha = 0.4f),
                             modifier = Modifier.size(16.dp)
                         )
                     }

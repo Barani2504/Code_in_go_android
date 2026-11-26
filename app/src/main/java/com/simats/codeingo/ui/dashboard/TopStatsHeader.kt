@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +57,7 @@ import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
  * Exact parity with iOS MainDashboardView.swift topStatsHeader.
  * Features:
- * - Circular side menu trigger button with pressScale
+ * - Circular More Actions button (MoreBottomDrawer) with pressScale
  * - PhoenixDynamicLogoView (size 28dp) with live emotion aura & tap sheet
  * - Streak pill (Ice 🧊 if pending restore, Flame 🔥 otherwise)
  * - Stars pill (🌟)
@@ -75,7 +75,7 @@ fun TopStatsHeader(
     gemsCount: Int = 450,
     heartTimerString: String? = null,
     isBossActive: Boolean = false,
-    onMenuClick: () -> Unit,
+    onMoreClick: () -> Unit = {},
     onPhoenixClick: () -> Unit = {},
     onAskAshClick: () -> Unit = {},
     onStreakClick: () -> Unit = {},
@@ -108,7 +108,7 @@ fun TopStatsHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // 1. Side Menu Hamburger Button
+            // 1. More Options Sheet Trigger Button
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -123,12 +123,12 @@ fun TopStatsHeader(
                         ),
                         CircleShape
                     )
-                    .clickable { onMenuClick() },
+                    .clickable { onMoreClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Side Menu",
+                    imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = "More Options",
                     tint = if (isDark) Color.White else Color(0xFF182030),
                     modifier = Modifier.size(16.dp)
                 )

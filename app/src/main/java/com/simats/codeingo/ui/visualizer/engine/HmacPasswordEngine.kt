@@ -147,7 +147,9 @@ object HmacPasswordEngine {
 
     /** Runs actual device PBKDF2 benchmark */
     fun benchmarkPbkdf2(password: String, salt: ByteArray, iterations: Int): Pbkdf2BenchmarkResult {
-        val spec = PBEKeySpec(password.toCharArray(), salt, iterations, 256)
+        val safeIterations = iterations.coerceIn(1, 500_000)
+        val safeSalt = if (salt.isEmpty()) byteArrayOf(0x01) else salt
+        val spec = PBEKeySpec(password.toCharArray(), safeSalt, safeIterations, 256)
         val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
 
         val start = System.nanoTime()
@@ -159,7 +161,7 @@ object HmacPasswordEngine {
         val estimate10M = costPerGuessSec * 10_000_000.0
 
         return Pbkdf2BenchmarkResult(
-            iterations = iterations,
+            iterations = safeIterations,
             elapsedMs = maxOf(1L, elapsedMs),
             derivedKeyHex = hex,
             crackingCostEstimateSec = estimate10M
@@ -171,15 +173,16 @@ object HmacPasswordEngine {
         startPasswords: List<String>,
         chainLength: Int = 4
     ): List<RainbowChain> {
+        val safeChainLength = chainLength.coerceIn(1, 32)
         val md = MessageDigest.getInstance("SHA-256")
         val chains = mutableListOf<RainbowChain>()
 
         fun reduce(hash: ByteArray, step: Int): String {
-            val num = ((hash[0].toInt() and 0xFF) shl 8) or (hash[1].toInt() and 0xFF) + step
+            val raw = (((hash[0].toInt() and 0xFF) shl 8) or (hash[1].toInt() and 0xFF)) + step
             val chars = "abcdefghijklmnopqrstuvwxyz"
-            val c1 = chars[(num) % 26]
-            val c2 = chars[(num / 26) % 26]
-            val c3 = chars[(num / (26 * 26)) % 26]
+            val c1 = chars[raw.mod(26)]
+            val c2 = chars[(raw / 26).mod(26)]
+            val c3 = chars[(raw / (26 * 26)).mod(26)]
             return "$c1$c2$c3"
         }
 
@@ -187,7 +190,7 @@ object HmacPasswordEngine {
             var curPwd = startPwd
             val steps = mutableListOf<Pair<String, String>>()
 
-            for (step in 0 until chainLength) {
+            for (step in 0 until safeChainLength) {
                 val hash = md.digest(curPwd.toByteArray(Charsets.UTF_8))
                 val hashHex = hash.take(4).joinToString("") { "%02x".format(it) }
                 steps.add(curPwd to hashHex)

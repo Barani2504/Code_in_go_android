@@ -129,7 +129,13 @@ object KasiskiEngine {
 
     /** Kasiski Examination: finds repeated 3-grams and factors their distances */
     fun kasiskiExamination(ciphertext: String, ngramLen: Int = 3): KasiskiResult {
+        if (ngramLen <= 0) {
+            return KasiskiResult(emptyList(), emptyList(), 3)
+        }
         val clean = ciphertext.filter { it in 'A'..'Z' || it in 'a'..'z' }.uppercase()
+        if (clean.length < ngramLen) {
+            return KasiskiResult(emptyList(), emptyList(), 3)
+        }
         val posMap = mutableMapOf<String, MutableList<Int>>()
 
         for (i in 0..clean.length - ngramLen) {
@@ -190,6 +196,14 @@ object KasiskiEngine {
     /** Automatically breaks Vigenère cipher given a candidate key length */
     fun breakVigenereWithKeyLength(ciphertext: String, keyLength: Int): VigenereCrackResult {
         val clean = ciphertext.filter { it in 'A'..'Z' || it in 'a'..'z' }.uppercase()
+        if (keyLength <= 0 || clean.isEmpty()) {
+            return VigenereCrackResult(
+                estimatedKeyLength = keyLength.coerceAtLeast(1),
+                ioc = 0.0,
+                recoveredKey = "A",
+                decryptedText = ciphertext
+            )
+        }
         val keyChars = CharArray(keyLength)
 
         for (col in 0 until keyLength) {

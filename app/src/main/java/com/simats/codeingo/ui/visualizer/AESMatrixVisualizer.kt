@@ -248,11 +248,14 @@ private fun AESMatrixExploreView() {
                     verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                 for (r in 0..3) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         for (c in 0..3) {
                             val byteVal = currentMatrix[r][c]
                             Box(
-                                modifier = Modifier.size(48.dp, 36.dp).clip(RoundedCornerShape(6.dp))
+                                modifier = Modifier.weight(1f).height(36.dp).clip(RoundedCornerShape(6.dp))
                                     .background(DsaPurple.copy(alpha = if (isDark) 0.25f else 0.12f))
                                     .border(1.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(6.dp)),
                                 contentAlignment = Alignment.Center

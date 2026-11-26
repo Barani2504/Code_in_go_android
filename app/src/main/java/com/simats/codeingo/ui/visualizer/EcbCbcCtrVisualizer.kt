@@ -91,6 +91,7 @@ fun EcbCbcCtrVisualizer(modifier: Modifier = Modifier) {
                         .weight(1f)
                         .pressSquish {
                             FeedbackManager.tap()
+                            isPlaying = false
                             selectedMode = mode
                             currentStep = 1
                         }

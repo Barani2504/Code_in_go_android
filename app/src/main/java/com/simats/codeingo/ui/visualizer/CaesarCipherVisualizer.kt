@@ -188,11 +188,11 @@ private fun CaesarCipherExploreView() {
 
     val outputText = remember(textInput, effectiveShift) {
         textInput.map { char ->
-            if (char.isLetter()) {
-                val base = if (char.isUpperCase()) 'A' else 'a'
-                val shifted = (char.code - base.code + effectiveShift).mod(26)
-                (base.code + shifted).toChar()
-            } else char
+            when (char) {
+                in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + effectiveShift).mod(26)).toChar()
+                in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + effectiveShift).mod(26)).toChar()
+                else -> char
+            }
         }.joinToString("")
     }
 

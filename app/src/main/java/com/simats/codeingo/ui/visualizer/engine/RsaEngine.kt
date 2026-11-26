@@ -61,8 +61,11 @@ object RsaEngine {
 
     /** Extended Euclidean Algorithm producing trace steps for a * x + b * y = gcd(a, b) */
     fun extendedEuclidean(e: BigInteger, phi: BigInteger): Pair<BigInteger, List<EeaStep>> {
+        if (phi <= BigInteger.ONE || e <= BigInteger.ZERO) {
+            return Pair(BigInteger.ZERO, emptyList())
+        }
         var r0 = phi
-        var r1 = e
+        var r1 = e % phi
         var x0 = BigInteger.ZERO
         var x1 = BigInteger.ONE
         var y0 = BigInteger.ONE
@@ -104,16 +107,23 @@ object RsaEngine {
         val p = BigInteger.valueOf(pVal)
         val q = BigInteger.valueOf(qVal)
 
+        if (pVal <= 1L || qVal <= 1L) {
+            return RsaKeyGenResult(p, q, BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, emptyList(), false, "Primes p and q must be greater than 1")
+        }
+
         if (p == q) {
             return RsaKeyGenResult(p, q, p * q, BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, emptyList(), false, "Primes p and q must be distinct")
         }
 
         val n = p * q
         val phi = (p - BigInteger.ONE) * (q - BigInteger.ONE)
+        if (phi <= BigInteger.TWO) {
+            return RsaKeyGenResult(p, q, n, phi, BigInteger.ZERO, BigInteger.ZERO, emptyList(), false, "Primes too small: phi(n) must exceed 2")
+        }
 
         // Find coprime e
         var e = BigInteger.valueOf(preferredE)
-        if (e >= phi || gcd(e, phi) != BigInteger.ONE) {
+        if (e <= BigInteger.ONE || e >= phi || gcd(e, phi) != BigInteger.ONE) {
             // Find smallest suitable odd e > 2
             var candidate = BigInteger.valueOf(3)
             var found = false
@@ -126,7 +136,7 @@ object RsaEngine {
                 candidate += BigInteger.valueOf(2)
             }
             if (!found) {
-                return RsaKeyGenResult(p, q, n, phi, e, BigInteger.ZERO, emptyList(), false, "Could not find coprime exponent e")
+                return RsaKeyGenResult(p, q, n, phi, BigInteger.ZERO, BigInteger.ZERO, emptyList(), false, "Could not find coprime exponent e")
             }
         }
 
@@ -136,6 +146,9 @@ object RsaEngine {
 
     /** Traces square-and-multiply modular exponentiation: base^exponent mod modulus */
     fun traceModExp(base: BigInteger, exponent: BigInteger, modulus: BigInteger): ModExpTrace {
+        if (modulus <= BigInteger.ONE || exponent < BigInteger.ZERO) {
+            return ModExpTrace(base, exponent, modulus, "0", emptyList(), BigInteger.ZERO)
+        }
         val bin = exponent.toString(2)
         var acc = BigInteger.ONE
         val steps = mutableListOf<SquareAndMultiplyStep>()

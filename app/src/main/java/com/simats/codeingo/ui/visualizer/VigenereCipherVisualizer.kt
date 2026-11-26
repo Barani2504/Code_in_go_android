@@ -154,19 +154,27 @@ private fun VigenereExploreView() {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "REPEATED KEYSTREAM ALIGNMENT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    cleanPlain.take(25).forEachIndexed { i, pChar ->
-                        val kChar = cleanKey[i % cleanKey.length]
-                        val rChar = resultText.getOrElse(i) { '?' }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
-                        ) {
-                            Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-                            Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                            Text(text = "=", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                if (cleanPlain.isEmpty()) {
+                    Text(
+                        text = "Enter ASCII letters (A-Z) above to compute keystream alignment.",
+                        fontSize = 11.sp,
+                        color = SubtextGray
+                    )
+                } else {
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        cleanPlain.take(25).forEachIndexed { i, pChar ->
+                            val kChar = cleanKey[i % cleanKey.length]
+                            val rChar = resultText.getOrElse(i) { '?' }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
+                            ) {
+                                Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                                Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
+                                Text(text = "=", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                            }
                         }
                     }
                 }

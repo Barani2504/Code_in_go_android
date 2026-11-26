@@ -4,7 +4,7 @@
             "outputFile": "com.simats.codeingo.macrobenchmark-mergeDebugResources-16:/values-it/values-it.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\baran\\.gradle\\caches\\9.6.0\\transforms\\ddc77b2e21d05959eca6ee3e46b0404f\\transformed\\core-1.9.0\\res\\values-it\\values-it.xml",
+                    "source": "/Users/user1/.gradle/caches/9.6.0/transforms/b87d6b42851bf1b70cde596bc09fbadf/transformed/core-1.9.0/res/values-it/values-it.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

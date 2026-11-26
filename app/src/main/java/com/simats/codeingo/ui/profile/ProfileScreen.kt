@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -197,7 +199,6 @@ fun ProfileScreen(
                             showSignOutAlert = false
                             localizationManager.resetProfileData()
                             com.simats.codeingo.domain.AuthService.shared.signOut()
-                            gameManager.deleteAccountAndClearAllData()
                             onLogout()
                         }
                     ) {
@@ -224,6 +225,7 @@ fun ProfileScreen(
 // ══════════════════════════════════════════════════════════════════
 // 👤 Authenticated Profile Content
 // ══════════════════════════════════════════════════════════════════
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AuthenticatedProfileBody(
     userName: String,
@@ -241,6 +243,8 @@ private fun AuthenticatedProfileBody(
     achievements: List<com.simats.codeingo.data.network.model.AchievementDTO> = emptyList(),
     onClaimAchievement: ((String) -> Unit)? = null
 ) {
+    var showCertificateSheet by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -366,6 +370,12 @@ private fun AuthenticatedProfileBody(
             onViewAllClick = {}
         )
 
+        // 6a. Exam Readiness & CNS Mastery Dashboard
+        ExamReadinessDashboard(
+            onViewCertificate = { showCertificateSheet = true },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         // 6b. Crypto Codex Collectible Cards Gallery
         val gameManager = com.simats.codeingo.domain.GameManager.instance
         val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
@@ -385,6 +395,20 @@ private fun AuthenticatedProfileBody(
         )
 
         Spacer(modifier = Modifier.height(72.dp))
+    }
+
+    if (showCertificateSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showCertificateSheet = false },
+            containerColor = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current.cardBackground
+        ) {
+            CipherCardShareView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .navigationBarsPadding()
+            )
+        }
     }
 }
 

@@ -98,13 +98,13 @@ fun VisualizerScaffold(
     val view = LocalView.current
     val reduceMotion = LocalReduceMotion.current
     val coroutineScope = rememberCoroutineScope()
-    var showLostSheet by remember { mutableStateOf(false) }
+    var showLostSheet by remember(spec.id) { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Check Question State
-    var selectedOptionIndex by remember { mutableIntStateOf(-1) }
-    var isAnswerSubmitted by remember { mutableStateOf(false) }
-    var isCorrectAnswer by remember { mutableStateOf(false) }
+    var selectedOptionIndex by remember(spec.id) { mutableIntStateOf(-1) }
+    var isAnswerSubmitted by remember(spec.id) { mutableStateOf(false) }
+    var isCorrectAnswer by remember(spec.id) { mutableStateOf(false) }
 
     Surface(
         modifier = modifier.fillMaxSize(),

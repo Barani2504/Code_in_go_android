@@ -405,10 +405,12 @@ object AesEngine {
     /** Helper to format hex strings */
     fun bytesToHex(bytes: ByteArray): String = bytes.joinToString("") { "%02x".format(it) }
     fun hexToBytes(hex: String): ByteArray {
-        val clean = hex.replace(" ", "").replace("\n", "")
-        val result = ByteArray(clean.length / 2)
+        val hexOnly = hex.filter { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
+        if (hexOnly.isEmpty()) return ByteArray(0)
+        val padded = if (hexOnly.length % 2 != 0) "0$hexOnly" else hexOnly
+        val result = ByteArray(padded.length / 2)
         for (i in result.indices) {
-            result[i] = clean.substring(i * 2, i * 2 + 2).toInt(16).toByte()
+            result[i] = padded.substring(i * 2, i * 2 + 2).toInt(16).toByte()
         }
         return result
     }

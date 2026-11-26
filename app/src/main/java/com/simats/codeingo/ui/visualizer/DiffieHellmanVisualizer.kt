@@ -99,9 +99,9 @@ private fun DiffieHellmanAttackView() {
                 Text(text = "😈 ACTIVE MALLORY MITM KEY SUBSTITUTION", fontSize = 12.sp, fontWeight = FontWeight.Black, color = redColor)
                 Text(text = "Mallory intercepts Alice's public key (A=$g^a mod p) and Bob's public key (B=$g^b mod p). She sends her own public key M = $g^m mod p = ${mitmState.malloryPublic} to both parties.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
-                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
                 }
 
                 Text(

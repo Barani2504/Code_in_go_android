@@ -91,26 +91,29 @@ fun CipherLabScreen(
         when (selectedAlgo) {
             CipherAlgorithm.CAESAR -> {
                 inputText.map { char ->
-                    if (char.isLetter()) {
-                        val base = if (char.isUpperCase()) 'A' else 'a'
-                        val shifted = (char.code - base.code + caesarShift).mod(26)
-                        (base.code + shifted).toChar()
-                    } else char
+                    when (char) {
+                        in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + caesarShift).mod(26)).toChar()
+                        in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + caesarShift).mod(26)).toChar()
+                        else -> char
+                    }
                 }.joinToString("")
             }
             CipherAlgorithm.VIGENERE -> {
-                val cleanKey = secretKey.filter { it.isLetter() }.uppercase()
+                val cleanKey = secretKey.uppercase().filter { it in 'A'..'Z' }
                 if (cleanKey.isEmpty()) inputText
                 else {
                     var keyIdx = 0
                     inputText.map { char ->
-                        if (char.isLetter()) {
-                            val base = if (char.isUpperCase()) 'A' else 'a'
-                            val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
-                            keyIdx++
-                            val shifted = (char.code - base.code + shift).mod(26)
-                            (base.code + shifted).toChar()
-                        } else char
+                        when (char) {
+                            in 'A'..'Z', in 'a'..'z' -> {
+                                val base = if (char in 'A'..'Z') 'A' else 'a'
+                                val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
+                                keyIdx++
+                                val shifted = (char.code - base.code + shift).mod(26)
+                                (base.code + shifted).toChar()
+                            }
+                            else -> char
+                        }
                     }.joinToString("")
                 }
             }

@@ -1,5 +1,6 @@
 package com.simats.codeingo.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
@@ -11,7 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,16 +24,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.simats.codeingo.domain.GameManager
+import com.simats.codeingo.ui.arenas.block_cipher_forge.BlockCipherForgeArenaScreen
+import com.simats.codeingo.ui.arenas.cipher_sanctum.CipherSanctumArenaScreen
+import com.simats.codeingo.ui.arenas.cyber_bastion.CyberBastionArenaScreen
+import com.simats.codeingo.ui.arenas.integrity_foundry.IntegrityFoundryArenaScreen
+import com.simats.codeingo.ui.arenas.key_exchange_citadel.KeyExchangeCitadelArenaScreen
+import com.simats.codeingo.ui.arenas.routing.ArenaRoute
 import com.simats.codeingo.ui.auth.LoginScreen
 import com.simats.codeingo.ui.auth.ProfileCreationScreen
 import com.simats.codeingo.ui.dashboard.MainDashboardScreen
 import com.simats.codeingo.ui.exercise.AssessmentScreen
 import com.simats.codeingo.ui.exercise.BossBattleScreen
 import com.simats.codeingo.ui.onboarding.OnboardingScreen
+import com.simats.codeingo.ui.phoenix.PhoenixEggHatch3DView
 import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
 import com.simats.codeingo.ui.phoenix.PhoenixSanctuaryScreen
+import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.settings.SettingsScreen
 import com.simats.codeingo.ui.splash.SplashScreen
+import com.simats.codeingo.ui.visualizer.VisualizerScreen
 
 @Composable
 fun AppNavHost(
@@ -164,13 +178,15 @@ fun AppNavHost(
                     onOpenPhoenixSanctuary = {
                         navController.navigate(Screen.PhoenixSanctuary.route)
                     },
+                    onOpenPracticeHub = {
+                        navController.navigate(Screen.PracticeHub.route)
+                    },
                     onOpenSettings = {
                         navController.navigate(Screen.Settings.route)
                     },
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -221,9 +237,57 @@ fun AppNavHost(
                 )
             }
 
+            composable(Screen.Visualizer.route) {
+                var activeWorldArena by remember { mutableStateOf<String?>(null) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    VisualizerScreen(
+                        onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
+                        onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
+                        onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
+                        onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
+                        onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    ArenaOverlay(
+                        activeWorldArena = activeWorldArena,
+                        onDismiss = { activeWorldArena = null }
+                    )
+                }
+            }
+
+            composable(Screen.PracticeHub.route) {
+                var activeWorldArena by remember { mutableStateOf<String?>(null) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    PracticeHubScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
+                        onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
+                        onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
+                        onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
+                        onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    ArenaOverlay(
+                        activeWorldArena = activeWorldArena,
+                        onDismiss = { activeWorldArena = null }
+                    )
+                }
+            }
+
             composable(Screen.PhoenixSanctuary.route) {
                 PhoenixSanctuaryScreen(
                     onDismiss = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.PhoenixEggHatch.route) {
+                PhoenixEggHatch3DView(
+                    onContinue = {
+                        navController.popBackStack()
+                    },
+                    onFinish = {
                         navController.popBackStack()
                     }
                 )
@@ -237,7 +301,6 @@ fun AppNavHost(
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -281,6 +344,30 @@ fun AppNavHost(
                     gameManager.dismissEvolutionModal()
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun ArenaOverlay(
+    activeWorldArena: String?,
+    onDismiss: () -> Unit
+) {
+    activeWorldArena?.let { arenaKey ->
+        BackHandler(onBack = onDismiss)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(500f)
+        ) {
+            when (arenaKey) {
+                ArenaRoute.CIPHER_SANCTUM -> CipherSanctumArenaScreen(onDismiss = onDismiss)
+                ArenaRoute.BLOCK_CIPHER_FORGE -> BlockCipherForgeArenaScreen(onDismiss = onDismiss)
+                ArenaRoute.KEY_EXCHANGE_CITADEL -> KeyExchangeCitadelArenaScreen(onDismiss = onDismiss)
+                ArenaRoute.INTEGRITY_FOUNDRY -> IntegrityFoundryArenaScreen(onDismiss = onDismiss)
+                ArenaRoute.CYBER_BASTION -> CyberBastionArenaScreen(onDismiss = onDismiss)
+                else -> CipherSanctumArenaScreen(onDismiss = onDismiss)
+            }
         }
     }
 }

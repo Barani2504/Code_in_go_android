@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSAVisualizerType
@@ -167,8 +168,14 @@ private fun TLS13HandshakeExploreView() {
                 .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}", fontSize = 12.sp, fontWeight = FontWeight.Black, color = orangeColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}",
+                        modifier = Modifier.weight(1f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = orangeColor
+                    )
                     Text(text = currentPacket.sender, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = tealColor)
                 }
 
@@ -213,9 +220,9 @@ private fun TLS13HandshakeExploreView() {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     currentPacket.fields.forEach { (k, v) ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "$k:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                            Text(text = v, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(text = "$k:", modifier = Modifier.weight(0.45f), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                            Text(text = v, modifier = Modifier.weight(0.55f), fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary, textAlign = TextAlign.End)
                         }
                     }
                 }

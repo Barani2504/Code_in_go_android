@@ -1,5 +1,6 @@
 package com.simats.codeingo.ui.dashboard
 
+import com.simats.codeingo.ui.challenge.DailyCipherChallengeCard
 import com.simats.codeingo.ui.dashboard.ContinueHeroCard
 import com.simats.codeingo.ui.dashboard.TodaysMissionsCarousel
 import com.simats.codeingo.ui.dashboard.DailyGoalAndStreakPill
@@ -142,7 +143,6 @@ import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.phoenix.PhoenixNodeJumpFlightView
 import com.simats.codeingo.ui.profile.ProfileScreen
-import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.shop.GemShopSheet
@@ -171,12 +171,12 @@ import com.simats.codeingo.ui.exercise.labs.XorBoardLab
  * Features:
  * - Master 5-Chapter DSA Course (Array, Linked List, Stack, Queue, Tree) with 25 levels & 5 Boss Stages
  * - 3D Interactive Worlds Section (Array Kingdom, Stack Tower, Queue Station, LinkedList Road, Binary Tree Forest)
- * - Floating Liquid Glass Top Stats Header (Menu, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
+ * - Floating Liquid Glass Top Stats Header (More Actions, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
  * - 3D Level Nodes with animated active target aura, START tooltip, and locked level popover
  * - Dynamic Companion Mascot floating next to the active node
- * - Slide-out Side Drawer Menu
+ * - More Actions Bottom Sheet (`MoreBottomDrawer`) for Practice Hub, Shop, Settings & Logout
  * - FullScreen & Bottom Sheets for Emotion Picker, Streak, and Chapter Guidebook
- * - Docked 4-Tab Liquid Glass Bottom Navigation Bar
+ * - Docked 5-Tab Liquid Glass Bottom Navigation Bar
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,6 +184,7 @@ fun MainDashboardScreen(
     onStartLesson: (unitId: Int, levelNumber: Int, totalLevelsInUnit: Int, isBoss: Boolean) -> Unit,
     onStartBoss: (bossId: String) -> Unit,
     onOpenPhoenixSanctuary: () -> Unit,
+    onOpenPracticeHub: () -> Unit = {},
     onOpenSettings: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
@@ -192,6 +193,12 @@ fun MainDashboardScreen(
     val gameManager = GameManager.instance
     val localizationManager = LocalizationManager.instance
     val emotionManager = PhoenixEmotionManager.instance
+
+    val isInitialized by gameManager.isInitialized.collectAsState()
+    if (!isInitialized) {
+        DashboardSkeletonLoading(modifier = modifier.fillMaxSize())
+        return
+    }
 
     val totalXP by gameManager.totalXP.collectAsState()
     val gemsCount by gameManager.gemsCount.collectAsState()
@@ -236,15 +243,12 @@ fun MainDashboardScreen(
 
     // Programmatic tab selection scrolls pager smoothly to destination page
     LaunchedEffect(selectedTab) {
-        val targetIndex = when (selectedTab) {
-            DashboardTab.PRACTICE -> dashboardTabs.indexOf(DashboardTab.VISUALIZER)
-            else -> dashboardTabs.indexOf(selectedTab)
-        }
+        val targetIndex = dashboardTabs.indexOf(selectedTab)
         if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
             pagerState.animateScrollToPage(targetIndex)
         }
     }
-    var showSideMenu by remember { mutableStateOf(false) }
+    var showMoreSheet by remember { mutableStateOf(false) }
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
     var showHeartsSheet by remember { mutableStateOf(false) }
@@ -585,7 +589,7 @@ fun MainDashboardScreen(
 
                                 TodaysMissionsCarousel(
                                     onOpenLesson = { onStartLesson(maxUnlockedChapter, activeLevelIndex, 5, false) },
-                                    onOpenMistakeVault = { selectedTab = DashboardTab.VISUALIZER },
+                                    onOpenMistakeVault = onOpenPracticeHub,
                                     onOpenArena = { selectedTab = DashboardTab.ARENAS },
                                     dailyQuests = dailyQuests,
                                     onClaimQuest = { questId -> viewModel.claimQuest(questId) },
@@ -597,6 +601,19 @@ fun MainDashboardScreen(
                                     onClaimReward = {
                                         viewModel.claimDailyChestReward(xp = 20, gems = 15)
                                     }
+                                )
+
+                                DailyCipherChallengeCard(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+
+                                AppButton(
+                                    title = "🛠️ OPEN PRACTICE HUB & MISTAKE VAULT",
+                                    style = AppButtonStyle.PRIMARY_AMBER,
+                                    onClick = onOpenPracticeHub,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
                                 }
 
@@ -833,7 +850,7 @@ fun MainDashboardScreen(
                                 heartsCount = heartsCount,
                                 gemsCount = gemsCount,
                                 heartTimerString = null,
-                                onMenuClick = { showSideMenu = true },
+                                onMoreClick = { showMoreSheet = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onAskAshClick = { showAskAshSheet = true },
                                 onStreakClick = { showStreakSheet = true },
@@ -1025,17 +1042,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.PRACTICE -> {
-                        PracticeHubScreen(
-                            onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
-                            onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
-                            onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
-                            onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
-                            onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.LEADERBOARDS -> {
                         val completedLessonCount by GameManager.instance.completedLessonIds.collectAsState()
                         LeaderboardsScreen(
@@ -1054,13 +1060,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.SHOP -> {
-                        GemShopSheet(
-                            onDismiss = { selectedTab = DashboardTab.LEARN },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.PROFILE -> {
                         ProfileScreen(
                             onOpenSettings = onOpenSettings,
@@ -1070,43 +1069,33 @@ fun MainDashboardScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-
-                    else -> {
-                        VisualizerScreen(
-                            onOpenArrayKingdom = { onStartLesson(1, 1, 5, false) },
-                            onOpenStackTower = { onStartLesson(3, 11, 5, false) },
-                            onOpenQueueStation = { onStartLesson(4, 16, 5, false) },
-                            onOpenLinkedListRoad = { onStartLesson(2, 6, 5, false) },
-                            onOpenBinaryTreeForest = { onStartLesson(5, 21, 5, false) },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                 }
             }
         }
     }
 
-        // Side Drawer Menu
-        AnimatedVisibility(
-            visible = showSideMenu,
-            enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
-            exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable { showSideMenu = false }
+        // More Actions Modal Sheet (Practice Hub, Gem Shop, Settings, Log Out)
+        if (showMoreSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showMoreSheet = false },
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
-                SideMenuDrawer(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab ->
-                        selectedTab = tab
-                        showSideMenu = false
+                MoreBottomDrawer(
+                    onOpenPracticeHub = {
+                        showMoreSheet = false
+                        onOpenPracticeHub()
                     },
-                    onMoreClick = {
-                        showSideMenu = false
+                    onOpenShop = {
+                        showMoreSheet = false
+                        showGemShopSheet = true
+                    },
+                    onOpenSettings = {
+                        showMoreSheet = false
                         onOpenSettings()
+                    },
+                    onLogout = {
+                        showMoreSheet = false
+                        onLogout()
                     }
                 )
             }
@@ -1221,8 +1210,26 @@ fun MainDashboardScreen(
             }
         }
 
+        if (showMoreSheet) {
+            BackHandler { showMoreSheet = false }
+        }
+        if (showGemShopSheet) {
+            BackHandler { showGemShopSheet = false }
+        }
+        if (showAskAshSheet) {
+            BackHandler { showAskAshSheet = false }
+        }
+
         // Back navigation: navigate to LEARN primary tab before allowing app exit
-        BackHandler(enabled = activeWorldArena == null && !showDiagnosticScreen && activeMicroLab == null && selectedTab != DashboardTab.LEARN) {
+        BackHandler(
+            enabled = activeWorldArena == null &&
+                !showDiagnosticScreen &&
+                activeMicroLab == null &&
+                !showMoreSheet &&
+                !showGemShopSheet &&
+                !showAskAshSheet &&
+                selectedTab != DashboardTab.LEARN
+        ) {
             val learnIndex = dashboardTabs.indexOf(DashboardTab.LEARN)
             if (learnIndex >= 0) {
                 coroutineScope.launch {
@@ -1302,11 +1309,8 @@ fun MainDashboardScreen(
                 DashboardTab.LEARN -> ScreenGuideCatalog.HOME
                 DashboardTab.VISUALIZER -> ScreenGuideCatalog.VISUALIZER
                 DashboardTab.ARENAS -> ScreenGuideCatalog.ARENA
-                DashboardTab.PRACTICE -> ScreenGuideCatalog.PRACTICE
                 DashboardTab.LEADERBOARDS -> ScreenGuideCatalog.LEADERBOARD
-                DashboardTab.SHOP -> ScreenGuideCatalog.SHOP
                 DashboardTab.PROFILE -> ScreenGuideCatalog.PROFILE
-                else -> ScreenGuideCatalog.HOME
             }
             AskAshBottomSheet(
                 guideContext = currentScreenGuide,

@@ -58,15 +58,15 @@ fun UniversalVisualizerView(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentBeat by remember { mutableStateOf(VisualizerBeat.STORY) }
-    var watchStepIndex by remember { mutableIntStateOf(0) }
-    var showDetails by remember { mutableStateOf(false) }
+    var currentBeat by remember(spec.id) { mutableStateOf(VisualizerBeat.STORY) }
+    var watchStepIndex by remember(spec.id) { mutableIntStateOf(0) }
+    var showDetails by remember(spec.id) { mutableStateOf(false) }
 
     // Dynamic State for interactive TRY beat
-    var textInput by remember { mutableStateOf("HELLO") }
-    var shiftValue by remember { mutableIntStateOf(3) }
-    var modA by remember { mutableStateOf("17") }
-    var modM by remember { mutableStateOf("5") }
+    var textInput by remember(spec.id) { mutableStateOf("HELLO") }
+    var shiftValue by remember(spec.id) { mutableIntStateOf(3) }
+    var modA by remember(spec.id) { mutableStateOf("17") }
+    var modM by remember(spec.id) { mutableStateOf("5") }
     val selectedColorAlice = Color(0xFFEF4444) // Red
     val selectedColorBob = Color(0xFF3B82F6)   // Blue
 

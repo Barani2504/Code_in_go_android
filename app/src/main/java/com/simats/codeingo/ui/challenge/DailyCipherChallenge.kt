@@ -74,7 +74,7 @@ fun DailyCipherChallengeCard(
         DailyPuzzle("PHOENIX", "SKRHQLA", 3, "Classic Caesar Shift of +3"),
         DailyPuzzle("CYBER", "HCGJX", 5, "Caesar Shift of +5"),
         DailyPuzzle("DIFFIE", "GLIILH", 3, "Caesar Shift of +3"),
-        DailyPuzzle("SHANNON", "VKDQQrq", 3, "Caesar Shift of +3"),
+        DailyPuzzle("SHANNON", "VKDQQRQ", 3, "Caesar Shift of +3"),
         DailyPuzzle("TURING", "WXULQJ", 3, "Caesar Shift of +3")
     )
     val activePuzzle = dailyPuzzles[dayOfYear % dailyPuzzles.size]

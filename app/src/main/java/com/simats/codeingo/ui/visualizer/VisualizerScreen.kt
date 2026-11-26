@@ -1,5 +1,6 @@
 package com.simats.codeingo.ui.visualizer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -64,6 +65,7 @@ import com.simats.codeingo.ui.theme.tilt3D
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -106,17 +108,85 @@ import com.simats.codeingo.ui.theme.DsaTeal
 import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
+import com.simats.codeingo.ui.theme.PhoenixCrimson
 import com.simats.codeingo.ui.theme.PhoenixGreen
 import com.simats.codeingo.ui.theme.SubtextGray
+import com.simats.codeingo.ui.visualizer.scaffold.CnsVisualizerRegistry
+import com.simats.codeingo.ui.visualizer.scaffold.UniversalVisualizerView
+import com.simats.codeingo.ui.visualizer.scaffold.VisualizerSpec
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
 
 enum class VisualizerDisplayMode {
     LIST,
-    VISUALIZER
+    VISUALIZER,
+    SPECIALIZED,
+    UNIVERSAL_SPEC,
+    CIPHER_LAB
 }
 
+private enum class SpecializedVisualizerLab(
+    val title: String,
+    val tagline: String,
+    val icon: String,
+    val filterCategory: String,
+    val accentColor: Color
+) {
+    ECB_CBC_CTR(
+        title = "Block Cipher Modes (ECB / CBC / CTR)",
+        tagline = "Pattern leaks vs IV chaining & parallel CTR stream",
+        icon = "🧱",
+        filterCategory = "Symmetric",
+        accentColor = PhoenixCrimson
+    ),
+    CERT_CHAIN(
+        title = "X.509 PKI & Certificate Chain",
+        tagline = "Root CA → Intermediate → Leaf trust & revocation",
+        icon = "📜",
+        filterCategory = "Asymmetric",
+        accentColor = AmberGold
+    ),
+    KERBEROS(
+        title = "Kerberos V5 Ticket Protocol",
+        tagline = "AS-REQ/REP, TGT, TGS ticket exchange & mutual auth",
+        icon = "🎫",
+        filterCategory = "Hashing & Protocols",
+        accentColor = PhoenixGreen
+    ),
+    MERKLE_TREE(
+        title = "Merkle Hash Tree & Inclusion Proof",
+        tagline = "Tamper detection & O(log n) sibling verification",
+        icon = "🌳",
+        filterCategory = "Hashing & Protocols",
+        accentColor = DsaBlue
+    ),
+    PASSWORD_HASH(
+        title = "Password KDF & Rainbow Defense",
+        tagline = "MD5 vs PBKDF2-HMAC-SHA256 work factors & salts",
+        icon = "🔑",
+        filterCategory = "Hashing & Protocols",
+        accentColor = DsaPurple
+    )
+}
+
+private fun realmFilterCategory(realmNumber: Int): String = when (realmNumber) {
+    0, 1 -> "Classical"
+    2 -> "Symmetric"
+    3 -> "Asymmetric"
+    else -> "Hashing & Protocols"
+}
+
+/**
+ * CNS Visualizer Directory & Multi-Mode Lab Shell.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM` (Chapter 1)
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE` (Chapter 2)
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL` (Chapter 3)
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY` (Chapter 4)
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION` (Chapter 5)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualizerScreen(
@@ -140,8 +210,14 @@ fun VisualizerScreen(
 
     var displayMode by remember { mutableStateOf(VisualizerDisplayMode.LIST) }
     var selectedType by remember { mutableStateOf(DSAVisualizerType.STACK) }
+    var selectedSpecialized by remember { mutableStateOf(SpecializedVisualizerLab.ECB_CBC_CTR) }
+    var selectedSpec by remember { mutableStateOf<VisualizerSpec?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
+
+    BackHandler(enabled = displayMode != VisualizerDisplayMode.LIST) {
+        displayMode = VisualizerDisplayMode.LIST
+    }
 
     val currentLanguageName = selectedLangObj?.name ?: when (selectedLanguageCode) {
         "es" -> "Spanish"
@@ -166,6 +242,32 @@ fun VisualizerScreen(
         }
     }
 
+    val filteredSpecialized = remember(searchQuery, selectedCategory) {
+        val query = searchQuery.trim().lowercase()
+        SpecializedVisualizerLab.entries.filter { lab ->
+            val matchesCategory = selectedCategory == "All" || lab.filterCategory == selectedCategory
+            val matchesSearch = query.isEmpty() ||
+                lab.title.lowercase().contains(query) ||
+                lab.tagline.lowercase().contains(query) ||
+                lab.filterCategory.lowercase().contains(query)
+            matchesCategory && matchesSearch
+        }
+    }
+
+    val filteredSpecs = remember(searchQuery, selectedCategory) {
+        val query = searchQuery.trim().lowercase()
+        CnsVisualizerRegistry.allSpecs.filter { spec ->
+            val specCat = realmFilterCategory(spec.realmNumber)
+            val matchesCategory = selectedCategory == "All" || specCat == selectedCategory
+            val matchesSearch = query.isEmpty() ||
+                spec.title.lowercase().contains(query) ||
+                spec.realmTitle.lowercase().contains(query) ||
+                spec.oneSentencePromise.lowercase().contains(query) ||
+                spec.story.conceptName.lowercase().contains(query)
+            matchesCategory && matchesSearch
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -173,55 +275,95 @@ fun VisualizerScreen(
     ) {
         PhoenixAtmosphericBackgroundView()
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-        ) {
-            // Header Bar
-            VisualizerHeaderBar(
-                displayMode = displayMode,
-                onBackToList = { displayMode = VisualizerDisplayMode.LIST }
-            )
+        val activeSpec = selectedSpec
+        if (displayMode == VisualizerDisplayMode.UNIVERSAL_SPEC && activeSpec != null) {
+            key(activeSpec.id) {
+                UniversalVisualizerView(
+                    spec = activeSpec,
+                    onBackClick = { displayMode = VisualizerDisplayMode.LIST },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+            ) {
+                // Header Bar
+                VisualizerHeaderBar(
+                    displayMode = displayMode,
+                    onBackToList = { displayMode = VisualizerDisplayMode.LIST }
+                )
 
-            if (displayMode == VisualizerDisplayMode.LIST) {
-                // Topic List View with 5-Chapter Progressive Roadmap
-                TopicListView(
-                    searchQuery = searchQuery,
-                    onSearchQueryChange = { searchQuery = it },
-                    categories = categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelect = { selectedCategory = it },
-                    filteredStructures = filteredStructures,
-                    maxUnlockedChapter = maxUnlockedChapter,
-                    completedChapters = completedChapters,
-                    onSelectTopic = { type ->
-                        selectedType = type
-                        displayMode = VisualizerDisplayMode.VISUALIZER
-                    },
-                    onChapterTap = { chapter ->
-                        activePopupChapter = chapter
-                    },
-                    onUnlockNextChapter = { nextId ->
-                        gameManager.unlockNextChapter(nextId)
-                    },
-                    onResetProgression = {
-                        gameManager.resetChapterProgression()
-                    },
-                    onOpenArrayKingdom = onOpenArrayKingdom,
-                    onOpenStackTower = onOpenStackTower,
-                    onOpenQueueStation = onOpenQueueStation,
-                    onOpenLinkedListRoad = onOpenLinkedListRoad,
-                    onOpenBinaryTreeForest = onOpenBinaryTreeForest
-                )
-            } else {
-                // Topic Detail View
-                TopicDetailView(
-                    selectedType = selectedType,
-                    onSelectType = { selectedType = it },
-                    onBackToList = { displayMode = VisualizerDisplayMode.LIST },
-                    currentLanguageName = currentLanguageName
-                )
+                when (displayMode) {
+                    VisualizerDisplayMode.LIST -> {
+                        TopicListView(
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = { searchQuery = it },
+                            categories = categories,
+                            selectedCategory = selectedCategory,
+                            onCategorySelect = { selectedCategory = it },
+                            filteredStructures = filteredStructures,
+                            filteredSpecialized = filteredSpecialized,
+                            filteredSpecs = filteredSpecs,
+                            maxUnlockedChapter = maxUnlockedChapter,
+                            completedChapters = completedChapters,
+                            onSelectTopic = { type ->
+                                selectedType = type
+                                displayMode = VisualizerDisplayMode.VISUALIZER
+                            },
+                            onSelectSpecialized = { lab ->
+                                selectedSpecialized = lab
+                                displayMode = VisualizerDisplayMode.SPECIALIZED
+                            },
+                            onSelectSpec = { spec ->
+                                selectedSpec = spec
+                                displayMode = VisualizerDisplayMode.UNIVERSAL_SPEC
+                            },
+                            onOpenCipherLab = {
+                                displayMode = VisualizerDisplayMode.CIPHER_LAB
+                            },
+                            onChapterTap = { chapter ->
+                                activePopupChapter = chapter
+                            },
+                            onUnlockNextChapter = { nextId ->
+                                gameManager.unlockNextChapter(nextId)
+                            },
+                            onResetProgression = {
+                                gameManager.resetChapterProgression()
+                            },
+                            onOpenArrayKingdom = onOpenArrayKingdom,
+                            onOpenStackTower = onOpenStackTower,
+                            onOpenQueueStation = onOpenQueueStation,
+                            onOpenLinkedListRoad = onOpenLinkedListRoad,
+                            onOpenBinaryTreeForest = onOpenBinaryTreeForest
+                        )
+                    }
+                    VisualizerDisplayMode.VISUALIZER -> {
+                        TopicDetailView(
+                            selectedType = selectedType,
+                            onSelectType = { selectedType = it },
+                            onBackToList = { displayMode = VisualizerDisplayMode.LIST },
+                            currentLanguageName = currentLanguageName
+                        )
+                    }
+                    VisualizerDisplayMode.SPECIALIZED -> {
+                        SpecializedLabDetailView(
+                            lab = selectedSpecialized,
+                            onBackToList = { displayMode = VisualizerDisplayMode.LIST }
+                        )
+                    }
+                    VisualizerDisplayMode.CIPHER_LAB -> {
+                        CipherLabScreen(
+                            onBack = { displayMode = VisualizerDisplayMode.LIST },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    VisualizerDisplayMode.UNIVERSAL_SPEC -> {
+                        displayMode = VisualizerDisplayMode.LIST
+                    }
+                }
             }
         }
 
@@ -306,7 +448,7 @@ private fun VisualizerHeaderBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (displayMode == VisualizerDisplayMode.VISUALIZER) {
+        if (displayMode != VisualizerDisplayMode.LIST) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
@@ -392,9 +534,14 @@ private fun TopicListView(
     selectedCategory: String,
     onCategorySelect: (String) -> Unit,
     filteredStructures: List<DSAVisualizerType>,
+    filteredSpecialized: List<SpecializedVisualizerLab>,
+    filteredSpecs: List<VisualizerSpec>,
     maxUnlockedChapter: Int,
     completedChapters: Set<Int>,
     onSelectTopic: (DSAVisualizerType) -> Unit,
+    onSelectSpecialized: (SpecializedVisualizerLab) -> Unit,
+    onSelectSpec: (VisualizerSpec) -> Unit,
+    onOpenCipherLab: () -> Unit,
     onChapterTap: (DSAChapterModel) -> Unit,
     onUnlockNextChapter: (Int) -> Unit,
     onResetProgression: () -> Unit,
@@ -559,22 +706,214 @@ private fun TopicListView(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Cards list
+        // Cards list (10 Flagship Multi-Mode Labs + Specialized Visualizers + Guided Story Labs + Cipher Workbench)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            // Free-Play Cipher Lab Workbench Card
+            VisualizerDirectoryEntryCard(
+                icon = "🧪",
+                badge = "SANDBOX WORKBENCH",
+                title = "Interactive Cipher Lab",
+                subtitle = "Free-play Caesar, Vigenère, XOR Stream, SHA-256 & Break-It Frequency Analyzer",
+                accentColor = PhoenixGreen,
+                onClick = onOpenCipherLab
+            )
+
             filteredStructures.forEach { type ->
                 DSATopicListCard(
                     type = type,
                     onSelect = { onSelectTopic(type) }
                 )
             }
+
+            if (filteredSpecialized.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "🔬 SPECIALIZED PROTOCOL & MODE LABS (${filteredSpecialized.size})",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = AmberGold
+                )
+                filteredSpecialized.forEach { lab ->
+                    VisualizerDirectoryEntryCard(
+                        icon = lab.icon,
+                        badge = lab.filterCategory.uppercase(),
+                        title = lab.title,
+                        subtitle = lab.tagline,
+                        accentColor = lab.accentColor,
+                        onClick = { onSelectSpecialized(lab) }
+                    )
+                }
+            }
+
+            if (filteredSpecs.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "📖 GUIDED STORY LABS · STORY / WATCH / TRY / CHECK (${filteredSpecs.size})",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = DsaBlue
+                )
+                filteredSpecs.forEach { spec ->
+                    VisualizerDirectoryEntryCard(
+                        icon = spec.story.iconEmoji,
+                        badge = "REALM ${spec.realmNumber} · ${spec.realmTitle.uppercase()}",
+                        title = spec.title,
+                        subtitle = spec.oneSentencePromise.ifEmpty { spec.story.conceptName },
+                        accentColor = DsaBlue,
+                        onClick = { onSelectSpec(spec) }
+                    )
+                }
+            }
+
+            if (filteredStructures.isEmpty() && filteredSpecialized.isEmpty() && filteredSpecs.isEmpty()) {
+                Text(
+                    text = "No matching visualizers for \"$searchQuery\". Try clearing search or selecting All.",
+                    fontSize = 13.sp,
+                    color = SubtextGray,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(110.dp))
+    }
+}
+
+@Composable
+private fun VisualizerDirectoryEntryCard(
+    icon: String,
+    badge: String,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(20.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CardBackground.copy(alpha = 0.85f))
+            .border(1.4.dp, accentColor.copy(alpha = 0.4f), shape)
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(accentColor.copy(alpha = 0.16f))
+                    .border(1.dp, accentColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = icon, fontSize = 22.sp)
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = badge,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    color = accentColor
+                )
+                Text(
+                    text = title,
+                    fontSize = 15.5.sp,
+                    fontWeight = FontWeight.Black,
+                    color = LocalDynamicThemeColors.current.textPrimary
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = SubtextGray,
+                    lineHeight = 16.sp
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open",
+                tint = accentColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpecializedLabDetailView(
+    lab: SpecializedVisualizerLab,
+    onBackToList: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(CardBackground.copy(alpha = 0.85f))
+                .border(1.4.dp, lab.accentColor.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(text = lab.icon, fontSize = 28.sp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = lab.filterCategory.uppercase(),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = lab.accentColor
+                    )
+                    Text(
+                        text = lab.title,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black,
+                        color = LocalDynamicThemeColors.current.textPrimary
+                    )
+                    Text(
+                        text = lab.tagline,
+                        fontSize = 12.sp,
+                        color = SubtextGray
+                    )
+                }
+            }
+        }
+
+        key(lab) {
+            when (lab) {
+                SpecializedVisualizerLab.ECB_CBC_CTR -> EcbCbcCtrVisualizer()
+                SpecializedVisualizerLab.CERT_CHAIN -> CertificateChainVisualizer()
+                SpecializedVisualizerLab.KERBEROS -> KerberosVisualizer()
+                SpecializedVisualizerLab.MERKLE_TREE -> MerkleTreeVisualizer()
+                SpecializedVisualizerLab.PASSWORD_HASH -> PasswordHashingVisualizer()
+            }
+        }
+
+        DuolingoButton(
+            title = "Back to All Visualizers",
+            onClick = onBackToList,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
@@ -997,17 +1336,19 @@ private fun TopicDetailView(
             )
 
             // 2. Interactive CNS Visualizer Engine (10 Flagship Cryptographic Labs)
-            when (selectedType) {
-                DSAVisualizerType.ARRAY -> CaesarCipherVisualizer(mode = activeLabMode)
-                DSAVisualizerType.STACK -> DESFeistelVisualizer(mode = activeLabMode)
-                DSAVisualizerType.QUEUE -> AESMatrixVisualizer(mode = activeLabMode)
-                DSAVisualizerType.LINKED_LIST -> VigenereCipherVisualizer(mode = activeLabMode)
-                DSAVisualizerType.BINARY_TREE -> DiffieHellmanVisualizer(mode = activeLabMode)
-                DSAVisualizerType.AVL_TREE -> RSAPublicKeyVisualizer(mode = activeLabMode)
-                DSAVisualizerType.TRIE -> ECCPointVisualizer(mode = activeLabMode)
-                DSAVisualizerType.GRAPH -> SHA256Visualizer(mode = activeLabMode)
-                DSAVisualizerType.SORTING -> HMACCollisionVisualizer(mode = activeLabMode)
-                DSAVisualizerType.STEP_RECORDER -> TLS13HandshakeVisualizer(mode = activeLabMode)
+            key(selectedType, activeLabMode) {
+                when (selectedType) {
+                    DSAVisualizerType.ARRAY -> CaesarCipherVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.STACK -> DESFeistelVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.QUEUE -> AESMatrixVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.LINKED_LIST -> VigenereCipherVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.BINARY_TREE -> DiffieHellmanVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.AVL_TREE -> RSAPublicKeyVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.TRIE -> ECCPointVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.GRAPH -> SHA256Visualizer(mode = activeLabMode)
+                    DSAVisualizerType.SORTING -> HMACCollisionVisualizer(mode = activeLabMode)
+                    DSAVisualizerType.STEP_RECORDER -> TLS13HandshakeVisualizer(mode = activeLabMode)
+                }
             }
 
             // 3. Real World Applications Card (Contextual in Explore mode)
