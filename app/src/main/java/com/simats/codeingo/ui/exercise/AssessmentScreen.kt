@@ -364,6 +364,13 @@ fun AssessmentScreen(
         if (isFinished) {
             feedback.levelComplete()
             DynamicPillController.post(DynamicPillEvent.LevelComplete(totalXPEarned))
+            com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakStageVictory(unitId, totalXPEarned)
+        }
+    }
+
+    LaunchedEffect(heartsCount <= 0) {
+        if (heartsCount <= 0) {
+            com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakStageFailed(0)
         }
     }
 

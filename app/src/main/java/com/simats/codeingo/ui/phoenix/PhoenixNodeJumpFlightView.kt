@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -76,8 +78,10 @@ fun PhoenixNodeJumpFlightView(
     triggerFlightToken: Int = 0,
     showTrailGlow: Boolean = true,
     autoFlyOnAppear: Boolean = false,
+    onMascotTapped: (() -> Unit)? = null,
     onLandingComplete: (() -> Unit)? = null
 ) {
+    val equippedCosmetics by com.simats.codeingo.domain.GameManager.instance.equippedCosmetics.collectAsState()
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -317,6 +321,7 @@ fun PhoenixNodeJumpFlightView(
             ) {
                 // Tapping Phoenix in main dashboard triggers the 3D waving gesture (phoenix_waving)!
                 launchWavingAnimation()
+                onMascotTapped?.invoke()
             },
         contentAlignment = Alignment.Center
     ) {
@@ -375,21 +380,29 @@ fun PhoenixNodeJumpFlightView(
             }
         }
 
-        // MARK: - 3. Soft Golden Radiant Ember Aura (Smooth Mathematical Radial Gradient, Zero Clipping Bounds)
-        if (showTrailGlow) {
+        // MARK: - 3. Soft Golden Radiant Ember Aura (Reflects Equipped Aura from Gem Shop)
+        val equippedAuraColor = when (equippedCosmetics.auraId) {
+            "aura_quantum", "aura_lightning" -> Color(0xFF06B6D4)
+            "aura_frost" -> Color(0xFF38BDF8)
+            "aura_rainbow" -> Color(0xFFA855F7)
+            "aura_ember" -> Color(0xFFEF4444)
+            "aura_sparkle" -> AmberGold
+            else -> AmberGold
+        }
+        if (showTrailGlow || equippedCosmetics.auraId != "none_aura") {
             val glowDiameter = maxOf(width, height) * (if (isAnyFlightActive) 1.55f else 1.25f)
             Canvas(
                 modifier = Modifier
                     .size(glowDiameter)
-                    .graphicsLayer { alpha = if (isAnyFlightActive) 0.90f else 0.65f }
+                    .graphicsLayer { alpha = if (isAnyFlightActive) 0.90f else 0.72f }
             ) {
                 val glowRadius = size.width * 0.44f
                 drawCircle(
                     brush = Brush.radialGradient(
                         colorStops = arrayOf(
-                            0.0f to AmberGold.copy(alpha = (if (isAnyFlightActive) 0.34f else 0.20f) * auraGlow),
-                            0.35f to Color(0xFFFF9500).copy(alpha = (if (isAnyFlightActive) 0.18f else 0.10f) * auraGlow),
-                            0.70f to Color(0xFFFF7A00).copy(alpha = (if (isAnyFlightActive) 0.05f else 0.02f) * auraGlow),
+                            0.0f to equippedAuraColor.copy(alpha = (if (isAnyFlightActive) 0.38f else 0.24f) * auraGlow),
+                            0.35f to equippedAuraColor.copy(alpha = (if (isAnyFlightActive) 0.20f else 0.12f) * auraGlow),
+                            0.70f to equippedAuraColor.copy(alpha = (if (isAnyFlightActive) 0.06f else 0.03f) * auraGlow),
                             1.0f to Color.Transparent
                         ),
                         center = center,
@@ -401,41 +414,80 @@ fun PhoenixNodeJumpFlightView(
             }
         }
 
-        // MARK: - 4. Phoenix Mascot Artwork: 100% True Alpha, Zero Background
-        if (isWaving) {
-            // Live 3D Waving from phoenix-waving.gif (R.raw.phoenix_waving)
-            val wavingPainter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(context)
-                    .data(R.raw.phoenix_waving)
-                    .crossfade(false)
-                    .setParameter("wave_token", waveToken, memoryCacheKey = "phoenix_waving_$waveToken")
-                    .build(),
-                imageLoader = imageLoader
-            )
-            Image(
-                painter = wavingPainter,
-                contentDescription = "Phoenix Companion Waving",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(width, height)
-                    .graphicsLayer {
-                        scaleX = tapBounce.value * landingSquashX.value
-                        scaleY = tapBounce.value * landingSquashY.value
-                    }
-            )
-        } else {
-            Image(
-                painter = painterResource(id = sittingOrFlyingResId),
-                contentDescription = "Phoenix Companion",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(width, height)
-                    .graphicsLayer {
-                        rotationZ = flightBankAngle
-                        scaleX = flightDynamicScale * landingSquashX.value
-                        scaleY = flightDynamicScale * landingSquashY.value
-                    }
-            )
+        // MARK: - 4. Phoenix Mascot Artwork + Equipped Gem Shop Cosmetics
+        Box(
+            modifier = Modifier
+                .size(width, height)
+                .graphicsLayer {
+                    rotationZ = if (isWaving) 0f else flightBankAngle
+                    scaleX = (if (isWaving) tapBounce.value else flightDynamicScale) * landingSquashX.value
+                    scaleY = (if (isWaving) tapBounce.value else flightDynamicScale) * landingSquashY.value
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            if (isWaving) {
+                val wavingPainter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(context)
+                        .data(R.raw.phoenix_waving)
+                        .crossfade(false)
+                        .setParameter("wave_token", waveToken, memoryCacheKey = "phoenix_waving_$waveToken")
+                        .build(),
+                    imageLoader = imageLoader
+                )
+                Image(
+                    painter = wavingPainter,
+                    contentDescription = "Phoenix Companion Waving",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(width, height)
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = sittingOrFlyingResId),
+                    contentDescription = "Phoenix Companion",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(width, height)
+                )
+            }
+
+            // Equipped Headwear Overlay
+            if (equippedCosmetics.headwearId != "none_head") {
+                val hatEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.headwearId)?.emoji
+                if (hatEmoji != null) {
+                    androidx.compose.material3.Text(
+                        text = hatEmoji,
+                        fontSize = 22.sp,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-4).dp)
+                    )
+                }
+            }
+            // Equipped Accessory Overlay
+            if (equippedCosmetics.accessoryId != "none_acc") {
+                val accEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.accessoryId)?.emoji
+                if (accEmoji != null) {
+                    androidx.compose.material3.Text(
+                        text = accEmoji,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .offset(x = (-10).dp, y = (-8).dp)
+                    )
+                }
+            }
+            // Equipped Outfit Overlay
+            if (equippedCosmetics.outfitId != "none_outfit") {
+                val outfitEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.outfitId)?.emoji
+                if (outfitEmoji != null) {
+                    androidx.compose.material3.Text(
+                        text = outfitEmoji,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .offset(x = 12.dp, y = (-20).dp)
+                    )
+                }
+            }
         }
     }
 }

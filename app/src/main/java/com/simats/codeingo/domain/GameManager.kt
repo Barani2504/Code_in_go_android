@@ -182,6 +182,22 @@ class GameManager private constructor() {
     private val _totalStars = MutableStateFlow(0)
     val totalStars: StateFlow<Int> = _totalStars.asStateFlow()
 
+    data class EquippedAshCosmetics(
+        val headwearId: String = "none_head",
+        val outfitId: String = "none_outfit",
+        val accessoryId: String = "none_acc",
+        val auraId: String = "none_aura"
+    )
+
+    private val _equippedCosmetics = MutableStateFlow(EquippedAshCosmetics())
+    val equippedCosmetics: StateFlow<EquippedAshCosmetics> = _equippedCosmetics.asStateFlow()
+
+    private val _streakFreezeCount = MutableStateFlow(1)
+    val streakFreezeCount: StateFlow<Int> = _streakFreezeCount.asStateFlow()
+
+    private val _xpBoostActive = MutableStateFlow(false)
+    val xpBoostActive: StateFlow<Boolean> = _xpBoostActive.asStateFlow()
+
     init {
         initializeDailyQuests()
         evaluateStreakOnLaunch()
@@ -192,6 +208,8 @@ class GameManager private constructor() {
     fun initialize(context: Context) {
         val p = UserPreferences(context)
         prefs = p
+        PhoenixVoiceGuide.instance.initialize(context)
+        loadEquippedCosmeticsFromPrefs(context)
 
         val db = CodeingoDatabase.getDatabase(context)
         database = db
@@ -775,6 +793,66 @@ class GameManager private constructor() {
         _gemsCount.update { maxOf(0, it - amount) }
         persistStats()
         return true
+    }
+
+    fun updateEquippedCosmetics(
+        headwearId: String,
+        outfitId: String,
+        accessoryId: String,
+        auraId: String
+    ) {
+        _equippedCosmetics.value = EquippedAshCosmetics(
+            headwearId = headwearId,
+            outfitId = outfitId,
+            accessoryId = accessoryId,
+            auraId = auraId
+        )
+    }
+
+    fun loadEquippedCosmeticsFromPrefs(context: Context) {
+        val userKey = (AuthService.shared.currentUser.value?.email ?: LocalizationManager.instance.userHandle.value)
+            .ifBlank { "guest" }
+            .lowercase()
+            .replace(Regex("[^a-z0-9_]"), "_")
+        val cosPrefs = context.getSharedPreferences("cns_cosmetics_prefs_$userKey", Context.MODE_PRIVATE)
+        _equippedCosmetics.value = EquippedAshCosmetics(
+            headwearId = cosPrefs.getString("cnsEquippedHeadwear", "none_head") ?: "none_head",
+            outfitId = cosPrefs.getString("cnsEquippedOutfit", "none_outfit") ?: "none_outfit",
+            accessoryId = cosPrefs.getString("cnsEquippedAccessory", "none_acc") ?: "none_acc",
+            auraId = cosPrefs.getString("cnsEquippedAura", "none_aura") ?: "none_aura"
+        )
+        _streakFreezeCount.value = cosPrefs.getInt("cnsStreakFreezes", 1)
+        _xpBoostActive.value = cosPrefs.getBoolean("cnsXpBoostActive", false)
+    }
+
+    fun buyPowerUp(itemId: String, price: Int, context: Context): Pair<Boolean, String> {
+        if (_gemsCount.value < price) {
+            val needed = price - _gemsCount.value
+            return Pair(false, "Not enough diamonds! You need $needed more 💎.")
+        }
+        val userKey = (AuthService.shared.currentUser.value?.email ?: LocalizationManager.instance.userHandle.value)
+            .ifBlank { "guest" }
+            .lowercase()
+            .replace(Regex("[^a-z0-9_]"), "_")
+        val cosPrefs = context.getSharedPreferences("cns_cosmetics_prefs_$userKey", Context.MODE_PRIVATE)
+
+        return when (itemId) {
+            "power_streak_freeze" -> {
+                _gemsCount.update { maxOf(0, it - price) }
+                _streakFreezeCount.update { it + 1 }
+                cosPrefs.edit().putInt("cnsStreakFreezes", _streakFreezeCount.value).apply()
+                persistStats(immediate = true)
+                Pair(true, "Equipped Streak Freeze! 🧊 (${_streakFreezeCount.value} in inventory)")
+            }
+            "power_xp_boost" -> {
+                _gemsCount.update { maxOf(0, it - price) }
+                _xpBoostActive.value = true
+                cosPrefs.edit().putBoolean("cnsXpBoostActive", true).apply()
+                persistStats(immediate = true)
+                Pair(true, "2x XP Boost Activated! ⚡ Next lessons award double XP!")
+            }
+            else -> Pair(false, "Unknown power-up.")
+        }
     }
 
     fun awardBossVictory(boss: DSABossSpec, unitId: Int = 1) {

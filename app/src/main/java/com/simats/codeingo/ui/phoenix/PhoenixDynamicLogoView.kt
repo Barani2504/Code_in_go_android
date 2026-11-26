@@ -67,6 +67,7 @@ fun PhoenixDynamicLogoView(
 ) {
     val emotionManager = PhoenixEmotionManager.instance
     val currentEmotion by emotionManager.currentEmotion.collectAsState()
+    val equippedCosmetics by com.simats.codeingo.domain.GameManager.instance.equippedCosmetics.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -93,7 +94,14 @@ fun PhoenixDynamicLogoView(
                 onTap?.invoke()
             }
     ) {
-        // Living Mascot Avatar with dynamic aura glow
+        // Living Mascot Avatar with dynamic aura glow + equipped cosmetic badge
+        val effectiveAuraColor = when (equippedCosmetics.auraId) {
+            "aura_quantum", "aura_lightning" -> Color(0xFF06B6D4)
+            "aura_frost" -> Color(0xFF38BDF8)
+            "aura_rainbow" -> Color(0xFFA855F7)
+            "aura_sparkle" -> com.simats.codeingo.ui.theme.AmberGold
+            else -> currentEmotion.auraColor
+        }
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(size + 8.dp)
@@ -104,7 +112,7 @@ fun PhoenixDynamicLogoView(
                     .size(size + 6.dp)
                     .scale(pulseScale)
                     .clip(CircleShape)
-                    .background(currentEmotion.auraColor.copy(alpha = 0.35f))
+                    .background(effectiveAuraColor.copy(alpha = 0.35f))
             )
 
             // Mascot Image
@@ -114,10 +122,21 @@ fun PhoenixDynamicLogoView(
                 modifier = Modifier.shadow(
                     elevation = 6.dp,
                     shape = CircleShape,
-                    ambientColor = currentEmotion.auraColor.copy(alpha = 0.55f),
-                    spotColor = currentEmotion.auraColor.copy(alpha = 0.55f)
+                    ambientColor = effectiveAuraColor.copy(alpha = 0.55f),
+                    spotColor = effectiveAuraColor.copy(alpha = 0.55f)
                 )
             )
+
+            if (equippedCosmetics.headwearId != "none_head") {
+                val hatEmoji = com.simats.codeingo.ui.shop.CosmeticsCatalog.item(equippedCosmetics.headwearId)?.emoji
+                if (hatEmoji != null) {
+                    Text(
+                        text = hatEmoji,
+                        fontSize = 11.sp,
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    )
+                }
+            }
         }
 
         if (showTitle || showSubtitleBadge) {

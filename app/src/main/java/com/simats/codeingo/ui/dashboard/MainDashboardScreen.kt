@@ -285,6 +285,16 @@ fun MainDashboardScreen(
     var mascotCurrentLevel by remember { mutableIntStateOf(activeLevelIndex) }
     var mascotFlightDepartureLevel by remember { mutableIntStateOf(activeLevelIndex) }
     var shouldFlyToActiveLevel by remember { mutableStateOf(false) }
+    val isVoiceEnabled by com.simats.codeingo.domain.PhoenixVoiceGuide.instance.isVoiceEnabled.collectAsState()
+
+    LaunchedEffect(maxUnlockedChapter) {
+        val chTitle = ChapterRegistry.getChapterById(maxUnlockedChapter)?.title ?: "Chapter $maxUnlockedChapter"
+        com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakChapterWelcome(
+            chapterId = maxUnlockedChapter,
+            chapterTitle = chTitle,
+            stageNumber = ((activeLevelIndex - 1) % 5) + 1
+        )
+    }
 
     LaunchedEffect(activeLevelIndex) {
         if (mascotCurrentLevel != activeLevelIndex) {
@@ -562,7 +572,7 @@ fun MainDashboardScreen(
                                                         }
                                                     )
 
-                                                    // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track
+                                                    // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track + Duolingo-style Guide Bubble
                                                     if (isActiveTarget) {
                                                         val mascotTargetX = if (safeXOffset <= 0.dp) 82.dp else (-82).dp
                                                         val departureLevel = if (mascotFlightDepartureLevel > 0) mascotFlightDepartureLevel else activeLevelIndex
@@ -578,6 +588,12 @@ fun MainDashboardScreen(
                                                             flyFromOffset = flyDelta,
                                                             shouldFly = shouldFlyToActiveLevel,
                                                             showTrailGlow = true,
+                                                            onMascotTapped = {
+                                                                com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakEncouragement(
+                                                                    chapterId = unit.id,
+                                                                    stageNumber = ((node.levelNumber - 1) % 5) + 1
+                                                                )
+                                                            },
                                                             onLandingComplete = {
                                                                 shouldFlyToActiveLevel = false
                                                                 mascotCurrentLevel = activeLevelIndex
@@ -585,6 +601,60 @@ fun MainDashboardScreen(
                                                             },
                                                             modifier = Modifier.offset(x = mascotTargetX, y = 8.dp)
                                                         )
+
+                                                        // Duolingo-style Speech Guide Bubble beside Ash
+                                                        val bubbleOffsetX = if (safeXOffset <= 0.dp) (-92).dp else 92.dp
+                                                        val guideMessage = if (node.isBoss) {
+                                                            "Boss Gate ahead! Prove your mastery!"
+                                                        } else {
+                                                            "Ch ${unit.id}: Tap to crack ${node.title}!"
+                                                        }
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .offset(x = bubbleOffsetX, y = (-4).dp)
+                                                                .widthIn(max = 148.dp)
+                                                                .shadow(4.dp, RoundedCornerShape(14.dp))
+                                                                .clip(RoundedCornerShape(14.dp))
+                                                                .background(LocalDynamicThemeColors.current.cardBackground)
+                                                                .border(1.2.dp, unit.themeColor.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+                                                                .clickable {
+                                                                    com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speak(guideMessage)
+                                                                }
+                                                                .padding(horizontal = 10.dp, vertical = 7.dp)
+                                                        ) {
+                                                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                                                Row(
+                                                                    modifier = Modifier.fillMaxWidth(),
+                                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                                    verticalAlignment = Alignment.CenterVertically
+                                                                ) {
+                                                                    Text(
+                                                                        text = "ASH GUIDE",
+                                                                        fontSize = 9.sp,
+                                                                        fontWeight = FontWeight.Black,
+                                                                        color = unit.themeColor
+                                                                    )
+                                                                    Text(
+                                                                        text = if (isVoiceEnabled) "🔊" else "🔇",
+                                                                        fontSize = 11.sp,
+                                                                        modifier = Modifier
+                                                                            .clip(CircleShape)
+                                                                            .clickable {
+                                                                                com.simats.codeingo.domain.PhoenixVoiceGuide.instance.toggleVoice()
+                                                                            }
+                                                                            .padding(2.dp)
+                                                                    )
+                                                                }
+                                                                Text(
+                                                                    text = guideMessage,
+                                                                    fontSize = 10.5.sp,
+                                                                    lineHeight = 13.sp,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    color = LocalDynamicThemeColors.current.textPrimary,
+                                                                    maxLines = 2
+                                                                )
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -613,7 +683,12 @@ fun MainDashboardScreen(
                                                     if (nextUnit != null) {
                                                         val firstLevel = nextUnit.nodes.firstOrNull()?.levelNumber ?: ((unit.nodes.lastOrNull()?.levelNumber ?: 0) + 1)
                                                         gameManager.unlockNextUnit(nextUnit.id, firstLevel)
+                                                        shouldFlyToActiveLevel = true
                                                     }
+                                                    com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakChapterComplete(
+                                                        chapterId = unit.id,
+                                                        nextChapterTitle = nextUnit?.titleDefault
+                                                    )
                                                 }
                                                 .padding(vertical = 14.dp, horizontal = 18.dp),
                                             contentAlignment = Alignment.Center

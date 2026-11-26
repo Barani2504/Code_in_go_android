@@ -112,7 +112,8 @@ enum class CosmeticCategory(val label: String, val iconEmoji: String) {
     OUTFITS("Outfits", "🧥"),
     ACCESSORIES("Accessories", "👓"),
     EFFECTS("Effects", "✨"),
-    LIVES("Hearts", "❤️")
+    LIVES("Hearts", "❤️"),
+    POWERUPS("Boosts", "⚡")
 }
 
 data class CosmeticItem(
@@ -138,6 +139,7 @@ object CosmeticsCatalog {
         CosmeticItem("cap_grad", "Graduation Cap", CosmeticCategory.HATS, "🎓", 250, "Degree in Algorithm Optimization"),
         CosmeticItem("hat_wizard", "Wizard Hat", CosmeticCategory.HATS, "🧙‍♂️", 400, "Casts O(1) constant time optimization spells"),
         CosmeticItem("hat_party", "Party Hat", CosmeticCategory.HATS, "🥳", 100, "Celebrates unbroken practice streaks"),
+        CosmeticItem("hat_cipher_helm", "Cyber Visor", CosmeticCategory.HATS, "🪖", 280, "Tactical encrypted HUD visor for Ash", isFeatured = true),
         CosmeticItem("hat_bubble", "Cipher Laurels", CosmeticCategory.HATS, "🌿", 0, "Golden laurels of ancient Caesar cipher decoders", unlockRequirement = "Master Realm 1: Secrets 101"),
         CosmeticItem("crown_tree", "Key Crown", CosmeticCategory.HATS, "👑", 0, "Forged from the golden master keys of symmetric ciphers", unlockRequirement = "Master Realm 2: Symmetric Forge"),
 
@@ -165,11 +167,16 @@ object CosmeticsCatalog {
         CosmeticItem("aura_lightning", "Lightning Flash", CosmeticCategory.EFFECTS, "⚡", 420, "Sub-millisecond runtime electricity"),
         CosmeticItem("aura_rainbow", "Rainbow Stream", CosmeticCategory.EFFECTS, "🌈", 600, "Full spectral spectrum of memory traversal"),
         CosmeticItem("aura_frost", "Cache Frost", CosmeticCategory.EFFECTS, "❄️", 320, "Cool icy air keeping processor temperature low"),
+        CosmeticItem("aura_quantum", "Quantum Aura", CosmeticCategory.EFFECTS, "🌀", 350, "Post-quantum cyan energy vortex around Ash", isFeatured = true),
 
         // ── 5. LIFE HEARTS & HEALTH REFILLS ────────────────────────────────
         CosmeticItem("heart_pack_full", "Full Heart Refill (10/10)", CosmeticCategory.LIVES, "💖", 35, "Instantly refills all 10 life hearts to full capacity", isFeatured = true),
         CosmeticItem("heart_pack_5", "+5 Life Hearts", CosmeticCategory.LIVES, "❤️", 20, "Restores +5 hearts so you can keep practicing without pause"),
-        CosmeticItem("heart_pack_1", "+1 Life Heart", CosmeticCategory.LIVES, "💓", 5, "Emergency +1 single life heart refill")
+        CosmeticItem("heart_pack_1", "+1 Life Heart", CosmeticCategory.LIVES, "💓", 5, "Emergency +1 single life heart refill"),
+
+        // ── 6. POWER-UPS & DEFENSE BOOSTS ──────────────────────────────────
+        CosmeticItem("power_streak_freeze", "Streak Freeze", CosmeticCategory.POWERUPS, "🧊", 100, "Protects your daily streak if you miss a day of defense", isFeatured = true),
+        CosmeticItem("power_xp_boost", "2x XP Boost", CosmeticCategory.POWERUPS, "⚡", 150, "Doubles your XP rewards on completed cipher stages")
     )
 
     val featuredItems: List<CosmeticItem> get() = allItems.filter { it.isFeatured && it.category != CosmeticCategory.LIVES }
@@ -300,12 +307,12 @@ fun GemShopSheet(
             CosmeticCategory.OUTFITS -> equippedOutfit == item.id
             CosmeticCategory.ACCESSORIES -> equippedAccessory == item.id
             CosmeticCategory.EFFECTS -> equippedAura == item.id
-            CosmeticCategory.LIVES -> false
+            CosmeticCategory.LIVES, CosmeticCategory.POWERUPS -> false
         }
     }
 
     fun checkIsOwned(item: CosmeticItem): Boolean {
-        if (item.category == CosmeticCategory.LIVES) return false
+        if (item.category == CosmeticCategory.LIVES || item.category == CosmeticCategory.POWERUPS) return false
         if (item.price == 0 && item.unlockRequirement == null) return true
         if (item.isLearningUnlock) return isLearningRequirementMet(item)
         return ownedIds.contains(item.id)
@@ -317,19 +324,19 @@ fun GemShopSheet(
             CosmeticCategory.OUTFITS -> tryingOutfit == item.id
             CosmeticCategory.ACCESSORIES -> tryingAccessory == item.id
             CosmeticCategory.EFFECTS -> tryingAura == item.id
-            CosmeticCategory.LIVES -> false
+            CosmeticCategory.LIVES, CosmeticCategory.POWERUPS -> false
         }
     }
 
     fun tryItem(item: CosmeticItem) {
-        if (item.category == CosmeticCategory.LIVES) return
+        if (item.category == CosmeticCategory.LIVES || item.category == CosmeticCategory.POWERUPS) return
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         when (item.category) {
             CosmeticCategory.HATS -> tryingHeadwear = item.id
             CosmeticCategory.OUTFITS -> tryingOutfit = item.id
             CosmeticCategory.ACCESSORIES -> tryingAccessory = item.id
             CosmeticCategory.EFFECTS -> tryingAura = item.id
-            CosmeticCategory.LIVES -> {}
+            CosmeticCategory.LIVES, CosmeticCategory.POWERUPS -> {}
         }
     }
 
@@ -341,7 +348,7 @@ fun GemShopSheet(
     }
 
     fun equip(item: CosmeticItem) {
-        if (item.category == CosmeticCategory.LIVES) return
+        if (item.category == CosmeticCategory.LIVES || item.category == CosmeticCategory.POWERUPS) return
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         resetTrying()
         when (item.category) {
@@ -361,12 +368,14 @@ fun GemShopSheet(
                 equippedAura = item.id
                 prefs.edit().putString("cnsEquippedAura", item.id).apply()
             }
-            CosmeticCategory.LIVES -> {}
+            CosmeticCategory.LIVES, CosmeticCategory.POWERUPS -> {}
         }
+        gameManager.updateEquippedCosmetics(equippedHeadwear, equippedOutfit, equippedAccessory, equippedAura)
+        com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakShopEquip(item.name)
     }
 
     fun unequip(item: CosmeticItem) {
-        if (item.category == CosmeticCategory.LIVES) return
+        if (item.category == CosmeticCategory.LIVES || item.category == CosmeticCategory.POWERUPS) return
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         resetTrying()
         when (item.category) {
@@ -386,8 +395,9 @@ fun GemShopSheet(
                 equippedAura = "none_aura"
                 prefs.edit().putString("cnsEquippedAura", "none_aura").apply()
             }
-            CosmeticCategory.LIVES -> {}
+            CosmeticCategory.LIVES, CosmeticCategory.POWERUPS -> {}
         }
+        gameManager.updateEquippedCosmetics(equippedHeadwear, equippedOutfit, equippedAccessory, equippedAura)
     }
 
     fun buyHeartPack(amount: Int, price: Int, name: String) {
@@ -448,6 +458,44 @@ fun GemShopSheet(
                 else -> 1
             }
             buyHeartPack(amount, item.price, item.name)
+            return
+        }
+
+        if (item.category == CosmeticCategory.POWERUPS) {
+            val (ok, msg) = gameManager.buyPowerUp(item.id, item.price, context)
+            if (!ok) {
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                alertTitle = "Cannot Purchase"
+                alertMessage = msg
+                showAlert = true
+                return
+            }
+            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            purchasedItemName = item.name
+            floatingGemDeduction = item.price
+            flyingItemEmoji = item.emoji
+            com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speakShopPurchase(item.name)
+            scope.launch {
+                floatingGemOffset.snapTo(50f)
+                floatingGemAlpha.snapTo(1f)
+                flyingItemOffset.snapTo(80f)
+                flyingItemScale.snapTo(0.5f)
+                launch {
+                    floatingGemOffset.animateTo(-120f, tween(600, easing = FastOutSlowInEasing))
+                    floatingGemAlpha.animateTo(0f, tween(300))
+                }
+                launch {
+                    flyingItemOffset.animateTo(-100f, tween(600, easing = FastOutSlowInEasing))
+                    flyingItemScale.animateTo(1.3f, tween(600, easing = FastOutSlowInEasing))
+                }
+                delay(250)
+                showPurchaseCelebration = true
+                delay(950)
+                floatingGemDeduction = null
+                flyingItemEmoji = null
+                delay(1300)
+                showPurchaseCelebration = false
+            }
             return
         }
 
