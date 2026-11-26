@@ -138,24 +138,24 @@ fun AskAshButton(
 ) {
     Box(
         modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(AshTheme.colors.brand.copy(alpha = 0.15f))
-            .border(1.5.dp, AshTheme.colors.brand, CircleShape)
-            .clickable(onClick = onClick),
+            .height(30.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(AshTheme.colors.brand.copy(alpha = 0.14f))
+            .border(1.2.dp, AshTheme.colors.brand.copy(alpha = 0.75f), RoundedCornerShape(15.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Ash 🪶",
-                style = AshType.labelSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    fontSize = 11.sp,
-                    color = AshTheme.colors.brand
-                ),
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
-        }
+        Text(
+            text = "Ash 🪶",
+            style = AshType.labelSmall.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp,
+                color = AshTheme.colors.brand
+            ),
+            maxLines = 1,
+            softWrap = false
+        )
     }
 }
 

@@ -62,10 +62,11 @@ fun BasecampFoundationsCard(
     onOpenModuloLab: () -> Unit,
     onOpenXorLab: () -> Unit,
     onStartStage: (levelNumber: Int, isBoss: Boolean) -> Unit,
+    initialExpanded: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val dynamicColors = LocalDynamicThemeColors.current
-    var isExpanded by remember { mutableStateOf(true) }
+    var isExpanded by remember { mutableStateOf(initialExpanded) }
 
     val slateTheme = Color(0xFF64748B)     // Titanium Slate
     val darkSlate = Color(0xFF334155)

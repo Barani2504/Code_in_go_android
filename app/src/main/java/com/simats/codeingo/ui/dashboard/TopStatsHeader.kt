@@ -104,14 +104,14 @@ fun TopStatsHeader(
                     cornerRadius = 24.dp,
                     glowColor = AmberGold.copy(alpha = if (isDark) 0.22f else 0.10f)
                 )
-                .padding(horizontal = 8.dp, vertical = 6.dp),
+                .padding(horizontal = 6.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // 1. More Options Sheet Trigger Button
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(30.dp)
                     .pressScale(0.90f)
                     .clip(CircleShape)
                     .background(if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.04f))
@@ -152,7 +152,7 @@ fun TopStatsHeader(
 
             // Stats Pill Row
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val pillBg = if (isDark) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.04f)
@@ -169,13 +169,13 @@ fun TopStatsHeader(
                         .background(pillBg)
                         .border(1.dp, streakColor.copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
                         .clickable { onStreakClick() }
-                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                        .padding(horizontal = 5.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = streakEmoji,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         modifier = if (!isStreakPendingRestore) Modifier.pulse(0.96f..1.12f) else Modifier
                     )
                     AnimatedContent(
@@ -185,9 +185,11 @@ fun TopStatsHeader(
                     ) { count ->
                         Text(
                             text = "$count",
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            color = streakColor
+                            color = streakColor,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -201,11 +203,11 @@ fun TopStatsHeader(
                         .background(pillBg)
                         .border(1.dp, gemColor.copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
                         .clickable { onGemsClick() }
-                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                        .padding(horizontal = 5.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Text(text = "💎", fontSize = 12.sp)
+                    Text(text = "💎", fontSize = 11.sp)
                     AnimatedContent(
                         targetState = gemsCount,
                         transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
@@ -213,9 +215,11 @@ fun TopStatsHeader(
                     ) { count ->
                         Text(
                             text = "$count",
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            color = gemColor
+                            color = gemColor,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -229,11 +233,11 @@ fun TopStatsHeader(
                         .background(pillBg)
                         .border(1.dp, xpColor.copy(alpha = if (isDark) 0.45f else 0.50f), CircleShape)
                         .clickable { onXpClick() }
-                        .padding(horizontal = 7.dp, vertical = 4.dp),
+                        .padding(horizontal = 5.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Text(text = "⚡", fontSize = 12.sp)
+                    Text(text = "⚡", fontSize = 11.sp)
                     AnimatedContent(
                         targetState = totalXP,
                         transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
@@ -241,9 +245,11 @@ fun TopStatsHeader(
                     ) { count ->
                         Text(
                             text = "$count",
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            color = xpColor
+                            color = xpColor,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -302,11 +308,11 @@ private fun HeartPill(
             .background(pillBg)
             .border(1.dp, Color(0xFFFF4D4D).copy(alpha = if (isDark) 0.45f else 0.55f), CircleShape)
             .clickable { onHeartsClick() }
-            .padding(horizontal = 7.dp, vertical = 4.dp),
+            .padding(horizontal = 5.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Text(text = "❤️", fontSize = 12.sp)
+        Text(text = "❤️", fontSize = 11.sp)
         AnimatedContent(
             targetState = heartsCount,
             transitionSpec = { slideInVertically { it } togetherWith slideOutVertically { -it } },
@@ -314,17 +320,21 @@ private fun HeartPill(
         ) { count ->
             Text(
                 text = "$count",
-                fontSize = 11.5.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
-                color = Color(0xFFFF4D4D)
+                color = Color(0xFFFF4D4D),
+                maxLines = 1,
+                softWrap = false
             )
         }
         if (displayTimer != null) {
             Text(
                 text = displayTimer,
-                fontSize = 9.sp,
+                fontSize = 8.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040)
+                color = if (isDark) Color(0xFFFF8888) else Color(0xFFE04040),
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

@@ -276,6 +276,7 @@ fun MainDashboardScreen(
 
     var showDiagnosticScreen by remember { mutableStateOf(false) }
     var activeMicroLab by remember { mutableStateOf<String?>(null) }
+    var isInsideVisualizerDetail by remember { mutableStateOf(false) }
 
     var reviewingPreviousUnitId by remember { mutableStateOf<Int?>(null) }
     var replayReturnLevelIndex by remember { mutableStateOf<Int?>(null) }
@@ -390,7 +391,13 @@ fun MainDashboardScreen(
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = {
-                if (activeWorldArena == null) {
+                val showBottomBar = activeWorldArena == null &&
+                    !(selectedTab == DashboardTab.VISUALIZER && isInsideVisualizerDetail)
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut()
+                ) {
                     BottomNavBar(
                         selectedTab = selectedTab,
                         onTabSelected = { tab ->
@@ -416,6 +423,7 @@ fun MainDashboardScreen(
                 HorizontalPager(
                     state = pagerState,
                     beyondViewportPageCount = 1,
+                    userScrollEnabled = !(selectedTab == DashboardTab.VISUALIZER && isInsideVisualizerDetail),
                     modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
                     val currentTab = dashboardTabs.getOrElse(pageIndex) { DashboardTab.LEARN }
@@ -433,7 +441,25 @@ fun MainDashboardScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 // Spacing for floating top stats header (status bar + cutout insets + header height)
-                                Spacer(modifier = Modifier.height(topInsetPadding + 80.dp))
+                                Spacer(modifier = Modifier.height(topInsetPadding + 84.dp))
+
+                                // Chapter 0: Compact Dropdown Menu (collapsed by default to preserve main chapters' originality)
+                                BasecampFoundationsCard(
+                                    completedStages = basecampCompletedLevels,
+                                    diagnosticTaken = diagnosticTaken,
+                                    recommendedChapter = diagnosticRecommendedChapter,
+                                    onOpenDiagnostic = { showDiagnosticScreen = true },
+                                    onOpenBitLab = { activeMicroLab = "bit" },
+                                    onOpenModuloLab = { activeMicroLab = "modulo" },
+                                    onOpenXorLab = { activeMicroLab = "xor" },
+                                    onStartStage = { levelNumber, isBoss ->
+                                        onStartLesson(0, levelNumber, 5, isBoss)
+                                    },
+                                    initialExpanded = false,
+                                    modifier = Modifier
+                                        .widthIn(max = 680.dp)
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
 
                                 // 1. CHAPTER UNITS PATH (Original UI & Animations)
                                 visibleUnits.forEach { unit ->
@@ -656,7 +682,7 @@ fun MainDashboardScreen(
                                 onMoreClick = { showMoreSheet = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onAskAshClick = { showAskAshSheet = true },
-                                onStreakClick = { onOpenPracticeHub() },
+                                onStreakClick = { showStreakSheet = true },
                                 onXpClick = { onOpenPracticeHub() },
                                 onHeartsClick = { showHeartsSheet = true },
                                 onGemsClick = { showGemShopSheet = true },
@@ -836,6 +862,7 @@ fun MainDashboardScreen(
 
                     DashboardTab.VISUALIZER -> {
                         VisualizerScreen(
+                            onDetailVisibilityChange = { isInsideVisualizerDetail = it },
                             onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
                             onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
                             onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },

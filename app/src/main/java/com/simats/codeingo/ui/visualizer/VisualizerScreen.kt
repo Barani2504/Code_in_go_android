@@ -63,6 +63,7 @@ import com.simats.codeingo.ui.theme.liquidGlassCard
 import com.simats.codeingo.ui.theme.pressScale
 import com.simats.codeingo.ui.theme.tilt3D
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -191,6 +192,7 @@ private fun realmFilterCategory(realmNumber: Int): String = when (realmNumber) {
 @Composable
 fun VisualizerScreen(
     modifier: Modifier = Modifier,
+    onDetailVisibilityChange: (Boolean) -> Unit = {},
     onOpenArrayKingdom: (() -> Unit)? = null,
     onOpenStackTower: (() -> Unit)? = null,
     onOpenQueueStation: (() -> Unit)? = null,
@@ -217,6 +219,10 @@ fun VisualizerScreen(
 
     BackHandler(enabled = displayMode != VisualizerDisplayMode.LIST) {
         displayMode = VisualizerDisplayMode.LIST
+    }
+
+    LaunchedEffect(displayMode) {
+        onDetailVisibilityChange(displayMode != VisualizerDisplayMode.LIST)
     }
 
     val currentLanguageName = selectedLangObj?.name ?: when (selectedLanguageCode) {
@@ -472,25 +478,34 @@ private fun VisualizerHeaderBar(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = AppFontFamily,
-                        color = LocalDynamicThemeColors.current.textPrimary
+                        color = LocalDynamicThemeColors.current.textPrimary,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
         } else {
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            ) {
                 Text(
                     text = "CNS Visualizer",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = AppFontFamily,
-                    color = LocalDynamicThemeColors.current.textPrimary
+                    color = LocalDynamicThemeColors.current.textPrimary,
+                    maxLines = 1
                 )
                 Text(
                     text = "Interactive Cryptography & Network Security Lab",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = AppFontFamily,
-                    color = SubtextGray
+                    color = SubtextGray,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
         }
@@ -501,7 +516,7 @@ private fun VisualizerHeaderBar(
                 .clip(RoundedCornerShape(20.dp))
                 .background(DsaBlue.copy(alpha = 0.15f))
                 .border(1.2.dp, DsaBlue.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-                .padding(horizontal = 12.dp, vertical = 7.dp)
+                .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -519,7 +534,9 @@ private fun VisualizerHeaderBar(
                     fontWeight = FontWeight.Black,
                     fontFamily = AppFontFamily,
                     color = DsaBlue,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 0.5.sp,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
@@ -771,6 +788,7 @@ private fun VisualizerDirectoryEntryCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .pressScale(0.97f)
             .clip(shape)
             .background(CardBackground.copy(alpha = 0.85f))
             .border(1.4.dp, accentColor.copy(alpha = 0.4f), shape)

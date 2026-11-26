@@ -119,18 +119,23 @@ fun VisualizerScaffold(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                ) {
                     IconButton(
                         onClick = {
                             AshSoundPool.playTap()
                             AshHaptics.tap(view, reduceMotion)
                             onBackClick()
                         },
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(38.dp)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -144,35 +149,48 @@ fun VisualizerScaffold(
                             text = spec.title,
                             style = AshTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = AshTheme.colors.ink
+                            color = AshTheme.colors.ink,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                         Text(
                             text = "Realm ${spec.realmNumber}: ${spec.realmTitle}",
                             style = AshTheme.typography.labelSmall,
-                            color = AshTheme.colors.subtle
+                            color = AshTheme.colors.subtle,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // "I'm lost" button
-                    AshButton(
-                        text = "I'm lost",
-                        onClick = {
+                // Compact, aligned "I'm lost" pill button
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(AshTheme.colors.surface)
+                        .border(1.2.dp, AshTheme.colors.border, RoundedCornerShape(18.dp))
+                        .clickable {
                             AshSoundPool.playTap()
                             AshHaptics.tap(view, reduceMotion)
                             showLostSheet = true
-                        },
-                        variant = AshButtonStyle.SURFACE,
-                        size = AshButtonSize.SMALL,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.HelpOutline,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = AshTheme.colors.brand
-                            )
                         }
+                        .padding(horizontal = 10.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.HelpOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(15.dp),
+                        tint = AshTheme.colors.brand
+                    )
+                    Text(
+                        text = "I'm lost",
+                        style = AshTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AshTheme.colors.ink,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
