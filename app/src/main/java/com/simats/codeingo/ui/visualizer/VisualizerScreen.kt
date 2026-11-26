@@ -909,7 +909,7 @@ private fun SpecializedLabDetailView(
         }
 
         DuolingoButton(
-            title = "Back to All Visualizers",
+            text = "Back to All Visualizers",
             onClick = onBackToList,
             modifier = Modifier.fillMaxWidth()
         )

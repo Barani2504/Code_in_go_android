@@ -207,7 +207,7 @@ class AuthRepository @Inject constructor(
         tokenManager.clearTokens()
         AuthService.shared.signOut()
         LocalizationManager.instance.resetProfileData()
-        GameManager.instance.deleteAccountAndClearAllData()
+        GameManager.instance.resetAllProgress()
     }
 
     private suspend fun handleAuthResponse(response: Response<AuthResponse>): ApiResult<UserDTO> {

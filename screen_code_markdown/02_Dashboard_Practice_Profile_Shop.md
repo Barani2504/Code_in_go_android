@@ -1,6 +1,6 @@
 # Dashboard, Practice Hub, Profile, Leaderboards, Shop & UI System
 
-> **Files in this bundle:** 78
+> **Files in this bundle:** 77
 
 ## File Index
 
@@ -52,36 +52,35 @@
 46. `app/src/main/java/com/simats/codeingo/ui/dashboard/EthicalReengagementGreeting.kt` (121 lines)
 47. `app/src/main/java/com/simats/codeingo/ui/dashboard/LessonNodeButton.kt` (269 lines)
 48. `app/src/main/java/com/simats/codeingo/ui/dashboard/LoadingScreen.kt` (196 lines)
-49. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardScreen.kt` (2041 lines)
+49. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardScreen.kt` (2013 lines)
 50. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardViewModel.kt` (366 lines)
-51. `app/src/main/java/com/simats/codeingo/ui/dashboard/MoreBottomDrawer.kt` (164 lines)
+51. `app/src/main/java/com/simats/codeingo/ui/dashboard/MoreBottomDrawer.kt` (168 lines)
 52. `app/src/main/java/com/simats/codeingo/ui/dashboard/PhoenixEggCompanionMascotView.kt` (243 lines)
 53. `app/src/main/java/com/simats/codeingo/ui/dashboard/RealmHeroDashboardCards.kt` (609 lines)
-54. `app/src/main/java/com/simats/codeingo/ui/dashboard/SideMenuDrawer.kt` (134 lines)
-55. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt` (331 lines)
-56. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt` (226 lines)
-57. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt` (45 lines)
-58. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt` (64 lines)
-59. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt` (837 lines)
-60. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt` (1178 lines)
-61. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt` (96 lines)
-62. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt` (243 lines)
-63. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt` (451 lines)
-64. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt` (194 lines)
-65. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt` (1833 lines)
-66. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt` (245 lines)
-67. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt` (1668 lines)
-68. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt` (337 lines)
-69. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt` (358 lines)
-70. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt` (74 lines)
-71. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt` (140 lines)
-72. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt` (125 lines)
-73. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt` (231 lines)
-74. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt` (1144 lines)
-75. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt` (166 lines)
-76. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt` (23 lines)
-77. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt` (428 lines)
-78. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt` (144 lines)
+54. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt` (331 lines)
+55. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt` (226 lines)
+56. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt` (45 lines)
+57. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt` (64 lines)
+58. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt` (837 lines)
+59. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt` (1189 lines)
+60. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt` (96 lines)
+61. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt` (243 lines)
+62. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt` (451 lines)
+63. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt` (194 lines)
+64. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt` (1832 lines)
+65. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt` (245 lines)
+66. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt` (1668 lines)
+67. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt` (337 lines)
+68. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt` (358 lines)
+69. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt` (74 lines)
+70. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt` (140 lines)
+71. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt` (125 lines)
+72. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt` (231 lines)
+73. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt` (1144 lines)
+74. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt` (166 lines)
+75. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt` (23 lines)
+76. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt` (428 lines)
+77. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt` (144 lines)
 
 ---
 
@@ -9802,7 +9801,6 @@ import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.phoenix.PhoenixNodeJumpFlightView
 import com.simats.codeingo.ui.profile.ProfileScreen
-import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.shop.GemShopSheet
@@ -9831,12 +9829,12 @@ import com.simats.codeingo.ui.exercise.labs.XorBoardLab
  * Features:
  * - Master 5-Chapter DSA Course (Array, Linked List, Stack, Queue, Tree) with 25 levels & 5 Boss Stages
  * - 3D Interactive Worlds Section (Array Kingdom, Stack Tower, Queue Station, LinkedList Road, Binary Tree Forest)
- * - Floating Liquid Glass Top Stats Header (Menu, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
+ * - Floating Liquid Glass Top Stats Header (More Actions, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
  * - 3D Level Nodes with animated active target aura, START tooltip, and locked level popover
  * - Dynamic Companion Mascot floating next to the active node
- * - Slide-out Side Drawer Menu
+ * - More Actions Bottom Sheet (`MoreBottomDrawer`) for Practice Hub, Shop, Settings & Logout
  * - FullScreen & Bottom Sheets for Emotion Picker, Streak, and Chapter Guidebook
- * - Docked 4-Tab Liquid Glass Bottom Navigation Bar
+ * - Docked 5-Tab Liquid Glass Bottom Navigation Bar
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -9908,7 +9906,7 @@ fun MainDashboardScreen(
             pagerState.animateScrollToPage(targetIndex)
         }
     }
-    var showSideMenu by remember { mutableStateOf(false) }
+    var showMoreSheet by remember { mutableStateOf(false) }
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
     var showHeartsSheet by remember { mutableStateOf(false) }
@@ -10266,6 +10264,15 @@ fun MainDashboardScreen(
                                 DailyCipherChallengeCard(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
+
+                                AppButton(
+                                    title = "🛠️ OPEN PRACTICE HUB & MISTAKE VAULT",
+                                    style = AppButtonStyle.PRIMARY_AMBER,
+                                    onClick = onOpenPracticeHub,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
                                 }
 
                                 // Chapter 0: Basecamp Foundations Primer Card (Android Expansion)
@@ -10501,7 +10508,7 @@ fun MainDashboardScreen(
                                 heartsCount = heartsCount,
                                 gemsCount = gemsCount,
                                 heartTimerString = null,
-                                onMenuClick = { showSideMenu = true },
+                                onMoreClick = { showMoreSheet = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onAskAshClick = { showAskAshSheet = true },
                                 onStreakClick = { showStreakSheet = true },
@@ -10693,17 +10700,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.PRACTICE -> {
-                        PracticeHubScreen(
-                            onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
-                            onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
-                            onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
-                            onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
-                            onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.LEADERBOARDS -> {
                         val completedLessonCount by GameManager.instance.completedLessonIds.collectAsState()
                         LeaderboardsScreen(
@@ -10722,13 +10718,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.SHOP -> {
-                        GemShopSheet(
-                            onDismiss = { selectedTab = DashboardTab.LEARN },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.PROFILE -> {
                         ProfileScreen(
                             onOpenSettings = onOpenSettings,
@@ -10738,48 +10727,33 @@ fun MainDashboardScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-
-                    else -> {
-                        VisualizerScreen(
-                            onOpenArrayKingdom = { onStartLesson(1, 1, 5, false) },
-                            onOpenStackTower = { onStartLesson(3, 11, 5, false) },
-                            onOpenQueueStation = { onStartLesson(4, 16, 5, false) },
-                            onOpenLinkedListRoad = { onStartLesson(2, 6, 5, false) },
-                            onOpenBinaryTreeForest = { onStartLesson(5, 21, 5, false) },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                 }
             }
         }
     }
 
-        // Side Drawer Menu
-        AnimatedVisibility(
-            visible = showSideMenu,
-            enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
-            exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable { showSideMenu = false }
+        // More Actions Modal Sheet (Practice Hub, Gem Shop, Settings, Log Out)
+        if (showMoreSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showMoreSheet = false },
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
-                SideMenuDrawer(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab ->
-                        showSideMenu = false
-                        when (tab) {
-                            DashboardTab.PRACTICE -> onOpenPracticeHub()
-                            DashboardTab.SHOP -> showGemShopSheet = true
-                            DashboardTab.MORE -> onOpenSettings()
-                            else -> selectedTab = tab
-                        }
+                MoreBottomDrawer(
+                    onOpenPracticeHub = {
+                        showMoreSheet = false
+                        onOpenPracticeHub()
                     },
-                    onMoreClick = {
-                        showSideMenu = false
+                    onOpenShop = {
+                        showMoreSheet = false
+                        showGemShopSheet = true
+                    },
+                    onOpenSettings = {
+                        showMoreSheet = false
                         onOpenSettings()
+                    },
+                    onLogout = {
+                        showMoreSheet = false
+                        onLogout()
                     }
                 )
             }
@@ -10894,8 +10868,8 @@ fun MainDashboardScreen(
             }
         }
 
-        if (showSideMenu) {
-            BackHandler { showSideMenu = false }
+        if (showMoreSheet) {
+            BackHandler { showMoreSheet = false }
         }
         if (showGemShopSheet) {
             BackHandler { showGemShopSheet = false }
@@ -10909,7 +10883,7 @@ fun MainDashboardScreen(
             enabled = activeWorldArena == null &&
                 !showDiagnosticScreen &&
                 activeMicroLab == null &&
-                !showSideMenu &&
+                !showMoreSheet &&
                 !showGemShopSheet &&
                 !showAskAshSheet &&
                 selectedTab != DashboardTab.LEARN
@@ -10993,11 +10967,8 @@ fun MainDashboardScreen(
                 DashboardTab.LEARN -> ScreenGuideCatalog.HOME
                 DashboardTab.VISUALIZER -> ScreenGuideCatalog.VISUALIZER
                 DashboardTab.ARENAS -> ScreenGuideCatalog.ARENA
-                DashboardTab.PRACTICE -> ScreenGuideCatalog.PRACTICE
                 DashboardTab.LEADERBOARDS -> ScreenGuideCatalog.LEADERBOARD
-                DashboardTab.SHOP -> ScreenGuideCatalog.SHOP
                 DashboardTab.PROFILE -> ScreenGuideCatalog.PROFILE
-                else -> ScreenGuideCatalog.HOME
             }
             AskAshBottomSheet(
                 guideContext = currentScreenGuide,
@@ -12094,10 +12065,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12105,43 +12077,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
-import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
+import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
 
 @Composable
 fun MoreBottomDrawer(
+    onOpenPracticeHub: () -> Unit = {},
+    onOpenShop: () -> Unit = {},
     onOpenSettings: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
+    val dynamicColors = LocalDynamicThemeColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(dynamicColors.cardBackground)
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        // Drag Handle
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(width = 40.dp, height = 4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(LocalDynamicThemeColors.current.placeholder)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
         val cardShape = RoundedCornerShape(20.dp)
         Column(
             modifier = Modifier
@@ -12150,94 +12115,104 @@ fun MoreBottomDrawer(
                 .background(CardBackground)
                 .border(1.5.dp, InputBorder, cardShape)
         ) {
-            // Settings Option
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOpenSettings() }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(DuolingoBlue.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = DuolingoBlue,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "SETTINGS",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = SubtextGray
-                )
-            }
-
-            // Divider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(InputBorder.copy(alpha = 0.6f))
+            MoreDrawerRow(
+                icon = Icons.Default.Build,
+                title = "PRACTICE HUB",
+                subtitle = "Mistake Vault · Daily Review · Interview Mode",
+                accentColor = DuolingoGreen,
+                onClick = onOpenPracticeHub
             )
-
-            // Logout Option
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onLogout() }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(DuolingoRed.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Logout",
-                        tint = DuolingoRed,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "LOG OUT",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DuolingoRed,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = DuolingoRed.copy(alpha = 0.6f)
-                )
-            }
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.Default.ShoppingBag,
+                title = "GEM SHOP",
+                subtitle = "Streak Freezes · Hearts · Phoenix Skins",
+                accentColor = AmberGold,
+                onClick = onOpenShop
+            )
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.Default.Settings,
+                title = "SETTINGS",
+                subtitle = "Theme · Audio · Profile & Data",
+                accentColor = DuolingoBlue,
+                onClick = onOpenSettings
+            )
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                title = "LOG OUT",
+                subtitle = "Sign out of active session",
+                accentColor = DuolingoRed,
+                titleColor = DuolingoRed,
+                onClick = onLogout
+            )
         }
+    }
+}
+
+@Composable
+private fun DrawerDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(InputBorder.copy(alpha = 0.6f))
+    )
+}
+
+@Composable
+private fun MoreDrawerRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    titleColor: Color = LocalDynamicThemeColors.current.textPrimary,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(accentColor.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = accentColor,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                color = titleColor
+            )
+            Text(
+                text = subtitle,
+                fontSize = 11.5.sp,
+                color = SubtextGray
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = if (titleColor == DuolingoRed) DuolingoRed.copy(alpha = 0.6f) else SubtextGray
+        )
     }
 }
 
@@ -13107,147 +13082,7 @@ fun DailyRewardChestCard(
 
 ```
 
-## 54. `app/src/main/java/com/simats/codeingo/ui/dashboard/SideMenuDrawer.kt`
-
-```kotlin
-package com.simats.codeingo.ui.dashboard
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.simats.codeingo.data.model.DashboardTab
-import com.simats.codeingo.ui.theme.DarkBackground
-import com.simats.codeingo.ui.theme.DsaBlue
-import com.simats.codeingo.ui.theme.DuolingoBlue
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
-
-@Composable
-fun SideMenuDrawer(
-    selectedTab: DashboardTab,
-    onTabSelected: (DashboardTab) -> Unit,
-    onMoreClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
-    Box(
-        modifier = modifier
-            .width(260.dp)
-            .fillMaxHeight()
-            .background(dynamicColors.cardBackground)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp)
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                Text(
-                    text = "CNS Defense",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DuolingoBlue
-                )
-                Text(
-                    text = "Cryptography & Network Security",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SubtextGray
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(InputBorder)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DashboardTab.values().forEach { tab ->
-                val isSelected = selectedTab == tab
-                val shape = RoundedCornerShape(14.dp)
-                val isMore = tab == DashboardTab.MORE
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 3.dp)
-                        .clip(shape)
-                        .background(
-                            if (isSelected && !isMore) DuolingoBlue.copy(alpha = 0.18f) else Color.Transparent
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            color = if (isSelected && !isMore) DuolingoBlue.copy(alpha = 0.4f) else Color.Transparent,
-                            shape = shape
-                        )
-                        .clickable {
-                            if (isMore) {
-                                onMoreClick()
-                            } else {
-                                onTabSelected(tab)
-                            }
-                        }
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = tab.gameEmoji,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Text(
-                        text = tab.title.uppercase(),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (isSelected && !isMore) DuolingoBlue else LocalDynamicThemeColors.current.textPrimary
-                    )
-                }
-            }
-        }
-
-        // Right border line
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-                .background(InputBorder)
-                .align(Alignment.CenterEnd)
-        )
-    }
-}
-
-```
-
-## 55. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt`
+## 54. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt`
 
 ```kotlin
 
@@ -13278,7 +13113,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13309,7 +13144,7 @@ import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
  * Exact parity with iOS MainDashboardView.swift topStatsHeader.
  * Features:
- * - Circular side menu trigger button with pressScale
+ * - Circular More Actions button (MoreBottomDrawer) with pressScale
  * - PhoenixDynamicLogoView (size 28dp) with live emotion aura & tap sheet
  * - Streak pill (Ice 🧊 if pending restore, Flame 🔥 otherwise)
  * - Stars pill (🌟)
@@ -13327,7 +13162,7 @@ fun TopStatsHeader(
     gemsCount: Int = 450,
     heartTimerString: String? = null,
     isBossActive: Boolean = false,
-    onMenuClick: () -> Unit,
+    onMoreClick: () -> Unit = {},
     onPhoenixClick: () -> Unit = {},
     onAskAshClick: () -> Unit = {},
     onStreakClick: () -> Unit = {},
@@ -13360,7 +13195,7 @@ fun TopStatsHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // 1. Side Menu Hamburger Button
+            // 1. More Options Sheet Trigger Button
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -13375,12 +13210,12 @@ fun TopStatsHeader(
                         ),
                         CircleShape
                     )
-                    .clickable { onMenuClick() },
+                    .clickable { onMoreClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Side Menu",
+                    imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = "More Options",
                     tint = if (isDark) Color.White else Color(0xFF182030),
                     modifier = Modifier.size(16.dp)
                 )
@@ -13584,7 +13419,7 @@ private fun HeartPill(
 
 ```
 
-## 56. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt`
+## 55. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.dashboard
@@ -13816,7 +13651,7 @@ fun UnitSectionBanner(
 
 ```
 
-## 57. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt`
+## 56. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.dashboard.viewmodel
@@ -13867,7 +13702,7 @@ class DashboardViewModel @Inject constructor(
 
 ```
 
-## 58. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt`
+## 57. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.leaderboards
@@ -13937,7 +13772,7 @@ class LeaderboardViewModel @Inject constructor(
 
 ```
 
-## 59. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt`
+## 58. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.leaderboards
@@ -14780,7 +14615,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
 
 ```
 
-## 60. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt`
+## 59. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.practice
@@ -14881,6 +14716,17 @@ data class InterviewProblem(
     val sampleCode: String
 )
 
+/**
+ * Interactive Practice Hub hosting Mistake Vault (Room + MistakeVaultViewModel),
+ * Daily Spaced Repetition & Cipher Challenge, and Security Interview Prep.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM`
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE`
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL`
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY`
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION`
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeHubScreen(
@@ -15964,7 +15810,7 @@ private fun FlippableMistakeCard(
 
 ```
 
-## 61. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt`
+## 60. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.practice.viewmodel
@@ -16066,7 +15912,7 @@ class MistakeVaultViewModel @Inject constructor(
 
 ```
 
-## 62. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt`
+## 61. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -16315,7 +16161,7 @@ fun CipherCardShareView(
 
 ```
 
-## 63. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt`
+## 62. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -16772,7 +16618,7 @@ private fun CodexItemCard(
 
 ```
 
-## 64. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt`
+## 63. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -16972,7 +16818,7 @@ fun ExamReadinessDashboard(
 
 ```
 
-## 65. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt`
+## 64. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -17176,7 +17022,6 @@ fun ProfileScreen(
                             showSignOutAlert = false
                             localizationManager.resetProfileData()
                             com.simats.codeingo.domain.AuthService.shared.signOut()
-                            gameManager.deleteAccountAndClearAllData()
                             onLogout()
                         }
                     ) {
@@ -18811,7 +18656,7 @@ private fun BenefitCard(
 
 ```
 
-## 66. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt`
+## 65. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.shop
@@ -19062,7 +18907,7 @@ private fun PlusBenefitRow(
 
 ```
 
-## 67. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt`
+## 66. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.shop
@@ -20736,7 +20581,7 @@ fun BoneShopSheet(
 
 ```
 
-## 68. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt`
+## 67. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.social
@@ -21079,7 +20924,7 @@ fun FriendsSocialCard(
 
 ```
 
-## 69. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt`
+## 68. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.streak
@@ -21443,7 +21288,7 @@ fun StreakSocietySheet(
 
 ```
 
-## 70. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt`
+## 69. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -21523,7 +21368,7 @@ object AshTheme {
 
 ```
 
-## 71. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt`
+## 70. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -21669,7 +21514,7 @@ val ashTokens: AshTokens
 
 ```
 
-## 72. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt`
+## 71. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -21800,7 +21645,7 @@ val AshType = AshTypography()
 
 ```
 
-## 73. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt`
+## 72. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -22037,7 +21882,7 @@ val GoogleBgLight        = Color(0xFFF1_F3_F4)
 
 ```
 
-## 74. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt`
+## 73. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -23187,7 +23032,7 @@ fun Shockwave(
 
 ```
 
-## 75. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt`
+## 74. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -23359,7 +23204,7 @@ fun Modifier.adaptiveHorizontalPadding(): Modifier {
 
 ```
 
-## 76. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt`
+## 75. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -23388,7 +23233,7 @@ val WorldCardShape   = RoundedCornerShape(18.dp)  // world entry cards
 
 ```
 
-## 77. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt`
+## 76. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -23821,7 +23666,7 @@ object ButtonTokens {
 }
 ```
 
-## 78. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt`
+## 77. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt`
 
 ```kotlin
 @file:OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)

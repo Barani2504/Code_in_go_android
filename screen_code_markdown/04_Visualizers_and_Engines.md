@@ -4,7 +4,7 @@
 
 ## File Index
 
-1. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt` (279 lines)
+1. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt` (282 lines)
 2. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSChallengeCardView.kt` (391 lines)
 3. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLabModeTabBar.kt` (103 lines)
 4. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageCodeProvider.kt` (1143 lines)
@@ -12,7 +12,7 @@
 6. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSTestVectorCardView.kt` (203 lines)
 7. `app/src/main/java/com/simats/codeingo/ui/visualizer/CaesarCipherVisualizer.kt` (310 lines)
 8. `app/src/main/java/com/simats/codeingo/ui/visualizer/CertificateChainVisualizer.kt` (238 lines)
-9. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt` (385 lines)
+9. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt` (388 lines)
 10. `app/src/main/java/com/simats/codeingo/ui/visualizer/DESFeistelVisualizer.kt` (291 lines)
 11. `app/src/main/java/com/simats/codeingo/ui/visualizer/DiffieHellmanVisualizer.kt` (198 lines)
 12. `app/src/main/java/com/simats/codeingo/ui/visualizer/ECCPointVisualizer.kt` (167 lines)
@@ -22,10 +22,10 @@
 16. `app/src/main/java/com/simats/codeingo/ui/visualizer/MerkleTreeVisualizer.kt` (287 lines)
 17. `app/src/main/java/com/simats/codeingo/ui/visualizer/PasswordHashingVisualizer.kt` (255 lines)
 18. `app/src/main/java/com/simats/codeingo/ui/visualizer/RSAPublicKeyVisualizer.kt` (205 lines)
-19. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt` (188 lines)
-20. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt` (242 lines)
-21. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt` (176 lines)
-22. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt` (2235 lines)
+19. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt` (191 lines)
+20. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt` (249 lines)
+21. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt` (184 lines)
+22. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt` (2245 lines)
 23. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/AvalancheMeterView.kt` (247 lines)
 24. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/PredictThenRevealPrompt.kt` (224 lines)
 25. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/VisualizerPlaybackController.kt` (337 lines)
@@ -44,7 +44,7 @@
 38. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/CnsVisualizerRegistry.kt` (1189 lines)
 39. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/UniversalVisualizerView.kt` (638 lines)
 40. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerBeat.kt` (56 lines)
-41. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt` (718 lines)
+41. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt` (719 lines)
 
 ---
 
@@ -301,11 +301,14 @@ private fun AESMatrixExploreView() {
                     verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                 for (r in 0..3) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         for (c in 0..3) {
                             val byteVal = currentMatrix[r][c]
                             Box(
-                                modifier = Modifier.size(48.dp, 36.dp).clip(RoundedCornerShape(6.dp))
+                                modifier = Modifier.weight(1f).height(36.dp).clip(RoundedCornerShape(6.dp))
                                     .background(DsaPurple.copy(alpha = if (isDark) 0.25f else 0.12f))
                                     .border(1.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(6.dp)),
                                 contentAlignment = Alignment.Center
@@ -2766,11 +2769,11 @@ private fun CaesarCipherExploreView() {
 
     val outputText = remember(textInput, effectiveShift) {
         textInput.map { char ->
-            if (char.isLetter()) {
-                val base = if (char.isUpperCase()) 'A' else 'a'
-                val shifted = (char.code - base.code + effectiveShift).mod(26)
-                (base.code + shifted).toChar()
-            } else char
+            when (char) {
+                in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + effectiveShift).mod(26)).toChar()
+                in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + effectiveShift).mod(26)).toChar()
+                else -> char
+            }
         }.joinToString("")
     }
 
@@ -3229,26 +3232,29 @@ fun CipherLabScreen(
         when (selectedAlgo) {
             CipherAlgorithm.CAESAR -> {
                 inputText.map { char ->
-                    if (char.isLetter()) {
-                        val base = if (char.isUpperCase()) 'A' else 'a'
-                        val shifted = (char.code - base.code + caesarShift).mod(26)
-                        (base.code + shifted).toChar()
-                    } else char
+                    when (char) {
+                        in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + caesarShift).mod(26)).toChar()
+                        in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + caesarShift).mod(26)).toChar()
+                        else -> char
+                    }
                 }.joinToString("")
             }
             CipherAlgorithm.VIGENERE -> {
-                val cleanKey = secretKey.filter { it.isLetter() }.uppercase()
+                val cleanKey = secretKey.uppercase().filter { it in 'A'..'Z' }
                 if (cleanKey.isEmpty()) inputText
                 else {
                     var keyIdx = 0
                     inputText.map { char ->
-                        if (char.isLetter()) {
-                            val base = if (char.isUpperCase()) 'A' else 'a'
-                            val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
-                            keyIdx++
-                            val shifted = (char.code - base.code + shift).mod(26)
-                            (base.code + shifted).toChar()
-                        } else char
+                        when (char) {
+                            in 'A'..'Z', in 'a'..'z' -> {
+                                val base = if (char in 'A'..'Z') 'A' else 'a'
+                                val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
+                                keyIdx++
+                                val shifted = (char.code - base.code + shift).mod(26)
+                                (base.code + shifted).toChar()
+                            }
+                            else -> char
+                        }
                     }.joinToString("")
                 }
             }
@@ -3783,20 +3789,20 @@ private fun DESFeistelExploreView() {
                         .background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)).padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "PC-2 Round Subkey (K_$roundIndex):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "PC-2 Round Subkey (K_$roundIndex):", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
                         Text(text = "0x%012X".format(currentRoundState.subkey), fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Expansion E(R_${roundIndex - 1}) [48b]:", fontSize = 10.sp, color = SubtextGray)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "Expansion E(R_${roundIndex - 1}) [48b]:", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray)
                         Text(text = "0x%012X".format(currentRoundState.expandedR), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "8 S-Boxes Output [32b]:", fontSize = 10.sp, color = SubtextGray)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "8 S-Boxes Output [32b]:", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray)
                         Text(text = "0x%08X".format(currentRoundState.sBoxOutput), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = tealColor)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "F-Function Output (after P):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "F-Function Output (after P):", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
                         Text(text = "0x%08X".format(currentRoundState.fOutput), fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor, fontFamily = FontFamily.Monospace)
                     }
                 }
@@ -3925,9 +3931,9 @@ private fun DiffieHellmanAttackView() {
                 Text(text = "😈 ACTIVE MALLORY MITM KEY SUBSTITUTION", fontSize = 12.sp, fontWeight = FontWeight.Black, color = redColor)
                 Text(text = "Mallory intercepts Alice's public key (A=$g^a mod p) and Bob's public key (B=$g^b mod p). She sends her own public key M = $g^m mod p = ${mitmState.malloryPublic} to both parties.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
-                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
                 }
 
                 Text(
@@ -5833,7 +5839,10 @@ private fun SHA256ExploreView() {
                             "E" to activeRoundState.e, "F" to activeRoundState.f,
                             "G" to activeRoundState.g, "H" to activeRoundState.h
                         ).forEach { (reg, valInt) ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(text = reg, fontSize = 10.sp, fontWeight = FontWeight.Black, color = purpleColor)
                                 Text(text = "%04X".format((valInt ushr 16) and 0xFFFF), fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                             }
@@ -5884,6 +5893,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSAVisualizerType
@@ -6024,8 +6034,14 @@ private fun TLS13HandshakeExploreView() {
                 .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}", fontSize = 12.sp, fontWeight = FontWeight.Black, color = orangeColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}",
+                        modifier = Modifier.weight(1f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = orangeColor
+                    )
                     Text(text = currentPacket.sender, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = tealColor)
                 }
 
@@ -6070,9 +6086,9 @@ private fun TLS13HandshakeExploreView() {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     currentPacket.fields.forEach { (k, v) ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "$k:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                            Text(text = v, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(text = "$k:", modifier = Modifier.weight(0.45f), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                            Text(text = v, modifier = Modifier.weight(0.55f), fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary, textAlign = TextAlign.End)
                         }
                     }
                 }
@@ -6259,19 +6275,27 @@ private fun VigenereExploreView() {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "REPEATED KEYSTREAM ALIGNMENT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    cleanPlain.take(25).forEachIndexed { i, pChar ->
-                        val kChar = cleanKey[i % cleanKey.length]
-                        val rChar = resultText.getOrElse(i) { '?' }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
-                        ) {
-                            Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-                            Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                            Text(text = "=", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                if (cleanPlain.isEmpty()) {
+                    Text(
+                        text = "Enter ASCII letters (A-Z) above to compute keystream alignment.",
+                        fontSize = 11.sp,
+                        color = SubtextGray
+                    )
+                } else {
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        cleanPlain.take(25).forEachIndexed { i, pChar ->
+                            val kChar = cleanKey[i % cleanKey.length]
+                            val rChar = resultText.getOrElse(i) { '?' }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
+                            ) {
+                                Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                                Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
+                                Text(text = "=", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                            }
                         }
                     }
                 }
@@ -6464,6 +6488,16 @@ private fun realmFilterCategory(realmNumber: Int): String = when (realmNumber) {
     else -> "Hashing & Protocols"
 }
 
+/**
+ * CNS Visualizer Directory & Multi-Mode Lab Shell.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM` (Chapter 1)
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE` (Chapter 2)
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL` (Chapter 3)
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY` (Chapter 4)
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION` (Chapter 5)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualizerScreen(
@@ -7186,7 +7220,7 @@ private fun SpecializedLabDetailView(
         }
 
         DuolingoButton(
-            title = "Back to All Visualizers",
+            text = "Back to All Visualizers",
             onClick = onBackToList,
             modifier = Modifier.fillMaxWidth()
         )
@@ -14517,8 +14551,8 @@ fun VisualizerScaffold(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 54.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(54.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(
@@ -14733,8 +14767,8 @@ fun VisualizerScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 72.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(72.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -14782,6 +14816,7 @@ fun VisualizerScaffold(
                 Spacer(modifier = Modifier.height(20.dp))
                 AshButton(
                     text = "Got it, Ash!",
+                    variant = AshButtonStyle.BRAND,
                     onClick = {
                         AshSoundPool.playTap()
                         coroutineScope.launch {

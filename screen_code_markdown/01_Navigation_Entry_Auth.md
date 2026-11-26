@@ -5,9 +5,9 @@
 ## File Index
 
 1. `app/src/main/java/com/simats/codeingo/MainActivity.kt` (67 lines)
-2. `app/src/main/java/com/simats/codeingo/navigation/AppNavHost.kt` (375 lines)
-3. `app/src/main/java/com/simats/codeingo/navigation/BottomNavBar.kt` (351 lines)
-4. `app/src/main/java/com/simats/codeingo/navigation/Routes.kt` (24 lines)
+2. `app/src/main/java/com/simats/codeingo/navigation/AppNavHost.kt` (373 lines)
+3. `app/src/main/java/com/simats/codeingo/navigation/BottomNavBar.kt` (348 lines)
+4. `app/src/main/java/com/simats/codeingo/navigation/Routes.kt` (37 lines)
 5. `app/src/main/java/com/simats/codeingo/ui/auth/AppleAuthSheet.kt` (336 lines)
 6. `app/src/main/java/com/simats/codeingo/ui/auth/ForgotPasswordSheet.kt` (475 lines)
 7. `app/src/main/java/com/simats/codeingo/ui/auth/GoogleAuthSheet.kt` (333 lines)
@@ -285,7 +285,6 @@ fun AppNavHost(
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -400,7 +399,6 @@ fun AppNavHost(
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -510,7 +508,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -768,9 +765,7 @@ fun BottomNavBar(
                             DashboardTab.VISUALIZER -> Icons.Default.Build
                             DashboardTab.LEADERBOARDS -> Icons.Default.Leaderboard
                             DashboardTab.ARENAS -> Icons.Default.Shield
-                            DashboardTab.SHOP -> Icons.Default.ShoppingBag
                             DashboardTab.PROFILE -> Icons.Default.Person
-                            else -> Icons.Default.Home
                         }
 
                         Box(
@@ -836,6 +831,8 @@ private fun BottomNavBarPreview() {
 ```kotlin
 package com.simats.codeingo.navigation
 
+import com.simats.codeingo.data.network.repository.LessonIdAdapter
+
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
@@ -845,7 +842,18 @@ sealed class Screen(val route: String) {
     object Assessment : Screen("assessment/{unitId}/{levelNumber}/{totalLevelsInUnit}/{isBoss}") {
         fun createRoute(unitId: Int, levelNumber: Int, totalLevelsInUnit: Int = 6, isBoss: Boolean = false) =
             "assessment/$unitId/$levelNumber/$totalLevelsInUnit/$isBoss"
-        fun createRoute(lessonId: String) = "assessment/1/1/6/false"
+
+        fun createRoute(lessonId: String): String {
+            val localIndex = LessonIdAdapter.toLocalLevelIndex(lessonId) ?: 1
+            return if (localIndex in 101..105) {
+                val stage = localIndex - 100
+                createRoute(unitId = 0, levelNumber = stage, totalLevelsInUnit = 5, isBoss = stage == 5)
+            } else {
+                val unitId = ((localIndex - 1) / 5) + 1
+                val stageInUnit = ((localIndex - 1) % 5) + 1
+                createRoute(unitId = unitId, levelNumber = localIndex, totalLevelsInUnit = 5, isBoss = stageInUnit == 5)
+            }
+        }
     }
     object BossBattle : Screen("boss_battle/{bossId}") {
         fun createRoute(bossId: String) = "boss_battle/$bossId"

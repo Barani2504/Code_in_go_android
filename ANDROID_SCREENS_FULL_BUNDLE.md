@@ -438,14 +438,14 @@ TextButton(onClick = {
 
 # 10. Complete Source Code of All Android UI & Navigation Files
 
-> **Total Files Included:** 221 (updated post bug-fix & wiring pass)
+> **Total Files Included:** 220 (verified post-build)
 
 ## File Index
 
 1. `app/src/main/java/com/simats/codeingo/MainActivity.kt` (67 lines)
-2. `app/src/main/java/com/simats/codeingo/navigation/AppNavHost.kt` (375 lines)
-3. `app/src/main/java/com/simats/codeingo/navigation/BottomNavBar.kt` (351 lines)
-4. `app/src/main/java/com/simats/codeingo/navigation/Routes.kt` (24 lines)
+2. `app/src/main/java/com/simats/codeingo/navigation/AppNavHost.kt` (373 lines)
+3. `app/src/main/java/com/simats/codeingo/navigation/BottomNavBar.kt` (348 lines)
+4. `app/src/main/java/com/simats/codeingo/navigation/Routes.kt` (37 lines)
 5. `app/src/main/java/com/simats/codeingo/ui/arenas/block_cipher_forge/BlockCipherForgeArenaScreen.kt` (701 lines)
 6. `app/src/main/java/com/simats/codeingo/ui/arenas/block_cipher_forge/BlockCipherForgeModels.kt` (22 lines)
 7. `app/src/main/java/com/simats/codeingo/ui/arenas/block_cipher_forge/levels/AddRoundKeyLockLevel.kt` (316 lines)
@@ -557,112 +557,111 @@ TextButton(onClick = {
 113. `app/src/main/java/com/simats/codeingo/ui/dashboard/EthicalReengagementGreeting.kt` (121 lines)
 114. `app/src/main/java/com/simats/codeingo/ui/dashboard/LessonNodeButton.kt` (269 lines)
 115. `app/src/main/java/com/simats/codeingo/ui/dashboard/LoadingScreen.kt` (196 lines)
-116. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardScreen.kt` (2041 lines)
+116. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardScreen.kt` (2013 lines)
 117. `app/src/main/java/com/simats/codeingo/ui/dashboard/MainDashboardViewModel.kt` (366 lines)
-118. `app/src/main/java/com/simats/codeingo/ui/dashboard/MoreBottomDrawer.kt` (164 lines)
+118. `app/src/main/java/com/simats/codeingo/ui/dashboard/MoreBottomDrawer.kt` (168 lines)
 119. `app/src/main/java/com/simats/codeingo/ui/dashboard/PhoenixEggCompanionMascotView.kt` (243 lines)
 120. `app/src/main/java/com/simats/codeingo/ui/dashboard/RealmHeroDashboardCards.kt` (609 lines)
-121. `app/src/main/java/com/simats/codeingo/ui/dashboard/SideMenuDrawer.kt` (134 lines)
-122. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt` (331 lines)
-123. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt` (226 lines)
-124. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt` (45 lines)
-125. `app/src/main/java/com/simats/codeingo/ui/debug/MotionLabScreen.kt` (736 lines)
-126. `app/src/main/java/com/simats/codeingo/ui/exercise/AssessmentScreen.kt` (1569 lines)
-127. `app/src/main/java/com/simats/codeingo/ui/exercise/BossBattleScreen.kt` (534 lines)
-128. `app/src/main/java/com/simats/codeingo/ui/exercise/DSAGamifiedExerciseViews.kt` (1911 lines)
-129. `app/src/main/java/com/simats/codeingo/ui/exercise/DiagnosticScreen.kt` (594 lines)
-130. `app/src/main/java/com/simats/codeingo/ui/exercise/components/MiniLessonIntroCards.kt` (295 lines)
-131. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/BitTogglerLab.kt` (524 lines)
-132. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/ModuloClockLab.kt` (461 lines)
-133. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/XorBoardLab.kt` (380 lines)
-134. `app/src/main/java/com/simats/codeingo/ui/exercise/types/CnsInteractiveExerciseViews.kt` (582 lines)
-135. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAChapterStoryIntroSheet.kt` (355 lines)
-136. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAFinalMasterJourneyView.kt` (490 lines)
-137. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt` (64 lines)
-138. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt` (837 lines)
-139. `app/src/main/java/com/simats/codeingo/ui/mascot/MascotController.kt` (238 lines)
-140. `app/src/main/java/com/simats/codeingo/ui/motion/AshHaptics.kt` (36 lines)
-141. `app/src/main/java/com/simats/codeingo/ui/motion/AshMotion.kt` (441 lines)
-142. `app/src/main/java/com/simats/codeingo/ui/onboarding/BeginnerOnboardingFlowView.kt` (845 lines)
-143. `app/src/main/java/com/simats/codeingo/ui/onboarding/CreativeTemperatureGaugeView.kt` (437 lines)
-144. `app/src/main/java/com/simats/codeingo/ui/onboarding/LanguagePickerSheet.kt` (173 lines)
-145. `app/src/main/java/com/simats/codeingo/ui/onboarding/OnboardingScreen.kt` (583 lines)
-146. `app/src/main/java/com/simats/codeingo/ui/phoenix/AnimatedGIFView.kt` (178 lines)
-147. `app/src/main/java/com/simats/codeingo/ui/phoenix/LiveActionPhoenixNotingView.kt` (198 lines)
-148. `app/src/main/java/com/simats/codeingo/ui/phoenix/Phoenix3DLiveWavingMascotView.kt` (201 lines)
-149. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAnimatedMascotView.kt` (161 lines)
-150. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAtmosphericBackgroundView.kt` (213 lines)
-151. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixDynamicLogoView.kt` (211 lines)
-152. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEggHatch3DView.kt` (462 lines)
-153. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionPickerSheet.kt` (389 lines)
-154. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionReactionBanner.kt` (227 lines)
-155. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEvolutionCelebrationScreen.kt` (328 lines)
-156. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixNodeJumpFlightView.kt` (441 lines)
-157. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixSanctuaryScreen.kt` (624 lines)
-158. `app/src/main/java/com/simats/codeingo/ui/phoenix/SmoothFlyingPhoenixView.kt` (141 lines)
-159. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt` (1178 lines)
-160. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt` (96 lines)
-161. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt` (243 lines)
-162. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt` (451 lines)
-163. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt` (194 lines)
-164. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt` (1833 lines)
-165. `app/src/main/java/com/simats/codeingo/ui/settings/SettingsScreen.kt` (2392 lines)
-166. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt` (245 lines)
-167. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt` (1668 lines)
-168. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt` (337 lines)
-169. `app/src/main/java/com/simats/codeingo/ui/sound/AshSoundPool.kt` (89 lines)
-170. `app/src/main/java/com/simats/codeingo/ui/splash/SplashScreen.kt` (390 lines)
-171. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt` (358 lines)
-172. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt` (74 lines)
-173. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt` (140 lines)
-174. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt` (125 lines)
-175. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt` (231 lines)
-176. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt` (1144 lines)
-177. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt` (166 lines)
-178. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt` (23 lines)
-179. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt` (428 lines)
-180. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt` (144 lines)
-181. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt` (279 lines)
-182. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSChallengeCardView.kt` (391 lines)
-183. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLabModeTabBar.kt` (103 lines)
-184. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageCodeProvider.kt` (1143 lines)
-185. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageImplementationCardView.kt` (370 lines)
-186. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSTestVectorCardView.kt` (203 lines)
-187. `app/src/main/java/com/simats/codeingo/ui/visualizer/CaesarCipherVisualizer.kt` (310 lines)
-188. `app/src/main/java/com/simats/codeingo/ui/visualizer/CertificateChainVisualizer.kt` (238 lines)
-189. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt` (385 lines)
-190. `app/src/main/java/com/simats/codeingo/ui/visualizer/DESFeistelVisualizer.kt` (291 lines)
-191. `app/src/main/java/com/simats/codeingo/ui/visualizer/DiffieHellmanVisualizer.kt` (198 lines)
-192. `app/src/main/java/com/simats/codeingo/ui/visualizer/ECCPointVisualizer.kt` (167 lines)
-193. `app/src/main/java/com/simats/codeingo/ui/visualizer/EcbCbcCtrVisualizer.kt` (261 lines)
-194. `app/src/main/java/com/simats/codeingo/ui/visualizer/HMACCollisionVisualizer.kt` (152 lines)
-195. `app/src/main/java/com/simats/codeingo/ui/visualizer/KerberosVisualizer.kt` (264 lines)
-196. `app/src/main/java/com/simats/codeingo/ui/visualizer/MerkleTreeVisualizer.kt` (287 lines)
-197. `app/src/main/java/com/simats/codeingo/ui/visualizer/PasswordHashingVisualizer.kt` (255 lines)
-198. `app/src/main/java/com/simats/codeingo/ui/visualizer/RSAPublicKeyVisualizer.kt` (205 lines)
-199. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt` (188 lines)
-200. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt` (242 lines)
-201. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt` (176 lines)
-202. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt` (2235 lines)
-203. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/AvalancheMeterView.kt` (247 lines)
-204. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/PredictThenRevealPrompt.kt` (224 lines)
-205. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/VisualizerPlaybackController.kt` (337 lines)
-206. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/AesEngine.kt` (417 lines)
-207. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DesEngine.kt` (253 lines)
-208. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DhEngine.kt` (179 lines)
-209. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/HmacPasswordEngine.kt` (205 lines)
-210. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/KasiskiEngine.kt` (252 lines)
-211. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/RsaEngine.kt` (292 lines)
-212. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/SafeCryptoEngine.kt` (179 lines)
-213. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/Sha256Engine.kt` (291 lines)
-214. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/TlsEngine.kt` (260 lines)
-215. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSChallenges.kt` (462 lines)
-216. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSLabMode.kt` (8 lines)
-217. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSTestVectors.kt` (113 lines)
-218. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/CnsVisualizerRegistry.kt` (1189 lines)
-219. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/UniversalVisualizerView.kt` (638 lines)
-220. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerBeat.kt` (56 lines)
-221. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt` (718 lines)
+121. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt` (331 lines)
+122. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt` (226 lines)
+123. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt` (45 lines)
+124. `app/src/main/java/com/simats/codeingo/ui/debug/MotionLabScreen.kt` (736 lines)
+125. `app/src/main/java/com/simats/codeingo/ui/exercise/AssessmentScreen.kt` (1569 lines)
+126. `app/src/main/java/com/simats/codeingo/ui/exercise/BossBattleScreen.kt` (534 lines)
+127. `app/src/main/java/com/simats/codeingo/ui/exercise/DSAGamifiedExerciseViews.kt` (1911 lines)
+128. `app/src/main/java/com/simats/codeingo/ui/exercise/DiagnosticScreen.kt` (594 lines)
+129. `app/src/main/java/com/simats/codeingo/ui/exercise/components/MiniLessonIntroCards.kt` (295 lines)
+130. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/BitTogglerLab.kt` (524 lines)
+131. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/ModuloClockLab.kt` (461 lines)
+132. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/XorBoardLab.kt` (380 lines)
+133. `app/src/main/java/com/simats/codeingo/ui/exercise/types/CnsInteractiveExerciseViews.kt` (582 lines)
+134. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAChapterStoryIntroSheet.kt` (355 lines)
+135. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAFinalMasterJourneyView.kt` (490 lines)
+136. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt` (64 lines)
+137. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt` (837 lines)
+138. `app/src/main/java/com/simats/codeingo/ui/mascot/MascotController.kt` (238 lines)
+139. `app/src/main/java/com/simats/codeingo/ui/motion/AshHaptics.kt` (36 lines)
+140. `app/src/main/java/com/simats/codeingo/ui/motion/AshMotion.kt` (441 lines)
+141. `app/src/main/java/com/simats/codeingo/ui/onboarding/BeginnerOnboardingFlowView.kt` (845 lines)
+142. `app/src/main/java/com/simats/codeingo/ui/onboarding/CreativeTemperatureGaugeView.kt` (437 lines)
+143. `app/src/main/java/com/simats/codeingo/ui/onboarding/LanguagePickerSheet.kt` (173 lines)
+144. `app/src/main/java/com/simats/codeingo/ui/onboarding/OnboardingScreen.kt` (583 lines)
+145. `app/src/main/java/com/simats/codeingo/ui/phoenix/AnimatedGIFView.kt` (178 lines)
+146. `app/src/main/java/com/simats/codeingo/ui/phoenix/LiveActionPhoenixNotingView.kt` (198 lines)
+147. `app/src/main/java/com/simats/codeingo/ui/phoenix/Phoenix3DLiveWavingMascotView.kt` (201 lines)
+148. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAnimatedMascotView.kt` (161 lines)
+149. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAtmosphericBackgroundView.kt` (213 lines)
+150. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixDynamicLogoView.kt` (211 lines)
+151. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEggHatch3DView.kt` (462 lines)
+152. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionPickerSheet.kt` (389 lines)
+153. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionReactionBanner.kt` (227 lines)
+154. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEvolutionCelebrationScreen.kt` (328 lines)
+155. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixNodeJumpFlightView.kt` (441 lines)
+156. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixSanctuaryScreen.kt` (624 lines)
+157. `app/src/main/java/com/simats/codeingo/ui/phoenix/SmoothFlyingPhoenixView.kt` (141 lines)
+158. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt` (1189 lines)
+159. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt` (96 lines)
+160. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt` (243 lines)
+161. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt` (451 lines)
+162. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt` (194 lines)
+163. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt` (1832 lines)
+164. `app/src/main/java/com/simats/codeingo/ui/settings/SettingsScreen.kt` (2392 lines)
+165. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt` (245 lines)
+166. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt` (1668 lines)
+167. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt` (337 lines)
+168. `app/src/main/java/com/simats/codeingo/ui/sound/AshSoundPool.kt` (89 lines)
+169. `app/src/main/java/com/simats/codeingo/ui/splash/SplashScreen.kt` (390 lines)
+170. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt` (358 lines)
+171. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt` (74 lines)
+172. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt` (140 lines)
+173. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt` (125 lines)
+174. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt` (231 lines)
+175. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt` (1144 lines)
+176. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt` (166 lines)
+177. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt` (23 lines)
+178. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt` (428 lines)
+179. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt` (144 lines)
+180. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt` (282 lines)
+181. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSChallengeCardView.kt` (391 lines)
+182. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLabModeTabBar.kt` (103 lines)
+183. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageCodeProvider.kt` (1143 lines)
+184. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageImplementationCardView.kt` (370 lines)
+185. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSTestVectorCardView.kt` (203 lines)
+186. `app/src/main/java/com/simats/codeingo/ui/visualizer/CaesarCipherVisualizer.kt` (310 lines)
+187. `app/src/main/java/com/simats/codeingo/ui/visualizer/CertificateChainVisualizer.kt` (238 lines)
+188. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt` (388 lines)
+189. `app/src/main/java/com/simats/codeingo/ui/visualizer/DESFeistelVisualizer.kt` (291 lines)
+190. `app/src/main/java/com/simats/codeingo/ui/visualizer/DiffieHellmanVisualizer.kt` (198 lines)
+191. `app/src/main/java/com/simats/codeingo/ui/visualizer/ECCPointVisualizer.kt` (167 lines)
+192. `app/src/main/java/com/simats/codeingo/ui/visualizer/EcbCbcCtrVisualizer.kt` (261 lines)
+193. `app/src/main/java/com/simats/codeingo/ui/visualizer/HMACCollisionVisualizer.kt` (152 lines)
+194. `app/src/main/java/com/simats/codeingo/ui/visualizer/KerberosVisualizer.kt` (264 lines)
+195. `app/src/main/java/com/simats/codeingo/ui/visualizer/MerkleTreeVisualizer.kt` (287 lines)
+196. `app/src/main/java/com/simats/codeingo/ui/visualizer/PasswordHashingVisualizer.kt` (255 lines)
+197. `app/src/main/java/com/simats/codeingo/ui/visualizer/RSAPublicKeyVisualizer.kt` (205 lines)
+198. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt` (191 lines)
+199. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt` (249 lines)
+200. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt` (184 lines)
+201. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt` (2245 lines)
+202. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/AvalancheMeterView.kt` (247 lines)
+203. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/PredictThenRevealPrompt.kt` (224 lines)
+204. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/VisualizerPlaybackController.kt` (337 lines)
+205. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/AesEngine.kt` (417 lines)
+206. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DesEngine.kt` (253 lines)
+207. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DhEngine.kt` (179 lines)
+208. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/HmacPasswordEngine.kt` (205 lines)
+209. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/KasiskiEngine.kt` (252 lines)
+210. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/RsaEngine.kt` (292 lines)
+211. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/SafeCryptoEngine.kt` (179 lines)
+212. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/Sha256Engine.kt` (291 lines)
+213. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/TlsEngine.kt` (260 lines)
+214. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSChallenges.kt` (462 lines)
+215. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSLabMode.kt` (8 lines)
+216. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSTestVectors.kt` (113 lines)
+217. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/CnsVisualizerRegistry.kt` (1189 lines)
+218. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/UniversalVisualizerView.kt` (638 lines)
+219. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerBeat.kt` (56 lines)
+220. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt` (719 lines)
 
 ---
 
@@ -930,7 +929,6 @@ fun AppNavHost(
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -1045,7 +1043,6 @@ fun AppNavHost(
                     onLogout = {
                         com.simats.codeingo.domain.AuthService.shared.signOut()
                         com.simats.codeingo.domain.LocalizationManager.instance.resetProfileData()
-                        com.simats.codeingo.domain.GameManager.instance.deleteAccountAndClearAllData()
                         navController.navigate(Screen.Onboarding.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -1155,7 +1152,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -1413,9 +1409,7 @@ fun BottomNavBar(
                             DashboardTab.VISUALIZER -> Icons.Default.Build
                             DashboardTab.LEADERBOARDS -> Icons.Default.Leaderboard
                             DashboardTab.ARENAS -> Icons.Default.Shield
-                            DashboardTab.SHOP -> Icons.Default.ShoppingBag
                             DashboardTab.PROFILE -> Icons.Default.Person
-                            else -> Icons.Default.Home
                         }
 
                         Box(
@@ -1481,6 +1475,8 @@ private fun BottomNavBarPreview() {
 ```kotlin
 package com.simats.codeingo.navigation
 
+import com.simats.codeingo.data.network.repository.LessonIdAdapter
+
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
@@ -1490,7 +1486,18 @@ sealed class Screen(val route: String) {
     object Assessment : Screen("assessment/{unitId}/{levelNumber}/{totalLevelsInUnit}/{isBoss}") {
         fun createRoute(unitId: Int, levelNumber: Int, totalLevelsInUnit: Int = 6, isBoss: Boolean = false) =
             "assessment/$unitId/$levelNumber/$totalLevelsInUnit/$isBoss"
-        fun createRoute(lessonId: String) = "assessment/1/1/6/false"
+
+        fun createRoute(lessonId: String): String {
+            val localIndex = LessonIdAdapter.toLocalLevelIndex(lessonId) ?: 1
+            return if (localIndex in 101..105) {
+                val stage = localIndex - 100
+                createRoute(unitId = 0, levelNumber = stage, totalLevelsInUnit = 5, isBoss = stage == 5)
+            } else {
+                val unitId = ((localIndex - 1) / 5) + 1
+                val stageInUnit = ((localIndex - 1) % 5) + 1
+                createRoute(unitId = unitId, levelNumber = localIndex, totalLevelsInUnit = 5, isBoss = stageInUnit == 5)
+            }
+        }
     }
     object BossBattle : Screen("boss_battle/{bossId}") {
         fun createRoute(bossId: String) = "boss_battle/$bossId"
@@ -35595,7 +35602,6 @@ import com.simats.codeingo.ui.phoenix.PhoenixEvolutionCelebrationScreen
 import com.simats.codeingo.ui.phoenix.PhoenixMascotPose
 import com.simats.codeingo.ui.phoenix.PhoenixNodeJumpFlightView
 import com.simats.codeingo.ui.profile.ProfileScreen
-import com.simats.codeingo.ui.practice.PracticeHubScreen
 import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.AmberGoldDark
 import com.simats.codeingo.ui.shop.GemShopSheet
@@ -35624,12 +35630,12 @@ import com.simats.codeingo.ui.exercise.labs.XorBoardLab
  * Features:
  * - Master 5-Chapter DSA Course (Array, Linked List, Stack, Queue, Tree) with 25 levels & 5 Boss Stages
  * - 3D Interactive Worlds Section (Array Kingdom, Stack Tower, Queue Station, LinkedList Road, Binary Tree Forest)
- * - Floating Liquid Glass Top Stats Header (Menu, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
+ * - Floating Liquid Glass Top Stats Header (More Actions, PhoenixDynamicLogoView, Streak, Stars, XP, Hearts)
  * - 3D Level Nodes with animated active target aura, START tooltip, and locked level popover
  * - Dynamic Companion Mascot floating next to the active node
- * - Slide-out Side Drawer Menu
+ * - More Actions Bottom Sheet (`MoreBottomDrawer`) for Practice Hub, Shop, Settings & Logout
  * - FullScreen & Bottom Sheets for Emotion Picker, Streak, and Chapter Guidebook
- * - Docked 4-Tab Liquid Glass Bottom Navigation Bar
+ * - Docked 5-Tab Liquid Glass Bottom Navigation Bar
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35701,7 +35707,7 @@ fun MainDashboardScreen(
             pagerState.animateScrollToPage(targetIndex)
         }
     }
-    var showSideMenu by remember { mutableStateOf(false) }
+    var showMoreSheet by remember { mutableStateOf(false) }
     var showEmotionPickerSheet by remember { mutableStateOf(false) }
     var showStreakSheet by remember { mutableStateOf(false) }
     var showHeartsSheet by remember { mutableStateOf(false) }
@@ -36059,6 +36065,15 @@ fun MainDashboardScreen(
                                 DailyCipherChallengeCard(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
+
+                                AppButton(
+                                    title = "🛠️ OPEN PRACTICE HUB & MISTAKE VAULT",
+                                    style = AppButtonStyle.PRIMARY_AMBER,
+                                    onClick = onOpenPracticeHub,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
                                 }
 
                                 // Chapter 0: Basecamp Foundations Primer Card (Android Expansion)
@@ -36294,7 +36309,7 @@ fun MainDashboardScreen(
                                 heartsCount = heartsCount,
                                 gemsCount = gemsCount,
                                 heartTimerString = null,
-                                onMenuClick = { showSideMenu = true },
+                                onMoreClick = { showMoreSheet = true },
                                 onPhoenixClick = { showEmotionPickerSheet = true },
                                 onAskAshClick = { showAskAshSheet = true },
                                 onStreakClick = { showStreakSheet = true },
@@ -36486,17 +36501,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.PRACTICE -> {
-                        PracticeHubScreen(
-                            onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
-                            onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
-                            onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },
-                            onOpenLinkedListRoad = { activeWorldArena = ArenaRoute.BLOCK_CIPHER_FORGE },
-                            onOpenBinaryTreeForest = { activeWorldArena = ArenaRoute.CYBER_BASTION },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.LEADERBOARDS -> {
                         val completedLessonCount by GameManager.instance.completedLessonIds.collectAsState()
                         LeaderboardsScreen(
@@ -36515,13 +36519,6 @@ fun MainDashboardScreen(
                         )
                     }
 
-                    DashboardTab.SHOP -> {
-                        GemShopSheet(
-                            onDismiss = { selectedTab = DashboardTab.LEARN },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
                     DashboardTab.PROFILE -> {
                         ProfileScreen(
                             onOpenSettings = onOpenSettings,
@@ -36531,48 +36528,33 @@ fun MainDashboardScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-
-                    else -> {
-                        VisualizerScreen(
-                            onOpenArrayKingdom = { onStartLesson(1, 1, 5, false) },
-                            onOpenStackTower = { onStartLesson(3, 11, 5, false) },
-                            onOpenQueueStation = { onStartLesson(4, 16, 5, false) },
-                            onOpenLinkedListRoad = { onStartLesson(2, 6, 5, false) },
-                            onOpenBinaryTreeForest = { onStartLesson(5, 21, 5, false) },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                 }
             }
         }
     }
 
-        // Side Drawer Menu
-        AnimatedVisibility(
-            visible = showSideMenu,
-            enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
-            exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable { showSideMenu = false }
+        // More Actions Modal Sheet (Practice Hub, Gem Shop, Settings, Log Out)
+        if (showMoreSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showMoreSheet = false },
+                containerColor = LocalDynamicThemeColors.current.cardBackground
             ) {
-                SideMenuDrawer(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab ->
-                        showSideMenu = false
-                        when (tab) {
-                            DashboardTab.PRACTICE -> onOpenPracticeHub()
-                            DashboardTab.SHOP -> showGemShopSheet = true
-                            DashboardTab.MORE -> onOpenSettings()
-                            else -> selectedTab = tab
-                        }
+                MoreBottomDrawer(
+                    onOpenPracticeHub = {
+                        showMoreSheet = false
+                        onOpenPracticeHub()
                     },
-                    onMoreClick = {
-                        showSideMenu = false
+                    onOpenShop = {
+                        showMoreSheet = false
+                        showGemShopSheet = true
+                    },
+                    onOpenSettings = {
+                        showMoreSheet = false
                         onOpenSettings()
+                    },
+                    onLogout = {
+                        showMoreSheet = false
+                        onLogout()
                     }
                 )
             }
@@ -36687,8 +36669,8 @@ fun MainDashboardScreen(
             }
         }
 
-        if (showSideMenu) {
-            BackHandler { showSideMenu = false }
+        if (showMoreSheet) {
+            BackHandler { showMoreSheet = false }
         }
         if (showGemShopSheet) {
             BackHandler { showGemShopSheet = false }
@@ -36702,7 +36684,7 @@ fun MainDashboardScreen(
             enabled = activeWorldArena == null &&
                 !showDiagnosticScreen &&
                 activeMicroLab == null &&
-                !showSideMenu &&
+                !showMoreSheet &&
                 !showGemShopSheet &&
                 !showAskAshSheet &&
                 selectedTab != DashboardTab.LEARN
@@ -36786,11 +36768,8 @@ fun MainDashboardScreen(
                 DashboardTab.LEARN -> ScreenGuideCatalog.HOME
                 DashboardTab.VISUALIZER -> ScreenGuideCatalog.VISUALIZER
                 DashboardTab.ARENAS -> ScreenGuideCatalog.ARENA
-                DashboardTab.PRACTICE -> ScreenGuideCatalog.PRACTICE
                 DashboardTab.LEADERBOARDS -> ScreenGuideCatalog.LEADERBOARD
-                DashboardTab.SHOP -> ScreenGuideCatalog.SHOP
                 DashboardTab.PROFILE -> ScreenGuideCatalog.PROFILE
-                else -> ScreenGuideCatalog.HOME
             }
             AskAshBottomSheet(
                 guideContext = currentScreenGuide,
@@ -37887,10 +37866,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37898,43 +37878,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.simats.codeingo.ui.theme.AmberGold
 import com.simats.codeingo.ui.theme.CardBackground
-import com.simats.codeingo.ui.theme.DarkBackground
 import com.simats.codeingo.ui.theme.DuolingoBlue
+import com.simats.codeingo.ui.theme.DuolingoGreen
 import com.simats.codeingo.ui.theme.DuolingoRed
 import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
 import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
+import com.simats.codeingo.ui.theme.SubtextGray
 
 @Composable
 fun MoreBottomDrawer(
+    onOpenPracticeHub: () -> Unit = {},
+    onOpenShop: () -> Unit = {},
     onOpenSettings: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
+    val dynamicColors = LocalDynamicThemeColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(dynamicColors.cardBackground)
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        // Drag Handle
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(width = 40.dp, height = 4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(LocalDynamicThemeColors.current.placeholder)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
         val cardShape = RoundedCornerShape(20.dp)
         Column(
             modifier = Modifier
@@ -37943,94 +37916,104 @@ fun MoreBottomDrawer(
                 .background(CardBackground)
                 .border(1.5.dp, InputBorder, cardShape)
         ) {
-            // Settings Option
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOpenSettings() }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(DuolingoBlue.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = DuolingoBlue,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "SETTINGS",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = LocalDynamicThemeColors.current.textPrimary,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = SubtextGray
-                )
-            }
-
-            // Divider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(InputBorder.copy(alpha = 0.6f))
+            MoreDrawerRow(
+                icon = Icons.Default.Build,
+                title = "PRACTICE HUB",
+                subtitle = "Mistake Vault · Daily Review · Interview Mode",
+                accentColor = DuolingoGreen,
+                onClick = onOpenPracticeHub
             )
-
-            // Logout Option
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onLogout() }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(DuolingoRed.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Logout",
-                        tint = DuolingoRed,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "LOG OUT",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DuolingoRed,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = DuolingoRed.copy(alpha = 0.6f)
-                )
-            }
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.Default.ShoppingBag,
+                title = "GEM SHOP",
+                subtitle = "Streak Freezes · Hearts · Phoenix Skins",
+                accentColor = AmberGold,
+                onClick = onOpenShop
+            )
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.Default.Settings,
+                title = "SETTINGS",
+                subtitle = "Theme · Audio · Profile & Data",
+                accentColor = DuolingoBlue,
+                onClick = onOpenSettings
+            )
+            DrawerDivider()
+            MoreDrawerRow(
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                title = "LOG OUT",
+                subtitle = "Sign out of active session",
+                accentColor = DuolingoRed,
+                titleColor = DuolingoRed,
+                onClick = onLogout
+            )
         }
+    }
+}
+
+@Composable
+private fun DrawerDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(InputBorder.copy(alpha = 0.6f))
+    )
+}
+
+@Composable
+private fun MoreDrawerRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    titleColor: Color = LocalDynamicThemeColors.current.textPrimary,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(accentColor.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = accentColor,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                color = titleColor
+            )
+            Text(
+                text = subtitle,
+                fontSize = 11.5.sp,
+                color = SubtextGray
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = if (titleColor == DuolingoRed) DuolingoRed.copy(alpha = 0.6f) else SubtextGray
+        )
     }
 }
 
@@ -38900,147 +38883,7 @@ fun DailyRewardChestCard(
 
 ```
 
-## 121. `app/src/main/java/com/simats/codeingo/ui/dashboard/SideMenuDrawer.kt`
-
-```kotlin
-package com.simats.codeingo.ui.dashboard
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.simats.codeingo.data.model.DashboardTab
-import com.simats.codeingo.ui.theme.DarkBackground
-import com.simats.codeingo.ui.theme.DsaBlue
-import com.simats.codeingo.ui.theme.DuolingoBlue
-import com.simats.codeingo.ui.theme.InputBorder
-import com.simats.codeingo.ui.theme.SubtextGray
-import com.simats.codeingo.ui.theme.LocalDynamicThemeColors
-
-@Composable
-fun SideMenuDrawer(
-    selectedTab: DashboardTab,
-    onTabSelected: (DashboardTab) -> Unit,
-    onMoreClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val dynamicColors = com.simats.codeingo.ui.theme.LocalDynamicThemeColors.current
-    Box(
-        modifier = modifier
-            .width(260.dp)
-            .fillMaxHeight()
-            .background(dynamicColors.cardBackground)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp)
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                Text(
-                    text = "CNS Defense",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    color = DuolingoBlue
-                )
-                Text(
-                    text = "Cryptography & Network Security",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SubtextGray
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(InputBorder)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DashboardTab.values().forEach { tab ->
-                val isSelected = selectedTab == tab
-                val shape = RoundedCornerShape(14.dp)
-                val isMore = tab == DashboardTab.MORE
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 3.dp)
-                        .clip(shape)
-                        .background(
-                            if (isSelected && !isMore) DuolingoBlue.copy(alpha = 0.18f) else Color.Transparent
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            color = if (isSelected && !isMore) DuolingoBlue.copy(alpha = 0.4f) else Color.Transparent,
-                            shape = shape
-                        )
-                        .clickable {
-                            if (isMore) {
-                                onMoreClick()
-                            } else {
-                                onTabSelected(tab)
-                            }
-                        }
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = tab.gameEmoji,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Text(
-                        text = tab.title.uppercase(),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (isSelected && !isMore) DuolingoBlue else LocalDynamicThemeColors.current.textPrimary
-                    )
-                }
-            }
-        }
-
-        // Right border line
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-                .background(InputBorder)
-                .align(Alignment.CenterEnd)
-        )
-    }
-}
-
-```
-
-## 122. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt`
+## 121. `app/src/main/java/com/simats/codeingo/ui/dashboard/TopStatsHeader.kt`
 
 ```kotlin
 
@@ -39071,7 +38914,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39102,7 +38945,7 @@ import com.simats.codeingo.ui.components.motion.dangerHeartbeatShake
  * TopStatsHeader — Floating Liquid Glass Island Navigation & Stats Bar.
  * Exact parity with iOS MainDashboardView.swift topStatsHeader.
  * Features:
- * - Circular side menu trigger button with pressScale
+ * - Circular More Actions button (MoreBottomDrawer) with pressScale
  * - PhoenixDynamicLogoView (size 28dp) with live emotion aura & tap sheet
  * - Streak pill (Ice 🧊 if pending restore, Flame 🔥 otherwise)
  * - Stars pill (🌟)
@@ -39120,7 +38963,7 @@ fun TopStatsHeader(
     gemsCount: Int = 450,
     heartTimerString: String? = null,
     isBossActive: Boolean = false,
-    onMenuClick: () -> Unit,
+    onMoreClick: () -> Unit = {},
     onPhoenixClick: () -> Unit = {},
     onAskAshClick: () -> Unit = {},
     onStreakClick: () -> Unit = {},
@@ -39153,7 +38996,7 @@ fun TopStatsHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // 1. Side Menu Hamburger Button
+            // 1. More Options Sheet Trigger Button
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -39168,12 +39011,12 @@ fun TopStatsHeader(
                         ),
                         CircleShape
                     )
-                    .clickable { onMenuClick() },
+                    .clickable { onMoreClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Side Menu",
+                    imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = "More Options",
                     tint = if (isDark) Color.White else Color(0xFF182030),
                     modifier = Modifier.size(16.dp)
                 )
@@ -39377,7 +39220,7 @@ private fun HeartPill(
 
 ```
 
-## 123. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt`
+## 122. `app/src/main/java/com/simats/codeingo/ui/dashboard/UnitSectionBanner.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.dashboard
@@ -39609,7 +39452,7 @@ fun UnitSectionBanner(
 
 ```
 
-## 124. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt`
+## 123. `app/src/main/java/com/simats/codeingo/ui/dashboard/viewmodel/DashboardViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.dashboard.viewmodel
@@ -39660,7 +39503,7 @@ class DashboardViewModel @Inject constructor(
 
 ```
 
-## 125. `app/src/main/java/com/simats/codeingo/ui/debug/MotionLabScreen.kt`
+## 124. `app/src/main/java/com/simats/codeingo/ui/debug/MotionLabScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.debug
@@ -40402,7 +40245,7 @@ fun MotionLabScreen(
 
 ```
 
-## 126. `app/src/main/java/com/simats/codeingo/ui/exercise/AssessmentScreen.kt`
+## 125. `app/src/main/java/com/simats/codeingo/ui/exercise/AssessmentScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise
@@ -41977,7 +41820,7 @@ private fun HeartRecoveryView(
 
 ```
 
-## 127. `app/src/main/java/com/simats/codeingo/ui/exercise/BossBattleScreen.kt`
+## 126. `app/src/main/java/com/simats/codeingo/ui/exercise/BossBattleScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise
@@ -42517,7 +42360,7 @@ fun BossBattleScreen(
 
 ```
 
-## 128. `app/src/main/java/com/simats/codeingo/ui/exercise/DSAGamifiedExerciseViews.kt`
+## 127. `app/src/main/java/com/simats/codeingo/ui/exercise/DSAGamifiedExerciseViews.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise
@@ -44434,7 +44277,7 @@ private fun ArcadePowerButton(
 
 ```
 
-## 129. `app/src/main/java/com/simats/codeingo/ui/exercise/DiagnosticScreen.kt`
+## 128. `app/src/main/java/com/simats/codeingo/ui/exercise/DiagnosticScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise
@@ -45034,7 +44877,7 @@ private fun getDiagnosticQuestions(): List<DiagnosticQuestionItem> = listOf(
 
 ```
 
-## 130. `app/src/main/java/com/simats/codeingo/ui/exercise/components/MiniLessonIntroCards.kt`
+## 129. `app/src/main/java/com/simats/codeingo/ui/exercise/components/MiniLessonIntroCards.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise.components
@@ -45335,7 +45178,7 @@ object MiniLessonRegistry {
 
 ```
 
-## 131. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/BitTogglerLab.kt`
+## 130. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/BitTogglerLab.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise.labs
@@ -45865,7 +45708,7 @@ private fun PresetChip(
 
 ```
 
-## 132. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/ModuloClockLab.kt`
+## 131. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/ModuloClockLab.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise.labs
@@ -46332,7 +46175,7 @@ private fun StepperChip(
 
 ```
 
-## 133. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/XorBoardLab.kt`
+## 132. `app/src/main/java/com/simats/codeingo/ui/exercise/labs/XorBoardLab.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise.labs
@@ -46718,7 +46561,7 @@ private fun BitRowSection(
 
 ```
 
-## 134. `app/src/main/java/com/simats/codeingo/ui/exercise/types/CnsInteractiveExerciseViews.kt`
+## 133. `app/src/main/java/com/simats/codeingo/ui/exercise/types/CnsInteractiveExerciseViews.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.exercise.types
@@ -47306,7 +47149,7 @@ fun SpotTheFlawExerciseView(
 
 ```
 
-## 135. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAChapterStoryIntroSheet.kt`
+## 134. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAChapterStoryIntroSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.gamification
@@ -47667,7 +47510,7 @@ fun DSAChapterStoryIntroSheet(
 
 ```
 
-## 136. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAFinalMasterJourneyView.kt`
+## 135. `app/src/main/java/com/simats/codeingo/ui/gamification/DSAFinalMasterJourneyView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.gamification
@@ -48163,7 +48006,7 @@ private fun StatTile(
 
 ```
 
-## 137. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt`
+## 136. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.leaderboards
@@ -48233,7 +48076,7 @@ class LeaderboardViewModel @Inject constructor(
 
 ```
 
-## 138. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt`
+## 137. `app/src/main/java/com/simats/codeingo/ui/leaderboards/LeaderboardsScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.leaderboards
@@ -49076,7 +48919,7 @@ private fun RankRowCard(entry: RankEntry, index: Int) {
 
 ```
 
-## 139. `app/src/main/java/com/simats/codeingo/ui/mascot/MascotController.kt`
+## 138. `app/src/main/java/com/simats/codeingo/ui/mascot/MascotController.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.mascot
@@ -49320,7 +49163,7 @@ private fun NativeMascotFallback(
 
 ```
 
-## 140. `app/src/main/java/com/simats/codeingo/ui/motion/AshHaptics.kt`
+## 139. `app/src/main/java/com/simats/codeingo/ui/motion/AshHaptics.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.motion
@@ -49362,7 +49205,7 @@ object AshHaptics {
 
 ```
 
-## 141. `app/src/main/java/com/simats/codeingo/ui/motion/AshMotion.kt`
+## 140. `app/src/main/java/com/simats/codeingo/ui/motion/AshMotion.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.motion
@@ -49809,7 +49652,7 @@ fun EmberGlassCard(
 
 ```
 
-## 142. `app/src/main/java/com/simats/codeingo/ui/onboarding/BeginnerOnboardingFlowView.kt`
+## 141. `app/src/main/java/com/simats/codeingo/ui/onboarding/BeginnerOnboardingFlowView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.onboarding
@@ -50660,7 +50503,7 @@ private fun InitializingStep(onReady: () -> Unit) {
 
 ```
 
-## 143. `app/src/main/java/com/simats/codeingo/ui/onboarding/CreativeTemperatureGaugeView.kt`
+## 142. `app/src/main/java/com/simats/codeingo/ui/onboarding/CreativeTemperatureGaugeView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.onboarding
@@ -51103,7 +50946,7 @@ fun CreativeTemperatureGaugeView(
 
 ```
 
-## 144. `app/src/main/java/com/simats/codeingo/ui/onboarding/LanguagePickerSheet.kt`
+## 143. `app/src/main/java/com/simats/codeingo/ui/onboarding/LanguagePickerSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.onboarding
@@ -51282,7 +51125,7 @@ fun LanguagePickerSheet(
 
 ```
 
-## 145. `app/src/main/java/com/simats/codeingo/ui/onboarding/OnboardingScreen.kt`
+## 144. `app/src/main/java/com/simats/codeingo/ui/onboarding/OnboardingScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.onboarding
@@ -51871,7 +51714,7 @@ fun AnimatedHomeMascotView(
 
 ```
 
-## 146. `app/src/main/java/com/simats/codeingo/ui/phoenix/AnimatedGIFView.kt`
+## 145. `app/src/main/java/com/simats/codeingo/ui/phoenix/AnimatedGIFView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -52055,7 +51898,7 @@ fun AnimatedGIFView(
 
 ```
 
-## 147. `app/src/main/java/com/simats/codeingo/ui/phoenix/LiveActionPhoenixNotingView.kt`
+## 146. `app/src/main/java/com/simats/codeingo/ui/phoenix/LiveActionPhoenixNotingView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -52259,7 +52102,7 @@ fun LiveActionPhoenixNotingView(
 
 ```
 
-## 148. `app/src/main/java/com/simats/codeingo/ui/phoenix/Phoenix3DLiveWavingMascotView.kt`
+## 147. `app/src/main/java/com/simats/codeingo/ui/phoenix/Phoenix3DLiveWavingMascotView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -52466,7 +52309,7 @@ fun Phoenix3DLiveWavingMascotView(
 
 ```
 
-## 149. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAnimatedMascotView.kt`
+## 148. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAnimatedMascotView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -52633,7 +52476,7 @@ fun PhoenixAnimatedMascotView(
 
 ```
 
-## 150. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAtmosphericBackgroundView.kt`
+## 149. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixAtmosphericBackgroundView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -52852,7 +52695,7 @@ fun PhoenixAtmosphericBackgroundView(
 
 ```
 
-## 151. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixDynamicLogoView.kt`
+## 150. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixDynamicLogoView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -53069,7 +52912,7 @@ fun PhoenixMascotImage(
 
 ```
 
-## 152. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEggHatch3DView.kt`
+## 151. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEggHatch3DView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -53537,7 +53380,7 @@ private fun StatPill(
 
 ```
 
-## 153. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionPickerSheet.kt`
+## 152. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionPickerSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -53932,7 +53775,7 @@ fun PhoenixEmotionPickerSheet(
 
 ```
 
-## 154. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionReactionBanner.kt`
+## 153. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEmotionReactionBanner.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -54165,7 +54008,7 @@ fun PhoenixEmotionReactionBanner(
 
 ```
 
-## 155. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEvolutionCelebrationScreen.kt`
+## 154. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixEvolutionCelebrationScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -54499,7 +54342,7 @@ fun PhoenixEvolutionCelebrationScreen(
 
 ```
 
-## 156. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixNodeJumpFlightView.kt`
+## 155. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixNodeJumpFlightView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -54946,7 +54789,7 @@ fun PhoenixNodeJumpFlightView(
 
 ```
 
-## 157. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixSanctuaryScreen.kt`
+## 156. `app/src/main/java/com/simats/codeingo/ui/phoenix/PhoenixSanctuaryScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -55576,7 +55419,7 @@ private fun PhoenixStageDetailSheet(
 
 ```
 
-## 158. `app/src/main/java/com/simats/codeingo/ui/phoenix/SmoothFlyingPhoenixView.kt`
+## 157. `app/src/main/java/com/simats/codeingo/ui/phoenix/SmoothFlyingPhoenixView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.phoenix
@@ -55723,7 +55566,7 @@ fun SmoothFlyingPhoenixView(
 
 ```
 
-## 159. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt`
+## 158. `app/src/main/java/com/simats/codeingo/ui/practice/PracticeHubScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.practice
@@ -55824,6 +55667,17 @@ data class InterviewProblem(
     val sampleCode: String
 )
 
+/**
+ * Interactive Practice Hub hosting Mistake Vault (Room + MistakeVaultViewModel),
+ * Daily Spaced Repetition & Cipher Challenge, and Security Interview Prep.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM`
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE`
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL`
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY`
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION`
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeHubScreen(
@@ -56907,7 +56761,7 @@ private fun FlippableMistakeCard(
 
 ```
 
-## 160. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt`
+## 159. `app/src/main/java/com/simats/codeingo/ui/practice/viewmodel/MistakeVaultViewModel.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.practice.viewmodel
@@ -57009,7 +56863,7 @@ class MistakeVaultViewModel @Inject constructor(
 
 ```
 
-## 161. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt`
+## 160. `app/src/main/java/com/simats/codeingo/ui/profile/CipherCardShareView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -57258,7 +57112,7 @@ fun CipherCardShareView(
 
 ```
 
-## 162. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt`
+## 161. `app/src/main/java/com/simats/codeingo/ui/profile/CryptoCodexGallery.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -57715,7 +57569,7 @@ private fun CodexItemCard(
 
 ```
 
-## 163. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt`
+## 162. `app/src/main/java/com/simats/codeingo/ui/profile/ExamReadinessDashboard.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -57915,7 +57769,7 @@ fun ExamReadinessDashboard(
 
 ```
 
-## 164. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt`
+## 163. `app/src/main/java/com/simats/codeingo/ui/profile/ProfileScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.profile
@@ -58119,7 +57973,6 @@ fun ProfileScreen(
                             showSignOutAlert = false
                             localizationManager.resetProfileData()
                             com.simats.codeingo.domain.AuthService.shared.signOut()
-                            gameManager.deleteAccountAndClearAllData()
                             onLogout()
                         }
                     ) {
@@ -59754,7 +59607,7 @@ private fun BenefitCard(
 
 ```
 
-## 165. `app/src/main/java/com/simats/codeingo/ui/settings/SettingsScreen.kt`
+## 164. `app/src/main/java/com/simats/codeingo/ui/settings/SettingsScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.settings
@@ -62152,7 +62005,7 @@ private fun NavigationRow(
 
 ```
 
-## 166. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt`
+## 165. `app/src/main/java/com/simats/codeingo/ui/shop/AshCryptPlusSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.shop
@@ -62403,7 +62256,7 @@ private fun PlusBenefitRow(
 
 ```
 
-## 167. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt`
+## 166. `app/src/main/java/com/simats/codeingo/ui/shop/GemShopSheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.shop
@@ -64077,7 +63930,7 @@ fun BoneShopSheet(
 
 ```
 
-## 168. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt`
+## 167. `app/src/main/java/com/simats/codeingo/ui/social/FriendsSocialLayer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.social
@@ -64420,7 +64273,7 @@ fun FriendsSocialCard(
 
 ```
 
-## 169. `app/src/main/java/com/simats/codeingo/ui/sound/AshSoundPool.kt`
+## 168. `app/src/main/java/com/simats/codeingo/ui/sound/AshSoundPool.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.sound
@@ -64515,7 +64368,7 @@ object AshSoundPool {
 
 ```
 
-## 170. `app/src/main/java/com/simats/codeingo/ui/splash/SplashScreen.kt`
+## 169. `app/src/main/java/com/simats/codeingo/ui/splash/SplashScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.splash
@@ -64911,7 +64764,7 @@ fun SplashScreen(
 
 ```
 
-## 171. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt`
+## 170. `app/src/main/java/com/simats/codeingo/ui/streak/StreakSocietySheet.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.streak
@@ -65275,7 +65128,7 @@ fun StreakSocietySheet(
 
 ```
 
-## 172. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt`
+## 171. `app/src/main/java/com/simats/codeingo/ui/theme/AshColors.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -65355,7 +65208,7 @@ object AshTheme {
 
 ```
 
-## 173. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt`
+## 172. `app/src/main/java/com/simats/codeingo/ui/theme/AshTokens.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -65501,7 +65354,7 @@ val ashTokens: AshTokens
 
 ```
 
-## 174. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt`
+## 173. `app/src/main/java/com/simats/codeingo/ui/theme/AshType.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -65632,7 +65485,7 @@ val AshType = AshTypography()
 
 ```
 
-## 175. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt`
+## 174. `app/src/main/java/com/simats/codeingo/ui/theme/Color.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -65869,7 +65722,7 @@ val GoogleBgLight        = Color(0xFFF1_F3_F4)
 
 ```
 
-## 176. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt`
+## 175. `app/src/main/java/com/simats/codeingo/ui/theme/Motion.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -67019,7 +66872,7 @@ fun Shockwave(
 
 ```
 
-## 177. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt`
+## 176. `app/src/main/java/com/simats/codeingo/ui/theme/ResponsiveLayout.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -67191,7 +67044,7 @@ fun Modifier.adaptiveHorizontalPadding(): Modifier {
 
 ```
 
-## 178. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt`
+## 177. `app/src/main/java/com/simats/codeingo/ui/theme/Shape.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -67220,7 +67073,7 @@ val WorldCardShape   = RoundedCornerShape(18.dp)  // world entry cards
 
 ```
 
-## 179. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt`
+## 178. `app/src/main/java/com/simats/codeingo/ui/theme/Theme.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.theme
@@ -67653,7 +67506,7 @@ object ButtonTokens {
 }
 ```
 
-## 180. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt`
+## 179. `app/src/main/java/com/simats/codeingo/ui/theme/Type.kt`
 
 ```kotlin
 @file:OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
@@ -67802,7 +67655,7 @@ val AppTypography = Typography(
 )
 ```
 
-## 181. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt`
+## 180. `app/src/main/java/com/simats/codeingo/ui/visualizer/AESMatrixVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -68055,11 +67908,14 @@ private fun AESMatrixExploreView() {
                     verticalArrangement = Arrangement.spacedBy(6.dp), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                 for (r in 0..3) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         for (c in 0..3) {
                             val byteVal = currentMatrix[r][c]
                             Box(
-                                modifier = Modifier.size(48.dp, 36.dp).clip(RoundedCornerShape(6.dp))
+                                modifier = Modifier.weight(1f).height(36.dp).clip(RoundedCornerShape(6.dp))
                                     .background(DsaPurple.copy(alpha = if (isDark) 0.25f else 0.12f))
                                     .border(1.dp, DsaPurple.copy(alpha = 0.5f), RoundedCornerShape(6.dp)),
                                 contentAlignment = Alignment.Center
@@ -68087,7 +67943,7 @@ private fun AESMatrixExploreView() {
 
 ```
 
-## 182. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSChallengeCardView.kt`
+## 181. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSChallengeCardView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -68484,7 +68340,7 @@ fun CNSChallengeCardView(
 
 ```
 
-## 183. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLabModeTabBar.kt`
+## 182. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLabModeTabBar.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -68593,7 +68449,7 @@ fun CNSLabModeTabBar(
 
 ```
 
-## 184. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageCodeProvider.kt`
+## 183. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageCodeProvider.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -69742,7 +69598,7 @@ typealias DSALanguageCodeProvider = CNSLanguageCodeProvider
 
 ```
 
-## 185. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageImplementationCardView.kt`
+## 184. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSLanguageImplementationCardView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -70118,7 +69974,7 @@ fun DSALanguageImplementationCardView(
 
 ```
 
-## 186. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSTestVectorCardView.kt`
+## 185. `app/src/main/java/com/simats/codeingo/ui/visualizer/CNSTestVectorCardView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -70327,7 +70183,7 @@ fun CNSTestVectorCardView(
 
 ```
 
-## 187. `app/src/main/java/com/simats/codeingo/ui/visualizer/CaesarCipherVisualizer.kt`
+## 186. `app/src/main/java/com/simats/codeingo/ui/visualizer/CaesarCipherVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -70520,11 +70376,11 @@ private fun CaesarCipherExploreView() {
 
     val outputText = remember(textInput, effectiveShift) {
         textInput.map { char ->
-            if (char.isLetter()) {
-                val base = if (char.isUpperCase()) 'A' else 'a'
-                val shifted = (char.code - base.code + effectiveShift).mod(26)
-                (base.code + shifted).toChar()
-            } else char
+            when (char) {
+                in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + effectiveShift).mod(26)).toChar()
+                in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + effectiveShift).mod(26)).toChar()
+                else -> char
+            }
         }.joinToString("")
     }
 
@@ -70643,7 +70499,7 @@ private fun CaesarCipherExploreView() {
 
 ```
 
-## 188. `app/src/main/java/com/simats/codeingo/ui/visualizer/CertificateChainVisualizer.kt`
+## 187. `app/src/main/java/com/simats/codeingo/ui/visualizer/CertificateChainVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -70887,7 +70743,7 @@ private fun CertificateNodeCard(
 
 ```
 
-## 189. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt`
+## 188. `app/src/main/java/com/simats/codeingo/ui/visualizer/CipherLabScreen.kt`
 
 ```kotlin
 
@@ -70983,26 +70839,29 @@ fun CipherLabScreen(
         when (selectedAlgo) {
             CipherAlgorithm.CAESAR -> {
                 inputText.map { char ->
-                    if (char.isLetter()) {
-                        val base = if (char.isUpperCase()) 'A' else 'a'
-                        val shifted = (char.code - base.code + caesarShift).mod(26)
-                        (base.code + shifted).toChar()
-                    } else char
+                    when (char) {
+                        in 'A'..'Z' -> ('A'.code + (char.code - 'A'.code + caesarShift).mod(26)).toChar()
+                        in 'a'..'z' -> ('a'.code + (char.code - 'a'.code + caesarShift).mod(26)).toChar()
+                        else -> char
+                    }
                 }.joinToString("")
             }
             CipherAlgorithm.VIGENERE -> {
-                val cleanKey = secretKey.filter { it.isLetter() }.uppercase()
+                val cleanKey = secretKey.uppercase().filter { it in 'A'..'Z' }
                 if (cleanKey.isEmpty()) inputText
                 else {
                     var keyIdx = 0
                     inputText.map { char ->
-                        if (char.isLetter()) {
-                            val base = if (char.isUpperCase()) 'A' else 'a'
-                            val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
-                            keyIdx++
-                            val shifted = (char.code - base.code + shift).mod(26)
-                            (base.code + shifted).toChar()
-                        } else char
+                        when (char) {
+                            in 'A'..'Z', in 'a'..'z' -> {
+                                val base = if (char in 'A'..'Z') 'A' else 'a'
+                                val shift = cleanKey[keyIdx % cleanKey.length] - 'A'
+                                keyIdx++
+                                val shifted = (char.code - base.code + shift).mod(26)
+                                (base.code + shifted).toChar()
+                            }
+                            else -> char
+                        }
                     }.joinToString("")
                 }
             }
@@ -71278,7 +71137,7 @@ fun CipherLabScreen(
 
 ```
 
-## 190. `app/src/main/java/com/simats/codeingo/ui/visualizer/DESFeistelVisualizer.kt`
+## 189. `app/src/main/java/com/simats/codeingo/ui/visualizer/DESFeistelVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -71537,20 +71396,20 @@ private fun DESFeistelExploreView() {
                         .background(dynamicColors.inputBackground).border(1.dp, dynamicColors.inputBorder, RoundedCornerShape(10.dp)).padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "PC-2 Round Subkey (K_$roundIndex):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "PC-2 Round Subkey (K_$roundIndex):", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
                         Text(text = "0x%012X".format(currentRoundState.subkey), fontSize = 11.sp, fontWeight = FontWeight.Black, color = amberColor, fontFamily = FontFamily.Monospace)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Expansion E(R_${roundIndex - 1}) [48b]:", fontSize = 10.sp, color = SubtextGray)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "Expansion E(R_${roundIndex - 1}) [48b]:", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray)
                         Text(text = "0x%012X".format(currentRoundState.expandedR), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "8 S-Boxes Output [32b]:", fontSize = 10.sp, color = SubtextGray)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "8 S-Boxes Output [32b]:", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray)
                         Text(text = "0x%08X".format(currentRoundState.sBoxOutput), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = tealColor)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "F-Function Output (after P):", fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "F-Function Output (after P):", modifier = Modifier.weight(1f), fontSize = 10.sp, color = SubtextGray, fontWeight = FontWeight.Bold)
                         Text(text = "0x%08X".format(currentRoundState.fOutput), fontSize = 11.sp, fontWeight = FontWeight.Black, color = greenColor, fontFamily = FontFamily.Monospace)
                     }
                 }
@@ -71575,7 +71434,7 @@ private fun DESFeistelExploreView() {
 
 ```
 
-## 191. `app/src/main/java/com/simats/codeingo/ui/visualizer/DiffieHellmanVisualizer.kt`
+## 190. `app/src/main/java/com/simats/codeingo/ui/visualizer/DiffieHellmanVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -71679,9 +71538,9 @@ private fun DiffieHellmanAttackView() {
                 Text(text = "😈 ACTIVE MALLORY MITM KEY SUBSTITUTION", fontSize = 12.sp, fontWeight = FontWeight.Black, color = redColor)
                 Text(text = "Mallory intercepts Alice's public key (A=$g^a mod p) and Bob's public key (B=$g^b mod p). She sends her own public key M = $g^m mod p = ${mitmState.malloryPublic} to both parties.", fontSize = 10.5.sp, color = dynamicColors.textPrimary)
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
-                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "Alice Secret (with Mallory): ${mitmState.aliceComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = amberColor)
+                    Text(text = "Bob Secret (with Mallory): ${mitmState.bobComputedSecret}", modifier = Modifier.weight(1f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = tealColor)
                 }
 
                 Text(
@@ -71779,7 +71638,7 @@ private fun DiffieHellmanExploreView() {
 
 ```
 
-## 192. `app/src/main/java/com/simats/codeingo/ui/visualizer/ECCPointVisualizer.kt`
+## 191. `app/src/main/java/com/simats/codeingo/ui/visualizer/ECCPointVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -71952,7 +71811,7 @@ private fun ECCPointExploreView() {
 
 ```
 
-## 193. `app/src/main/java/com/simats/codeingo/ui/visualizer/EcbCbcCtrVisualizer.kt`
+## 192. `app/src/main/java/com/simats/codeingo/ui/visualizer/EcbCbcCtrVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -72219,7 +72078,7 @@ fun EcbCbcCtrVisualizer(modifier: Modifier = Modifier) {
 
 ```
 
-## 194. `app/src/main/java/com/simats/codeingo/ui/visualizer/HMACCollisionVisualizer.kt`
+## 193. `app/src/main/java/com/simats/codeingo/ui/visualizer/HMACCollisionVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -72377,7 +72236,7 @@ private fun HMACCollisionExploreView() {
 
 ```
 
-## 195. `app/src/main/java/com/simats/codeingo/ui/visualizer/KerberosVisualizer.kt`
+## 194. `app/src/main/java/com/simats/codeingo/ui/visualizer/KerberosVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -72647,7 +72506,7 @@ fun KerberosVisualizer(modifier: Modifier = Modifier) {
 
 ```
 
-## 196. `app/src/main/java/com/simats/codeingo/ui/visualizer/MerkleTreeVisualizer.kt`
+## 195. `app/src/main/java/com/simats/codeingo/ui/visualizer/MerkleTreeVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -72940,7 +72799,7 @@ fun MerkleTreeVisualizer(modifier: Modifier = Modifier) {
 
 ```
 
-## 197. `app/src/main/java/com/simats/codeingo/ui/visualizer/PasswordHashingVisualizer.kt`
+## 196. `app/src/main/java/com/simats/codeingo/ui/visualizer/PasswordHashingVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -73201,7 +73060,7 @@ private fun AlgorithmCrackRow(
 
 ```
 
-## 198. `app/src/main/java/com/simats/codeingo/ui/visualizer/RSAPublicKeyVisualizer.kt`
+## 197. `app/src/main/java/com/simats/codeingo/ui/visualizer/RSAPublicKeyVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -73412,7 +73271,7 @@ private fun RSAPublicKeyExploreView() {
 
 ```
 
-## 199. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt`
+## 198. `app/src/main/java/com/simats/codeingo/ui/visualizer/SHA256Visualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -73587,7 +73446,10 @@ private fun SHA256ExploreView() {
                             "E" to activeRoundState.e, "F" to activeRoundState.f,
                             "G" to activeRoundState.g, "H" to activeRoundState.h
                         ).forEach { (reg, valInt) ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(text = reg, fontSize = 10.sp, fontWeight = FontWeight.Black, color = purpleColor)
                                 Text(text = "%04X".format((valInt ushr 16) and 0xFFFF), fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
                             }
@@ -73606,7 +73468,7 @@ private fun SHA256ExploreView() {
 
 ```
 
-## 200. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt`
+## 199. `app/src/main/java/com/simats/codeingo/ui/visualizer/TLS13HandshakeVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -73638,6 +73500,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simats.codeingo.data.model.DSAVisualizerType
@@ -73778,8 +73641,14 @@ private fun TLS13HandshakeExploreView() {
                 .border(1.5.dp, orangeColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp)).padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}", fontSize = 12.sp, fontWeight = FontWeight.Black, color = orangeColor)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "PACKET ${flightIndex + 1} / ${packets.size}: ${currentPacket.messageType}",
+                        modifier = Modifier.weight(1f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = orangeColor
+                    )
                     Text(text = currentPacket.sender, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = tealColor)
                 }
 
@@ -73824,9 +73693,9 @@ private fun TLS13HandshakeExploreView() {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     currentPacket.fields.forEach { (k, v) ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "$k:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
-                            Text(text = v, fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(text = "$k:", modifier = Modifier.weight(0.45f), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SubtextGray)
+                            Text(text = v, modifier = Modifier.weight(0.55f), fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = dynamicColors.textPrimary, textAlign = TextAlign.End)
                         }
                     }
                 }
@@ -73854,7 +73723,7 @@ private fun TLS13HandshakeExploreView() {
 
 ```
 
-## 201. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt`
+## 200. `app/src/main/java/com/simats/codeingo/ui/visualizer/VigenereCipherVisualizer.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -74013,19 +73882,27 @@ private fun VigenereExploreView() {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "REPEATED KEYSTREAM ALIGNMENT", fontSize = 10.sp, fontWeight = FontWeight.Black, color = SubtextGray)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    cleanPlain.take(25).forEachIndexed { i, pChar ->
-                        val kChar = cleanKey[i % cleanKey.length]
-                        val rChar = resultText.getOrElse(i) { '?' }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
-                        ) {
-                            Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
-                            Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
-                            Text(text = "=", fontSize = 9.sp, color = SubtextGray)
-                            Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                if (cleanPlain.isEmpty()) {
+                    Text(
+                        text = "Enter ASCII letters (A-Z) above to compute keystream alignment.",
+                        fontSize = 11.sp,
+                        color = SubtextGray
+                    )
+                } else {
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        cleanPlain.take(25).forEachIndexed { i, pChar ->
+                            val kChar = cleanKey[i % cleanKey.length]
+                            val rChar = resultText.getOrElse(i) { '?' }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(dynamicColors.cardBackground).padding(horizontal = 7.dp, vertical = 5.dp)
+                            ) {
+                                Text(text = "$pChar", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = dynamicColors.textPrimary)
+                                Text(text = "⊕", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$kChar", fontSize = 12.sp, fontWeight = FontWeight.Black, color = amberColor)
+                                Text(text = "=", fontSize = 9.sp, color = SubtextGray)
+                                Text(text = "$rChar", fontSize = 13.sp, fontWeight = FontWeight.Black, color = tealColor)
+                            }
                         }
                     }
                 }
@@ -74036,7 +73913,7 @@ private fun VigenereExploreView() {
 
 ```
 
-## 202. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt`
+## 201. `app/src/main/java/com/simats/codeingo/ui/visualizer/VisualizerScreen.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer
@@ -74218,6 +74095,16 @@ private fun realmFilterCategory(realmNumber: Int): String = when (realmNumber) {
     else -> "Hashing & Protocols"
 }
 
+/**
+ * CNS Visualizer Directory & Multi-Mode Lab Shell.
+ *
+ * Legacy DSA world callback names map deterministically to AshCrypt CNS Arenas:
+ * - [onOpenArrayKingdom] -> `ArenaRoute.CIPHER_SANCTUM` (Chapter 1)
+ * - [onOpenLinkedListRoad] -> `ArenaRoute.BLOCK_CIPHER_FORGE` (Chapter 2)
+ * - [onOpenStackTower] -> `ArenaRoute.KEY_EXCHANGE_CITADEL` (Chapter 3)
+ * - [onOpenQueueStation] -> `ArenaRoute.INTEGRITY_FOUNDRY` (Chapter 4)
+ * - [onOpenBinaryTreeForest] -> `ArenaRoute.CYBER_BASTION` (Chapter 5)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualizerScreen(
@@ -74940,7 +74827,7 @@ private fun SpecializedLabDetailView(
         }
 
         DuolingoButton(
-            title = "Back to All Visualizers",
+            text = "Back to All Visualizers",
             onClick = onBackToList,
             modifier = Modifier.fillMaxWidth()
         )
@@ -76277,7 +76164,7 @@ private fun DSAChapterPopupCard(
 
 ```
 
-## 203. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/AvalancheMeterView.kt`
+## 202. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/AvalancheMeterView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.components
@@ -76530,7 +76417,7 @@ fun calculateHammingDistance(hexA: String, hexB: String): Int {
 
 ```
 
-## 204. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/PredictThenRevealPrompt.kt`
+## 203. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/PredictThenRevealPrompt.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.components
@@ -76760,7 +76647,7 @@ fun PredictThenRevealPrompt(
 
 ```
 
-## 205. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/VisualizerPlaybackController.kt`
+## 204. `app/src/main/java/com/simats/codeingo/ui/visualizer/components/VisualizerPlaybackController.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.components
@@ -77103,7 +76990,7 @@ fun VisualizerPlaybackController(
 
 ```
 
-## 206. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/AesEngine.kt`
+## 205. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/AesEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -77526,7 +77413,7 @@ object AesEngine {
 
 ```
 
-## 207. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DesEngine.kt`
+## 206. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DesEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -77785,7 +77672,7 @@ object DesEngine {
 
 ```
 
-## 208. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DhEngine.kt`
+## 207. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/DhEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -77970,7 +77857,7 @@ object DhEngine {
 
 ```
 
-## 209. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/HmacPasswordEngine.kt`
+## 208. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/HmacPasswordEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -78181,7 +78068,7 @@ object HmacPasswordEngine {
 
 ```
 
-## 210. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/KasiskiEngine.kt`
+## 209. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/KasiskiEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -78439,7 +78326,7 @@ object KasiskiEngine {
 
 ```
 
-## 211. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/RsaEngine.kt`
+## 210. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/RsaEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -78737,7 +78624,7 @@ object RsaEngine {
 
 ```
 
-## 212. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/SafeCryptoEngine.kt`
+## 211. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/SafeCryptoEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -78922,7 +78809,7 @@ object SafeCryptoEngine {
 
 ```
 
-## 213. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/Sha256Engine.kt`
+## 212. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/Sha256Engine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -79219,7 +79106,7 @@ object Sha256Engine {
 
 ```
 
-## 214. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/TlsEngine.kt`
+## 213. `app/src/main/java/com/simats/codeingo/ui/visualizer/engine/TlsEngine.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.engine
@@ -79485,7 +79372,7 @@ object TlsEngine {
 
 ```
 
-## 215. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSChallenges.kt`
+## 214. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSChallenges.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.model
@@ -79953,7 +79840,7 @@ object CNSChallengeRepository {
 
 ```
 
-## 216. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSLabMode.kt`
+## 215. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSLabMode.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.model
@@ -79967,7 +79854,7 @@ enum class CNSLabMode(val title: String, val icon: String, val subtitle: String)
 
 ```
 
-## 217. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSTestVectors.kt`
+## 216. `app/src/main/java/com/simats/codeingo/ui/visualizer/model/CNSTestVectors.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.model
@@ -80086,7 +79973,7 @@ object CNSTestVectorRepository {
 
 ```
 
-## 218. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/CnsVisualizerRegistry.kt`
+## 217. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/CnsVisualizerRegistry.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.scaffold
@@ -81281,7 +81168,7 @@ object CnsVisualizerRegistry {
 
 ```
 
-## 219. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/UniversalVisualizerView.kt`
+## 218. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/UniversalVisualizerView.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.scaffold
@@ -81925,7 +81812,7 @@ private fun GenericInteractiveTryContent(
 
 ```
 
-## 220. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerBeat.kt`
+## 219. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerBeat.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.scaffold
@@ -81987,7 +81874,7 @@ data class VisualizerSpec(
 
 ```
 
-## 221. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt`
+## 220. `app/src/main/java/com/simats/codeingo/ui/visualizer/scaffold/VisualizerScaffold.kt`
 
 ```kotlin
 package com.simats.codeingo.ui.visualizer.scaffold
@@ -82271,8 +82158,8 @@ fun VisualizerScaffold(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 54.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(54.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(
@@ -82487,8 +82374,8 @@ fun VisualizerScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 72.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(72.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -82536,6 +82423,7 @@ fun VisualizerScaffold(
                 Spacer(modifier = Modifier.height(20.dp))
                 AshButton(
                     text = "Got it, Ash!",
+                    variant = AshButtonStyle.BRAND,
                     onClick = {
                         AshSoundPool.playTap()
                         coroutineScope.launch {

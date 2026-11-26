@@ -279,8 +279,8 @@ fun VisualizerScaffold(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 54.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(54.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(
@@ -495,8 +495,8 @@ fun VisualizerScaffold(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PhoenixEggCompanionMascotView(
-                    size = 72.dp,
-                    stage = spec.realmNumber
+                    levelNumber = spec.realmNumber.coerceAtLeast(1),
+                    modifier = Modifier.size(72.dp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -544,6 +544,7 @@ fun VisualizerScaffold(
                 Spacer(modifier = Modifier.height(20.dp))
                 AshButton(
                     text = "Got it, Ash!",
+                    variant = AshButtonStyle.BRAND,
                     onClick = {
                         AshSoundPool.playTap()
                         coroutineScope.launch {
