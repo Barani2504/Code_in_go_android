@@ -80,6 +80,13 @@ fun UniversalVisualizerView(
             val res = SafeCryptoEngine.safeModulo(a, m).getOrNull()
             "$a mod $m = ${res?.remainder ?: 2}"
         }
+        "dh_elgamal_lab" -> "Shared secret computed across public channels."
+        "aes_state_matrix" -> "128-bit state matrix transformed across SubBytes & ShiftRows."
+        "des_explorer", "feistel_builder" -> "Feistel L/R halves swapped with F-function round output."
+        "block_modes_rc4" -> "ECB vs CBC vs CTR encryption modes compared."
+        "ecc_point_addition" -> "Secp256k1 curve secant tangent bounced to P + Q point."
+        "hmac_lab" -> "HMAC-SHA256 seal verified against message tampering."
+        "tls_wifi_handshake" -> "TLS 1.3 ClientHello / ServerHello 1-RTT key derivation completed."
         else -> null
     }
 
@@ -107,6 +114,7 @@ fun UniversalVisualizerView(
                     onShiftChange = { shiftValue = it },
                     showDetails = details
                 )
+                "cryptanalysis_lab" -> com.simats.codeingo.ui.visualizer.VigenereCipherVisualizer()
                 "sha256_avalanche" -> Sha256TryContent(
                     text = textInput,
                     onTextChange = { textInput = it },
@@ -124,7 +132,16 @@ fun UniversalVisualizerView(
                     onMChange = { modM = it },
                     showDetails = details
                 )
-                "rsa_stepper" -> RsaTryContent(showDetails = details)
+                "rsa_stepper" -> com.simats.codeingo.ui.visualizer.RSAPublicKeyVisualizer()
+                "feistel_builder", "des_explorer" -> com.simats.codeingo.ui.visualizer.DESFeistelVisualizer()
+                "aes_state_matrix" -> com.simats.codeingo.ui.visualizer.AESMatrixVisualizer()
+                "block_modes_rc4" -> com.simats.codeingo.ui.visualizer.EcbCbcCtrVisualizer()
+                "ecc_point_addition" -> com.simats.codeingo.ui.visualizer.ECCPointVisualizer()
+                "hmac_lab" -> com.simats.codeingo.ui.visualizer.HMACCollisionVisualizer()
+                "auth_challenge" -> com.simats.codeingo.ui.visualizer.PasswordHashingVisualizer()
+                "kerberos_pki" -> com.simats.codeingo.ui.visualizer.KerberosVisualizer()
+                "tls_wifi_handshake" -> com.simats.codeingo.ui.visualizer.TLS13HandshakeVisualizer()
+                "zkp_merkle_pqc" -> com.simats.codeingo.ui.visualizer.MerkleTreeVisualizer()
                 else -> GenericInteractiveTryContent(
                     spec = spec,
                     input = textInput,

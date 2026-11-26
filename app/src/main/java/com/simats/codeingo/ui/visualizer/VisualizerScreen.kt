@@ -723,38 +723,10 @@ private fun TopicListView(
                 onClick = onOpenCipherLab
             )
 
-            filteredStructures.forEach { type ->
-                DSATopicListCard(
-                    type = type,
-                    onSelect = { onSelectTopic(type) }
-                )
-            }
-
-            if (filteredSpecialized.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "🔬 SPECIALIZED PROTOCOL & MODE LABS (${filteredSpecialized.size})",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace,
-                    color = AmberGold
-                )
-                filteredSpecialized.forEach { lab ->
-                    VisualizerDirectoryEntryCard(
-                        icon = lab.icon,
-                        badge = lab.filterCategory.uppercase(),
-                        title = lab.title,
-                        subtitle = lab.tagline,
-                        accentColor = lab.accentColor,
-                        onClick = { onSelectSpecialized(lab) }
-                    )
-                }
-            }
-
             if (filteredSpecs.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "📖 GUIDED STORY LABS · STORY / WATCH / TRY / CHECK (${filteredSpecs.size})",
+                    text = "📖 CNS INTERACTIVE LABS · STORY / WATCH / TRY / CHECK (${filteredSpecs.size})",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
@@ -772,7 +744,7 @@ private fun TopicListView(
                 }
             }
 
-            if (filteredStructures.isEmpty() && filteredSpecialized.isEmpty() && filteredSpecs.isEmpty()) {
+            if (filteredSpecs.isEmpty()) {
                 Text(
                     text = "No matching visualizers for \"$searchQuery\". Try clearing search or selecting All.",
                     fontSize = 13.sp,

@@ -63,6 +63,11 @@ import com.simats.codeingo.R
 import com.simats.codeingo.data.model.MistakeVaultItem
 import com.simats.codeingo.domain.GameManager
 import com.simats.codeingo.ui.challenge.DailyCipherChallengeCard
+import com.simats.codeingo.ui.dashboard.BasecampFoundationsCard
+import com.simats.codeingo.ui.dashboard.DailyGoalAndStreakPill
+import com.simats.codeingo.ui.dashboard.DailyRewardChestCard
+import com.simats.codeingo.ui.dashboard.EthicalReengagementGreeting
+import com.simats.codeingo.ui.dashboard.TodaysMissionsCarousel
 import com.simats.codeingo.ui.components.motion.FlipCard
 import com.simats.codeingo.ui.components.motion.CardFace
 import com.simats.codeingo.ui.components.AppButton
@@ -121,7 +126,16 @@ fun PracticeHubScreen(
 ) {
     val gameManager = GameManager.instance
     val mistakes by viewModel.mistakeVaultItems.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) } // 0: Mistake Vault, 1: Daily Review, 2: Interview Prep
+    val totalXP by gameManager.totalXP.collectAsState()
+    val streakDays by gameManager.streakDays.collectAsState()
+    val dailyQuests by gameManager.dailyQuests.collectAsState()
+    val basecampCompletedLevels by gameManager.basecampCompletedLevels.collectAsState()
+    val diagnosticTaken by gameManager.diagnosticTaken.collectAsState()
+    val diagnosticRecommendedChapter by gameManager.diagnosticRecommendedChapter.collectAsState()
+    val maxUnlockedChapter by gameManager.maxUnlockedChapter.collectAsState()
+    val activeLevelIndex by gameManager.activeLevelIndex.collectAsState()
+
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Daily Quests, 1: Mistake Vault, 2: Daily Review, 3: Interview Prep
 
     var repairingMistake by remember { mutableStateOf<MistakeVaultItem?>(null) }
     var selectedProblem by remember { mutableStateOf<InterviewProblem?>(null) }
@@ -198,6 +212,7 @@ fun PracticeHubScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val tabs = listOf(
+                    Pair("Daily Quests", "🎯"),
                     Pair("Mistake Vault", "📦"),
                     Pair("Daily Review", "⚡"),
                     Pair("Interview Mode", "💼")
@@ -250,16 +265,32 @@ fun PracticeHubScreen(
                     .fillMaxWidth()
             ) {
                 when (selectedTab) {
-                    0 -> MistakeVaultTab(
+                    0 -> DailyQuestsTab(
+                        totalXP = totalXP,
+                        streakDays = streakDays,
+                        dailyQuests = dailyQuests,
+                        basecampCompletedLevels = basecampCompletedLevels,
+                        diagnosticTaken = diagnosticTaken,
+                        diagnosticRecommendedChapter = diagnosticRecommendedChapter,
+                        onClaimQuest = { gameManager.claimQuest(it) },
+                        onClaimReward = {
+                            gameManager.addXP(20)
+                            gameManager.addGems(15)
+                        },
+                        onOpenLesson = null,
+                        onOpenMistakeVault = { selectedTab = 1 },
+                        onOpenArena = onOpenBinaryTreeForest
+                    )
+                    1 -> MistakeVaultTab(
                         mistakes = mistakes,
                         onStartRepair = { mistake -> repairingMistake = mistake }
                     )
-                    1 -> DailyReviewTab(
+                    2 -> DailyReviewTab(
                         onCompleteReview = {
                             gameManager.awardLessonXP(baseXP = 25, accuracyPercentage = 1.0, speedSeconds = 30)
                         }
                     )
-                    2 -> InterviewPrepTab(
+                    3 -> InterviewPrepTab(
                         onSelectProblem = { prob -> selectedProblem = prob }
                     )
                 }
@@ -1186,4 +1217,82 @@ private fun FlippableMistakeCard(
             }
         }
     )
+}
+
+@Composable
+private fun DailyQuestsTab(
+    totalXP: Int,
+    streakDays: Int,
+    dailyQuests: List<com.simats.codeingo.data.model.DailyQuestItem>,
+    basecampCompletedLevels: Set<String>,
+    diagnosticTaken: Boolean,
+    diagnosticRecommendedChapter: Int?,
+    onClaimQuest: (String) -> Unit,
+    onClaimReward: () -> Unit,
+    onOpenLesson: (() -> Unit)?,
+    onOpenMistakeVault: () -> Unit,
+    onOpenArena: (() -> Unit)?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        EthicalReengagementGreeting(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+
+        DailyGoalAndStreakPill(
+            currentXp = totalXP % 50,
+            targetXp = 50,
+            streakDays = streakDays,
+            hasStreakFreeze = true,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+
+        TodaysMissionsCarousel(
+            onOpenLesson = { onOpenLesson?.invoke() },
+            onOpenMistakeVault = onOpenMistakeVault,
+            onOpenArena = { onOpenArena?.invoke() },
+            dailyQuests = dailyQuests.map {
+                com.simats.codeingo.data.network.model.DailyQuestItem(
+                    id = it.id,
+                    title = it.title,
+                    requirement = it.requirement,
+                    targetCount = it.targetCount,
+                    currentCount = it.currentCount,
+                    xpReward = it.xpReward,
+                    gemReward = 5,
+                    isCompleted = it.isCompleted,
+                    isClaimed = it.isClaimed
+                )
+            },
+            onClaimQuest = onClaimQuest,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+
+        DailyRewardChestCard(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            onClaimReward = onClaimReward
+        )
+
+        DailyCipherChallengeCard(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+
+        BasecampFoundationsCard(
+            completedStages = basecampCompletedLevels,
+            diagnosticTaken = diagnosticTaken,
+            recommendedChapter = diagnosticRecommendedChapter ?: 1,
+            onOpenDiagnostic = {},
+            onOpenBitLab = {},
+            onOpenModuloLab = {},
+            onOpenXorLab = {},
+            onStartStage = { _, _ -> onOpenLesson?.invoke() },
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+    }
 }
