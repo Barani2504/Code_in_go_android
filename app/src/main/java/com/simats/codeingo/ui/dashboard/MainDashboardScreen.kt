@@ -427,82 +427,220 @@ fun MainDashboardScreen(
                             val topInsetPadding = topInsets.asPaddingValues().calculateTopPadding()
 
                             Column(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(dashboardScrollState),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                // Spacing for floating top stats header
-                                Spacer(modifier = Modifier.height(topInsetPadding + 64.dp))
+                                // Spacing for floating top stats header (status bar + cutout insets + header height)
+                                Spacer(modifier = Modifier.height(topInsetPadding + 80.dp))
 
-                                // Discrete 1-line Quests shortcut pill
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(LocalDynamicThemeColors.current.cardBackground)
-                                        .border(1.dp, LocalDynamicThemeColors.current.placeholder.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                                        .clickable { onOpenPracticeHub() }
-                                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                // 1. CHAPTER UNITS PATH (Original UI & Animations)
+                                visibleUnits.forEach { unit ->
+                                    val isUnitOpen = unit.id <= maxUnlockedChapter
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            Text(text = "🎯", fontSize = 14.sp)
-                                            Text(
-                                                text = "DAILY DEFENSE & QUESTS",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Black,
-                                                fontFamily = FontFamily.Monospace,
-                                                color = AmberGold
-                                            )
+                                        // Expansion Track Header Divider when entering Chapter 6
+                                        if (unit.id == 6) {
+                                            ExpansionTrackHeader()
                                         }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                                        // Unit Section Banner
+                                        UnitSectionBanner(
+                                            unit = unit,
+                                            isUnlocked = isUnitOpen,
+                                            onGuidebookClick = {
+                                                val chapter = com.simats.codeingo.data.model.DSA5ChapterData.chapters.firstOrNull { it.id == unit.id }
+                                                if (chapter != null) {
+                                                    storySelectedChapter = chapter
+                                                } else {
+                                                    guideSelectedUnit = unit
+                                                }
+                                            }
+                                        )
+
+                                        // Winding 3D Level Nodes with Stepping Stones Path & Smooth Flying Mascot
+                                        val isUnitActive = unit.nodes.any { it.levelNumber == activeLevelIndex }
+
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(16.dp)
                                         ) {
-                                            Text(
-                                                text = "${totalXP % 50}/50 XP",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = LocalDynamicThemeColors.current.textSecondary
-                                            )
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                                contentDescription = "Open Quests",
-                                                tint = LocalDynamicThemeColors.current.textSecondary,
-                                                modifier = Modifier.size(12.dp)
-                                            )
+                                            unit.nodes.forEachIndexed { index, node ->
+                                                val isNodeCompleted = completedLevelIndices.contains(node.levelNumber)
+                                                val isNodeUnlocked = isUnitOpen && (unlockedLevels.contains(node.levelNumber) || isNodeCompleted || node.levelNumber == activeLevelIndex)
+                                                val isActiveTarget = isUnitOpen && (node.levelNumber == activeLevelIndex)
+                                                val isLockedSelected = selectedLockedNodeId == node.id
+
+                                                val safeXOffset = (node.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+
+                                                val prevNode = if (index > 0) unit.nodes[index - 1] else null
+                                                val prevXOffset = if (prevNode != null) {
+                                                    (prevNode.xOffset * 0.45f).coerceIn((-22).dp, 22.dp)
+                                                } else safeXOffset
+
+                                                // Stepping Stone Connector Dots from previous node
+                                                if (index > 0) {
+                                                    ConnectorSteppingStones(
+                                                        fromX = prevXOffset,
+                                                        toX = safeXOffset,
+                                                        isActive = isNodeUnlocked || isNodeCompleted,
+                                                        unitColor = unit.themeColor
+                                                    )
+                                                }
+
+                                                Box(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    LessonNodeButton(
+                                                        node = node,
+                                                        unit = unit,
+                                                        isUnlocked = isNodeUnlocked,
+                                                        isActiveTarget = isActiveTarget,
+                                                        isLockedSelected = isLockedSelected,
+                                                        xOffset = safeXOffset,
+                                                        onCirclePositioned = {},
+                                                        onNodeClick = {
+                                                            selectedStageCardNode = node
+                                                            if (isNodeUnlocked) {
+                                                                if (activeLevelIndex != node.levelNumber) {
+                                                                    mascotFlightDepartureLevel = mascotCurrentLevel
+                                                                    gameManager.setActiveLevel(node.levelNumber)
+                                                                    shouldFlyToActiveLevel = true
+                                                                } else {
+                                                                    mascotFlightDepartureLevel = activeLevelIndex
+                                                                    shouldFlyToActiveLevel = true
+                                                                }
+                                                                selectedLockedNodeId = null
+                                                            } else {
+                                                                selectedLockedNodeId = if (selectedLockedNodeId == node.id) null else node.id
+                                                            }
+                                                        },
+                                                        onStartClick = {
+                                                            if (node.levelNumber < activeLevelIndex && replayReturnLevelIndex == null) {
+                                                                replayReturnLevelIndex = activeLevelIndex
+                                                            }
+                                                            if (node.isBoss) {
+                                                                onStartBoss(node.bossSpec?.id ?: "boss_unit_${unit.id}")
+                                                            } else {
+                                                                onStartLesson(unit.id, node.levelNumber, 5, false)
+                                                            }
+                                                        }
+                                                    )
+
+                                                    // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track
+                                                    if (isActiveTarget) {
+                                                        val mascotTargetX = if (safeXOffset <= 0.dp) 82.dp else (-82).dp
+                                                        val departureLevel = if (mascotFlightDepartureLevel > 0) mascotFlightDepartureLevel else activeLevelIndex
+                                                        val startPos = getMascotPositionForLevel(departureLevel)
+                                                        val endPos = getMascotPositionForLevel(activeLevelIndex)
+                                                        val deltaX = startPos.x - endPos.x
+                                                        val deltaY = startPos.y - endPos.y
+                                                        val flyDelta = DpOffset(deltaX, deltaY)
+
+                                                        PhoenixNodeJumpFlightView(
+                                                            width = 104.dp,
+                                                            height = 120.dp,
+                                                            flyFromOffset = flyDelta,
+                                                            shouldFly = shouldFlyToActiveLevel,
+                                                            showTrailGlow = true,
+                                                            onLandingComplete = {
+                                                                shouldFlyToActiveLevel = false
+                                                                mascotCurrentLevel = activeLevelIndex
+                                                                mascotFlightDepartureLevel = activeLevelIndex
+                                                            },
+                                                            modifier = Modifier.offset(x = mascotTargetX, y = 8.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Finish Chapter & Unlock Next Button (Parity with iOS hasCompletedAllLevels)
+                                    val isUnitCompleted = completedChapters.contains(unit.id)
+                                    val hasCompletedAllLevelsInUnit = unit.nodes.all { completedLevelIndices.contains(it.levelNumber) }
+                                    if (hasCompletedAllLevelsInUnit && !isUnitCompleted && unit.id == maxUnlockedChapter) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        val nextUnit = masterUnits.firstOrNull { it.id == unit.id + 1 }
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 24.dp)
+                                                .shadow(8.dp, RoundedCornerShape(16.dp))
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(
+                                                    Brush.horizontalGradient(
+                                                        listOf(AmberGold, Color(0xFFFF9500))
+                                                    )
+                                                )
+                                                .clickable {
+                                                    gameManager.markChapterCompleted(unit.id)
+                                                    if (nextUnit != null) {
+                                                        val firstLevel = nextUnit.nodes.firstOrNull()?.levelNumber ?: ((unit.nodes.lastOrNull()?.levelNumber ?: 0) + 1)
+                                                        gameManager.unlockNextUnit(nextUnit.id, firstLevel)
+                                                    }
+                                                }
+                                                .padding(vertical = 14.dp, horizontal = 18.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.CheckCircle,
+                                                        contentDescription = null,
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Text(
+                                                        text = "FINISH CHAPTER ${unit.unitNumber} & UNLOCK NEXT",
+                                                        fontSize = 12.5.sp,
+                                                        fontWeight = FontWeight.Black,
+                                                        color = Color.White
+                                                    )
+                                                }
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                                    contentDescription = null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
 
-                                // 🗺️ Recycled 25-Chapter Forge Path across 5 Realms (Phase 5)
-                                com.simats.codeingo.ui.dashboard.path.ForgePathLazyColumn(
-                                    maxUnlockedChapter = maxUnlockedChapter,
-                                    activeLevelIndex = activeLevelIndex,
-                                    completedChapters = completedChapters,
-                                    completedLevelIndices = completedLevelIndices,
-                                    onSelectNode = { chapterId, node ->
-                                        val cnsChapter = com.simats.codeingo.data.repository.CurriculumRepository.getChapter(chapterId, context)
-                                        if (cnsChapter != null) {
-                                            selectedChapterForDetail = cnsChapter
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                // Grand Master Journey Milestone Card (Core 25 Levels)
+                                GrandMasterJourneyCard(
+                                    completedCount = unlockedLevels.filter { it in 1..25 }.size.coerceAtMost(25),
+                                    totalCount = 25,
+                                    onOpenSanctuary = {
+                                        if (unlockedLevels.filter { it in 1..25 }.size >= 25) {
+                                            showFinalMasterJourney = true
                                         } else {
-                                            onStartLesson(chapterId, node.levelNumber, 5, node.isBoss)
+                                            onOpenPhoenixSanctuary()
                                         }
-                                    },
-                                    onOpenBoss = { bossId ->
-                                        onStartBoss(bossId)
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .coachMarkTarget("tour_path", coachMarkState)
+                                    }
                                 )
+
+                                Spacer(modifier = Modifier.height(40.dp))
                             }
 
                             // Floating Liquid Glass Top Stats Header (Docked to Top)
