@@ -532,6 +532,68 @@ fun MainDashboardScreen(
                                                     )
                                                 }
 
+                                                // Duolingo-style Speech Guide Bubble cleanly above the active node (never overlapping chapter circles)
+                                                if (isActiveTarget) {
+                                                    val guideMessage = if (node.isBoss) {
+                                                        "Boss Gate ahead! Prove your mastery!"
+                                                    } else {
+                                                        "Ch ${unit.id}: Tap to crack ${node.title}!"
+                                                    }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 28.dp, vertical = 4.dp),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .widthIn(max = 260.dp)
+                                                                .shadow(4.dp, RoundedCornerShape(14.dp))
+                                                                .clip(RoundedCornerShape(14.dp))
+                                                                .background(LocalDynamicThemeColors.current.cardBackground)
+                                                                .border(1.2.dp, unit.themeColor.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+                                                                .clickable {
+                                                                    com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speak(guideMessage)
+                                                                }
+                                                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                                        ) {
+                                                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                                                Row(
+                                                                    modifier = Modifier.fillMaxWidth(),
+                                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                                    verticalAlignment = Alignment.CenterVertically
+                                                                ) {
+                                                                    Text(
+                                                                        text = "ASH GUIDE",
+                                                                        fontSize = 9.5.sp,
+                                                                        fontWeight = FontWeight.Black,
+                                                                        color = unit.themeColor
+                                                                    )
+                                                                    Text(
+                                                                        text = if (isVoiceEnabled) "🔊" else "🔇",
+                                                                        fontSize = 12.sp,
+                                                                        modifier = Modifier
+                                                                            .clip(CircleShape)
+                                                                            .clickable {
+                                                                                com.simats.codeingo.domain.PhoenixVoiceGuide.instance.toggleVoice()
+                                                                            }
+                                                                            .padding(2.dp)
+                                                                    )
+                                                                }
+                                                                Text(
+                                                                    text = guideMessage,
+                                                                    fontSize = 11.5.sp,
+                                                                    lineHeight = 15.sp,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    color = LocalDynamicThemeColors.current.textPrimary,
+                                                                    maxLines = 2
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(6.dp))
+                                                }
+
                                                 Box(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     contentAlignment = Alignment.Center
@@ -572,7 +634,7 @@ fun MainDashboardScreen(
                                                         }
                                                     )
 
-                                                    // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track + Duolingo-style Guide Bubble
+                                                    // 3D Animated Phoenix Companion Mascot Flying & Sitting on the Track
                                                     if (isActiveTarget) {
                                                         val mascotTargetX = if (safeXOffset <= 0.dp) 82.dp else (-82).dp
                                                         val departureLevel = if (mascotFlightDepartureLevel > 0) mascotFlightDepartureLevel else activeLevelIndex
@@ -601,60 +663,6 @@ fun MainDashboardScreen(
                                                             },
                                                             modifier = Modifier.offset(x = mascotTargetX, y = 8.dp)
                                                         )
-
-                                                        // Duolingo-style Speech Guide Bubble beside Ash
-                                                        val bubbleOffsetX = if (safeXOffset <= 0.dp) (-92).dp else 92.dp
-                                                        val guideMessage = if (node.isBoss) {
-                                                            "Boss Gate ahead! Prove your mastery!"
-                                                        } else {
-                                                            "Ch ${unit.id}: Tap to crack ${node.title}!"
-                                                        }
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .offset(x = bubbleOffsetX, y = (-4).dp)
-                                                                .widthIn(max = 148.dp)
-                                                                .shadow(4.dp, RoundedCornerShape(14.dp))
-                                                                .clip(RoundedCornerShape(14.dp))
-                                                                .background(LocalDynamicThemeColors.current.cardBackground)
-                                                                .border(1.2.dp, unit.themeColor.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
-                                                                .clickable {
-                                                                    com.simats.codeingo.domain.PhoenixVoiceGuide.instance.speak(guideMessage)
-                                                                }
-                                                                .padding(horizontal = 10.dp, vertical = 7.dp)
-                                                        ) {
-                                                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                                                Row(
-                                                                    modifier = Modifier.fillMaxWidth(),
-                                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                                    verticalAlignment = Alignment.CenterVertically
-                                                                ) {
-                                                                    Text(
-                                                                        text = "ASH GUIDE",
-                                                                        fontSize = 9.sp,
-                                                                        fontWeight = FontWeight.Black,
-                                                                        color = unit.themeColor
-                                                                    )
-                                                                    Text(
-                                                                        text = if (isVoiceEnabled) "🔊" else "🔇",
-                                                                        fontSize = 11.sp,
-                                                                        modifier = Modifier
-                                                                            .clip(CircleShape)
-                                                                            .clickable {
-                                                                                com.simats.codeingo.domain.PhoenixVoiceGuide.instance.toggleVoice()
-                                                                            }
-                                                                            .padding(2.dp)
-                                                                    )
-                                                                }
-                                                                Text(
-                                                                    text = guideMessage,
-                                                                    fontSize = 10.5.sp,
-                                                                    lineHeight = 13.sp,
-                                                                    fontWeight = FontWeight.Bold,
-                                                                    color = LocalDynamicThemeColors.current.textPrimary,
-                                                                    maxLines = 2
-                                                                )
-                                                            }
-                                                        }
                                                     }
                                                 }
                                             }

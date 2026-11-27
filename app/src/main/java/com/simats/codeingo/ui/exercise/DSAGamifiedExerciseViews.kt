@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -224,19 +225,26 @@ fun MatchPairsExerciseView(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Text(text = "⚡", fontSize = 14.sp)
                     Text(
                         text = when {
                             activeDraggingLeft != null -> "Drag '$activeDraggingLeft' to its pair dock ➔"
                             selectedLeft != null -> "Connecting '$selectedLeft' ➔ Tap or drag to target"
-                            else -> "Drag side A sentence to pair with side B:"
+                            else -> "Tap or drag left items to match right:"
                         },
-                        fontSize = 13.sp,
+                        fontSize = 12.5.sp,
+                        lineHeight = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (activeDraggingLeft != null || selectedLeft != null) Color(0xFF1C_B0_F6) else DuolingoSubtext
+                        color = if (activeDraggingLeft != null || selectedLeft != null) Color(0xFF1C_B0_F6) else DuolingoSubtext,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
                 Box(
@@ -248,9 +256,11 @@ fun MatchPairsExerciseView(
                 ) {
                     Text(
                         text = "${matchedPairs.size}/${solution.size} SYNAPSES",
-                        fontSize = 11.sp,
+                        fontSize = 10.5.sp,
                         fontWeight = FontWeight.Black,
-                        color = if (matchedPairs.size == solution.size) PhoenixGreen else Color(0xFF1C_B0_F6)
+                        color = if (matchedPairs.size == solution.size) PhoenixGreen else Color(0xFF1C_B0_F6),
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -1667,6 +1677,7 @@ private fun SynapseNodeCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .padding(bottom = 4.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1691,18 +1702,19 @@ private fun SynapseNodeCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = 68.dp)
                 .offset(y = currentOffset)
                 .clip(shape)
                 .background(faceColor)
                 .border(if (isDragging || isHovered || isSelected || isMatched) 2.dp else 1.2.dp, borderColor, shape)
-                .padding(horizontal = 12.dp, vertical = 13.dp),
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isLeft && !isMatched) {
                 // Tactile 6-dot drag handle on left items
                 Column(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 6.dp)
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         Box(modifier = Modifier.size(2.5.dp).clip(CircleShape).background(if (isDragging) Color(0xFF1C_B0_F6) else DuolingoSubtext.copy(alpha = 0.6f)))
@@ -1723,32 +1735,36 @@ private fun SynapseNodeCard(
                 // Inward Receiver Pin on right column items
                 Box(
                     modifier = Modifier
-                        .size(9.dp)
+                        .size(8.dp)
                         .clip(CircleShape)
                         .background(if (isMatched) PhoenixGreen else if (isHovered) Color(0xFF1C_B0_F6) else borderColor)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
             }
 
             Text(
                 text = text,
-                fontSize = 13.sp,
-                fontWeight = if (isMonospace) FontWeight.Black else FontWeight.Bold,
+                fontSize = 12.5.sp,
+                lineHeight = 16.sp,
+                fontWeight = if (isMonospace) FontWeight.Bold else FontWeight.Bold,
                 fontFamily = if (isMonospace) FontFamily.Monospace else AppFontFamily,
                 color = if (isMatched) PhoenixGreen else LocalDynamicThemeColors.current.textPrimary,
+                maxLines = 3,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
 
             if (isLeft) {
                 // Outward Transmitter Pin on left column items
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Box(
                     modifier = Modifier
-                        .size(9.dp)
+                        .size(8.dp)
                         .clip(CircleShape)
                         .background(if (isMatched) PhoenixGreen else if (isDragging || isSelected) Color(0xFF1C_B0_F6) else SubtextGray.copy(alpha = 0.4f))
                 )
             } else if (isMatched) {
+                Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Matched",
@@ -1756,11 +1772,14 @@ private fun SynapseNodeCard(
                     modifier = Modifier.size(16.dp)
                 )
             } else if (isHovered) {
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "DOCK ⚡",
-                    fontSize = 10.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color(0xFF1C_B0_F6)
+                    color = Color(0xFF1C_B0_F6),
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
