@@ -538,6 +538,7 @@ fun OrderStepsExerciseView(
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             currentSteps.forEachIndexed { index, step ->
+                androidx.compose.runtime.key(step) {
                 val isDraggedCard = draggedStep == step
                 val shape = RoundedCornerShape(14.dp)
                 val isCorrectPosition = index < solution.size && solution[index] == step
@@ -556,21 +557,21 @@ fun OrderStepsExerciseView(
                 val animatedShiftY by animateFloatAsState(
                     targetValue = shiftSlots * itemHeightPx,
                     animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMediumLow
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
                     ),
                     label = "stepShift_$index"
                 )
 
                 val dragScale by animateFloatAsState(
-                    targetValue = if (isDraggedCard) 1.04f else 1.0f,
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
+                    targetValue = if (isDraggedCard) 1.03f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
                     label = "orderDragScale"
                 )
 
                 val dragTilt by animateFloatAsState(
-                    targetValue = if (isDraggedCard) (dragOffsetY / 30f).coerceIn(-4.5f, 4.5f) else 0f,
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 380f),
+                    targetValue = if (isDraggedCard) (dragOffsetY / 45f).coerceIn(-3f, 3f) else 0f,
+                    animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
                     label = "orderDragTilt"
                 )
 
@@ -622,12 +623,13 @@ fun OrderStepsExerciseView(
                             val measuredH = coords.size.height.toFloat() + spacingPx
                             if (measuredH > 50f) itemHeightPx = measuredH
                         }
-                        .pointerInput(step, isChecked) {
+                        .pointerInput(step, currentSteps, isChecked) {
                             if (!isChecked) {
                                 detectDragGestures(
                                     onDragStart = {
                                         val startIdx = currentSteps.indexOf(step)
                                         if (startIdx != -1) {
+                                            isSettling = false
                                             draggedStep = step
                                             dragStartIndex = startIdx
                                             targetDropIndex = startIdx
@@ -637,9 +639,11 @@ fun OrderStepsExerciseView(
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
-                                        dragOffsetY += dragAmount.y
-
                                         val effectiveH = itemHeightPx.coerceAtLeast(100f)
+                                        val minOffset = -dragStartIndex * effectiveH
+                                        val maxOffset = (currentSteps.size - 1 - dragStartIndex) * effectiveH
+                                        dragOffsetY = (dragOffsetY + dragAmount.y).coerceIn(minOffset, maxOffset)
+
                                         val rawOffsetSlots = (dragOffsetY / effectiveH).roundToInt()
                                         val newTarget = (dragStartIndex + rawOffsetSlots).coerceIn(0, currentSteps.size - 1)
 
@@ -853,6 +857,7 @@ fun OrderStepsExerciseView(
                             )
                         }
                     }
+                }
                 }
             }
         }

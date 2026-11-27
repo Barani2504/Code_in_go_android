@@ -72,7 +72,7 @@ class GameManager private constructor() {
     private val _totalXP = MutableStateFlow(0)
     val totalXP: StateFlow<Int> = _totalXP.asStateFlow()
 
-    private val _gemsCount = MutableStateFlow(0)
+    private val _gemsCount = MutableStateFlow(1_000_000)
     val gemsCount: StateFlow<Int> = _gemsCount.asStateFlow()
 
     private val _lastSyncedServerGems = MutableStateFlow(0)
@@ -238,7 +238,8 @@ class GameManager private constructor() {
 
             // Atomically publish all state values in a single coherent step
             _totalXP.value = snapshot.totalXP
-            _gemsCount.value = snapshot.gemsCount
+            // Testing phase: ensure 1,000,000 diamonds are available for Gem Shop testing
+            _gemsCount.value = maxOf(snapshot.gemsCount, 1_000_000)
             _lastSyncedServerGems.value = snapshot.lastSyncedServerGems
             _heartsCount.value = snapshot.heartsCount
             _streakDays.value = snapshot.streakDays

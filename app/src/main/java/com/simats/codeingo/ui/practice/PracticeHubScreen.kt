@@ -117,6 +117,7 @@ data class InterviewProblem(
 fun PracticeHubScreen(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    onStartLesson: ((unitId: Int, levelNumber: Int, totalLevelsInUnit: Int, isBoss: Boolean) -> Unit)? = null,
     onOpenArrayKingdom: (() -> Unit)? = null,
     onOpenStackTower: (() -> Unit)? = null,
     onOpenQueueStation: (() -> Unit)? = null,
@@ -277,7 +278,11 @@ fun PracticeHubScreen(
                             gameManager.addXP(20)
                             gameManager.addGems(15)
                         },
-                        onOpenLesson = null,
+                        onOpenLesson = {
+                            val targetChapter = maxUnlockedChapter.coerceAtLeast(1)
+                            val targetLevel = activeLevelIndex.coerceAtLeast(1)
+                            onStartLesson?.invoke(targetChapter, targetLevel, 5, false)
+                        },
                         onOpenMistakeVault = { selectedTab = 1 },
                         onOpenArena = onOpenBinaryTreeForest
                     )

@@ -59,6 +59,49 @@ object AshCosmeticAssets {
 
         else -> R.drawable.cosmetic_none
     }
+
+    /**
+     * Returns the pre-rendered animated GIF (512x512, 24 frames) of Ash wearing [cosmeticId],
+     * or null if [cosmeticId] is a "none_*" / non-wearable item.
+     */
+    fun fittedGifForId(cosmeticId: String): Int? = when (cosmeticId) {
+        "hat_dev" -> R.raw.ash_hat_dev
+        "cap_code" -> R.raw.ash_cap_code
+        "crown_gold", "crown_tree" -> R.raw.ash_crown_gold
+        "cap_grad" -> R.raw.ash_cap_grad
+        "hat_wizard" -> R.raw.ash_hat_wizard
+        "hat_party" -> R.raw.ash_hat_party
+        "hat_cipher_helm" -> R.raw.ash_hat_cipher_helm
+        "hat_bubble" -> R.raw.ash_hat_bubble
+        "outfit_hoodie", "outfit_wings" -> R.raw.ash_outfit_hoodie
+        "outfit_cape" -> R.raw.ash_outfit_cape
+        "outfit_vest" -> R.raw.ash_outfit_vest
+        "outfit_belt" -> R.raw.ash_outfit_belt
+        "glasses_nerd" -> R.raw.ash_glasses_nerd
+        "shades_cool" -> R.raw.ash_shades_cool
+        "scarf_red" -> R.raw.ash_scarf_red
+        "bowtie_ruby" -> R.raw.ash_bowtie_ruby
+        "acc_pack" -> R.raw.ash_acc_pack
+        "acc_train" -> R.raw.ash_acc_train
+        else -> null
+    }
+
+    /**
+     * Picks the best pre-rendered animated Ash GIF for the current equipped loadout,
+     * returning Pair(gifResId, bakedCosmeticIdOrNull).
+     */
+    fun resolveFittedAshGif(
+        headwearId: String,
+        outfitId: String,
+        accessoryId: String
+    ): Pair<Int, String?> {
+        val candidates = listOf(headwearId, accessoryId, outfitId)
+        for (id in candidates) {
+            val gif = fittedGifForId(id)
+            if (gif != null) return gif to id
+        }
+        return R.raw.phoenix_waving to null
+    }
 }
 
 /**

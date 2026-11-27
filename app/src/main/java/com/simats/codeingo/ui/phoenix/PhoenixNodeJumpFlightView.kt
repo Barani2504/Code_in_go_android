@@ -425,18 +425,24 @@ fun PhoenixNodeJumpFlightView(
                 },
             contentAlignment = Alignment.Center
         ) {
-            if (isWaving) {
+            val (fittedGifRes, bakedId) = AshCosmeticAssets.resolveFittedAshGif(
+                headwearId = equippedCosmetics.headwearId,
+                outfitId = equippedCosmetics.outfitId,
+                accessoryId = equippedCosmetics.accessoryId
+            )
+
+            if (isWaving || bakedId != null) {
                 val wavingPainter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(context)
-                        .data(R.raw.phoenix_waving)
+                        .data(fittedGifRes)
                         .crossfade(false)
-                        .setParameter("wave_token", waveToken, memoryCacheKey = "phoenix_waving_$waveToken")
+                        .setParameter("wave_token", "${waveToken}_$fittedGifRes", memoryCacheKey = "phoenix_waving_${waveToken}_$fittedGifRes")
                         .build(),
                     imageLoader = imageLoader
                 )
                 Image(
                     painter = wavingPainter,
-                    contentDescription = "Phoenix Companion Waving",
+                    contentDescription = "Phoenix Companion",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(width, height)
                 )
@@ -449,11 +455,11 @@ fun PhoenixNodeJumpFlightView(
                 )
             }
 
-            // Equipped Gem Shop Cosmetics fitted onto Ash
+            // Layer any remaining equipped Gem Shop cosmetics not already baked into the GIF
             AshCosmeticOverlay(
-                headwearId = equippedCosmetics.headwearId,
-                outfitId = equippedCosmetics.outfitId,
-                accessoryId = equippedCosmetics.accessoryId,
+                headwearId = if (bakedId == equippedCosmetics.headwearId) "none_head" else equippedCosmetics.headwearId,
+                outfitId = if (bakedId == equippedCosmetics.outfitId) "none_outfit" else equippedCosmetics.outfitId,
+                accessoryId = if (bakedId == equippedCosmetics.accessoryId) "none_acc" else equippedCosmetics.accessoryId,
                 mascotWidth = width,
                 mascotHeight = height
             )

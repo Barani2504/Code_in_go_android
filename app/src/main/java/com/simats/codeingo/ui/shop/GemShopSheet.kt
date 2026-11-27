@@ -37,7 +37,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -70,6 +69,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -697,21 +697,53 @@ fun GemShopSheet(
                                     .background(Color.Black.copy(alpha = 0.12f))
                             )
 
-                            // Animated Bird Mascot with sinusoidal idle kinematics + Live Equipped/Tried Cosmetics
+                            // Animated Bird Mascot with sinusoidal idle kinematics + Fitted Cosmetic GIF
                             Box(
                                 modifier = Modifier.graphicsLayer {
                                     translationY = birdHoverOffset * density
                                 },
                                 contentAlignment = Alignment.Center
                             ) {
-                                PhoenixAnimatedMascotView(
-                                    pose = PhoenixMascotPose.Welcoming,
-                                    size = 155.dp
-                                )
-                                com.simats.codeingo.ui.phoenix.AshCosmeticOverlay(
+                                val (fittedGifRes, bakedId) = com.simats.codeingo.ui.phoenix.AshCosmeticAssets.resolveFittedAshGif(
                                     headwearId = activeHeadwear,
                                     outfitId = activeOutfit,
-                                    accessoryId = activeAccessory,
+                                    accessoryId = activeAccessory
+                                )
+                                if (bakedId != null) {
+                                    val gifContext = androidx.compose.ui.platform.LocalContext.current
+                                    val gifLoader = remember(gifContext) {
+                                        coil.ImageLoader.Builder(gifContext)
+                                            .components {
+                                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                                    add(coil.decode.ImageDecoderDecoder.Factory())
+                                                } else {
+                                                    add(coil.decode.GifDecoder.Factory())
+                                                }
+                                            }
+                                            .build()
+                                    }
+                                    androidx.compose.foundation.Image(
+                                        painter = coil.compose.rememberAsyncImagePainter(
+                                            model = coil.request.ImageRequest.Builder(gifContext)
+                                                .data(fittedGifRes)
+                                                .crossfade(false)
+                                                .build(),
+                                            imageLoader = gifLoader
+                                        ),
+                                        contentDescription = "Ash with Equipped Cosmetics",
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                                        modifier = Modifier.size(155.dp)
+                                    )
+                                } else {
+                                    PhoenixAnimatedMascotView(
+                                        pose = PhoenixMascotPose.Welcoming,
+                                        size = 155.dp
+                                    )
+                                }
+                                com.simats.codeingo.ui.phoenix.AshCosmeticOverlay(
+                                    headwearId = if (bakedId == activeHeadwear) "none_head" else activeHeadwear,
+                                    outfitId = if (bakedId == activeOutfit) "none_outfit" else activeOutfit,
+                                    accessoryId = if (bakedId == activeAccessory) "none_acc" else activeAccessory,
                                     mascotWidth = 155.dp,
                                     mascotHeight = 155.dp
                                 )

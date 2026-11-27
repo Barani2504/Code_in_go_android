@@ -260,6 +260,16 @@ fun AppNavHost(
                 Box(modifier = Modifier.fillMaxSize()) {
                     PracticeHubScreen(
                         onBack = { navController.popBackStack() },
+                        onStartLesson = { unitId, levelNumber, totalLevelsInUnit, isBoss ->
+                            navController.navigate(
+                                Screen.Assessment.createRoute(
+                                    unitId = unitId,
+                                    levelNumber = levelNumber,
+                                    totalLevelsInUnit = totalLevelsInUnit,
+                                    isBoss = isBoss
+                                )
+                            )
+                        },
                         onOpenArrayKingdom = { activeWorldArena = ArenaRoute.CIPHER_SANCTUM },
                         onOpenStackTower = { activeWorldArena = ArenaRoute.KEY_EXCHANGE_CITADEL },
                         onOpenQueueStation = { activeWorldArena = ArenaRoute.INTEGRITY_FOUNDRY },

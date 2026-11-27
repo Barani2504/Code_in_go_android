@@ -490,10 +490,23 @@ private fun UserHeaderCard(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        PhoenixMascotImage(
-                            emotion = currentEmotion,
-                            size = 66.dp
-                        )
+                        Box(
+                            modifier = Modifier.size(66.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val equipped by GameManager.instance.equippedCosmetics.collectAsState()
+                            PhoenixMascotImage(
+                                emotion = currentEmotion,
+                                size = 66.dp
+                            )
+                            com.simats.codeingo.ui.phoenix.AshCosmeticOverlay(
+                                headwearId = equipped.headwearId,
+                                outfitId = equipped.outfitId,
+                                accessoryId = equipped.accessoryId,
+                                mascotWidth = 66.dp,
+                                mascotHeight = 66.dp
+                            )
+                        }
                     }
                 }
 
@@ -678,25 +691,14 @@ private fun LevelProgressCard(
 private fun YourPhoenixCustomizationSection(
     onOpenGemShop: () -> Unit
 ) {
-    val context = LocalContext.current
-    val userKey = (com.simats.codeingo.domain.AuthService.shared.currentUser.value?.email
-        ?: com.simats.codeingo.domain.LocalizationManager.instance.userHandle.value)
-        .ifBlank { "guest" }
-        .lowercase()
-        .replace(Regex("[^a-z0-9_]"), "_")
-
-    val prefs = remember(userKey) { context.getSharedPreferences("cns_cosmetics_prefs_$userKey", Context.MODE_PRIVATE) }
-    val headId = prefs.getString("cnsEquippedHeadwear", "none_head") ?: "none_head"
-    val outfitId = prefs.getString("cnsEquippedOutfit", "none_outfit") ?: "none_outfit"
-    val accId = prefs.getString("cnsEquippedAccessory", "none_acc") ?: "none_acc"
+    val equipped by GameManager.instance.equippedCosmetics.collectAsState()
+    val headId = equipped.headwearId
+    val outfitId = equipped.outfitId
+    val accId = equipped.accessoryId
 
     val headItem = CosmeticsCatalog.item(headId)
     val outfitItem = CosmeticsCatalog.item(outfitId)
     val accItem = CosmeticsCatalog.item(accId)
-
-    val headEmoji = if (headId == "none_head") "" else (headItem?.emoji ?: "")
-    val outfitEmoji = if (outfitId == "none_outfit") "" else (outfitItem?.emoji ?: "")
-    val accEmoji = if (accId == "none_acc") "" else (accItem?.emoji ?: "")
 
     val headName = headItem?.name ?: "Natural"
     val accName = accItem?.name ?: "None"
@@ -736,18 +738,25 @@ private fun YourPhoenixCustomizationSection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Preview Icon Circle
+                // Live Ash + Equipped Cosmetics Preview
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                         .background(AmberGold.copy(alpha = 0.18f))
                         .border(1.dp, AmberGold.copy(alpha = 0.35f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "$headEmoji$outfitEmoji$accEmoji",
-                        fontSize = 18.sp
+                    PhoenixMascotImage(
+                        emotion = PhoenixEmotionManager.instance.currentEmotion.collectAsState().value,
+                        size = 48.dp
+                    )
+                    com.simats.codeingo.ui.phoenix.AshCosmeticOverlay(
+                        headwearId = headId,
+                        outfitId = outfitId,
+                        accessoryId = accId,
+                        mascotWidth = 48.dp,
+                        mascotHeight = 48.dp
                     )
                 }
 
